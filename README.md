@@ -6,7 +6,7 @@ Website modern dan responsif untuk Redline Academy dengan dukungan multi-languag
 
 Redline Academy adalah platform pelatihan vokasi bersertifikat Australia yang menawarkan berbagai program pelatihan profesional. Website ini dibangun sebagai aplikasi web statis dengan HTML, CSS, dan JavaScript vanilla, tanpa dependencies eksternal.
 
-## 🎯 Fitur Utama
+## Fitur Utama
 
 - **Multi-Language Support**: Dukungan penuh untuk Bahasa Indonesia dan Bahasa Inggris
 - **Responsive Design**: Desain yang responsif dan mobile-friendly
@@ -16,7 +16,7 @@ Redline Academy adalah platform pelatihan vokasi bersertifikat Australia yang me
 - **Smooth Animations**: Animasi yang halus dan engaging
 - **SEO Friendly**: Meta tags dan struktur HTML yang SEO-friendly
 
-## 📁 Struktur Folder
+## Struktur Folder
 
 ```
 redline-academy/
@@ -45,7 +45,7 @@ redline-academy/
 └── README.md                 # File dokumentasi ini
 ```
 
-## 🌐 Halaman-Halaman
+## Halaman-Halaman
 
 ### 1. Homepage (index.html)
 - Hero section dengan call-to-action
@@ -87,7 +87,7 @@ redline-academy/
 - Privacy Policy
 - Tab navigation untuk switching antar section
 
-## 🎨 Desain & Styling
+## Desain & Styling
 
 ### Warna Utama
 - **Primary Color**: #EF4444 (Merah terang)
@@ -106,7 +106,7 @@ redline-academy/
 - Tablet: 768px - 1024px
 - Desktop: > 1024px
 
-## 🌍 Multi-Language System
+## Multi-Language System
 
 Website menggunakan sistem i18n (internationalization) sederhana dengan JavaScript:
 
@@ -138,7 +138,7 @@ translations = {
 }
 ```
 
-## 🚀 Cara Menggunakan
+## Cara Menggunakan
 
 ### 1. Membuka Website Secara Lokal
 - Buka file `index.html` langsung di browser
@@ -164,14 +164,14 @@ translations = {
 - Pastikan nama file sesuai dengan referensi di HTML
 - Gunakan format yang dioptimalkan (PNG untuk logo, JPG untuk foto)
 
-## 📱 Browser Support
+## Browser Support
 
 - Chrome/Edge (Latest)
 - Firefox (Latest)
 - Safari (Latest)
 - Mobile browsers (iOS Safari, Chrome Mobile)
 
-## 🔍 SEO Optimization
+## SEO Optimization
 
 - Semantic HTML structure
 - Meta descriptions pada setiap halaman
@@ -179,7 +179,7 @@ translations = {
 - Mobile-friendly viewport settings
 - Fast loading times (static files)
 
-## 📦 Deployment
+## Deployment
 
 Website dapat di-deploy ke berbagai platform:
 
@@ -198,7 +198,7 @@ Website dapat di-deploy ke berbagai platform:
 2. Pastikan struktur folder tetap sama
 3. Website siap diakses
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Language tidak berubah
 - Buka browser console (F12)
@@ -215,11 +215,11 @@ Website dapat di-deploy ke berbagai platform:
 - Reload halaman (Ctrl+F5)
 - Cek apakah file `css/style.css` ter-load dengan baik
 
-## 📝 Lisensi
+## Lisensi
 
 Copyright © 2024 Redline Academy. Semua hak dilindungi.
 
-## 👥 Kontak
+## Kontak
 
 - Email: info@redlineacademy.com
 - Telepon: +62 (21) 2345-678
@@ -228,4 +228,4 @@ Copyright © 2024 Redline Academy. Semua hak dilindungi.
 
 ---
 
-**Dibuat dengan ❤️ untuk Redline Academy**
+**Dibuat oleh Patrio Vincentio for Redline Academy**
