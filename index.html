@@ -1,362 +1,634 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Redline Academy - Platform pelatihan vokasi bersertifikat Australia">
-  <title>Redline Academy</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <!-- Header & Navigation -->
-  <header>
-    <div class="container">
-      <div class="header-content">
-        <div class="logo">
-          <img src="assets/images/redlineacademy_logo.png" alt="Redline Academy Logo">
-        </div>
-        
-        <nav>
-          <a href="index.html" data-i18n="home">Beranda</a>
-          <a href="pages/about.html" data-i18n="about">Tentang Kami</a>
-          <a href="pages/programs.html" data-i18n="programs">Program</a>
-          <a href="pages/contact.html" data-i18n="contact">Hubungi Kami</a>
-          <a href="pages/blog.html" data-i18n="blog">Blog</a>
-          <a href="pages/legal.html" data-i18n="legal">Legal</a>
-          
-          <div class="language-switcher">
-            <button class="lang-btn" data-lang="id">ID</button>
-            <button class="lang-btn" data-lang="en">ENG</button>
-          </div>
-        </nav>
-        
-        <button class="menu-toggle">☰</button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-image-bg">
-      <img src="assets/images/hero_pict.png" alt="Hero Image">
-    </div>
-    <div class="hero-overlay"></div>
-    <div class="hero-content-wrapper">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Redline Academy - Platform pelatihan vokasi bersertifikat Australia"
+    />
+    <title>Redline Academy</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <!-- Header & Navigation -->
+    <header>
       <div class="container">
-        <div class="hero-text slide-in-left">
-          <h2 data-i18n="heroWelcome">Selamat datang</h2>
-          <h1 data-i18n="heroTitle">Redline bukan sekadar akademi</h1>
-          <p data-i18n="heroSubtitle">— ini adalah tempat untuk membuka potensi, menembus batas, dan mengambil kendali atas masa depanmu. Berani mengubah masa depanmu?</p>
-          <button class="btn btn-primary" data-i18n="enrollNow">Daftar Sekarang</button>
+        <div class="header-content">
+          <div class="logo">
+            <img
+              src="assets/images/redlineacademy_logo.png"
+              alt="Redline Academy Logo"
+            />
+          </div>
+
+          <nav>
+            <a href="index.html" data-i18n="home">Beranda</a>
+            <a href="pages/about.html" data-i18n="about">Tentang Kami</a>
+            <a href="pages/programs.html" data-i18n="programs">Program</a>
+            <a href="pages/contact.html" data-i18n="contact">Hubungi Kami</a>
+            <a href="pages/blog.html" data-i18n="blog">Blog</a>
+            <a href="pages/legal.html" data-i18n="legal">Legal</a>
+
+            <div class="language-switcher">
+              <button class="lang-btn" data-lang="id">ID</button>
+              <button class="lang-btn" data-lang="en">ENG</button>
+            </div>
+          </nav>
+
+          <button class="menu-toggle">☰</button>
         </div>
       </div>
-    </div>
-  </section>
+    </header>
 
-  <!-- Our Programs Section -->
-  <section class="section-padding" style="background-color: #f9fafb;">
-    <div class="container">
-      <h2 class="section-title" data-i18n="ourPrograms">Program Kami</h2>
-      
-      <div class="grid-6">
-        <!-- Card 1: Assistant Carer -->
-        <div class="card fade-in">
-          <img src="assets/images/assistant_carer.png" alt="Assistant Carer" class="card-image">
-          <div class="card-body">
-            <h3 class="card-title" data-i18n="assistantCarer">Asisten Perawat</h3>
-            <p class="card-text" data-i18n="assistantCarerDesc">Dapatkan keterampilan dasar perawatan kesehatan dan pelatihan berbasis empati untuk mendukung pasien di rumah sakit, panti jompo, dan lingkungan masyarakat.</p>
-            <button class="btn btn-primary btn-sm" data-i18n="programDetail">Detail Program</button>
-          </div>
-        </div>
-
-        <!-- Card 2: Bartender -->
-        <div class="card fade-in">
-          <img src="assets/images/bartender.png" alt="Bartender" class="card-image">
-          <div class="card-body">
-            <h3 class="card-title" data-i18n="bartender">Bartender</h3>
-            <p class="card-text" data-i18n="bartenderDesc">Pelajari seni mixology, pelayanan pelanggan, dan manajemen bar untuk berkembang di dunia perhotelan yang dinamis dan serba cepat.</p>
-            <button class="btn btn-primary btn-sm" data-i18n="programDetail">Detail Program</button>
-          </div>
-        </div>
-
-        <!-- Card 3: Cooking (Chef) -->
-        <div class="card fade-in">
-          <img src="assets/images/cooking.png" alt="Cooking" class="card-image">
-          <div class="card-body">
-            <h3 class="card-title" data-i18n="cooking">Memasak (Chef)</h3>
-            <p class="card-text" data-i18n="cookingDesc">Kembangkan keahlian kuliner — mulai dari teknik dapur hingga perencanaan menu — dan ubah passion terhadap makanan menjadi karier profesional.</p>
-            <button class="btn btn-primary btn-sm" data-i18n="programDetail">Detail Program</button>
-          </div>
-        </div>
-
-        <!-- Card 4: Barista -->
-        <div class="card fade-in">
-          <img src="assets/images/barista.png" alt="Barista" class="card-image">
-          <div class="card-body">
-            <h3 class="card-title" data-i18n="barista">Barista</h3>
-            <p class="card-text" data-i18n="baristaDesc">Kuasai seni meracik kopi, teknik penyeduhan, serta keterampilan pelayanan untuk membangun karier sukses di kafe dan kedai kopi spesialti.</p>
-            <button class="btn btn-primary btn-sm" data-i18n="programDetail">Detail Program</button>
-          </div>
-        </div>
-
-        <!-- Card 5: Coding (IT) -->
-        <div class="card fade-in">
-          <img src="assets/images/coding.jpg" alt="Coding" class="card-image">
-          <div class="card-body">
-            <h3 class="card-title" data-i18n="coding">Pemrograman (IT)</h3>
-            <p class="card-text" data-i18n="codingDesc">Bangun keterampilan pemrograman dan IT yang dibutuhkan industri untuk mempersiapkan diri berkarier di bidang pengembangan web, perangkat lunak, dan solusi digital.</p>
-            <button class="btn btn-primary btn-sm" data-i18n="programDetail">Detail Program</button>
-          </div>
-        </div>
-
-        <!-- Card 6: Electrician -->
-        <div class="card fade-in">
-          <img src="assets/images/electrician.png" alt="Electrician" class="card-image">
-          <div class="card-body">
-            <h3 class="card-title" data-i18n="electrician">Teknisi Listrik</h3>
-            <p class="card-text" data-i18n="electricianDesc">Dapatkan pelatihan praktis kelistrikan, pengetahuan keselamatan industri, dan kemampuan memecahkan masalah untuk menghidupkan rumah maupun bisnis.</p>
-            <button class="btn btn-primary btn-sm" data-i18n="programDetail">Detail Program</button>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-image-bg">
+        <img src="assets/images/hero_pict.png" alt="Hero Image" />
+      </div>
+      <div class="hero-overlay"></div>
+      <div class="hero-content-wrapper">
+        <div class="container">
+          <div class="hero-text slide-in-left">
+            <h2 data-i18n="heroWelcome">Selamat datang</h2>
+            <h1 data-i18n="heroTitle">Redline bukan sekadar akademi</h1>
+            <p data-i18n="heroSubtitle">
+              — ini adalah tempat untuk membuka potensi, menembus batas, dan
+              mengambil kendali atas masa depanmu. Berani mengubah masa depanmu?
+            </p>
+            <a href="#contact" class="btn btn-primary" data-i18n="enrollNow"
+              >Daftar Sekarang</a
+            >
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Our Commitment Section -->
-  <section class="section-padding">
-    <div class="container">
-      <h2 class="section-title" data-i18n="ourCommitment">Komitmen Kami</h2>
-      
-      <div class="grid-6">
-        <!-- Card 1: Dedicated Educator -->
-        <div class="card fade-in">
-          <div class="card-body text-center">
-            <div class="card-icon">🎓</div>
-            <h3 class="card-title" data-i18n="dedicatedEducator">Pendidik yang Berdedikasi</h3>
-            <p class="card-text" data-i18n="dedicatedEducatorDesc">Belajar jadi lebih mudah ketika ada bimbingan yang tepat. Para pelatih kami sangat terampil di bidangnya dan memiliki semangat tinggi terhadap apa yang mereka ajarkan.</p>
+    <!-- Our Programs Section -->
+    <section class="section-padding" style="background-color: #f9fafb">
+      <div class="container">
+        <h2 class="section-title" data-i18n="ourPrograms">Program Kami</h2>
+
+        <div class="grid-6">
+          <!-- Card 1: Assistant Carer -->
+          <div class="card fade-in">
+            <img
+              src="assets/images/assistant_carer.png"
+              alt="Assistant Carer"
+              class="card-image"
+            />
+            <div class="card-body">
+              <h3 class="card-title" data-i18n="assistantCarer">
+                Asisten Perawat
+              </h3>
+              <p class="card-text" data-i18n="assistantCarerDesc">
+                Dapatkan keterampilan dasar perawatan kesehatan dan pelatihan
+                berbasis empati untuk mendukung pasien di rumah sakit, panti
+                jompo, dan lingkungan masyarakat.
+              </p>
+              <button class="btn btn-primary btn-sm" data-i18n="programDetail">
+                Detail Program
+              </button>
+            </div>
           </div>
-        </div>
 
-        <!-- Card 2: Australian Micro-Credentials -->
-        <div class="card fade-in">
-          <div class="card-body text-center">
-            <div class="card-icon">🏆</div>
-            <h3 class="card-title" data-i18n="australianMicro">Program Micro-Credentials Australia</h3>
-            <p class="card-text" data-i18n="australianMicroDesc">Baik kamu pemula maupun ingin mengasah kemampuan, program kami mengikuti Microcredentials Framework.</p>
+          <!-- Card 2: Bartender -->
+          <div class="card fade-in">
+            <img
+              src="assets/images/bartender.png"
+              alt="Bartender"
+              class="card-image"
+            />
+            <div class="card-body">
+              <h3 class="card-title" data-i18n="bartender">Bartender</h3>
+              <p class="card-text" data-i18n="bartenderDesc">
+                Pelajari seni mixology, pelayanan pelanggan, dan manajemen bar
+                untuk berkembang di dunia perhotelan yang dinamis dan serba
+                cepat.
+              </p>
+              <button class="btn btn-primary btn-sm" data-i18n="programDetail">
+                Detail Program
+              </button>
+            </div>
           </div>
-        </div>
 
-        <!-- Card 3: Commitment to Excellence -->
-        <div class="card fade-in">
-          <div class="card-body text-center">
-            <div class="card-icon">⭐</div>
-            <h3 class="card-title" data-i18n="commitmentExcellence">Komitmen terhadap Keunggulan</h3>
-            <p class="card-text" data-i18n="commitmentExcellenceDesc">Di RedLine Academy, keunggulan bukan sekadar tujuan — ini adalah budaya kami.</p>
+          <!-- Card 3: Cooking (Chef) -->
+          <div class="card fade-in">
+            <img
+              src="assets/images/cooking.png"
+              alt="Cooking"
+              class="card-image"
+            />
+            <div class="card-body">
+              <h3 class="card-title" data-i18n="cooking">Memasak (Chef)</h3>
+              <p class="card-text" data-i18n="cookingDesc">
+                Kembangkan keahlian kuliner — mulai dari teknik dapur hingga
+                perencanaan menu — dan ubah passion terhadap makanan menjadi
+                karier profesional.
+              </p>
+              <button class="btn btn-primary btn-sm" data-i18n="programDetail">
+                Detail Program
+              </button>
+            </div>
           </div>
-        </div>
 
-        <!-- Card 4: Innovative Learning -->
-        <div class="card fade-in">
-          <div class="card-body text-center">
-            <div class="card-icon">💡</div>
-            <h3 class="card-title" data-i18n="innovativeLearning">Lingkungan Belajar Inovatif</h3>
-            <p class="card-text" data-i18n="innovativeLearningDesc">Kami mengadopsi alat pembelajaran modern dan metode interaktif yang membuat pendidikan lebih dinamis dan relevan.</p>
+          <!-- Card 4: Barista -->
+          <div class="card fade-in">
+            <img
+              src="assets/images/barista.png"
+              alt="Barista"
+              class="card-image"
+            />
+            <div class="card-body">
+              <h3 class="card-title" data-i18n="barista">Barista</h3>
+              <p class="card-text" data-i18n="baristaDesc">
+                Kuasai seni meracik kopi, teknik penyeduhan, serta keterampilan
+                pelayanan untuk membangun karier sukses di kafe dan kedai kopi
+                spesialti.
+              </p>
+              <button class="btn btn-primary btn-sm" data-i18n="programDetail">
+                Detail Program
+              </button>
+            </div>
           </div>
-        </div>
 
-        <!-- Card 5: Personalized Support -->
-        <div class="card fade-in">
-          <div class="card-body text-center">
-            <div class="card-icon">🤝</div>
-            <h3 class="card-title" data-i18n="personalizedSupport">Dukungan Personalisasi</h3>
-            <p class="card-text" data-i18n="personalizedSupportDesc">Setiap perjalanan belajar itu unik. Kami menyediakan bimbingan dan sumber daya yang disesuaikan dengan kebutuhan masing-masing individu.</p>
+          <!-- Card 5: Coding (IT) -->
+          <div class="card fade-in">
+            <img
+              src="assets/images/coding.jpg"
+              alt="Coding"
+              class="card-image"
+            />
+            <div class="card-body">
+              <h3 class="card-title" data-i18n="coding">Pemrograman (IT)</h3>
+              <p class="card-text" data-i18n="codingDesc">
+                Bangun keterampilan pemrograman dan IT yang dibutuhkan industri
+                untuk mempersiapkan diri berkarier di bidang pengembangan web,
+                perangkat lunak, dan solusi digital.
+              </p>
+              <button class="btn btn-primary btn-sm" data-i18n="programDetail">
+                Detail Program
+              </button>
+            </div>
           </div>
-        </div>
 
-        <!-- Card 6: Global Mindset -->
-        <div class="card fade-in">
-          <div class="card-body text-center">
-            <div class="card-icon">🌍</div>
-            <h3 class="card-title" data-i18n="globalMindset">Wawasan Global</h3>
-            <p class="card-text" data-i18n="globalMindsetDesc">Program kami dirancang dengan perspektif global, membantu siswa mengembangkan kemampuan beradaptasi dan kepercayaan diri.</p>
+          <!-- Card 6: Electrician -->
+          <div class="card fade-in">
+            <img
+              src="assets/images/electrician.png"
+              alt="Electrician"
+              class="card-image"
+            />
+            <div class="card-body">
+              <h3 class="card-title" data-i18n="electrician">
+                Teknisi Listrik
+              </h3>
+              <p class="card-text" data-i18n="electricianDesc">
+                Dapatkan pelatihan praktis kelistrikan, pengetahuan keselamatan
+                industri, dan kemampuan memecahkan masalah untuk menghidupkan
+                rumah maupun bisnis.
+              </p>
+              <button class="btn btn-primary btn-sm" data-i18n="programDetail">
+                Detail Program
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Testimonials Section -->
-  <section class="section-padding" style="background-color: #f9fafb;">
-    <div class="container">
-      <h2 class="section-title" data-i18n="whatAlumniSay">Apa Kata Alumni Kami?</h2>
-      
-      <div class="grid-3">
-        <!-- Testimonial 1 -->
-        <div class="card fade-in">
-          <div class="card-body text-center">
-            <div class="card-icon">👤</div>
-            <p class="card-text" data-i18n="testimonial1">"RedLine Academy memberi saya lebih dari sekadar kualifikasi..."</p>
-            <p style="font-weight: 600; color: var(--text-dark); margin-top: 1rem;" data-i18n="testimonial1Author">Sarah Mitchell, Perawat Terdaftar</p>
+    <!-- Our Commitment Section -->
+    <section class="section-padding">
+      <div class="container">
+        <h2 class="section-title" data-i18n="ourCommitment">Komitmen Kami</h2>
+
+        <div class="grid-6">
+          <!-- Card 1: Dedicated Educator -->
+          <div class="card fade-in">
+            <div class="card-body text-center">
+              <div class="card-icon">🎓</div>
+              <h3 class="card-title" data-i18n="dedicatedEducator">
+                Pendidik yang Berdedikasi
+              </h3>
+              <p class="card-text" data-i18n="dedicatedEducatorDesc">
+                Belajar jadi lebih mudah ketika ada bimbingan yang tepat. Para
+                pelatih kami sangat terampil di bidangnya dan memiliki semangat
+                tinggi terhadap apa yang mereka ajarkan.
+              </p>
+            </div>
           </div>
-        </div>
 
-        <!-- Testimonial 2 -->
-        <div class="card fade-in">
-          <div class="card-body text-center">
-            <div class="card-icon">👤</div>
-            <p class="card-text" data-i18n="testimonial2">"Keterampilan yang saya dapatkan di RedLine Academy..."</p>
-            <p style="font-weight: 600; color: var(--text-dark); margin-top: 1rem;" data-i18n="testimonial2Author">Daniel Roberts, Supervisor Teknik Listrik</p>
+          <!-- Card 2: Australian Micro-Credentials -->
+          <div class="card fade-in">
+            <div class="card-body text-center">
+              <div class="card-icon">🏆</div>
+              <h3 class="card-title" data-i18n="australianMicro">
+                Program Micro-Credentials Australia
+              </h3>
+              <p class="card-text" data-i18n="australianMicroDesc">
+                Baik kamu pemula maupun ingin mengasah kemampuan, program kami
+                mengikuti Microcredentials Framework.
+              </p>
+            </div>
           </div>
-        </div>
 
-        <!-- Testimonial 3 -->
-        <div class="card fade-in">
-          <div class="card-body text-center">
-            <div class="card-icon">👤</div>
-            <p class="card-text" data-i18n="testimonial3">"Belajar di RedLine Academy adalah pengalaman yang mengubah hidup..."</p>
-            <p style="font-weight: 600; color: var(--text-dark); margin-top: 1rem;" data-i18n="testimonial3Author">Maria Gonzalez, Supervisor Perhotelan</p>
+          <!-- Card 3: Commitment to Excellence -->
+          <div class="card fade-in">
+            <div class="card-body text-center">
+              <div class="card-icon">⭐</div>
+              <h3 class="card-title" data-i18n="commitmentExcellence">
+                Komitmen terhadap Keunggulan
+              </h3>
+              <p class="card-text" data-i18n="commitmentExcellenceDesc">
+                Di RedLine Academy, keunggulan bukan sekadar tujuan — ini adalah
+                budaya kami.
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 4: Innovative Learning -->
+          <div class="card fade-in">
+            <div class="card-body text-center">
+              <div class="card-icon">💡</div>
+              <h3 class="card-title" data-i18n="innovativeLearning">
+                Lingkungan Belajar Inovatif
+              </h3>
+              <p class="card-text" data-i18n="innovativeLearningDesc">
+                Kami mengadopsi alat pembelajaran modern dan metode interaktif
+                yang membuat pendidikan lebih dinamis dan relevan.
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 5: Personalized Support -->
+          <div class="card fade-in">
+            <div class="card-body text-center">
+              <div class="card-icon">🤝</div>
+              <h3 class="card-title" data-i18n="personalizedSupport">
+                Dukungan Personalisasi
+              </h3>
+              <p class="card-text" data-i18n="personalizedSupportDesc">
+                Setiap perjalanan belajar itu unik. Kami menyediakan bimbingan
+                dan sumber daya yang disesuaikan dengan kebutuhan masing-masing
+                individu.
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 6: Global Mindset -->
+          <div class="card fade-in">
+            <div class="card-body text-center">
+              <div class="card-icon">🌍</div>
+              <h3 class="card-title" data-i18n="globalMindset">
+                Wawasan Global
+              </h3>
+              <p class="card-text" data-i18n="globalMindsetDesc">
+                Program kami dirancang dengan perspektif global, membantu siswa
+                mengembangkan kemampuan beradaptasi dan kepercayaan diri.
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Contact Section -->
-  <section class="section-padding">
-    <div class="container">
-      <h2 class="section-title" data-i18n="contactUs">Hubungi Kami</h2>
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-bottom: 3rem;">
-        <!-- Contact Form -->
-        <div>
-          <h3 class="mb-3" data-i18n="contactForm">Formulir Kontak</h3>
-          <form id="contactForm">
-            <div class="form-row">
-              <div class="form-group">
-                <label data-i18n="name">Nama</label>
-                <input type="text" required placeholder="Nama Anda" data-i18n="namePlaceholder">
+    <!-- Testimonials Section -->
+    <section class="section-padding" style="background-color: #f9fafb">
+      <div class="container">
+        <h2 class="section-title" data-i18n="whatAlumniSay">
+          Apa Kata Alumni Kami?
+        </h2>
+
+        <div class="grid-3">
+          <!-- Testimonial 1 -->
+          <div class="card fade-in">
+            <div class="card-body text-center">
+              <div class="card-icon">👤</div>
+              <p class="card-text" data-i18n="testimonial1">
+                "RedLine Academy memberi saya lebih dari sekadar kualifikasi..."
+              </p>
+              <p
+                style="
+                  font-weight: 600;
+                  color: var(--text-dark);
+                  margin-top: 1rem;
+                "
+                data-i18n="testimonial1Author"
+              >
+                Sarah Mitchell, Perawat Terdaftar
+              </p>
+            </div>
+          </div>
+
+          <!-- Testimonial 2 -->
+          <div class="card fade-in">
+            <div class="card-body text-center">
+              <div class="card-icon">👤</div>
+              <p class="card-text" data-i18n="testimonial2">
+                "Keterampilan yang saya dapatkan di RedLine Academy..."
+              </p>
+              <p
+                style="
+                  font-weight: 600;
+                  color: var(--text-dark);
+                  margin-top: 1rem;
+                "
+                data-i18n="testimonial2Author"
+              >
+                Daniel Roberts, Supervisor Teknik Listrik
+              </p>
+            </div>
+          </div>
+
+          <!-- Testimonial 3 -->
+          <div class="card fade-in">
+            <div class="card-body text-center">
+              <div class="card-icon">👤</div>
+              <p class="card-text" data-i18n="testimonial3">
+                "Belajar di RedLine Academy adalah pengalaman yang mengubah
+                hidup..."
+              </p>
+              <p
+                style="
+                  font-weight: 600;
+                  color: var(--text-dark);
+                  margin-top: 1rem;
+                "
+                data-i18n="testimonial3Author"
+              >
+                Maria Gonzalez, Supervisor Perhotelan
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section-padding">
+      <div class="container">
+        <h2 class="section-title" data-i18n="contactUs">Hubungi Kami</h2>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+          "
+        >
+          <!-- Contact Form -->
+          <div>
+            <h3 class="mb-3" data-i18n="contactForm">Formulir Kontak</h3>
+            <form id="contactForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label data-i18n="name">Nama</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Nama Anda"
+                    data-i18n="namePlaceholder"
+                  />
+                </div>
+                <div class="form-group">
+                  <label data-i18n="email">Email</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="Email Anda"
+                    data-i18n="emailPlaceholder"
+                  />
+                </div>
               </div>
-              <div class="form-group">
-                <label data-i18n="email">Email</label>
-                <input type="email" required placeholder="Email Anda" data-i18n="emailPlaceholder">
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label data-i18n="course">Kursus</label>
+                  <select required>
+                    <option value="" data-i18n="selectCourse">
+                      Pilih Kursus
+                    </option>
+                    <option value="assistant-carer" data-i18n="assistantCarer">
+                      Asisten Perawat
+                    </option>
+                    <option value="bartender" data-i18n="bartender">
+                      Bartender
+                    </option>
+                    <option value="cooking" data-i18n="cooking">
+                      Memasak (Chef)
+                    </option>
+                    <option value="barista" data-i18n="barista">Barista</option>
+                    <option value="coding" data-i18n="coding">
+                      Pemrograman (IT)
+                    </option>
+                    <option value="electrician" data-i18n="electrician">
+                      Teknisi Listrik
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label data-i18n="gender">Jenis Kelamin</label>
+                  <select required>
+                    <option value="" data-i18n="genderSelect">Pilih</option>
+                    <option value="male" data-i18n="genderMale">
+                      Laki-laki
+                    </option>
+                    <option value="female" data-i18n="genderFemale">
+                      Perempuan
+                    </option>
+                  </select>
+                </div>
               </div>
+
+              <div class="form-group">
+                <label data-i18n="postalCode">Kode Pos</label>
+                <input
+                  type="text"
+                  placeholder="Kode Pos Anda"
+                  data-i18n="postalCodePlaceholder"
+                />
+              </div>
+
+              <div class="form-group">
+                <label data-i18n="message"
+                  >Beritahu kami apa yang bisa dibantu</label
+                >
+                <textarea
+                  placeholder="Pesan Anda..."
+                  required
+                  data-i18n="messagePlaceholder"
+                ></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary" data-i18n="submit">
+                Kirim
+              </button>
+            </form>
+          </div>
+
+          <!-- Contact Info -->
+          <div>
+            <h3 class="mb-3" data-i18n="contactInfo">Informasi Kontak</h3>
+            <div
+              style="
+                background-color: #f9fafb;
+                padding: 2rem;
+                border-radius: 0.5rem;
+                margin-bottom: 2rem;
+              "
+            >
+              <h4 class="mb-2" data-i18n="address">Alamat</h4>
+              <p data-i18n="addressValue">
+                Jl. Pendidikan No. 123, Jakarta, Indonesia 12345
+              </p>
+
+              <h4 class="mb-2 mt-3" data-i18n="phone">Telepon</h4>
+              <p>
+                <a href="tel:+62212345678" data-i18n="phoneValue"
+                  >+62 (21) 2345-678</a
+                >
+              </p>
+
+              <h4 class="mb-2 mt-3" data-i18n="emailLabel">Email</h4>
+              <p>
+                <a href="mailto:info@redlineacademy.com" data-i18n="emailValue"
+                  >info@redlineacademy.com</a
+                >
+              </p>
+
+              <h4 class="mb-2 mt-3" data-i18n="whatsapp">WhatsApp</h4>
+              <p>
+                <a
+                  href="https://wa.me/62212345678"
+                  target="_blank"
+                  data-i18n="whatsappText"
+                  >Chat dengan kami</a
+                >
+              </p>
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label data-i18n="course">Kursus</label>
-                <select required>
-                  <option value="" data-i18n="selectCourse">Pilih Kursus</option>
-                  <option value="assistant-carer" data-i18n="assistantCarer">Asisten Perawat</option>
-                  <option value="bartender" data-i18n="bartender">Bartender</option>
-                  <option value="cooking" data-i18n="cooking">Memasak (Chef)</option>
-                  <option value="barista" data-i18n="barista">Barista</option>
-                  <option value="coding" data-i18n="coding">Pemrograman (IT)</option>
-                  <option value="electrician" data-i18n="electrician">Teknisi Listrik</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label data-i18n="gender">Jenis Kelamin</label>
-                <select required>
-                  <option value="" data-i18n="genderSelect">Pilih</option>
-                  <option value="male" data-i18n="genderMale">Laki-laki</option>
-                  <option value="female" data-i18n="genderFemale">Perempuan</option>
-                </select>
-              </div>
+            <!-- Map Placeholder -->
+            <div
+              style="
+                background-color: #e5e7eb;
+                height: 300px;
+                border-radius: 0.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <p style="color: var(--text-light)" data-i18n="mapsPlaceholder">
+                Google Maps akan ditampilkan di sini
+              </p>
             </div>
-
-            <div class="form-group">
-              <label data-i18n="postalCode">Kode Pos</label>
-              <input type="text" placeholder="Kode Pos Anda" data-i18n="postalCodePlaceholder">
-            </div>
-
-            <div class="form-group">
-              <label data-i18n="message">Beritahu kami apa yang bisa dibantu</label>
-              <textarea placeholder="Pesan Anda..." required data-i18n="messagePlaceholder"></textarea>
-            </div>
-
-            <button type="submit" class="btn btn-primary" data-i18n="submit">Kirim</button>
-          </form>
-        </div>
-
-        <!-- Contact Info -->
-        <div>
-          <h3 class="mb-3" data-i18n="contactInfo">Informasi Kontak</h3>
-          <div style="background-color: #f9fafb; padding: 2rem; border-radius: 0.5rem; margin-bottom: 2rem;">
-            <h4 class="mb-2" data-i18n="address">Alamat</h4>
-            <p data-i18n="addressValue">Jl. Pendidikan No. 123, Jakarta, Indonesia 12345</p>
-            
-            <h4 class="mb-2 mt-3" data-i18n="phone">Telepon</h4>
-            <p><a href="tel:+62212345678" data-i18n="phoneValue">+62 (21) 2345-678</a></p>
-            
-            <h4 class="mb-2 mt-3" data-i18n="emailLabel">Email</h4>
-            <p><a href="mailto:info@redlineacademy.com" data-i18n="emailValue">info@redlineacademy.com</a></p>
-            
-            <h4 class="mb-2 mt-3" data-i18n="whatsapp">WhatsApp</h4>
-            <p><a href="https://wa.me/62212345678" target="_blank" data-i18n="whatsappText">Chat dengan kami</a></p>
-          </div>
-
-          <!-- Map Placeholder -->
-          <div style="background-color: #e5e7eb; height: 300px; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;">
-            <p style="color: var(--text-light);" data-i18n="mapsPlaceholder">Google Maps akan ditampilkan di sini</p>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Footer -->
-  <footer>
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-section">
-          <h4>Redline Academy</h4>
-          <p data-i18n="footerDesc">Platform pelatihan vokasi bersertifikat Australia yang diakui secara internasional.</p>
-          <div class="social-links">
-            <a href="https://facebook.com" target="_blank" title="Facebook">f</a>
-            <a href="https://twitter.com" target="_blank" title="Twitter">𝕏</a>
-            <a href="https://instagram.com" target="_blank" title="Instagram">📷</a>
-            <a href="https://linkedin.com" target="_blank" title="LinkedIn">in</a>
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h4>Redline Academy</h4>
+            <p data-i18n="footerDesc">
+              Platform pelatihan vokasi bersertifikat Australia yang diakui
+              secara internasional.
+            </p>
+            <div class="social-links">
+              <a href="https://facebook.com" target="_blank" title="Facebook"
+                >f</a
+              >
+              <a href="https://twitter.com" target="_blank" title="Twitter"
+                >𝕏</a
+              >
+              <a href="https://instagram.com" target="_blank" title="Instagram"
+                >📷</a
+              >
+              <a href="https://linkedin.com" target="_blank" title="LinkedIn"
+                >in</a
+              >
+            </div>
+          </div>
+
+          <div class="footer-section">
+            <h4 data-i18n="programs">Program</h4>
+            <ul>
+              <li>
+                <a href="pages/programs.html" data-i18n="assistantCarer"
+                  >Asisten Perawat</a
+                >
+              </li>
+              <li>
+                <a href="pages/programs.html" data-i18n="bartender"
+                  >Bartender</a
+                >
+              </li>
+              <li>
+                <a href="pages/programs.html" data-i18n="cooking"
+                  >Memasak (Chef)</a
+                >
+              </li>
+              <li>
+                <a href="pages/programs.html" data-i18n="barista">Barista</a>
+              </li>
+              <li>
+                <a href="pages/programs.html" data-i18n="coding"
+                  >Pemrograman (IT)</a
+                >
+              </li>
+              <li>
+                <a href="pages/programs.html" data-i18n="electrician"
+                  >Teknisi Listrik</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div class="footer-section">
+            <h4 data-i18n="company">Perusahaan</h4>
+            <ul>
+              <li>
+                <a href="pages/about.html" data-i18n="about">Tentang Kami</a>
+              </li>
+              <li><a href="pages/blog.html" data-i18n="blog">Blog</a></li>
+              <li>
+                <a href="pages/contact.html" data-i18n="contact"
+                  >Hubungi Kami</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div class="footer-section">
+            <h4>Legal</h4>
+            <ul>
+              <li>
+                <a href="pages/legal.html" data-i18n="termsConditions"
+                  >Syarat & Ketentuan</a
+                >
+              </li>
+              <li>
+                <a href="pages/legal.html" data-i18n="privacyPolicy"
+                  >Kebijakan Privasi</a
+                >
+              </li>
+            </ul>
           </div>
         </div>
 
-        <div class="footer-section">
-          <h4 data-i18n="programs">Program</h4>
-          <ul>
-            <li><a href="pages/programs.html" data-i18n="assistantCarer">Asisten Perawat</a></li>
-            <li><a href="pages/programs.html" data-i18n="bartender">Bartender</a></li>
-            <li><a href="pages/programs.html" data-i18n="cooking">Memasak (Chef)</a></li>
-            <li><a href="pages/programs.html" data-i18n="barista">Barista</a></li>
-            <li><a href="pages/programs.html" data-i18n="coding">Pemrograman (IT)</a></li>
-            <li><a href="pages/programs.html" data-i18n="electrician">Teknisi Listrik</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-section">
-          <h4 data-i18n="company">Perusahaan</h4>
-          <ul>
-            <li><a href="pages/about.html" data-i18n="about">Tentang Kami</a></li>
-            <li><a href="pages/blog.html" data-i18n="blog">Blog</a></li>
-            <li><a href="pages/contact.html" data-i18n="contact">Hubungi Kami</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-section">
-          <h4>Legal</h4>
-          <ul>
-            <li><a href="pages/legal.html" data-i18n="termsConditions">Syarat & Ketentuan</a></li>
-            <li><a href="pages/legal.html" data-i18n="privacyPolicy">Kebijakan Privasi</a></li>
-          </ul>
+        <div class="footer-bottom">
+          <p>
+            &copy; 2024 Redline Academy.
+            <span data-i18n="allRightsReserved">Semua Hak Dilindungi</span>.
+          </p>
         </div>
       </div>
+    </footer>
 
-      <div class="footer-bottom">
-        <p>&copy; 2024 Redline Academy. <span data-i18n="allRightsReserved">Semua Hak Dilindungi</span>.</p>
-      </div>
-    </div>
-  </footer>
-
-  <script src="js/script.js"></script>
-</body>
+    <script src="js/script.js"></script>
+  </body>
 </html>
-
