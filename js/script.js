@@ -14,7 +14,7 @@ const translations = {
     legal: 'Legal',
     
     // Homepage
-    heroWelcome: 'Selamat Datang',
+    heroWelcome: 'Selamat datang',
     heroTitle: 'Redline bukan sekadar akademi',
     heroSubtitle: '— ini adalah tempat untuk membuka potensi, menembus batas, dan mengambil kendali atas masa depanmu. Berani mengubah masa depanmu?',
     enrollNow: 'Daftar Sekarang',
