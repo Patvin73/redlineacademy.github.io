@@ -14,7 +14,7 @@ const translations = {
     legal: "Legal",
 
     // Homepage
-    heroWelcome: "Selamat datang", 
+    heroWelcome: "Selamat datang",
     heroTitle: "Redline bukan sekadar akademi",
     heroSubtitle:
       "— ini adalah tempat untuk membuka potensi, menembus batas, dan mengambil kendali atas masa depanmu. Berani mengubah masa depanmu?",
@@ -221,7 +221,7 @@ const translations = {
     legal: "Legal",
 
     // Homepage
-    heroWelcome: "Welcome", 
+    heroWelcome: "Welcome",
     heroTitle: "Redline is more than an academy",
     heroSubtitle:
       "— it's a place to unlock potential, break boundaries and take control of what comes next. Dare to change your future?",
@@ -527,6 +527,14 @@ document.addEventListener("DOMContentLoaded", function () {
       this.reset();
     });
   }
+
+  // Handling enrollment buttons
+  document.querySelectorAll('[data-i18n="enrollNow"]').forEach((button) => {
+    button.addEventListener("click", () => {
+      // Scroll to contact section
+      document.querySelector("#contact").scrollIntoView({ behavior: "smooth" });
+    });
+  });
 });
 
 // Smooth scroll for anchor links
