@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hubungi Redline Academy">
+  <title>Hubungi Kami - Redline Academy</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <!-- Header & Navigation -->
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <img src="../assets/images/redlineacademy_logo_header.png" alt="Redline Academy Logo">
+          <span>Redline Academy</span>
+        </div>
+        
+        <nav>
+          <a href="../index.html" data-i18n="home">Beranda</a>
+          <a href="about.html" data-i18n="about">Tentang Kami</a>
+          <a href="programs.html" data-i18n="programs">Program</a>
+          <a href="contact.html" data-i18n="contact">Hubungi Kami</a>
+          <a href="blog.html" data-i18n="blog">Blog</a>
+          <a href="legal.html" data-i18n="legal">Legal</a>
+          
+          <div class="language-switcher">
+            <button class="lang-btn" data-lang="id">ID</button>
+            <button class="lang-btn" data-lang="en">ENG</button>
+          </div>
+        </nav>
+        
+        <button class="menu-toggle">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contact Section -->
+  <section class="section-padding">
+    <div class="container">
+      <h1 class="section-title" data-i18n="contactUs">Hubungi Kami</h1>
+      <p style="text-align: center; color: var(--text-light); max-width: 600px; margin: 0 auto 3rem;" data-i18n="contactDesc">Kami siap membantu Anda. Hubungi kami melalui formulir di bawah ini atau gunakan informasi kontak kami.</p>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;">
+        <!-- Contact Form -->
+        <div class="fade-in">
+          <h2 class="mb-3" data-i18n="contactForm">Formulir Kontak</h2>
+          <form id="contactForm">
+            <div class="form-group">
+              <label data-i18n="name">Nama</label>
+              <input type="text" name="name" required placeholder="Nama Lengkap Anda" data-i18n="namePlaceholder">
+            </div>
+
+            <div class="form-group">
+              <label data-i18n="email">Email</label>
+              <input type="email" name="email" required placeholder="Email Anda" data-i18n="emailPlaceholder">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label data-i18n="course">Kursus</label>
+                <select name="course" required>
+                  <option value="" data-i18n="selectCourse">Pilih Kursus</option>
+                  <option value="assistant-carer" data-i18n="assistantCarer">Asisten Perawat</option>
+                  <option value="bartender" data-i18n="bartender">Bartender</option>
+                  <option value="cooking" data-i18n="cooking">Memasak (Chef)</option>
+                  <option value="barista" data-i18n="barista">Barista</option>
+                  <option value="coding" data-i18n="coding">Pemrograman (IT)</option>
+                  <option value="electrician" data-i18n="electrician">Teknisi Listrik</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label data-i18n="gender">Jenis Kelamin</label>
+                <select name="gender" required>
+                  <option value="" data-i18n="genderSelect">Pilih</option>
+                  <option value="male" data-i18n="genderMale">Laki-laki</option>
+                  <option value="female" data-i18n="genderFemale">Perempuan</option>
+                  <option value="other" data-i18n="genderOther">Lainnya</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label data-i18n="postalCode">Kode Pos</label>
+              <input type="text" name="postal_code" placeholder="Kode Pos Anda">
+            </div>
+
+            <div class="form-group">
+              <label data-i18n="message">Beritahu kami apa yang bisa dibantu</label>
+              <textarea name="message" placeholder="Pesan Anda..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" data-i18n="submit">Kirim</button>
+          </form>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="fade-in">
+          <h2 class="mb-3">Informasi Kontak</h2>
+          
+          <!-- Address -->
+          <div style="background-color: #f9fafb; padding: 2rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+              <div style="font-size: 2rem;">📍</div>
+              <div>
+                <h4 class="mb-1" data-i18n="address">Alamat</h4>
+                <p style="color: var(--text-light);" data-i18n="addressValue">Jl. Pendidikan No. 123, Jakarta, Indonesia 12345</p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+              <div style="font-size: 2rem;">📞</div>
+              <div>
+                <h4 class="mb-1" data-i18n="phone">Telepon</h4>
+                <p><a href="tel:+62212345678" style="color: var(--primary-color);" data-i18n="phoneValue">+62 (21) 2345-678</a></p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+              <div style="font-size: 2rem;">✉️</div>
+              <div>
+                <h4 class="mb-1" data-i18n="emailLabel">Email</h4>
+                <p><a href="mailto:info@redlineacademy.com" style="color: var(--primary-color);" data-i18n="emailValue">info@redlineacademy.com</a></p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+              <div style="font-size: 2rem;">💬</div>
+              <div>
+                <h4 class="mb-1" data-i18n="whatsapp">WhatsApp</h4>
+                <p><a href="https://wa.me/62212345678" target="_blank" style="color: var(--primary-color);" data-i18n="whatsappText">Chat dengan kami</a></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Office Hours -->
+          <div style="background-color: white; padding: 2rem; border-radius: 0.5rem; border: 1px solid var(--border-color);">
+            <h4 class="mb-2" data-i18n="officeHours">Jam Kerja</h4>
+            <ul style="list-style: none; color: var(--text-light);">
+              <li style="margin-bottom: 0.5rem;" data-i18n="mondayFriday"><strong>Senin - Jumat:</strong> 08:00 - 17:00</li>
+              <li style="margin-bottom: 0.5rem;" data-i18n="saturday"><strong>Sabtu:</strong> 09:00 - 13:00</li>
+              <li data-i18n="sunday"><strong>Minggu:</strong> Tutup</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map Section -->
+      <div style="margin-top: 3rem;">
+        <h2 class="mb-3">Lokasi Kami</h2>
+        <div style="background-color: #e5e7eb; height: 400px; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.521260322945!2d106.8196!3d-6.2088!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f3e945e34a9d%3A0x5540e62c33333333!2sJakarta!5e0!3m2!1sid!2sid!4v1234567890" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+    <section class="section-padding" style="background-color: #f9fafb;">
+    <div class="container">
+      <h2 class="section-title" data-i18n="faqTitle">Pertanyaan yang Sering Diajukan</h2>
+      
+      <div style="max-width: 800px; margin: 0 auto;">
+        <div class="fade-in" style="background-color: white; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1rem; border-left: 4px solid var(--primary-color);">
+          <h4 class="mb-2">Bagaimana cara mendaftar program?</h4>
+          <p style="color: var(--text-light);">Anda dapat mendaftar melalui formulir kontak di atas atau menghubungi kami langsung melalui telepon atau WhatsApp. Tim kami akan memandu Anda melalui proses pendaftaran.</p>
+        </div>
+
+        <div class="fade-in" style="background-color: white; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1rem; border-left: 4px solid var(--primary-color);">
+          <h4 class="mb-2">Berapa lama durasi setiap program?</h4>
+          <p style="color: var(--text-light);">Durasi program bervariasi dari 3 hingga 12 bulan tergantung pada jenis program yang Anda pilih. Silakan lihat halaman Program untuk detail durasi setiap program.</p>
+        </div>
+
+        <div class="fade-in" style="background-color: white; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1rem; border-left: 4px solid var(--primary-color);">
+          <h4 class="mb-2">Apakah ada beasiswa atau bantuan finansial?</h4>
+          <p style="color: var(--text-light);">Kami menawarkan berbagai opsi pembayaran yang fleksibel. Hubungi kami untuk mendiskusikan opsi yang tersedia dan melihat apakah Anda memenuhi syarat untuk bantuan finansial.</p>
+        </div>
+
+        <div class="fade-in" style="background-color: white; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1rem; border-left: 4px solid var(--primary-color);">
+          <h4 class="mb-2">Apakah sertifikat kami diakui secara internasional?</h4>
+          <p style="color: var(--text-light);">Ya, semua sertifikat kami diakui secara internasional dan sesuai dengan standar industri global. Kami mengikuti Microcredentials Framework Australia.</p>
+        </div>
+
+        <div class="fade-in" style="background-color: white; padding: 1.5rem; border-radius: 0.5rem; border-left: 4px solid var(--primary-color);">
+          <h4 class="mb-2">Apakah ada dukungan penempatan kerja setelah lulus?</h4>
+          <p style="color: var(--text-light);">Ya, kami memiliki tim dedicated yang membantu lulusan kami menemukan pekerjaan melalui jaringan mitra industri kami yang luas.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>Redline Academy</h4>
+          <p data-i18n="footerDesc">Platform pelatihan vokasi bersertifikat Australia yang diakui secara internasional.</p>
+          <div class="social-links">
+            <a href="https://facebook.com" target="_blank" title="Facebook">f</a>
+            <a href="https://twitter.com" target="_blank" title="Twitter">𝕏</a>
+            <a href="https://instagram.com" target="_blank" title="Instagram">📷</a>
+            <a href="https://linkedin.com" target="_blank" title="LinkedIn">in</a>
+          </div>
+        </div>
+
+        <div class="footer-section">
+          <h4 data-i18n="programs">Program</h4>
+          <ul>
+            <li><a href="programs.html" data-i18n="assistantCarer">Asisten Perawat</a></li>
+            <li><a href="programs.html" data-i18n="bartender">Bartender</a></li>
+            <li><a href="programs.html" data-i18n="cooking">Memasak (Chef)</a></li>
+            <li><a href="programs.html" data-i18n="barista">Barista</a></li>
+            <li><a href="programs.html" data-i18n="coding">Pemrograman (IT)</a></li>
+            <li><a href="programs.html" data-i18n="electrician">Teknisi Listrik</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Perusahaan</h4>
+          <ul>
+            <li><a href="about.html" data-i18n="about">Tentang Kami</a></li>
+            <li><a href="blog.html" data-i18n="blog">Blog</a></li>
+            <li><a href="contact.html" data-i18n="contact">Hubungi Kami</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="legal.html" data-i18n="termsConditions">Syarat & Ketentuan</a></li>
+            <li><a href="legal.html" data-i18n="privacyPolicy">Kebijakan Privasi</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2024 Redline Academy. <span data-i18n="allRightsReserved">Semua Hak Dilindungi</span>.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/script.js"></script>
+</body>
+</html>
+
