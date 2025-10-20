@@ -337,8 +337,12 @@ nav a.active {
   font-size: 3.5rem;
   line-height: 1.2;
   margin-bottom: 1.5rem;
-  color: #ffffff;
+  color: var(--primary-color); /* Mengubah warna menjadi merah */
   font-weight: 700;
+}
+
+.hero-text h3 {
+  color: var(--bg-white);
 }
 
 .hero-text p {
@@ -557,6 +561,51 @@ footer {
 }
 
 /* ============================================
+   CONTACT SECTION STYLES
+   ============================================ */
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+
+.contact-form-wrapper,
+.contact-info-wrapper {
+  background: var(--bg-white);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.contact-info-wrapper {
+  padding: 2rem;
+}
+
+@media (max-width: 768px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .contact-form-wrapper,
+  .contact-info-wrapper {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-grid {
+    gap: 1.5rem;
+  }
+
+  .contact-form-wrapper,
+  .contact-info-wrapper {
+    padding: 1rem;
+  }
+}
+
+/* ============================================
    RESPONSIVE DESIGN
    ============================================ */
 
@@ -597,8 +646,24 @@ footer {
     padding: 3rem 0;
   }
 
+  /* Contact Section Responsive */
+  .container [style*="grid-template-columns: 1fr 1fr"] {
+    display: grid;
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+
+  .contact-info {
+    margin-bottom: 2rem;
+  }
+
   .form-row {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  iframe {
+    height: 250px !important;
   }
 
   nav {
@@ -664,6 +729,18 @@ footer {
   .btn {
     padding: 0.625rem 1.5rem;
     font-size: 0.9rem;
+  }
+
+  .container [style*="grid-template-columns: 1fr 1fr"] {
+    gap: 1.5rem !important;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  iframe {
+    height: 200px !important;
   }
 }
 
