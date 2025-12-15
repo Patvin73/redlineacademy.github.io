@@ -8,10 +8,10 @@ const translations = {
     // Header
     home: "Beranda",
     about: "Tentang Kami",
-    programs: "Program",
+    // programs: "Program",
     contact: "Hubungi Kami",
-    blog: "Blog",
-    legal: "Legal",
+    // blog: "Blog",
+    // legal: "Legal",
 
     // Homepage
     heroWelcome: "Selamat datang",
@@ -25,8 +25,8 @@ const translations = {
     programDetail: "Detail Program",
 
     // Program Cards
-    assistantCarer: "Asisten Perawat",
-    assistantCarerDesc:
+    careGiver: "Care Giver",
+    careGiverDesc:
       "Dapatkan keterampilan dasar perawatan kesehatan dan pelatihan berbasis empati untuk mendukung pasien di rumah sakit, panti jompo, dan lingkungan masyarakat.",
 
     bartender: "Bartender",
@@ -123,11 +123,11 @@ const translations = {
     // Contact Info Section
     contactInfo: "Informasi Kontak",
     address: "Alamat",
-    addressValue: "Jl. Pendidikan No. 123, Jakarta, Indonesia 12345",
+    addressValue: "Jl. Terusan Jakarta No.330 KAV. 25, Bandung - West Java, Indonesia",
     phone: "Telepon",
-    phoneValue: "+62 (21) 2345-678",
+    phoneValue: "+61 408 578 253",
     emailLabel: "Email",
-    emailValue: "info@redlineacademy.com",
+    emailValue: "hello@redlineacademy.com.au",
     whatsapp: "WhatsApp",
     whatsappText: "Chat dengan kami",
     ourLocation: "Lokasi Kami",
@@ -215,10 +215,10 @@ const translations = {
     // Header
     home: "Home",
     about: "About Us",
-    programs: "Programs",
+    // programs: "Programs",
     contact: "Contact Us",
-    blog: "Blog",
-    legal: "Legal",
+    // blog: "Blog",
+    // legal: "Legal",
 
     // Homepage
     heroWelcome: "Welcome",
@@ -232,8 +232,8 @@ const translations = {
     programDetail: "Program Detail",
 
     // Program Cards
-    assistantCarer: "Assistant Carer",
-    assistantCarerDesc:
+    careGiver: "Care Giver",
+    careGiverDesc:
       "Gain essential healthcare skills and compassion-driven training to support patients in hospitals, aged care, and community settings.",
 
     bartender: "Bartender",
@@ -330,11 +330,11 @@ const translations = {
     // Contact Info Section
     contactInfo: "Contact Information",
     address: "Address",
-    addressValue: "Jl. Pendidikan No. 123, Jakarta, Indonesia 12345",
+    addressValue: "Jl. Terusan Jakarta No.330 KAV. 25, Bandung - West Java, Indonesia",
     phone: "Phone",
-    phoneValue: "+62 (21) 2345-678",
+    phoneValue: "+61 408 578 253",
     emailLabel: "Email",
-    emailValue: "info@redlineacademy.com",
+    emailValue: "hello@redlineacademy.com.au",
     whatsapp: "WhatsApp",
     whatsappText: "Chat with us",
     ourLocation: "Our Location",
