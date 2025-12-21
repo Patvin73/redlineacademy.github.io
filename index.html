@@ -14,25 +14,31 @@
     <!-- Header & Navigation -->
     <header>
       <div class="container">
-        <div class="header-content">
-          <div class="logo">
-            <img
-              src="assets/images/redlineacademy_logo.png"
-              alt="Redline Academy Logo"
-            />
+      <div class="header-content">
+        <div class="logo">
+          <img src="../assets/images/redlineacademy_logo.png" alt="Redline Academy Logo">
+          <span>Redline Academy</span>
           </div>
 
           <nav>
             <a href="index.html" data-i18n="home">Beranda</a>
             <a href="pages/about.html" data-i18n="about">Tentang Kami</a>
-            <a href="pages/programs.html" data-i18n="programs">Program</a>
+            <!-- Tautan ini dinonaktifkan sementara -->
+            <!-- <a href="pages/programs.html" data-i18n="programs">Program</a> -->
             <a href="pages/contact.html" data-i18n="contact">Hubungi Kami</a>
-            <a href="pages/blog.html" data-i18n="blog">Blog</a>
-            <a href="pages/legal.html" data-i18n="legal">Legal</a>
+            <!-- Tautan ini dinonaktifkan sementara -->
+            <!-- <a href="pages/blog.html" data-i18n="blog">Blog</a> -->
+            <!-- <a href="pages/legal.html" data-i18n="legal">Legal</a> -->
 
-            <div class="language-switcher">
-              <button class="lang-btn" data-lang="id">ID</button>
-              <button class="lang-btn" data-lang="en">ENG</button>
+            <div class="language-switcher" role="navigation" aria-label="Language selector">
+              <button class="lang-btn" data-lang="id" aria-label="Bahasa Indonesia">
+                <img src="assets/images/flags/id.png" alt="" class="flag" aria-hidden="true">
+                <span class="sr-only">Bahasa Indonesia</span>
+              </button>
+              <button class="lang-btn" data-lang="en" aria-label="English">
+                <img src="assets/images/flags/en.png" alt="" class="flag" aria-hidden="true">
+                <span class="sr-only">English</span>
+              </button>
             </div>
           </nav>
 
@@ -71,18 +77,18 @@
         <h2 class="section-title" data-i18n="ourPrograms">Program Kami</h2>
 
         <div class="grid-6">
-          <!-- Card 1: Assistant Carer -->
+          <!-- Card 1: Care Giver -->
           <div class="card fade-in">
             <img
               src="assets/images/assistant_carer.png"
-              alt="Assistant Carer"
+              alt="Care Giver"
               class="card-image"
             />
             <div class="card-body">
-              <h3 class="card-title" data-i18n="assistantCarer">
-                Asisten Perawat
+              <h3 class="card-title" data-i18n="careGiver">
+                Care Giver
               </h3>
-              <p class="card-text" data-i18n="assistantCarerDesc">
+              <p class="card-text" data-i18n="careGiverDesc">
                 Dapatkan keterampilan dasar perawatan kesehatan dan pelatihan
                 berbasis empati untuk mendukung pasien di rumah sakit, panti
                 jompo, dan lingkungan masyarakat.
@@ -93,7 +99,7 @@
             </div>
           </div>
 
-          <!-- Card 2: Bartender -->
+          <!-- Card 2: Bartender 
           <div class="card fade-in">
             <img
               src="assets/images/bartender.png"
@@ -112,8 +118,9 @@
               </button>
             </div>
           </div>
+          -->
 
-          <!-- Card 3: Cooking (Chef) -->
+          <!-- Card 3: Cooking (Chef) 
           <div class="card fade-in">
             <img
               src="assets/images/cooking.png"
@@ -132,8 +139,9 @@
               </button>
             </div>
           </div>
+          -->
 
-          <!-- Card 4: Barista -->
+          <!-- Card 4: Barista 
           <div class="card fade-in">
             <img
               src="assets/images/barista.png"
@@ -152,8 +160,8 @@
               </button>
             </div>
           </div>
-
-          <!-- Card 5: Coding (IT) -->
+          -->
+          <!-- Card 5: Coding (IT) 
           <div class="card fade-in">
             <img
               src="assets/images/coding.jpg"
@@ -172,8 +180,9 @@
               </button>
             </div>
           </div>
+          -->
 
-          <!-- Card 6: Electrician -->
+          <!-- Card 6: Electrician 
           <div class="card fade-in">
             <img
               src="assets/images/electrician.png"
@@ -194,6 +203,7 @@
               </button>
             </div>
           </div>
+          -->
         </div>
       </div>
     </section>
@@ -293,7 +303,7 @@
       </div>
     </section>
 
-    <!-- Testimonials Section -->
+     <!-- TESTIMONIALS SECTION DISABLED 
     <section class="section-padding" style="background-color: #f9fafb">
       <div class="container">
         <h2 class="section-title" data-i18n="whatAlumniSay">
@@ -301,7 +311,6 @@
         </h2>
 
         <div class="grid-3">
-          <!-- Testimonial 1 -->
           <div class="card fade-in">
             <div class="card-body text-center">
               <div class="card-icon">👤</div>
@@ -321,7 +330,6 @@
             </div>
           </div>
 
-          <!-- Testimonial 2 -->
           <div class="card fade-in">
             <div class="card-body text-center">
               <div class="card-icon">👤</div>
@@ -341,7 +349,6 @@
             </div>
           </div>
 
-          <!-- Testimonial 3 -->
           <div class="card fade-in">
             <div class="card-body text-center">
               <div class="card-icon">👤</div>
@@ -364,6 +371,7 @@
         </div>
       </div>
     </section>
+    -->
 
     <!-- Contact Section -->
     <section id="contact" class="section-padding">
@@ -403,10 +411,10 @@
                     <option value="" data-i18n="selectCourse">
                       Pilih Kursus
                     </option>
-                    <option value="assistant-carer" data-i18n="assistantCarer">
-                      Asisten Perawat
+                    <option value="assistant-carer" data-i18n="careGiver">
+                      Care Giver
                     </option>
-                    <option value="bartender" data-i18n="bartender">
+                    <!--<option value="bartender" data-i18n="bartender">
                       Bartender
                     </option>
                     <option value="cooking" data-i18n="cooking">
@@ -418,7 +426,7 @@
                     </option>
                     <option value="electrician" data-i18n="electrician">
                       Teknisi Listrik
-                    </option>
+                    </option> -->
                   </select>
                 </div>
                 <div class="form-group">
@@ -474,27 +482,27 @@
             >
               <h4 class="mb-2" data-i18n="address">Alamat</h4>
               <p data-i18n="addressValue">
-                Jl. Pendidikan No. 123, Jakarta, Indonesia 12345
+                Jl. Terusan Jakarta No.330 KAV. 25, Bandung - West Java, Indonesia
               </p>
 
               <h4 class="mb-2 mt-3" data-i18n="phone">Telepon</h4>
               <p>
-                <a href="tel:+62212345678" data-i18n="phoneValue"
-                  >+62 (21) 2345-678</a
+                <a href="tel:+61408578253" data-i18n="phoneValue"
+                  >+61 408 578 253</a
                 >
               </p>
 
               <h4 class="mb-2 mt-3" data-i18n="emailLabel">Email</h4>
               <p>
-                <a href="mailto:info@redlineacademy.com" data-i18n="emailValue"
-                  >info@redlineacademy.com</a
+                <a href="mailto:hello@redlineacademy.com.au" data-i18n="emailValue"
+                  >hello@redlineacademy.com.au</a
                 >
               </p>
 
               <h4 class="mb-2 mt-3" data-i18n="whatsapp">WhatsApp</h4>
               <p>
                 <a
-                  href="https://wa.me/62212345678"
+                  href="https://wa.me/61408578253"
                   target="_blank"
                   data-i18n="whatsappText"
                   >Chat dengan kami</a
@@ -514,7 +522,7 @@
               "
             >
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.521260322945!2d106.8196!3d-6.2088!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f3e945e34a9d%3A0x5540e62c33333333!2sJakarta!5e0!3m2!1sid!2sid!4v1234567890"
+                src="https://www.google.com/maps?q=-6.9167307,107.66587&z=17&output=embed"
                 width="100%"
                 height="100%"
                 style="border: 0"
@@ -558,31 +566,31 @@
             <h4 data-i18n="programs">Program</h4>
             <ul>
               <li>
-                <a href="pages/programs.html" data-i18n="assistantCarer"
-                  >Asisten Perawat</a
+                <a href="pages/programs.html" data-i18n="careGiver"
+                  >Care Giver</a
                 >
               </li>
               <li>
-                <a href="pages/programs.html" data-i18n="bartender"
-                  >Bartender</a
+                <!-- <a href="pages/programs.html" data-i18n="bartender"
+                  >Bartender</a -->
                 >
               </li>
               <li>
-                <a href="pages/programs.html" data-i18n="cooking"
-                  >Memasak (Chef)</a
+                <!-- <a href="pages/programs.html" data-i18n="cooking"
+                  >Memasak (Chef)</a -->
                 >
               </li>
               <li>
-                <a href="pages/programs.html" data-i18n="barista">Barista</a>
+                <!-- <a href="pages/programs.html" data-i18n="barista">Barista</a>
+              </li> -->
+              <li>
+                <!-- <a href="pages/programs.html" data-i18n="coding"
+                  >Pemrograman (IT)</a -->
+                > 
               </li>
               <li>
-                <a href="pages/programs.html" data-i18n="coding"
-                  >Pemrograman (IT)</a
-                >
-              </li>
-              <li>
-                <a href="pages/programs.html" data-i18n="electrician"
-                  >Teknisi Listrik</a
+                <!-- <a href="pages/programs.html" data-i18n="electrician"
+                  >Teknisi Listrik</a -->
                 >
               </li>
             </ul>
@@ -594,7 +602,7 @@
               <li>
                 <a href="pages/about.html" data-i18n="about">Tentang Kami</a>
               </li>
-              <li><a href="pages/blog.html" data-i18n="blog">Blog</a></li>
+              <li> <!-- <a href="pages/blog.html" data-i18n="blog">Blog</a></li> -->
               <li>
                 <a href="pages/contact.html" data-i18n="contact"
                   >Hubungi Kami</a
@@ -622,7 +630,7 @@
 
         <div class="footer-bottom">
           <p>
-            &copy; 2024 Redline Academy.
+            &copy; 2025 Redline Academy.
             <span data-i18n="allRightsReserved">Semua Hak Dilindungi</span>.
           </p>
         </div>

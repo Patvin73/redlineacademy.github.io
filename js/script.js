@@ -8,10 +8,10 @@ const translations = {
     // Header
     home: "Beranda",
     about: "Tentang Kami",
-    programs: "Program",
+    // programs: "Program",
     contact: "Hubungi Kami",
-    blog: "Blog",
-    legal: "Legal",
+    // blog: "Blog",
+    // legal: "Legal",
 
     // Homepage
     heroWelcome: "Selamat datang",
@@ -25,8 +25,8 @@ const translations = {
     programDetail: "Detail Program",
 
     // Program Cards
-    assistantCarer: "Asisten Perawat",
-    assistantCarerDesc:
+    careGiver: "Care Giver",
+    careGiverDesc:
       "Dapatkan keterampilan dasar perawatan kesehatan dan pelatihan berbasis empati untuk mendukung pasien di rumah sakit, panti jompo, dan lingkungan masyarakat.",
 
     bartender: "Bartender",
@@ -119,15 +119,26 @@ const translations = {
     saturday: "Sabtu: 09:00 - 13:00",
     sunday: "Minggu: Tutup",
     faqTitle: "Pertanyaan yang Sering Diajukan",
+    faqQ1: "Bagaimana cara mendaftar program?",
+    faqA1: "Anda dapat mendaftar melalui formulir kontak di atas atau menghubungi kami langsung melalui telepon atau WhatsApp. Tim kami akan memandu Anda melalui proses pendaftaran.",
+    faqQ2: "Berapa lama durasi setiap program?",
+    faqA2: "Durasi program bervariasi dari 3 hingga 12 bulan tergantung pada jenis program yang Anda pilih. Silakan lihat halaman Program untuk detail durasi setiap program.",
+    faqQ3: "Apakah ada beasiswa atau bantuan finansial?",
+    faqA3: "Kami menawarkan berbagai opsi pembayaran yang fleksibel. Hubungi kami untuk mendiskusikan opsi yang tersedia dan melihat apakah Anda memenuhi syarat untuk bantuan finansial.",
+    faqQ4: "Apakah sertifikat kami diakui secara internasional?",
+    faqA4: "Ya, semua sertifikat kami diakui secara internasional dan sesuai dengan standar industri global. Kami mengikuti Microcredentials Framework Australia.",
+    faqQ5: "Apakah ada dukungan penempatan kerja setelah lulus?",
+    faqA5: "Ya, kami memiliki tim dedicated yang membantu lulusan kami menemukan pekerjaan melalui jaringan mitra industri kami yang luas.",
+
 
     // Contact Info Section
     contactInfo: "Informasi Kontak",
     address: "Alamat",
-    addressValue: "Jl. Pendidikan No. 123, Jakarta, Indonesia 12345",
+    addressValue: "Jl. Terusan Jakarta No.330 KAV. 25, Bandung - West Java, Indonesia",
     phone: "Telepon",
-    phoneValue: "+62 (21) 2345-678",
+    phoneValue: "+61 408 578 253",
     emailLabel: "Email",
-    emailValue: "info@redlineacademy.com",
+    emailValue: "hello@redlineacademy.com.au",
     whatsapp: "WhatsApp",
     whatsappText: "Chat dengan kami",
     ourLocation: "Lokasi Kami",
@@ -215,10 +226,10 @@ const translations = {
     // Header
     home: "Home",
     about: "About Us",
-    programs: "Programs",
+    // programs: "Programs",
     contact: "Contact Us",
-    blog: "Blog",
-    legal: "Legal",
+    // blog: "Blog",
+    // legal: "Legal",
 
     // Homepage
     heroWelcome: "Welcome",
@@ -232,8 +243,8 @@ const translations = {
     programDetail: "Program Detail",
 
     // Program Cards
-    assistantCarer: "Assistant Carer",
-    assistantCarerDesc:
+    careGiver: "Care Giver",
+    careGiverDesc:
       "Gain essential healthcare skills and compassion-driven training to support patients in hospitals, aged care, and community settings.",
 
     bartender: "Bartender",
@@ -326,15 +337,26 @@ const translations = {
     saturday: "Saturday: 09:00 - 13:00",
     sunday: "Sunday: Closed",
     faqTitle: "Frequently Asked Questions",
+    faqQ1: "How do I enroll in the program?",
+    faqA1: "You can register via the contact form above or contact us directly via phone or WhatsApp. Our team will guide you through the enrollment process.",
+    faqQ2: "How long is each program?",
+    faqA2: "Program duration varies from 3 to 12 months depending on the type of program you choose. Please see the Programs page for details on each program's duration.",
+    faqQ3: "Are scholarships or financial aid available?",
+    faqA3: "We offer a variety of flexible payment options. Please contact us to discuss the available options and to see if you are eligible for financial assistance.",
+    faqQ4: "Are your certificates internationally recognized?",
+    faqA4: "Yes, all of our certificates are internationally recognized and aligned with global industry standards. We adhere to the Australian Microcredentials Framework.",
+    faqQ5: "Is there job placement support after graduation?",
+    faqA5: "Yes, we have a dedicated team that assists our graduates in finding employment through our extensive network of industry partners.",
+
 
     // Contact Info Section
     contactInfo: "Contact Information",
     address: "Address",
-    addressValue: "Jl. Pendidikan No. 123, Jakarta, Indonesia 12345",
+    addressValue: "Jl. Terusan Jakarta No.330 KAV. 25, Bandung - West Java, Indonesia",
     phone: "Phone",
-    phoneValue: "+62 (21) 2345-678",
+    phoneValue: "+61 408 578 253",
     emailLabel: "Email",
-    emailValue: "info@redlineacademy.com",
+    emailValue: "hello@redlineacademy.com.au",
     whatsapp: "WhatsApp",
     whatsappText: "Chat with us",
     ourLocation: "Our Location",
@@ -510,7 +532,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const nav = document.querySelector("nav");
   if (menuToggle) {
     menuToggle.addEventListener("click", function () {
-      nav.style.display = nav.style.display === "flex" ? "none" : "flex";
+      // Toggle the CSS `active` class so the menu appearance is driven by CSS
+      nav.classList.toggle("active");
     });
   }
 

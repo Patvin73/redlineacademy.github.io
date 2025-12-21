@@ -217,14 +217,14 @@ Website dapat di-deploy ke berbagai platform:
 
 ## Lisensi
 
-Copyright © 2024 Redline Academy. Semua hak dilindungi.
+Copyright © 2025 Redline Academy. Semua hak dilindungi.
 
 ## Kontak
 
-- Email: info@redlineacademy.com
-- Telepon: +62 (21) 2345-678
+- Email: hello@redlineacademy.com.au
+- Telepon: +61 408 578 253
 - WhatsApp: Chat dengan kami
-- Alamat: Jl. Pendidikan No. 123, Jakarta, Indonesia 12345
+- Alamat: Jl. Terusan Jakarta No.330 KAV. 25, Bandung - West Java, Indonesia
 
 ---
 
