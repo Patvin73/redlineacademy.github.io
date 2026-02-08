@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
@@ -9,34 +9,70 @@
     />
     <title>Redline Academy</title>
     <link rel="stylesheet" href="css/style.css" />
+    <!-- Hreflang: language/region alternates -->
+    <link
+      rel="alternate"
+      href="https://redlineacademy.com/index.html"
+      hreflang="id"
+    />
+    <link
+      rel="alternate"
+      href="https://redlineacademy.com/index.html?lang=en"
+      hreflang="en"
+    />
+    <link
+      rel="alternate"
+      href="https://redlineacademy.com/index.html"
+      hreflang="x-default"
+    />
   </head>
   <body>
     <!-- Header & Navigation -->
     <header>
       <div class="container">
-      <div class="header-content">
-        <div class="logo">
-          <img src="../assets/images/redlineacademy_logo.png" alt="Redline Academy Logo">
-          <span>Redline Academy</span>
+        <div class="header-content">
+          <div class="logo">
+            <img
+              src="../assets/images/redlineacademy_logo.png"
+              alt="Redline Academy Logo"
+            />
+            <span>Redline Academy</span>
           </div>
 
           <nav>
             <a href="index.html" data-i18n="home">Beranda</a>
             <a href="pages/about.html" data-i18n="about">Tentang Kami</a>
-            <!-- Tautan ini dinonaktifkan sementara -->
-            <!-- <a href="pages/programs.html" data-i18n="programs">Program</a> -->
+            <a href="pages/programs.html" data-i18n="programs">Program</a>
             <a href="pages/contact.html" data-i18n="contact">Hubungi Kami</a>
             <!-- Tautan ini dinonaktifkan sementara -->
             <!-- <a href="pages/blog.html" data-i18n="blog">Blog</a> -->
             <!-- <a href="pages/legal.html" data-i18n="legal">Legal</a> -->
 
-            <div class="language-switcher" role="navigation" aria-label="Language selector">
-              <button class="lang-btn" data-lang="id" aria-label="Bahasa Indonesia">
-                <img src="assets/images/flags/id.png" alt="" class="flag" aria-hidden="true">
+            <div
+              class="language-switcher"
+              role="navigation"
+              aria-label="Language selector"
+            >
+              <button
+                class="lang-btn"
+                data-lang="id"
+                aria-label="Bahasa Indonesia"
+              >
+                <img
+                  src="assets/images/flags/id.png"
+                  alt=""
+                  class="flag"
+                  aria-hidden="true"
+                />
                 <span class="sr-only">Bahasa Indonesia</span>
               </button>
               <button class="lang-btn" data-lang="en" aria-label="English">
-                <img src="assets/images/flags/en.png" alt="" class="flag" aria-hidden="true">
+                <img
+                  src="assets/images/flags/en.png"
+                  alt=""
+                  class="flag"
+                  aria-hidden="true"
+                />
                 <span class="sr-only">English</span>
               </button>
             </div>
@@ -85,17 +121,18 @@
               class="card-image"
             />
             <div class="card-body">
-              <h3 class="card-title" data-i18n="careGiver">
-                Care Giver
-              </h3>
+              <h3 class="card-title" data-i18n="careGiver">Care Giver</h3>
               <p class="card-text" data-i18n="careGiverDesc">
                 Dapatkan keterampilan dasar perawatan kesehatan dan pelatihan
                 berbasis empati untuk mendukung pasien di rumah sakit, panti
                 jompo, dan lingkungan masyarakat.
               </p>
-              <button class="btn btn-primary btn-sm" data-i18n="programDetail">
-                Detail Program
-              </button>
+              <a
+                href="pages/programs.html"
+                class="btn btn-primary btn-sm"
+                data-i18n="programDetail"
+                >Detail Program</a
+              >
             </div>
           </div>
 
@@ -303,7 +340,7 @@
       </div>
     </section>
 
-     <!-- TESTIMONIALS SECTION DISABLED 
+    <!-- TESTIMONIALS SECTION DISABLED 
     <section class="section-padding" style="background-color: #f9fafb">
       <div class="container">
         <h2 class="section-title" data-i18n="whatAlumniSay">
@@ -482,7 +519,8 @@
             >
               <h4 class="mb-2" data-i18n="address">Alamat</h4>
               <p data-i18n="addressValue">
-                Jl. Terusan Jakarta No.330 KAV. 25, Bandung - West Java, Indonesia
+                Jl. Terusan Jakarta No.330 KAV. 25, Bandung - West Java,
+                Indonesia
               </p>
 
               <h4 class="mb-2 mt-3" data-i18n="phone">Telepon</h4>
@@ -494,7 +532,9 @@
 
               <h4 class="mb-2 mt-3" data-i18n="emailLabel">Email</h4>
               <p>
-                <a href="mailto:hello@redlineacademy.com.au" data-i18n="emailValue"
+                <a
+                  href="mailto:hello@redlineacademy.com.au"
+                  data-i18n="emailValue"
                   >hello@redlineacademy.com.au</a
                 >
               </p>
@@ -583,10 +623,12 @@
               <li>
                 <!-- <a href="pages/programs.html" data-i18n="barista">Barista</a>
               </li> -->
+              </li>
+
               <li>
                 <!-- <a href="pages/programs.html" data-i18n="coding"
                   >Pemrograman (IT)</a -->
-                > 
+                >
               </li>
               <li>
                 <!-- <a href="pages/programs.html" data-i18n="electrician"
@@ -602,7 +644,9 @@
               <li>
                 <a href="pages/about.html" data-i18n="about">Tentang Kami</a>
               </li>
-              <li> <!-- <a href="pages/blog.html" data-i18n="blog">Blog</a></li> -->
+              <li>
+                <!-- <a href="pages/blog.html" data-i18n="blog">Blog</a></li> -->
+              </li>
               <li>
                 <a href="pages/contact.html" data-i18n="contact"
                   >Hubungi Kami</a
