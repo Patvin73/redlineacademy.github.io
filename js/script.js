@@ -119,21 +119,26 @@ const translations = {
     saturday: "Sabtu: 09:00 - 13:00",
     sunday: "Minggu: Tutup",
     faqTitle: "Pertanyaan yang Sering Diajukan",
-    faqQ1: "Bagaimana cara mendaftar program?",
+    faqQ1: "Apakah program ini terakreditasi?",
     faqA1:
-      "Anda dapat mendaftar melalui formulir kontak di atas atau menghubungi kami langsung melalui telepon atau WhatsApp. Tim kami akan memandu Anda melalui proses pendaftaran.",
-    faqQ2: "Berapa lama durasi setiap program?",
+      "Ya. Anda akan menyelesaikan Unit Pelatihan Terakreditasi Australia yang diakui secara nasional.",
+    faqQ2: "Berapa lama durasi kursusnya?",
     faqA2:
-      "Durasi program bervariasi dari 3 hingga 12 bulan tergantung pada jenis program yang Anda pilih. Silakan lihat halaman Program untuk detail durasi setiap program.",
-    faqQ3: "Apakah ada beasiswa atau bantuan finansial?",
-    faqA3:
-      "Kami menawarkan berbagai opsi pembayaran yang fleksibel. Hubungi kami untuk mendiskusikan opsi yang tersedia dan melihat apakah Anda memenuhi syarat untuk bantuan finansial.",
-    faqQ4: "Apakah sertifikat kami diakui secara internasional?",
+      "Jalur cepat kami dirancang untuk diselesaikan hanya dalam waktu 12 minggu.",
+    faqQ3: "Apakah saya butuh pengalaman medis?",
+    faqA3: "Tidak perlu. Kami melatih Anda agar siap kerja sejak hari pertama.",
+    faqQ4: "Apakah ada bantuan bahasa?",
     faqA4:
-      "Ya, semua sertifikat kami diakui secara internasional dan sesuai dengan standar industri global. Kami mengikuti Microcredentials Framework Australia.",
-    faqQ5: "Apakah ada dukungan penempatan kerja setelah lulus?",
+      "Ya, kami menyediakan dukungan penuh dalam Bahasa Inggris dan Bahasa Indonesia.",
+    faqQ5: "Bagaimana dengan bagian praktiknya?",
     faqA5:
-      "Ya, kami memiliki tim dedicated yang membantu lulusan kami menemukan pekerjaan melalui jaringan mitra industri kami yang luas.",
+      "Program ini mencakup 120 jam asesmen praktis di fasilitas perawatan nyata.",
+    faqQ6: "Pekerjaan apa yang bisa saya dapatkan?",
+    faqA6:
+      "Anda bisa bekerja di sektor Perawatan Lansia, Dukungan Disabilitas, atau Kesehatan Mental.",
+    faqQ7: "Apakah tersedia rencana pembayaran?",
+    faqA7:
+      "Ya, kami menawarkan rencana pembayaran yang fleksibel agar pendidikan Anda lebih terjangkau. Silakan hubungi kami untuk mendiskusikan opsi yang sesuai dengan anggaran Anda.",
 
     // Contact Info Section
     contactInfo: "Informasi Kontak",
@@ -141,7 +146,7 @@ const translations = {
     addressValue:
       "Jl. Terusan Jakarta No.330 KAV. 25, Bandung - West Java, Indonesia",
     phone: "Telepon",
-    phoneValue: "+61 408 578 253",
+    phoneValue: "+62 821-2017-1731",
     emailLabel: "Email",
     emailValue: "hello@redlineacademy.com.au",
     whatsapp: "WhatsApp",
@@ -152,7 +157,7 @@ const translations = {
     // About Page
     aboutUs: "Tentang Kami",
     aboutContent:
-      "Di RedLine Academy, kami percaya bahwa setiap individu memiliki potensi untuk membentuk masa depannya sendiri. Kami bukan sekadar akademi — kami adalah tempat di mana ambisi bertemu dengan peluang, dan di mana keterampilan, semangat, serta tekad bersatu untuk menciptakan dampak yang berarti.\n\nProgram kami dibangun berdasarkan pelatihan vokasi bersertifikat Australia yang diakui secara internasional dan selaras dengan Kerangka Microcredentials, memastikan setiap siswa memperoleh keterampilan praktis yang relevan dan dibutuhkan di dunia kerja nyata.\n\nKami memiliki semangat untuk memberdayakan para pembelajar — baik yang baru memulai karier, ingin meningkatkan keterampilan, maupun berpindah ke bidang baru. Kami yakin bahwa setiap orang berhak mendapatkan titik awal yang sama, tanpa memandang latar belakang, dan kami menyediakan bimbingan serta sumber daya yang membantu setiap siswa mencapai potensi terbaiknya.\n\nMelalui pengajaran inovatif, bimbingan personal, dan pengalaman langsung, kami membantu siswa mengubah tantangan menjadi peluang dan mimpi menjadi pencapaian nyata.\n\nDi RedLine Academy, kami menumbuhkan budaya pertumbuhan, keberanian, dan transformasi — menginspirasi siswa untuk melangkah keluar dari zona nyaman, beradaptasi dengan perubahan, dan mengambil kendali atas masa depan mereka.",
+      "Program pelatihan ini dirancang khusus untuk membangun kompetensi unggul di bidang perawatan lansia secara komprehensif. Keterampilan yang Anda kuasai akan membuka gerbang karier di sektor pelayanan komunitas, pengabdian bagi keluarga, hingga peran strategis sebagai relawan dan pekerja sosial profesional.\n\nMelalui kurikulum terakreditasi yang menggabungkan metode klasikal, pembelajaran mandiri, dan praktik intensif, kami mengundang Anda untuk bergabung. Mari bersama Redline Academy, membentuk insan peduli yang berdaya saing global.\n\nProgram ini mencakup 6 Australian Accredited Training Units serta 120 jam asesmen praktik, yang mencerminkan standar industri dan praktik perawatan terkini.",
 
     visionTitle: "Visi Kami",
     visionContent:
@@ -213,13 +218,19 @@ const translations = {
 
     // Programs Page
     whatYouWillLearn: "Apa yang akan Anda pelajari:",
+    careGiverLearn1: "Keterampilan Perawatan Lansia.",
+    careGiverLearn2: "Komunikasi Efektif di Layanan Kesehatan.",
+    careGiverLearn3: "Standar Keselamatan Klien dan Pengendalian Infeksi.",
+    careGiverLearn4: "Strategi Pemberdayaan Klien.",
+    careGiverLearn5: "Dukungan Personal Berpusat pada Klien.",
+    careGiverLearn6: "Pencegahan & Manajemen Risiko Cedera.",
     duration6Months: "Durasi Program: 6 bulan",
     duration4Months: "Durasi Program: 4 bulan",
     duration3Months: "Durasi Program: 3 bulan",
     certificationInternational: "Sertifikasi: Internasional",
     whyChooseOurProgram: "Mengapa Memilih Program Kami?",
     programsIntro:
-      "Pilih salah satu program pelatihan vokasi bersertifikat Australia kami dan mulai perjalanan karier Anda menuju kesuksesan.",
+      "Program Mikro-Kredensial: Pendampingan Perawatan (Unit Pelatihan Terakreditasi Australia).\n\nKita mungkin tidak bisa mengubah seluruh dunia, namun jika Anda memiliki rasa kasih sayang, Anda dapat mengubah kehidupan orang-orang di sekitar Anda yang membutuhkan bantuan.\n\nApakah Anda baru saja akan menyelesaikan pendidikan dan bingung memilih jalur karier? Atau mungkin pekerjaan Anda saat ini terasa membosankan dan tidak memberikan kepuasan batin yang nyata?\n\nHanya dalam enam belas minggu pelatihan berkualitas standar Australia yang diakui secara internasional, Anda dapat mengubah segalanya. Pelatihan yang kami tawarkan dirancang untuk membuka pintu peluang nyata menuju karier yang bermakna, di mana Anda dapat memberikan dampak yang nyata.\n\nKursus ini terdiri dari dua belas minggu pelatihan daring (online) ditambah 3 ½ minggu praktik kerja lapangan untuk mendapatkan pengalaman langsung.\n\nDengan bekal pelatihan ini, Anda siap untuk mengubah dunia Anda.",
 
     // Legal Page
     legalTitle: "Legal",
@@ -342,21 +353,27 @@ const translations = {
     saturday: "Saturday: 09:00 - 13:00",
     sunday: "Sunday: Closed",
     faqTitle: "Frequently Asked Questions",
-    faqQ1: "How do I enroll in the program?",
+    faqQ1: "Is this program accredited?",
     faqA1:
-      "You can register via the contact form above or contact us directly via phone or WhatsApp. Our team will guide you through the enrollment process.",
-    faqQ2: "How long is each program?",
+      "Yes. You will complete Australian Accredited Training Units that are nationally recognized.",
+    faqQ2: "How long is the course?",
     faqA2:
-      "Program duration varies from 3 to 12 months depending on the type of program you choose. Please see the Programs page for details on each program's duration.",
-    faqQ3: "Are scholarships or financial aid available?",
+      "Our fast-track pathway is designed to be completed in just 12 weeks.",
+    faqQ3: "Do I need medical experience?",
     faqA3:
-      "We offer a variety of flexible payment options. Please contact us to discuss the available options and to see if you are eligible for financial assistance.",
-    faqQ4: "Are your certificates internationally recognized?",
+      "No experience is needed. We train you for job-readiness from day one.",
+    faqQ4: "Is there language support?",
     faqA4:
-      "Yes, all of our certificates are internationally recognized and aligned with global industry standards. We adhere to the Australian Microcredentials Framework.",
-    faqQ5: "Is there job placement support after graduation?",
+      "Yes, we provide full Bilingual Support in English and Bahasa Indonesia.",
+    faqQ5: "What about the practical part?",
     faqA5:
-      "Yes, we have a dedicated team that assists our graduates in finding employment through our extensive network of industry partners.",
+      "The program includes 120 hours of practical assessment in a real care facility.",
+    faqQ6: "What jobs can I get?",
+    faqA6:
+      "You can work in the Aged Care, Disability Support, or Mental Health sectors.",
+    faqQ7: "Do you offer payment plans?",
+    faqA7:
+      "Yes, we offer flexible payment plans to make your education more accessible. Please contact us to discuss options that suit your budget.",
 
     // Contact Info Section
     contactInfo: "Contact Information",
@@ -364,7 +381,7 @@ const translations = {
     addressValue:
       "Jl. Terusan Jakarta No.330 KAV. 25, Bandung - West Java, Indonesia",
     phone: "Phone",
-    phoneValue: "+61 408 578 253",
+    phoneValue: "+62 821-2017-1731",
     emailLabel: "Email",
     emailValue: "hello@redlineacademy.com.au",
     whatsapp: "WhatsApp",
@@ -375,7 +392,7 @@ const translations = {
     // About Page
     aboutUs: "About Us",
     aboutContent:
-      "At RedLine Academy, we believe that every individual has the potential to shape their own future. We are more than an academy—we are a place where ambition meets opportunity, and where skills, passion, and determination come together to create lasting impact.\n\nOur programs are built on Australian-certified, internationally recognised vocational training, aligned with the Microcredentials Framework, ensuring every student gains practical, industry-focused skills that matter in the real world.\n\nWe are passionate about empowering learners—whether you're just starting your career, looking to upskill, or transitioning into a new field. We firmly believe that everyone deserves the same starting point, regardless of their background, and we provide the guidance and resources to help every student reach their potential. Through innovative teaching, personalised guidance, and hands-on experience, we help our students turn challenges into opportunities and dreams into tangible achievements.\n\nAt RedLine Academy, we cultivate a culture of growth, courage, and transformation, inspiring students to step beyond their comfort zones, embrace change, and take control of their future.",
+      "This training program is specifically designed to build outstanding competencies in aged care comprehensively. The skills you acquire will open pathways to careers in the community services sector, family caregiving, as well as strategic roles as volunteers and professional social workers.\n\nThrough an accredited curriculum that integrates classroom-based learning, self-directed study, and intensive practical training, we invite you to join us. Together with Redline Academy, let us shape compassionate professionals with global competitiveness.\n\nThis program comprises 6 Australian Accredited Training Units and 120 hours of practical assessment, reflecting current industry standards and best practices in care provision.",
 
     visionTitle: "Our Vision",
     visionContent:
@@ -436,13 +453,19 @@ const translations = {
 
     // Programs Page
     whatYouWillLearn: "What You Will Learn:",
+    careGiverLearn1: "Elderly Care Skills.",
+    careGiverLearn2: "Effective Communication in Healthcare Services.",
+    careGiverLearn3: "Client Safety Standards and Infection Control.",
+    careGiverLearn4: "Client Empowerment Strategies.",
+    careGiverLearn5: "Client-Centered Personal Support.",
+    careGiverLearn6: "Injury Prevention and Risk Management.",
     duration6Months: "Program Duration: 6 months",
     duration4Months: "Program Duration: 4 months",
     duration3Months: "Program Duration: 3 months",
     certificationInternational: "Certification: International",
     whyChooseOurProgram: "Why Choose Our Program?",
     programsIntro:
-      "Choose one of our Australian-certified vocational training programs and start your journey to career success.",
+      "Micro-Credential Program: Care Support (Australian Accredited Training Units).\n\nWe may not be able to change the whole world, but if you have compassion, you can change the lives of those around you who need support.\n\nAre you about to complete your studies and feeling uncertain about your career path? Or perhaps your current job feels unfulfilling and lacks genuine purpose?\n\nIn just sixteen weeks of high-quality, Australian-standard training that is internationally recognized, you can transform your future. The training we offer is designed to open real opportunities for a meaningful career—one where you can make a tangible and lasting impact.\n\nThis course consists of twelve weeks of online training followed by 3½ weeks of workplace practicum, providing hands-on, real-world experience.\n\nWith this training, you will be equipped and ready to change your world.",
 
     // Legal Page
     legalTitle: "Legal",
@@ -452,18 +475,51 @@ const translations = {
 };
 
 // Language management
-let currentLanguage = localStorage.getItem("language") || "id";
+let currentLanguage;
+
+// Try to get language from localStorage, with fallback
+try {
+  currentLanguage = localStorage.getItem("language") || "id";
+  console.log("Language loaded from localStorage:", currentLanguage);
+} catch (e) {
+  // localStorage might be unavailable in private mode or strict privacy settings
+  console.warn("localStorage not available, using default language 'id'");
+  currentLanguage = "id";
+}
 
 function setLanguage(lang) {
+  console.log("setLanguage called with lang:", lang);
+
+  // Validate language
+  if (!translations[lang]) {
+    console.error("Language not found in translations:", lang);
+    return;
+  }
+
   currentLanguage = lang;
-  localStorage.setItem("language", lang);
+
+  // Try to save to localStorage
+  try {
+    localStorage.setItem("language", lang);
+    console.log("Language saved to localStorage:", lang);
+  } catch (e) {
+    console.warn("Could not save to localStorage:", e.message);
+  }
+
   updatePageLanguage();
 
   // Update active button
   document.querySelectorAll(".lang-btn").forEach((btn) => {
     btn.classList.remove("active");
   });
-  document.querySelector(`[data-lang="${lang}"]`).classList.add("active");
+
+  const activeBtn = document.querySelector(`[data-lang="${lang}"]`);
+  if (activeBtn) {
+    activeBtn.classList.add("active");
+    console.log("Active button updated for language:", lang);
+  } else {
+    console.warn("Could not find button for language:", lang);
+  }
 }
 
 function t(key) {
@@ -471,10 +527,19 @@ function t(key) {
 }
 
 function updatePageLanguage() {
+  console.log("updatePageLanguage called for", currentLanguage);
+
   // Update all elements with data-i18n attribute
-  document.querySelectorAll("[data-i18n]").forEach((element) => {
+  const elements = document.querySelectorAll("[data-i18n]");
+  console.log("Found", elements.length, "elements with data-i18n");
+
+  elements.forEach((element) => {
     const key = element.getAttribute("data-i18n");
     const text = t(key);
+
+    if (!text || text === key) {
+      console.warn(`Translation missing for key: ${key}`);
+    }
 
     if (element.tagName === "INPUT" || element.tagName === "TEXTAREA") {
       element.placeholder = text;
@@ -484,6 +549,8 @@ function updatePageLanguage() {
       element.textContent = text;
     }
   });
+
+  console.log("Page language updated to:", currentLanguage);
 
   // Update page title and meta
   updatePageTitle();
@@ -508,18 +575,38 @@ function updatePageTitle() {
 
 // Initialize language on page load
 document.addEventListener("DOMContentLoaded", function () {
+  console.log("DOMContentLoaded fired");
+  console.log("Current language:", currentLanguage);
+  console.log("Translations object:", typeof translations);
+  console.log(
+    "Lang buttons found:",
+    document.querySelectorAll(".lang-btn").length,
+  );
+
   // Set initial language
   const langBtn = document.querySelector(`[data-lang="${currentLanguage}"]`);
   if (langBtn) {
     langBtn.classList.add("active");
+    console.log("Active language button set:", currentLanguage);
+  } else {
+    console.warn("Language button not found for:", currentLanguage);
   }
 
   updatePageLanguage();
 
   // Set up language switcher
-  document.querySelectorAll(".lang-btn").forEach((btn) => {
-    btn.addEventListener("click", function () {
-      setLanguage(this.getAttribute("data-lang"));
+  const langButtons = document.querySelectorAll(".lang-btn");
+  console.log(
+    "Setting up language switcher for",
+    langButtons.length,
+    "buttons",
+  );
+
+  langButtons.forEach((btn) => {
+    btn.addEventListener("click", function (e) {
+      const lang = this.getAttribute("data-lang");
+      console.log("Language button clicked:", lang);
+      setLanguage(lang);
     });
   });
 
@@ -547,17 +634,71 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Form submission
+  // Form submission (AJAX to Formspree)
   const contactForm = document.getElementById("contactForm");
   if (contactForm) {
     contactForm.addEventListener("submit", function (e) {
       e.preventDefault();
-      alert(
-        currentLanguage === "id"
-          ? "Terima kasih telah menghubungi kami!"
-          : "Thank you for contacting us!",
+      const form = this;
+      const action = form.getAttribute("action") || form.dataset.action;
+      if (!action) {
+        alert(
+          currentLanguage === "id"
+            ? "Form action tidak ditemukan."
+            : "Form action not found.",
+        );
+        return;
+      }
+
+      const submitBtn = form.querySelector(
+        'button[type="submit"], input[type="submit"]',
       );
-      this.reset();
+      if (submitBtn) submitBtn.disabled = true;
+
+      const formData = new FormData(form);
+      // honeypot check
+      if (formData.get("_gotcha")) {
+        if (submitBtn) submitBtn.disabled = false;
+        return;
+      }
+
+      fetch(action, {
+        method: "POST",
+        body: formData,
+        headers: { Accept: "application/json" },
+      })
+        .then(function (response) {
+          if (response.ok)
+            return response.json().catch(function () {
+              return {};
+            });
+          return response.json().then(function (err) {
+            throw err;
+          });
+        })
+        .then(function () {
+          // success
+          alert(
+            currentLanguage === "id"
+              ? "Terima kasih — pesan Anda telah terkirim."
+              : "Thank you — your message has been sent.",
+          );
+          form.reset();
+          if (submitBtn) submitBtn.disabled = false;
+          var next = formData.get("_next");
+          if (next)
+            setTimeout(function () {
+              window.location.href = next;
+            }, 900);
+        })
+        .catch(function () {
+          alert(
+            currentLanguage === "id"
+              ? "Terjadi kesalahan saat mengirim. Silakan coba lagi."
+              : "Error sending form. Please try again.",
+          );
+          if (submitBtn) submitBtn.disabled = false;
+        });
     });
   }
 

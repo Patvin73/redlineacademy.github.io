@@ -72,10 +72,10 @@
         <div class="header-content">
           <div class="logo">
             <img
-              src="../assets/images/redlineacademy_logo.png"
+              src="../assets/images/redlinelogo.png"
               alt="Redline Academy Logo"
             />
-            <span>Redline Academy</span>
+            <!-- <span>Redline Academy</span> -->
           </div>
 
           <nav>
@@ -144,7 +144,28 @@
           <!-- Contact Form -->
           <div class="fade-in">
             <h2 class="mb-3" data-i18n="contactForm">Formulir Kontak</h2>
-            <form id="contactForm">
+            <form
+              id="contactForm"
+              action="https://formspree.io/f/mzdagyly"
+              method="POST"
+            >
+              <input
+                type="hidden"
+                name="_subject"
+                value="Website contact form"
+              />
+              <input
+                type="hidden"
+                name="_next"
+                value="/pages/contact.html?success=1"
+              />
+              <input
+                type="text"
+                name="_gotcha"
+                style="display: none"
+                tabindex="-1"
+                autocomplete="off"
+              />
               <div class="form-group">
                 <label data-i18n="name">Nama</label>
                 <input
@@ -257,10 +278,10 @@
                   <h4 class="mb-1" data-i18n="phone">Telepon</h4>
                   <p>
                     <a
-                      href="tel:+62212345678"
+                      href="tel:+6282120171731"
                       style="color: var(--primary-color)"
                       data-i18n="phoneValue"
-                      >+61 408 578 253</a
+                      >+62 821-2017-1731</a
                     >
                   </p>
                 </div>
@@ -272,10 +293,10 @@
                   <h4 class="mb-1" data-i18n="emailLabel">Email</h4>
                   <p>
                     <a
-                      href="mailto:info@redlineacademy.com.au"
+                      href="mailto:hello@redlineacademy.com.au"
                       style="color: var(--primary-color)"
                       data-i18n="emailValue"
-                      >info@redlineacademy.com.au</a
+                      >hello@redlineacademy.com.au</a
                     >
                   </p>
                 </div>
@@ -287,7 +308,7 @@
                   <h4 class="mb-1" data-i18n="whatsapp">WhatsApp</h4>
                   <p>
                     <a
-                      href="https://wa.me/61408578253"
+                      href="https://wa.me/6282120171731"
                       target="_blank"
                       style="color: var(--primary-color)"
                       data-i18n="whatsappText"
@@ -368,12 +389,11 @@
             "
           >
             <h4 class="mb-2" data-i18n="faqQ1">
-              Bagaimana cara mendaftar program?
+              Apakah program ini terakreditasi?
             </h4>
             <p style="color: var(--text-light)" data-i18n="faqA1">
-              Anda dapat mendaftar melalui formulir kontak di atas atau
-              menghubungi kami langsung melalui telepon atau WhatsApp. Tim kami
-              akan memandu Anda melalui proses pendaftaran.
+              Ya. Anda akan menyelesaikan Unit Pelatihan Terakreditasi Australia
+              yang diakui secara nasional.
             </p>
           </div>
 
@@ -388,12 +408,11 @@
             "
           >
             <h4 class="mb-2" data-i18n="faqQ2">
-              Berapa lama durasi setiap program?
+              Berapa lama durasi kursusnya?
             </h4>
             <p style="color: var(--text-light)" data-i18n="faqA2">
-              Durasi program bervariasi dari 3 hingga 12 bulan tergantung pada
-              jenis program yang Anda pilih. Silakan lihat halaman Program untuk
-              detail durasi setiap program.
+              Jalur cepat kami dirancang untuk diselesaikan hanya dalam waktu 12
+              minggu.
             </p>
           </div>
 
@@ -408,12 +427,10 @@
             "
           >
             <h4 class="mb-2" data-i18n="faqQ3">
-              Apakah ada beasiswa atau bantuan finansial?
+              Apakah saya butuh pengalaman medis?
             </h4>
             <p style="color: var(--text-light)" data-i18n="faqA3">
-              Kami menawarkan berbagai opsi pembayaran yang fleksibel. Hubungi
-              kami untuk mendiskusikan opsi yang tersedia dan melihat apakah
-              Anda memenuhi syarat untuk bantuan finansial.
+              Tidak perlu. Kami melatih Anda agar siap kerja sejak hari pertama.
             </p>
           </div>
 
@@ -427,13 +444,10 @@
               border-left: 4px solid var(--primary-color);
             "
           >
-            <h4 class="mb-2" data-i18n="faqQ4">
-              Apakah sertifikat kami diakui secara internasional?
-            </h4>
+            <h4 class="mb-2" data-i18n="faqQ4">Apakah ada bantuan bahasa?</h4>
             <p style="color: var(--text-light)" data-i18n="faqA4">
-              Ya, semua sertifikat kami diakui secara internasional dan sesuai
-              dengan standar industri global. Kami mengikuti Microcredentials
-              Framework Australia.
+              Ya, kami menyediakan dukungan penuh dalam Bahasa Inggris dan
+              Bahasa Indonesia.
             </p>
           </div>
 
@@ -447,12 +461,48 @@
             "
           >
             <h4 class="mb-2" data-i18n="faqQ5">
-              Apakah ada dukungan penempatan kerja setelah lulus?
+              Bagaimana dengan bagian praktiknya?
             </h4>
             <p style="color: var(--text-light)" data-i18n="faqA5">
-              Ya, kami memiliki tim dedicated yang membantu lulusan kami
-              menemukan pekerjaan melalui jaringan mitra industri kami yang
-              luas.
+              Program ini mencakup 120 jam asesmen praktis di fasilitas
+              perawatan nyata.
+            </p>
+          </div>
+
+          <div
+            class="fade-in"
+            style="
+              background-color: white;
+              padding: 1.5rem;
+              border-radius: 0.5rem;
+              border-left: 4px solid var(--primary-color);
+            "
+          >
+            <h4 class="mb-2" data-i18n="faqQ6">
+              Pekerjaan apa yang bisa saya dapatkan?
+            </h4>
+            <p style="color: var(--text-light)" data-i18n="faqA6">
+              Anda bisa bekerja di sektor Perawatan Lansia, Dukungan
+              Disabilitas, atau Kesehatan Mental.
+            </p>
+          </div>
+
+          <div
+            class="fade-in"
+            style="
+              background-color: white;
+              padding: 1.5rem;
+              border-radius: 0.5rem;
+              border-left: 4px solid var(--primary-color);
+            "
+          >
+            <h4 class="mb-2" data-i18n="faqQ7">
+              Apakah tersedia rencana pembayaran?
+            </h4>
+            <p style="color: var(--text-light)" data-i18n="faqA7">
+              Ya, kami menawarkan rencana pembayaran yang fleksibel agar
+              pendidikan Anda lebih terjangkau. Silakan hubungi kami untuk
+              mendiskusikan opsi yang sesuai dengan anggaran Anda.
             </p>
           </div>
         </div>

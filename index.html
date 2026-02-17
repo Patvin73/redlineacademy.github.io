@@ -104,7 +104,7 @@
         <div class="header-content">
           <div class="logo">
             <img
-              src="../assets/images/redlineacademy_logo.png"
+              src="../assets/images/redlinelogo.png"
               alt="Redline Academy Logo"
             />
             <span>Redline Academy</span>
@@ -157,8 +157,8 @@
     <!-- Hero Section -->
     <section class="hero">
       <div class="hero-image-bg">
-        <img src="assets/images/red_line.png" alt="Hero Image" />
-        <img src="assets/images/hero_pict.png" alt="Hero Image 2" />
+        <img src="assets/images/red_line.png" alt="redlineacademy" />
+        <img src="assets/images/hero_pict.png" alt="redlineacademylibrary" />
       </div>
       <div class="hero-overlay"></div>
       <div class="hero-content-wrapper">
@@ -490,12 +490,34 @@
           <!-- Contact Form -->
           <div class="contact-form-wrapper">
             <h3 class="mb-3" data-i18n="contactForm">Formulir Kontak</h3>
-            <form id="contactForm">
+            <form
+              id="contactForm"
+              action="https://formspree.io/f/mzdagyly"
+              method="POST"
+            >
+              <input
+                type="hidden"
+                name="_subject"
+                value="Website contact form"
+              />
+              <input
+                type="hidden"
+                name="_next"
+                value="/pages/contact.html?success=1"
+              />
+              <input
+                type="text"
+                name="_gotcha"
+                style="display: none"
+                tabindex="-1"
+                autocomplete="off"
+              />
               <div class="form-row">
                 <div class="form-group">
                   <label data-i18n="name">Nama</label>
                   <input
                     type="text"
+                    name="name"
                     required
                     placeholder="Nama Anda"
                     data-i18n="namePlaceholder"
@@ -505,6 +527,7 @@
                   <label data-i18n="email">Email</label>
                   <input
                     type="email"
+                    name="email"
                     required
                     placeholder="Email Anda"
                     data-i18n="emailPlaceholder"
@@ -515,7 +538,7 @@
               <div class="form-row">
                 <div class="form-group">
                   <label data-i18n="course">Kursus</label>
-                  <select required>
+                  <select name="course" required>
                     <option value="" data-i18n="selectCourse">
                       Pilih Kursus
                     </option>
@@ -539,7 +562,7 @@
                 </div>
                 <div class="form-group">
                   <label data-i18n="gender">Jenis Kelamin</label>
-                  <select required>
+                  <select name="gender" required>
                     <option value="" data-i18n="genderSelect">Pilih</option>
                     <option value="male" data-i18n="genderMale">
                       Laki-laki
@@ -555,6 +578,7 @@
                 <label data-i18n="postalCode">Kode Pos</label>
                 <input
                   type="text"
+                  name="postal_code"
                   placeholder="Kode Pos Anda"
                   data-i18n="postalCodePlaceholder"
                 />
@@ -565,6 +589,7 @@
                   >Beritahu kami apa yang bisa dibantu</label
                 >
                 <textarea
+                  name="message"
                   placeholder="Pesan Anda..."
                   required
                   data-i18n="messagePlaceholder"
@@ -596,8 +621,8 @@
 
               <h4 class="mb-2 mt-3" data-i18n="phone">Telepon</h4>
               <p>
-                <a href="tel:+61408578253" data-i18n="phoneValue"
-                  >+61 408 578 253</a
+                <a href="tel:+6282120171731" data-i18n="phoneValue"
+                  >+62 821-2017-1731</a
                 >
               </p>
 
@@ -613,7 +638,7 @@
               <h4 class="mb-2 mt-3" data-i18n="whatsapp">WhatsApp</h4>
               <p>
                 <a
-                  href="https://wa.me/61408578253"
+                  href="https://wa.me/6282120171731"
                   target="_blank"
                   data-i18n="whatsappText"
                   >Chat dengan kami</a

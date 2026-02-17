@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Language Switcher</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <div class="header-content">
+          <div class="logo">
+            <img
+              src="assets/images/redlinelogo.png"
+              alt="Redline Academy Logo"
+            />
+          </div>
+
+          <nav>
+            <a href="index.html" data-i18n="home">Beranda</a>
+            <a href="pages/about.html" data-i18n="about">Tentang Kami</a>
+
+            <div
+              class="language-switcher"
+              role="navigation"
+              aria-label="Language selector"
+            >
+              <button
+                class="lang-btn"
+                data-lang="id"
+                aria-label="Bahasa Indonesia"
+              >
+                <img
+                  src="assets/images/flags/id.png"
+                  alt=""
+                  class="flag"
+                  aria-hidden="true"
+                />
+                <span class="sr-only">Bahasa Indonesia</span>
+              </button>
+              <button class="lang-btn" data-lang="en" aria-label="English">
+                <img
+                  src="assets/images/flags/en.png"
+                  alt=""
+                  class="flag"
+                  aria-hidden="true"
+                />
+                <span class="sr-only">English</span>
+              </button>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="section-padding">
+        <div class="container">
+          <h1 data-i18n="heroTitle">Redline bukan sekadar akademi</h1>
+          <p data-i18n="heroSubtitle">
+            — ini adalah tempat untuk membuka potensi, menembus batas, dan
+            mengambil kendali atas masa depanmu. Berani mengubah masa depanmu?
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      console.log("Test page loaded");
+      console.log("Window object exists:", typeof window);
+    </script>
+    <script src="js/script.js"></script>
+    <script>
+      console.log("Script.js loaded");
+      console.log("Translations available:", typeof translations);
+      console.log("currentLanguage:", currentLanguage);
+      console.log(
+        "Lang buttons found:",
+        document.querySelectorAll(".lang-btn").length,
+      );
+      console.log("setLanguage function:", typeof setLanguage);
+
+      // Test manual language switch
+      console.log("Testing manual language switch...");
+      setTimeout(() => {
+        console.log("Before switch - Language:", currentLanguage);
+        setLanguage("en");
+        console.log("After switch - Language:", currentLanguage);
+      }, 1000);
+    </script>
+  </body>
+</html>
