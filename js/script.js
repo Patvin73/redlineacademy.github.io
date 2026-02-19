@@ -8,7 +8,7 @@ const translations = {
     // Header
     home: "Beranda",
     about: "Tentang Kami",
-    programs: "Program",
+    // programs: "Program",
     contact: "Hubungi Kami",
     // blog: "Blog",
     // legal: "Legal",
@@ -143,10 +143,9 @@ const translations = {
     // Contact Info Section
     contactInfo: "Informasi Kontak",
     address: "Alamat",
-    addressValue:
-      "Jl. Terusan Jakarta No.330 KAV. 25, Bandung - West Java, Indonesia",
+    addressValue: "Jl. Pendidikan No. 123, Jakarta, Indonesia 12345",
     phone: "Telepon",
-    phoneValue: "+62 821-2017-1731",
+    phoneValue: "+62 (21) 2345-678",
     emailLabel: "Email",
     emailValue: "hello@redlineacademy.com.au",
     whatsapp: "WhatsApp",
@@ -242,7 +241,7 @@ const translations = {
     // Header
     home: "Home",
     about: "About Us",
-    programs: "Programs",
+    // programs: "Programs",
     contact: "Contact Us",
     // blog: "Blog",
     // legal: "Legal",
@@ -378,10 +377,9 @@ const translations = {
     // Contact Info Section
     contactInfo: "Contact Information",
     address: "Address",
-    addressValue:
-      "Jl. Terusan Jakarta No.330 KAV. 25, Bandung - West Java, Indonesia",
+    addressValue: "Jl. Pendidikan No. 123, Jakarta, Indonesia 12345",
     phone: "Phone",
-    phoneValue: "+62 821-2017-1731",
+    phoneValue: "+62 (21) 2345-678",
     emailLabel: "Email",
     emailValue: "hello@redlineacademy.com.au",
     whatsapp: "WhatsApp",
