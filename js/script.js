@@ -8,7 +8,7 @@ const translations = {
     // Header
     home: "Beranda",
     about: "Tentang Kami",
-    // programs: "Program",
+    programs: "Program",
     contact: "Hubungi Kami",
     // blog: "Blog",
     // legal: "Legal",
@@ -18,11 +18,35 @@ const translations = {
     heroTitle: "Redline bukan sekadar akademi",
     heroSubtitle:
       "— ini adalah tempat untuk membuka potensi, menembus batas, dan mengambil kendali atas masa depanmu. Berani mengubah masa depanmu?",
-    enrollNow: "Daftar Sekarang",
+    applyNow: "Daftar Sekarang",
 
     // Programs Section
     ourPrograms: "Program Kami",
     programDetail: "Detail Program",
+    learningMaterials: "Materi Pembelajaran",
+    durationMode: "Durasi & Mode Pembelajaran",
+    durationModeContent:
+      "Fleksibel berdasarkan mode pembelajaran (biasanya bagian dari kualifikasi lengkap).",
+    learningMode: "Mode Pembelajaran:",
+    learningMode1: "Kelas tatap muka.",
+    learningMode2: "Pembelajaran campuran (blended learning).",
+    learningMode3: "Online dengan dukungan trainer.",
+    programsOverview: "Ringkasan Program",
+    programsOverview1:
+      "Durasi: 12 Minggu Online + 3.5 Minggu Praktik Lapangan.",
+    programsOverview2:
+      "Tipe Studi: Hybrid (Fleksibilitas Online & Tatap Muka).",
+    programsOverview3:
+      "Sertifikat: Ya (Diberikan setelah penyelesaian seluruh modul).",
+    programsOverview4:
+      "Prasyarat: Semangat untuk merawat dan komitmen untuk belajar (Tidak memerlukan pengalaman medis sebelumnya).",
+    scoreMethode: "Metode Penilaian",
+    yourScore: "Anda akan dinilai melalui:",
+    scoreMethode1:
+      "Penilaian tertulis (studi kasus, pertanyaan pilihan ganda, esai).",
+    scoreMethode2: "Demonstrasi praktik dan observasi.",
+    scoreMethode3: "Portofolio bukti.",
+    scoreMethode4: "Proyek dan presentasi.",
 
     // Program Cards
     careGiver: "Care Giver",
@@ -51,6 +75,11 @@ const translations = {
 
     // Our Commitment Section
     ourCommitment: "Komitmen Kami",
+
+    caregiverExcellence:
+      "Keunggulan Care Giver: Memberdayakan Hidup dengan Pendekatan Person-Centred Care",
+    caregiverExcellenceIntro:
+      "Jembatani potensi Anda dengan kurikulum yang menyelaraskan kompetensi praktis dan pendekatan perawatan yang berpusat pada individu (person-centred care). Program ini membekali Anda dengan kecakapan yang diperlukan untuk unggul di rumah sakit, perawatan lansia, maupun lingkungan masyarakat dengan tetap menghargai martabat serta pilihan unik setiap pribadi. Bergabunglah bersama kami untuk memberikan dukungan yang bukan sekadar layanan, melainkan komitmen tulus untuk meningkatkan kualitas hidup sesama. Mulailah langkah Anda untuk membawa perubahan berarti bagi dunia, melalui pengabdian tulus bagi setiap pribadi yang Anda rawat.",
 
     dedicatedEducator: "Pendidik yang Berdedikasi",
     dedicatedEducatorDesc:
@@ -143,9 +172,10 @@ const translations = {
     // Contact Info Section
     contactInfo: "Informasi Kontak",
     address: "Alamat",
-    addressValue: "Jl. Pendidikan No. 123, Jakarta, Indonesia 12345",
+    addressValue:
+      "Jl. Terusan Jakarta No.330 KAV. 25, Bandung - West Java, Indonesia",
     phone: "Telepon",
-    phoneValue: "+62 (21) 2345-678",
+    phoneValue: "+62 821-2017-1731",
     emailLabel: "Email",
     emailValue: "hello@redlineacademy.com.au",
     whatsapp: "WhatsApp",
@@ -221,15 +251,56 @@ const translations = {
     careGiverLearn2: "Komunikasi Efektif di Layanan Kesehatan.",
     careGiverLearn3: "Standar Keselamatan Klien dan Pengendalian Infeksi.",
     careGiverLearn4: "Strategi Pemberdayaan Klien.",
-    careGiverLearn5: "Dukungan Personal Berpusat pada Klien.",
+    careGiverLearn5: "Dukungan berorientasi Pelayanan Klien.",
     careGiverLearn6: "Pencegahan & Manajemen Risiko Cedera.",
     duration6Months: "Durasi Program: 6 bulan",
     duration4Months: "Durasi Program: 4 bulan",
-    duration3Months: "Durasi Program: 3 bulan",
+    duration3Months:
+      "Durasi Program: 12 Minggu Pembelajaran Online plus 3.5 Minggu Praktik Lapangan.",
     certificationInternational: "Sertifikasi: Internasional",
     whyChooseOurProgram: "Mengapa Memilih Program Kami?",
     programsIntro:
-      "Program Mikro-Kredensial: Pendampingan Perawatan (Unit Pelatihan Terakreditasi Australia).\n\nKita mungkin tidak bisa mengubah seluruh dunia, namun jika Anda memiliki rasa kasih sayang, Anda dapat mengubah kehidupan orang-orang di sekitar Anda yang membutuhkan bantuan.\n\nApakah Anda baru saja akan menyelesaikan pendidikan dan bingung memilih jalur karier? Atau mungkin pekerjaan Anda saat ini terasa membosankan dan tidak memberikan kepuasan batin yang nyata?\n\nHanya dalam enam belas minggu pelatihan berkualitas standar Australia yang diakui secara internasional, Anda dapat mengubah segalanya. Pelatihan yang kami tawarkan dirancang untuk membuka pintu peluang nyata menuju karier yang bermakna, di mana Anda dapat memberikan dampak yang nyata.\n\nKursus ini terdiri dari dua belas minggu pelatihan daring (online) ditambah 3 ½ minggu praktik kerja lapangan untuk mendapatkan pengalaman langsung.\n\nDengan bekal pelatihan ini, Anda siap untuk mengubah dunia Anda.",
+      "Pendampingan Perawatan (Unit Pelatihan Terakreditasi Australia).\n\nKita mungkin tidak bisa mengubah seluruh dunia, namun jika Anda memiliki rasa kasih sayang, Anda dapat mengubah kehidupan orang-orang di sekitar Anda yang membutuhkan bantuan.\n\nApakah Anda baru saja akan menyelesaikan pendidikan dan bingung memilih jalur karier? Atau mungkin pekerjaan Anda saat ini terasa membosankan dan tidak memberikan kepuasan batin yang nyata?\n\nHanya dalam enam belas minggu pelatihan berkualitas standar Australia yang diakui secara internasional, Anda dapat mengubah segalanya. Pelatihan yang kami tawarkan dirancang untuk membuka pintu peluang nyata menuju karier yang bermakna, di mana Anda dapat memberikan dampak yang nyata.\n\nKursus ini terdiri dari dua belas minggu pelatihan daring (online) ditambah 3 ½ minggu praktik kerja lapangan untuk mendapatkan pengalaman langsung.\n\nDengan bekal pelatihan ini, Anda siap untuk mengubah dunia Anda.",
+
+    // Enrollment / Enroll form translations (ID)
+    enrollTitle: "Formulir Pendaftaran Program",
+    enrollSubtitle:
+      'Silakan lengkapi formulir di bawah ini dan tim kami akan menghubungi Anda.<p>Di Redline Academy, kami menjaga privasi Anda. Informasi yang Anda bagikan kepada kami akan tetap aman bersama kami dan kami tidak akan membagikannya kepada pihak diluar Redline Academy, kecuali:</p><ul class="enroll-privacy-list"><li>Anda memberikan izin tertulis kepada kami.</li><li>Atau, Kami diwajibkan secara hukum untuk membagikannya.</li></ul><p>Kepercayaan Anda sangat berarti bagi kami, dan kami berkomitmen untuk menjaga keamanan informasi Anda.</p>',
+    personalInfoLegend: "Informasi Pribadi",
+    fullNameLabel: "Nama Lengkap",
+    fullNamePlaceholder: "Nama lengkap Anda",
+    dobLabel: "Tanggal Lahir",
+    genderLabel: "Jenis Kelamin",
+    selectOption: "Pilih",
+    maleOption: "Laki-laki",
+    femaleOption: "Perempuan",
+    otherOption: "Lainnya",
+    emailLabel: "Email",
+    emailPlaceholder: "Email Anda",
+    phoneLabel: "Nomor Telepon",
+    phonePlaceholder: "Nomor telepon Anda",
+    addressLabel: "Alamat",
+    addressPlaceholder: "Alamat lengkap",
+    postcodeLabel: "Kode Pos",
+    postcodePlaceholder: "Kode Pos Anda",
+    educationLegend: "Pendidikan & Latar Belakang",
+    qualificationLabel: "Pendidikan Terakhir",
+    qualificationPlaceholder: "Contoh: SMA / Diploma / Sarjana",
+    employmentStatusLabel: "Status Pekerjaan",
+    employedOption: "Bekerja",
+    unemployedOption: "Tidak Bekerja",
+    studentOption: "Pelajar",
+    experienceLabel: "Pengalaman Relevan",
+    experiencePlaceholder: "Ceritakan pengalaman Anda (jika ada)",
+    declarationLegend: "Pernyataan",
+    accuracyDeclaration:
+      "Saya menyatakan bahwa informasi yang diberikan adalah benar.",
+    termsDeclaration:
+      "Saya menyetujui Syarat & Ketentuan serta Kebijakan Privasi.",
+    submitApplicationBtn: "Kirim Pendaftaran",
+    idNumberLabel: "Nomor KTP",
+    idNumberPlaceholder: "Nomor KTP Anda",
+    uploadIdBtn: "Unggah KTP",
 
     // Legal Page
     legalTitle: "Legal",
@@ -241,7 +312,7 @@ const translations = {
     // Header
     home: "Home",
     about: "About Us",
-    // programs: "Programs",
+    programs: "Programs",
     contact: "Contact Us",
     // blog: "Blog",
     // legal: "Legal",
@@ -251,11 +322,34 @@ const translations = {
     heroTitle: "Redline is more than an academy",
     heroSubtitle:
       "— it's a place to unlock potential, break boundaries and take control of what comes next. Dare to change your future?",
-    enrollNow: "Enroll Now",
+    applyNow: "Apply Now",
 
     // Programs Section
     ourPrograms: "Our Programs",
     programDetail: "Program Detail",
+    learningMaterials: "Learning Materials",
+    durationMode: "Duration & Mode of Learning",
+    durationModeContent:
+      "Flexible depending on the mode of delivery (usually part of the full qualification).",
+    learningMode: "Mode of Delivery:",
+    learningMode1: "Face-to-face classroom.",
+    learningMode2: "Blended learning.",
+    learningMode3: "Online with trainer support.",
+    programsOverview: "Program Overview",
+    programsOverview1:
+      "Duration: 12 weeks online + 3.5 weeks practical placement.",
+    programsOverview2:
+      "Study Type: Hybrid (Online & Face-to-face flexibility).",
+    programsOverview3:
+      "Certificate: Yes (awarded upon completion of all modules).",
+    programsOverview4:
+      "Prerequisites: Passion for caregiving and commitment to learning (No prior medical experience required).",
+    scoreMethode: "Assessment Methods",
+    yourScore: "You will be assessed through:",
+    scoreMethode1: "Written assessments (case studies, MCQs, essays).",
+    scoreMethode2: "Practical demonstration and observation.",
+    scoreMethode3: "Portfolio of evidence.",
+    scoreMethode4: "Projects and presentations.",
 
     // Program Cards
     careGiver: "Care Giver",
@@ -284,6 +378,11 @@ const translations = {
 
     // Our Commitment Section
     ourCommitment: "Our Commitment",
+
+    caregiverExcellence:
+      "Care Giver Excellence: Empowering Lives with a Person-Centred Care Approach",
+    caregiverExcellenceIntro:
+      "Bridge your potential with a curriculum that aligns practical competence and person-centred care. This program equips you with the skills to excel in hospitals, aged care and community settings while honoring each person's dignity and choices. Join us to provide support that goes beyond service — a genuine commitment to improving quality of life. Start your journey to make meaningful change through compassionate care.",
 
     dedicatedEducator: "Dedicated Educator",
     dedicatedEducatorDesc:
@@ -377,9 +476,10 @@ const translations = {
     // Contact Info Section
     contactInfo: "Contact Information",
     address: "Address",
-    addressValue: "Jl. Pendidikan No. 123, Jakarta, Indonesia 12345",
+    addressValue:
+      "Jl. Terusan Jakarta No.330 KAV. 25, Bandung - West Java, Indonesia",
     phone: "Phone",
-    phoneValue: "+62 (21) 2345-678",
+    phoneValue: "+62 821-2017-1731",
     emailLabel: "Email",
     emailValue: "hello@redlineacademy.com.au",
     whatsapp: "WhatsApp",
@@ -455,15 +555,54 @@ const translations = {
     careGiverLearn2: "Effective Communication in Healthcare Services.",
     careGiverLearn3: "Client Safety Standards and Infection Control.",
     careGiverLearn4: "Client Empowerment Strategies.",
-    careGiverLearn5: "Client-Centered Personal Support.",
+    careGiverLearn5: "Provide Individualised Support.",
     careGiverLearn6: "Injury Prevention and Risk Management.",
     duration6Months: "Program Duration: 6 months",
     duration4Months: "Program Duration: 4 months",
-    duration3Months: "Program Duration: 3 months",
+    duration3Months:
+      "Program Duration: 12 Weeks of Online Learning plus 3.5 Weeks of Practical Field Placement",
     certificationInternational: "Certification: International",
     whyChooseOurProgram: "Why Choose Our Program?",
     programsIntro:
-      "Micro-Credential Program: Care Support (Australian Accredited Training Units).\n\nWe may not be able to change the whole world, but if you have compassion, you can change the lives of those around you who need support.\n\nAre you about to complete your studies and feeling uncertain about your career path? Or perhaps your current job feels unfulfilling and lacks genuine purpose?\n\nIn just sixteen weeks of high-quality, Australian-standard training that is internationally recognized, you can transform your future. The training we offer is designed to open real opportunities for a meaningful career—one where you can make a tangible and lasting impact.\n\nThis course consists of twelve weeks of online training followed by 3½ weeks of workplace practicum, providing hands-on, real-world experience.\n\nWith this training, you will be equipped and ready to change your world.",
+      "Care Support (Australian Accredited Training Units).\n\nWe may not be able to change the whole world, but if you have compassion, you can change the lives of those around you who need support.\n\nAre you about to complete your studies and feeling uncertain about your career path? Or perhaps your current job feels unfulfilling and lacks genuine purpose?\n\nIn just sixteen weeks of high-quality, Australian-standard training that is internationally recognized, you can transform your future. The training we offer is designed to open real opportunities for a meaningful career—one where you can make a tangible and lasting impact.\n\nThis course consists of twelve weeks of online training followed by 3½ weeks of workplace practicum, providing hands-on, real-world experience.\n\nWith this training, you will be equipped and ready to change your world.",
+
+    // Enrollment / Enroll form translations (EN)
+    enrollTitle: "Program Enrollment Form",
+    enrollSubtitle:
+      'Please complete the form below and our team will contact you.<p>At Redline Academy, we respect your privacy. The information you share with us will be kept secure and will not be shared with parties outside Redline Academy, except:</p><ul class="enroll-privacy-list"><li>You give us written consent.</li><li>Or, we are legally required to disclose it.</li></ul><p>Your trust means a great deal to us, and we are committed to protecting your information.</p>',
+    personalInfoLegend: "Personal Information",
+    fullNameLabel: "Full Name",
+    fullNamePlaceholder: "Your full name",
+    dobLabel: "Date of Birth",
+    genderLabel: "Gender",
+    selectOption: "Select",
+    maleOption: "Male",
+    femaleOption: "Female",
+    otherOption: "Other",
+    emailLabel: "Email",
+    emailPlaceholder: "Your email",
+    phoneLabel: "Phone Number",
+    phonePlaceholder: "Your phone number",
+    addressLabel: "Address",
+    addressPlaceholder: "Full address",
+    postcodeLabel: "Postcode",
+    postcodePlaceholder: "Your postcode",
+    educationLegend: "Education & Background",
+    qualificationLabel: "Highest Qualification",
+    qualificationPlaceholder: "Eg: High School / Diploma / Bachelor",
+    employmentStatusLabel: "Employment Status",
+    employedOption: "Employed",
+    unemployedOption: "Unemployed",
+    studentOption: "Student",
+    experienceLabel: "Relevant Experience",
+    experiencePlaceholder: "Describe your experience (if any)",
+    declarationLegend: "Declaration",
+    accuracyDeclaration: "I declare that the information provided is true.",
+    termsDeclaration: "I agree to the Terms & Conditions and Privacy Policy.",
+    submitApplicationBtn: "Submit Application",
+    idNumberLabel: "ID Number",
+    idNumberPlaceholder: "Your ID number",
+    uploadIdBtn: "Upload ID",
 
     // Legal Page
     legalTitle: "Legal",
@@ -521,7 +660,17 @@ function setLanguage(lang) {
 }
 
 function t(key) {
-  return translations[currentLanguage][key] || key;
+  // Prefer current language, fall back to Indonesian, then English, then key
+  if (translations[currentLanguage] && translations[currentLanguage][key]) {
+    return translations[currentLanguage][key];
+  }
+  if (translations.id && translations.id[key]) {
+    return translations.id[key];
+  }
+  if (translations.en && translations.en[key]) {
+    return translations.en[key];
+  }
+  return key;
 }
 
 function updatePageLanguage() {
@@ -544,7 +693,12 @@ function updatePageLanguage() {
     } else if (element.tagName === "OPTION") {
       element.textContent = text;
     } else {
-      element.textContent = text;
+      // If the translation contains HTML tags, render as HTML
+      if (typeof text === "string" && text.includes("<")) {
+        element.innerHTML = text;
+      } else {
+        element.textContent = text;
+      }
     }
   });
 
@@ -722,3 +876,58 @@ document.addEventListener("click", function (e) {
     }
   }
 });
+
+// File upload preview + simple client-side validation for enroll form
+(function () {
+  const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+  const ALLOWED_TYPES = ["image/png", "image/jpeg", "application/pdf"];
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const enroll = document.getElementById("enroll-form");
+    if (!enroll) return;
+
+    enroll.querySelectorAll('input[type="file"]').forEach(function (fileInput) {
+      const label = fileInput.closest("label");
+      const fileNameSpan = document.createElement("span");
+      fileNameSpan.className = "file-name";
+      fileNameSpan.setAttribute("aria-live", "polite");
+
+      if (label && label.parentNode) {
+        label.parentNode.insertBefore(fileNameSpan, label.nextSibling);
+      } else if (fileInput.parentNode) {
+        fileInput.parentNode.insertBefore(fileNameSpan, fileInput.nextSibling);
+      }
+
+      fileInput.addEventListener("change", function () {
+        const f = fileInput.files && fileInput.files[0];
+        if (!f) {
+          fileNameSpan.textContent = "";
+          return;
+        }
+
+        if (ALLOWED_TYPES.indexOf(f.type) === -1) {
+          fileNameSpan.textContent =
+            typeof currentLanguage !== "undefined" && currentLanguage === "id"
+              ? "Tipe file tidak didukung"
+              : "File type not supported";
+          fileNameSpan.style.color = "red";
+          fileInput.value = "";
+          return;
+        }
+
+        if (f.size > MAX_SIZE) {
+          fileNameSpan.textContent =
+            typeof currentLanguage !== "undefined" && currentLanguage === "id"
+              ? "File terlalu besar (max 5MB)"
+              : "File too large (max 5MB)";
+          fileNameSpan.style.color = "red";
+          fileInput.value = "";
+          return;
+        }
+
+        fileNameSpan.style.color = "";
+        fileNameSpan.textContent = f.name;
+      });
+    });
+  });
+})();
