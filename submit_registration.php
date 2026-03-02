@@ -7,8 +7,8 @@
 
 // ── CONFIGURATION – ubah sesuai kebutuhan ──────────────────────────────────
 define('ADMIN_EMAIL',    'hello@redlineacademy.com.au'); // Email penerima notifikasi
-define('FROM_EMAIL',     'hello@redlineacademy.com.au'); // Email pengirim
-define('UPLOAD_DIR',     __DIR__ . '/uploads/ktp/');    // Folder penyimpanan KTP
+define('FROM_EMAIL',     'noreply@redlineacademy.com.au'); // Email pengirim
+define('UPLOAD_DIR',     dirname(__DIR__) . '/uploads_private/ktp/'); // Folder penyimpanan KTP (aman, di luar public_html)
 define('MAX_FILE_SIZE',  5 * 1024 * 1024);              // Maks 5 MB
 define('ALLOWED_TYPES',  ['image/jpeg','image/png','image/webp','application/pdf']);
 define('SUCCESS_URL',    '/pages/programs.html?status=success');
