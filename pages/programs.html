@@ -272,7 +272,10 @@
               <img src="../assets/images/user_registration.png" alt="Ilustrasi Mengisi Formulir" class="enroll-image">
             </div>
 
-            <form action="https://formspree.io/f/mzdagyly" method="POST" class="enroll-form">
+            <!-- Notifikasi sukses / error dari PHP -->
+            <div id="form-notification" style="display:none; margin-bottom:1.5rem; padding:1rem 1.25rem; border-radius:8px; font-size:0.95rem; font-weight:500;"></div>
+
+            <form action="../submit_registration.php" method="POST" enctype="multipart/form-data" class="enroll-form">
               <div class="grid-2">
                 <div>
                   <!-- PERSONAL INFORMATION (left column) -->
@@ -320,9 +323,15 @@
                       <div style="display:flex; gap:0.5rem; align-items:center;">
                         <input type="text" name="id_number" required placeholder="Nomor KTP Anda" data-i18n="idNumberPlaceholder" style="flex:1;" />
                         <label class="btn btn-secondary btn-sm" style="margin:0; padding:0.5rem 0.75rem; display:inline-flex; align-items:center; gap:0.5rem; cursor:pointer;">
-                          <input type="file" name="id_document" style="display:none;" />
+                          <input type="file" name="id_document" id="id_document" accept="image/*,.pdf" style="display:none;" />
                           <span data-i18n="uploadIdBtn">Unggah KTP</span>
                         </label>
+                      </div>
+                      <div id="id_document_feedback" style="margin-top:0.35rem; font-size:0.85rem; color:#6b7280;">
+                        <span id="id_document_name">Belum ada file dipilih</span>
+                      </div>
+                      <div id="id_document_error" style="display:none; margin-top:0.35rem; font-size:0.85rem; color:#dc2626; font-weight:500;">
+                        ⚠️ Foto/scan KTP wajib diunggah sebelum mengirim formulir.
                       </div>
                     </div>
 
@@ -590,6 +599,66 @@
     }
   })();
   </script>
+  <script>
+    // ── Notifikasi sukses / error dari PHP redirect ───────────────────────
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const status = params.get('status');
+      const box    = document.getElementById('form-notification');
+      if (!box || !status) return;
+
+      if (status === 'success') {
+        box.style.background    = '#d1fae5';
+        box.style.border        = '1px solid #6ee7b7';
+        box.style.color         = '#065f46';
+        box.textContent         = '✅ Pendaftaran berhasil dikirim! Tim kami akan menghubungi Anda segera.';
+      } else {
+        const msg = params.get('msg') ? decodeURIComponent(params.get('msg')) : 'Terjadi kesalahan. Silakan coba lagi.';
+        box.style.background    = '#fee2e2';
+        box.style.border        = '1px solid #fca5a5';
+        box.style.color         = '#991b1b';
+        box.textContent         = '❌ ' + msg;
+      }
+
+      box.style.display = 'block';
+      box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Hapus query param dari URL tanpa reload
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+    })();
+  </script>
+
+  <!-- Photo ID validation -->
+    (function () {
+      const fileInput   = document.getElementById('id_document');
+      const fileName    = document.getElementById('id_document_name');
+      const errorBox    = document.getElementById('id_document_error');
+      const form        = document.querySelector('.enroll-form');
+
+      // Show selected file name when user picks a file
+      fileInput.addEventListener('change', function () {
+        if (this.files && this.files.length > 0) {
+          fileName.textContent = '✅ ' + this.files[0].name;
+          fileName.style.color = '#16a34a';
+          errorBox.style.display = 'none';
+        } else {
+          fileName.textContent = 'Belum ada file dipilih';
+          fileName.style.color = '#6b7280';
+        }
+      });
+
+      // Block submit if no file chosen
+      form.addEventListener('submit', function (e) {
+        if (!fileInput.files || fileInput.files.length === 0) {
+          e.preventDefault();
+          errorBox.style.display = 'block';
+          fileInput.closest('.form-group').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    })();
+  </script>
+
   <!-- Sticky WhatsApp quick access -->
   <a href="https://wa.me/6282120171731" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp +62 821-2017-1731">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
