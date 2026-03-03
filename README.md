@@ -159,7 +159,7 @@ translations = {
   ```bash
   python3 -m http.server 8000
   ```
-  Kemudian akses `http://localhost:8000`
+  Kemudian akses `http://localhost:8000` (local only)
 
 ### 2. Mengedit Konten
 

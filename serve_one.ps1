@@ -1,8 +1,9 @@
 $listener = New-Object System.Net.HttpListener
+# Local development URL (local only) - not used in production
 $prefix = 'http://localhost:8000/'
 $listener.Prefixes.Add($prefix)
 $listener.Start()
-Write-Host "Listening on $prefix (will serve one request and exit)"
+Write-Host "Listening on $prefix (local only; will serve one request and exit)"
 $ctx = $listener.GetContext()
 $req = $ctx.Request
 $resp = $ctx.Response

@@ -29,7 +29,7 @@ Provide concise, actionable guidance for AI coding agents working on this reposi
 
 ```bash
 python3 -m http.server 8000
-# then visit http://localhost:8000
+# then visit http://localhost:8000 (local only)
 ```
 
 - No build step — deployment targets (GitHub Pages, Netlify) expect the repo root as the site root.
