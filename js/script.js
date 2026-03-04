@@ -301,6 +301,33 @@ const translations = {
     idNumberLabel: "Nomor KTP",
     idNumberPlaceholder: "Nomor KTP Anda",
     uploadIdBtn: "Unggah KTP",
+    lmsNavLogin: "Login LMS",
+    lmsLoginTitle: "Login LMS",
+    lmsLoginSubtitle: "Masuk dengan akun resmi Redline Academy.",
+    password: "Password",
+    lmsPasswordPlaceholder: "Masukkan password Anda",
+    lmsLoginButton: "Masuk",
+    lmsBackToSite: "Kembali ke website utama",
+    lmsLoggingIn: "Memproses login...",
+    lmsLoginSuccessRedirect: "Login berhasil. Mengarahkan dashboard...",
+    lmsStudentDashboardTitle: "Dashboard Student",
+    lmsAdminDashboardTitle: "Dashboard Admin",
+    lmsLogout: "Keluar",
+    lmsStudentProfileTitle: "Profil Student",
+    lmsAdminProfileTitle: "Profil Admin",
+    lmsNameLabel: "Nama:",
+    lmsStudentIdLabel: "Student ID:",
+    lmsAdminIdLabel: "Admin ID:",
+    lmsEmailLabelSimple: "Email:",
+    lmsStudentListTitle: "Daftar Student",
+    lmsTableName: "Nama",
+    lmsTableStudentId: "Student ID",
+    lmsTableEmail: "Email",
+    lmsErrInvalidCredentials: "Email atau password tidak valid.",
+    lmsErrProfileNotFound: "Profil tidak ditemukan.",
+    lmsErrLoginFailed: "Login gagal.",
+    lmsErrLoadStudents: "Gagal memuat data student.",
+    lmsNoStudents: "Belum ada student.",
 
     // Legal Page
     legalTitle: "Legal",
@@ -603,6 +630,33 @@ const translations = {
     idNumberLabel: "ID Number",
     idNumberPlaceholder: "Your ID number",
     uploadIdBtn: "Upload ID",
+    lmsNavLogin: "LMS Login",
+    lmsLoginTitle: "LMS Login",
+    lmsLoginSubtitle: "Sign in with your official Redline Academy account.",
+    password: "Password",
+    lmsPasswordPlaceholder: "Enter your password",
+    lmsLoginButton: "Sign In",
+    lmsBackToSite: "Back to main website",
+    lmsLoggingIn: "Signing in...",
+    lmsLoginSuccessRedirect: "Login successful. Redirecting to dashboard...",
+    lmsStudentDashboardTitle: "Student Dashboard",
+    lmsAdminDashboardTitle: "Admin Dashboard",
+    lmsLogout: "Log Out",
+    lmsStudentProfileTitle: "Student Profile",
+    lmsAdminProfileTitle: "Admin Profile",
+    lmsNameLabel: "Name:",
+    lmsStudentIdLabel: "Student ID:",
+    lmsAdminIdLabel: "Admin ID:",
+    lmsEmailLabelSimple: "Email:",
+    lmsStudentListTitle: "Student List",
+    lmsTableName: "Name",
+    lmsTableStudentId: "Student ID",
+    lmsTableEmail: "Email",
+    lmsErrInvalidCredentials: "Invalid email or password.",
+    lmsErrProfileNotFound: "Profile not found.",
+    lmsErrLoginFailed: "Login failed.",
+    lmsErrLoadStudents: "Failed to load student data.",
+    lmsNoStudents: "No students found.",
 
     // Legal Page
     legalTitle: "Legal",
@@ -720,6 +774,12 @@ function updatePageTitle() {
     document.title = `${t("blogTitle")} - Redline Academy`;
   } else if (path.includes("legal")) {
     document.title = `${t("legalTitle")} - Redline Academy`;
+  } else if (path.includes("login")) {
+    document.title = `${t("lmsLoginTitle")} - Redline Academy`;
+  } else if (path.includes("dashboard-student")) {
+    document.title = `${t("lmsStudentDashboardTitle")} - Redline Academy`;
+  } else if (path.includes("dashboard-admin")) {
+    document.title = `${t("lmsAdminDashboardTitle")} - Redline Academy`;
   } else {
     document.title = "Redline Academy";
   }

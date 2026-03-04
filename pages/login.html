@@ -1,0 +1,99 @@
+﻿<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login LMS - Redline Academy</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/lms.css" />
+  </head>
+  <body class="lms-auth-page">
+    <main class="lms-auth-wrap">
+      <section class="lms-auth-card">
+        <div class="language-switcher" role="navigation" aria-label="Language selector">
+          <button class="lang-btn" data-lang="id" aria-label="Bahasa Indonesia">
+            <img src="../assets/images/flags/id.png" alt="" class="flag" aria-hidden="true" />
+            <span class="sr-only">Bahasa Indonesia</span>
+          </button>
+          <button class="lang-btn" data-lang="en" aria-label="English">
+            <img src="../assets/images/flags/en.png" alt="" class="flag" aria-hidden="true" />
+            <span class="sr-only">English</span>
+          </button>
+        </div>
+
+        <h1 data-i18n="lmsLoginTitle">Login LMS</h1>
+        <p data-i18n="lmsLoginSubtitle">Masuk dengan akun resmi Redline Academy.</p>
+
+        <form id="loginForm" class="lms-form">
+          <label for="email" data-i18n="email">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            autocomplete="email"
+            data-i18n="emailPlaceholder"
+          />
+
+          <label for="password" data-i18n="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autocomplete="current-password"
+            data-i18n="lmsPasswordPlaceholder"
+          />
+
+          <button type="submit" class="btn btn-primary" data-i18n="lmsLoginButton">Masuk</button>
+        </form>
+
+        <p id="loginMessage" class="lms-message" aria-live="polite"></p>
+
+        <a href="../index.html" class="lms-back-link" data-i18n="lmsBackToSite"
+          >Kembali ke website utama</a
+        >
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/script.js"></script>
+    <script src="../js/supabase-client.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        window.lmsAuth.redirectIfLoggedIn();
+
+        const form = document.getElementById("loginForm");
+        const message = document.getElementById("loginMessage");
+
+        form.addEventListener("submit", async (event) => {
+          event.preventDefault();
+
+          const formData = new FormData(form);
+          const email = String(formData.get("email") || "").trim();
+          const password = String(formData.get("password") || "");
+          const tSafe = (key, fallback) =>
+            typeof t === "function" ? t(key) : fallback;
+
+          message.textContent = tSafe("lmsLoggingIn", "Memproses login...");
+          message.classList.remove("error");
+
+          const result = await window.lmsAuth.signIn(email, password);
+          if (!result.ok) {
+            message.textContent = result.error;
+            message.classList.add("error");
+            return;
+          }
+
+          message.textContent = tSafe(
+            "lmsLoginSuccessRedirect",
+            "Login berhasil. Mengarahkan dashboard...",
+          );
+          window.location.replace(result.redirectTo);
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,139 @@
+﻿.lms-auth-page,
+.lms-dashboard-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #fff5f5 0%, #ffffff 100%);
+}
+
+.lms-auth-wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+}
+
+.lms-auth-card {
+  width: 100%;
+  max-width: 460px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.lms-auth-card .language-switcher {
+  width: 100%;
+  justify-content: flex-end;
+  margin-left: 0;
+  margin-bottom: 0.75rem;
+  padding-left: 0;
+  border-left: 0;
+}
+
+.lms-auth-card h1 {
+  font-size: 1.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.lms-form {
+  margin-top: 1.25rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.lms-form input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 0.75rem 0.875rem;
+  font-size: 1rem;
+}
+
+.lms-form button {
+  margin-top: 0.25rem;
+}
+
+.lms-message {
+  margin-top: 1rem;
+  min-height: 1.5rem;
+  color: #065f46;
+}
+
+.lms-message.error {
+  color: #b91c1c;
+}
+
+.lms-back-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+}
+
+.lms-header {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lms-header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.lms-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lms-content {
+  max-width: 1100px;
+  margin: 1rem auto 0;
+  padding: 0 1rem 2rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.lms-panel {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.lms-panel h2 {
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+}
+
+.lms-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.lms-table th,
+.lms-table td {
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  padding: 0.65rem 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .lms-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .lms-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .lms-table {
+    font-size: 0.85rem;
+  }
+}

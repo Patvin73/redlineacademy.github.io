@@ -1,0 +1,60 @@
+﻿<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Admin - Redline Academy LMS</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/lms.css" />
+  </head>
+  <body class="lms-dashboard-page" data-lms-role="admin">
+    <header class="lms-header">
+      <h1 data-i18n="lmsAdminDashboardTitle">Admin Dashboard</h1>
+      <div class="lms-header-actions">
+        <div class="language-switcher" role="navigation" aria-label="Language selector">
+          <button class="lang-btn" data-lang="id" aria-label="Bahasa Indonesia">
+            <img src="../assets/images/flags/id.png" alt="" class="flag" aria-hidden="true" />
+            <span class="sr-only">Bahasa Indonesia</span>
+          </button>
+          <button class="lang-btn" data-lang="en" aria-label="English">
+            <img src="../assets/images/flags/en.png" alt="" class="flag" aria-hidden="true" />
+            <span class="sr-only">English</span>
+          </button>
+        </div>
+        <button id="logoutBtn" class="btn btn-secondary" type="button" data-i18n="lmsLogout">
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <main class="lms-content">
+      <section class="lms-panel">
+        <h2 data-i18n="lmsAdminProfileTitle">Profil Admin</h2>
+        <p><strong data-i18n="lmsNameLabel">Nama:</strong> <span id="adminName">-</span></p>
+        <p><strong data-i18n="lmsAdminIdLabel">Admin ID:</strong> <span id="adminId">-</span></p>
+        <p><strong data-i18n="lmsEmailLabelSimple">Email:</strong> <span id="adminEmail">-</span></p>
+      </section>
+
+      <section class="lms-panel">
+        <h2 data-i18n="lmsStudentListTitle">Daftar Student</h2>
+        <table class="lms-table" aria-label="Daftar student">
+          <thead>
+            <tr>
+              <th data-i18n="lmsTableName">Nama</th>
+              <th data-i18n="lmsTableStudentId">Student ID</th>
+              <th data-i18n="lmsTableEmail">Email</th>
+            </tr>
+          </thead>
+          <tbody id="studentTableBody"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/script.js"></script>
+    <script src="../js/supabase-client.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/guard.js"></script>
+  </body>
+</html>

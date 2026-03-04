@@ -1,0 +1,46 @@
+﻿<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Student - Redline Academy LMS</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/lms.css" />
+  </head>
+  <body class="lms-dashboard-page" data-lms-role="student">
+    <header class="lms-header">
+      <h1 data-i18n="lmsStudentDashboardTitle">Student Dashboard</h1>
+      <div class="lms-header-actions">
+        <div class="language-switcher" role="navigation" aria-label="Language selector">
+          <button class="lang-btn" data-lang="id" aria-label="Bahasa Indonesia">
+            <img src="../assets/images/flags/id.png" alt="" class="flag" aria-hidden="true" />
+            <span class="sr-only">Bahasa Indonesia</span>
+          </button>
+          <button class="lang-btn" data-lang="en" aria-label="English">
+            <img src="../assets/images/flags/en.png" alt="" class="flag" aria-hidden="true" />
+            <span class="sr-only">English</span>
+          </button>
+        </div>
+        <button id="logoutBtn" class="btn btn-secondary" type="button" data-i18n="lmsLogout">
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <main class="lms-content">
+      <section class="lms-panel">
+        <h2 data-i18n="lmsStudentProfileTitle">Profil Student</h2>
+        <p><strong data-i18n="lmsNameLabel">Nama:</strong> <span id="studentName">-</span></p>
+        <p><strong data-i18n="lmsStudentIdLabel">Student ID:</strong> <span id="studentId">-</span></p>
+        <p><strong data-i18n="lmsEmailLabelSimple">Email:</strong> <span id="studentEmail">-</span></p>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/script.js"></script>
+    <script src="../js/supabase-client.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/guard.js"></script>
+  </body>
+</html>
