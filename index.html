@@ -119,46 +119,59 @@
           </div>
 
           <nav>
-            <a href="/" data-i18n="home">Beranda</a>
-            <a href="pages/about.html" data-i18n="about">Tentang Kami</a>
-            <a href="pages/programs.html" data-i18n="programs">Program</a>
-            <a href="pages/contact.html" data-i18n="contact">Hubungi Kami</a>
-            <a href="pages/login.html" data-i18n="lmsNavLogin">LMS Login</a>
-            <!-- Tautan ini dinonaktifkan sementara -->
-            <!-- <a href="pages/blog.html" data-i18n="blog">Blog</a> -->
-            <!-- <a href="pages/legal.html" data-i18n="legal">Legal</a> -->
+            <div class="nav-links">
+              <a href="/" data-i18n="home">Beranda</a>
+              <a href="pages/about.html" data-i18n="about">Tentang Kami</a>
+              <a href="pages/programs.html" data-i18n="programs">Program</a>
+              <a href="pages/contact.html" data-i18n="contact">Hubungi Kami</a>
+            </div>
 
-            <div
-              class="language-switcher"
-              role="navigation"
-              aria-label="Language selector"
-            >
+            <div class="nav-actions">
               <button
-                class="lang-btn"
-                data-lang="id"
-                aria-label="Bahasa Indonesia"
+                class="nav-login-btn"
+                onclick="location.href = 'pages/login.html'"
               >
-                <img
-                  src="assets/images/flags/id.png"
-                  alt=""
-                  class="flag"
-                  aria-hidden="true"
-                />
-                <span class="sr-only">Bahasa Indonesia</span>
+                Login
               </button>
-              <button class="lang-btn" data-lang="en" aria-label="English">
-                <img
-                  src="assets/images/flags/en.png"
-                  alt=""
-                  class="flag"
-                  aria-hidden="true"
-                />
-                <span class="sr-only">English</span>
-              </button>
+
+              <!-- Tautan ini dinonaktifkan sementara -->
+              <!-- <a href="pages/blog.html" data-i18n="blog">Blog</a> -->
+              <!-- <a href="pages/legal.html" data-i18n="legal">Legal</a> -->
+
+              <div
+                class="language-switcher"
+                role="navigation"
+                aria-label="Language selector"
+              >
+                <button
+                  class="lang-btn"
+                  data-lang="id"
+                  aria-label="Bahasa Indonesia"
+                >
+                  <img
+                    src="assets/images/flags/id.png"
+                    alt=""
+                    class="flag"
+                    aria-hidden="true"
+                  />
+                  <span class="sr-only">Bahasa Indonesia</span>
+                </button>
+                <button class="lang-btn" data-lang="en" aria-label="English">
+                  <img
+                    src="assets/images/flags/en.png"
+                    alt=""
+                    class="flag"
+                    aria-hidden="true"
+                  />
+                  <span class="sr-only">English</span>
+                </button>
+              </div>
             </div>
           </nav>
 
-          <button class="menu-toggle">â˜°</button>
+          <button class="menu-toggle" type="button" aria-label="Toggle menu">
+            &#9776;
+          </button>
         </div>
       </div>
     </header>
@@ -427,8 +440,8 @@
                 Komitmen terhadap Keunggulan
               </h3>
               <p class="card-text" data-i18n="commitmentExcellenceDesc">
-                Di RedLine Academy, keunggulan bukan sekadar tujuan â€” ini adalah
-                budaya kami.
+                Di RedLine Academy, keunggulan bukan sekadar tujuan â€” ini
+                adalah budaya kami.
               </p>
             </div>
           </div>
@@ -945,4 +958,3 @@
     </a>
   </body>
 </html>
-
