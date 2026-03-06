@@ -1,0 +1,15 @@
+{
+  "name": "redlineacademy.github.io",
+  "version": "1.0.0",
+  "description": "Website modern dan responsif untuk Redline Academy dengan dukungan multi-language (Indonesia dan Inggris).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "playwright": "^1.58.2"
+  }
+}
