@@ -666,6 +666,8 @@ const translations = {
 };
 
 // Language management
+// Expose translations globally so other modules can inject new keys
+window.translations = translations;
 let currentLanguage;
 
 // Try to get language from localStorage, with fallback

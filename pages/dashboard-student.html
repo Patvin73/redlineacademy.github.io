@@ -1,46 +1,597 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard Student - Redline Academy LMS</title>
     <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Nunito:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/lms.css" />
+    <link rel="stylesheet" href="../css/lms-student.css" />
   </head>
-  <body class="lms-dashboard-page" data-lms-role="student">
-    <header class="lms-header">
-      <h1 data-i18n="lmsStudentDashboardTitle">Student Dashboard</h1>
-      <div class="lms-header-actions">
-        <div class="language-switcher" role="navigation" aria-label="Language selector">
-          <button class="lang-btn" data-lang="id" aria-label="Bahasa Indonesia">
-            <img src="../assets/images/flags/id.png" alt="" class="flag" aria-hidden="true" />
-            <span class="sr-only">Bahasa Indonesia</span>
-          </button>
-          <button class="lang-btn" data-lang="en" aria-label="English">
-            <img src="../assets/images/flags/en.png" alt="" class="flag" aria-hidden="true" />
-            <span class="sr-only">English</span>
-          </button>
-        </div>
-        <button id="logoutBtn" class="btn btn-secondary" type="button" data-i18n="lmsLogout">
-          Logout
+
+  <!-- ─── data-lms-role dipakai oleh guard.js untuk proteksi akses ─── -->
+  <body class="lms-dashboard-page sd-body" data-lms-role="student">
+
+    <!-- ══════════════════════════════════════════
+         OVERLAY (mobile sidebar backdrop)
+    ══════════════════════════════════════════ -->
+    <div class="sd-overlay" id="sdOverlay" aria-hidden="true"></div>
+
+    <!-- ══════════════════════════════════════════
+         SIDEBAR
+    ══════════════════════════════════════════ -->
+    <aside class="sd-sidebar" id="sdSidebar" role="navigation" aria-label="Student navigation">
+
+      <!-- Logo -->
+      <div class="sd-sidebar__logo">
+        <a href="../index.html" aria-label="Redline Academy Home">
+          <span class="sd-logo-mark">R</span>
+          <span class="sd-logo-text">Redline <strong>Academy</strong></span>
+        </a>
+        <button class="sd-sidebar__close" id="sdSidebarClose" aria-label="Close sidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-    </header>
 
-    <main class="lms-content">
-      <section class="lms-panel">
-        <h2 data-i18n="lmsStudentProfileTitle">Profil Student</h2>
-        <p><strong data-i18n="lmsNameLabel">Nama:</strong> <span id="studentName">-</span></p>
-        <p><strong data-i18n="lmsStudentIdLabel">Student ID:</strong> <span id="studentId">-</span></p>
-        <p><strong data-i18n="lmsEmailLabelSimple">Email:</strong> <span id="studentEmail">-</span></p>
-      </section>
-    </main>
+      <!-- Profile Thumb -->
+      <div class="sd-sidebar__profile">
+        <div class="sd-avatar sd-avatar--lg" id="sidebarAvatar">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        </div>
+        <div class="sd-sidebar__profile-info">
+          <p class="sd-sidebar__profile-name" id="sidebarName">—</p>
+          <p class="sd-sidebar__profile-role" data-i18n="lmsSidebarRoleStudent">Student</p>
+        </div>
+      </div>
 
+      <!-- Nav Menu -->
+      <ul class="sd-nav" role="list">
+        <li>
+          <button class="sd-nav__item active" data-section="home" aria-current="page">
+            <svg class="sd-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/></svg>
+            <span data-i18n="lmsDashboardHome">Dashboard</span>
+          </button>
+        </li>
+        <li>
+          <button class="sd-nav__item" data-section="courses">
+            <svg class="sd-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            <span data-i18n="lmsMyCourses">My Courses</span>
+          </button>
+        </li>
+        <li>
+          <button class="sd-nav__item" data-section="assignments">
+            <svg class="sd-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <span data-i18n="lmsAssignments">Assignments</span>
+            <span class="sd-nav__badge" id="assignmentBadge" style="display:none">0</span>
+          </button>
+        </li>
+        <li>
+          <button class="sd-nav__item" data-section="schedule">
+            <svg class="sd-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span data-i18n="lmsSchedule">Schedule</span>
+          </button>
+        </li>
+        <li>
+          <button class="sd-nav__item" data-section="certificates">
+            <svg class="sd-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+            <span data-i18n="lmsCertificates">Certificates</span>
+          </button>
+        </li>
+        <li>
+          <button class="sd-nav__item" data-section="messages">
+            <svg class="sd-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span data-i18n="lmsMessages">Messages</span>
+            <span class="sd-nav__badge sd-nav__badge--red" id="messageBadge" style="display:none">0</span>
+          </button>
+        </li>
+        <li>
+          <button class="sd-nav__item" data-section="resources">
+            <svg class="sd-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span data-i18n="lmsResources">Resources</span>
+          </button>
+        </li>
+        <li>
+          <button class="sd-nav__item" data-section="profile">
+            <svg class="sd-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            <span data-i18n="lmsProfile">Profile</span>
+          </button>
+        </li>
+      </ul>
+
+      <!-- Sidebar Footer -->
+      <div class="sd-sidebar__footer">
+        <div class="sd-language-switcher" role="navigation" aria-label="Language selector">
+          <button class="lang-btn sd-lang-btn" data-lang="id" aria-label="Bahasa Indonesia">
+            <img src="../assets/images/flags/id.png" alt="" class="flag" aria-hidden="true" />
+            <span>ID</span>
+          </button>
+          <button class="lang-btn sd-lang-btn" data-lang="en" aria-label="English">
+            <img src="../assets/images/flags/en.png" alt="" class="flag" aria-hidden="true" />
+            <span>EN</span>
+          </button>
+        </div>
+        <button id="logoutBtn" class="sd-logout-btn" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span data-i18n="lmsLogout">Log Out</span>
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- ══════════════════════════════════════════
+         MAIN CONTENT WRAPPER
+    ══════════════════════════════════════════ -->
+    <div class="sd-main" id="sdMain">
+
+      <!-- ── TOP BAR ── -->
+      <header class="sd-topbar">
+        <div class="sd-topbar__left">
+          <button class="sd-hamburger" id="sdHamburger" aria-label="Open sidebar" aria-expanded="false">
+            <span></span><span></span><span></span>
+          </button>
+          <div class="sd-topbar__breadcrumb">
+            <span class="sd-topbar__section-title" id="topBarTitle" data-i18n="lmsDashboardHome">Dashboard</span>
+          </div>
+        </div>
+        <div class="sd-topbar__right">
+          <!-- Search -->
+          <div class="sd-search">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" id="sdSearchInput" data-i18n="lmsSearchPlaceholder" placeholder="Search courses..." aria-label="Search" />
+          </div>
+          <!-- Notification Bell -->
+          <div class="sd-notif" id="sdNotifBtn" role="button" tabindex="0" aria-label="Notifications" aria-haspopup="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="sd-notif__dot" id="notifDot" style="display:none"></span>
+          </div>
+          <!-- Profile Dropdown -->
+          <div class="sd-topbar__profile" id="topbarProfileBtn" role="button" tabindex="0" aria-haspopup="true">
+            <div class="sd-avatar sd-avatar--sm" id="topbarAvatar">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            </div>
+            <span class="sd-topbar__profile-name" id="topbarName">—</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+      </header>
+
+      <!-- ── PAGE CONTENT ── -->
+      <main class="sd-page" id="sdPage">
+
+        <!-- ════════════════════════════
+             SECTION: HOME / DASHBOARD
+        ════════════════════════════ -->
+        <section class="sd-section active" id="section-home" aria-labelledby="homeHeading">
+
+          <!-- Welcome Banner -->
+          <div class="sd-welcome-banner">
+            <div class="sd-welcome-banner__text">
+              <p class="sd-welcome-banner__greeting" data-i18n="lmsWelcomeBack">Welcome back</p>
+              <h1 class="sd-welcome-banner__name" id="welcomeName">—</h1>
+              <p class="sd-welcome-banner__subtitle" data-i18n="lmsWelcomeSubtitle">Continue your caregiver journey today.</p>
+            </div>
+            <div class="sd-welcome-banner__badge">
+              <div class="sd-welcome-batch">
+                <span class="sd-welcome-batch__label" data-i18n="lmsBatch">Batch</span>
+                <span class="sd-welcome-batch__value" id="welcomeBatch">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="sd-stats-grid" role="list" aria-label="Progress summary">
+            <div class="sd-stat-card" role="listitem">
+              <div class="sd-stat-card__icon sd-stat-card__icon--blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+              </div>
+              <div class="sd-stat-card__body">
+                <p class="sd-stat-card__value" id="statCoursesEnrolled">—</p>
+                <p class="sd-stat-card__label" data-i18n="lmsCoursesEnrolled">Courses Enrolled</p>
+              </div>
+              <div class="sd-stat-card__trend">
+                <span class="sd-trend sd-trend--up">↑</span>
+              </div>
+            </div>
+
+            <div class="sd-stat-card" role="listitem">
+              <div class="sd-stat-card__icon sd-stat-card__icon--green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="sd-stat-card__body">
+                <p class="sd-stat-card__value" id="statLessonsCompleted">—</p>
+                <p class="sd-stat-card__label" data-i18n="lmsLessonsCompleted">Lessons Completed</p>
+              </div>
+            </div>
+
+            <div class="sd-stat-card" role="listitem">
+              <div class="sd-stat-card__icon sd-stat-card__icon--orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div class="sd-stat-card__body">
+                <p class="sd-stat-card__value" id="statPendingAssignments">—</p>
+                <p class="sd-stat-card__label" data-i18n="lmsPendingAssignments">Pending Assignments</p>
+              </div>
+            </div>
+
+            <div class="sd-stat-card" role="listitem">
+              <div class="sd-stat-card__icon sd-stat-card__icon--red">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+              </div>
+              <div class="sd-stat-card__body">
+                <p class="sd-stat-card__value" id="statCertificates">—</p>
+                <p class="sd-stat-card__label" data-i18n="lmsCertificatesEarned">Certificates Earned</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mid Row: Continue Learning + Upcoming Schedule -->
+          <div class="sd-mid-row">
+
+            <!-- Continue Learning -->
+            <div class="sd-card sd-card--continue" aria-label="Continue Learning">
+              <div class="sd-card__header">
+                <h2 class="sd-card__title" data-i18n="lmsContinueLearning">Continue Learning</h2>
+                <button class="sd-link-btn" data-section="courses" data-i18n="lmsViewAll">View All</button>
+              </div>
+              <div id="continueLearningContent">
+                <!-- Loading skeleton -->
+                <div class="sd-skeleton-continue" aria-busy="true">
+                  <div class="sd-skeleton sd-skeleton--thumb"></div>
+                  <div class="sd-skeleton-lines">
+                    <div class="sd-skeleton sd-skeleton--line-lg"></div>
+                    <div class="sd-skeleton sd-skeleton--line-md"></div>
+                    <div class="sd-skeleton sd-skeleton--line-sm"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upcoming Schedule -->
+            <div class="sd-card sd-card--schedule">
+              <div class="sd-card__header">
+                <h2 class="sd-card__title" data-i18n="lmsUpcomingSchedule">Upcoming Schedule</h2>
+                <button class="sd-link-btn" data-section="schedule" data-i18n="lmsViewAll">View All</button>
+              </div>
+              <ul class="sd-schedule-list" id="scheduleList" role="list">
+                <!-- Populated by JS -->
+                <li class="sd-schedule-empty" id="scheduleEmpty">
+                  <span data-i18n="lmsNoSchedule">No upcoming events</span>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+
+          <!-- Activity Feed -->
+          <div class="sd-card">
+            <div class="sd-card__header">
+              <h2 class="sd-card__title" data-i18n="lmsRecentActivity">Recent Activity</h2>
+            </div>
+            <ul class="sd-activity-list" id="activityList" role="list">
+              <!-- Populated by JS -->
+              <li class="sd-activity-empty" id="activityEmpty">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span data-i18n="lmsNoActivity">No activity yet</span>
+              </li>
+            </ul>
+          </div>
+
+        </section>
+
+        <!-- ════════════════════════════
+             SECTION: MY COURSES
+        ════════════════════════════ -->
+        <section class="sd-section" id="section-courses" aria-labelledby="coursesHeading">
+          <div class="sd-section__header">
+            <h2 id="coursesHeading" data-i18n="lmsMyCourses">My Courses</h2>
+            <!-- Filter Tabs -->
+            <div class="sd-filter-tabs" role="tablist" aria-label="Filter courses">
+              <button class="sd-filter-tab active" role="tab" data-filter="all" data-i18n="lmsFilterAll">All</button>
+              <button class="sd-filter-tab" role="tab" data-filter="active" data-i18n="lmsFilterActive">In Progress</button>
+              <button class="sd-filter-tab" role="tab" data-filter="completed" data-i18n="lmsFilterCompleted">Completed</button>
+            </div>
+          </div>
+          <!-- Course Grid -->
+          <div class="sd-course-grid" id="courseGrid">
+            <!-- Loading state -->
+            <div class="sd-skeleton-card" aria-hidden="true">
+              <div class="sd-skeleton sd-skeleton--thumb-full"></div>
+              <div class="sd-skeleton-card__body">
+                <div class="sd-skeleton sd-skeleton--line-lg"></div>
+                <div class="sd-skeleton sd-skeleton--line-md"></div>
+                <div class="sd-skeleton sd-skeleton--bar"></div>
+              </div>
+            </div>
+            <div class="sd-skeleton-card" aria-hidden="true">
+              <div class="sd-skeleton sd-skeleton--thumb-full"></div>
+              <div class="sd-skeleton-card__body">
+                <div class="sd-skeleton sd-skeleton--line-lg"></div>
+                <div class="sd-skeleton sd-skeleton--line-md"></div>
+                <div class="sd-skeleton sd-skeleton--bar"></div>
+              </div>
+            </div>
+            <div class="sd-skeleton-card" aria-hidden="true">
+              <div class="sd-skeleton sd-skeleton--thumb-full"></div>
+              <div class="sd-skeleton-card__body">
+                <div class="sd-skeleton sd-skeleton--line-lg"></div>
+                <div class="sd-skeleton sd-skeleton--line-md"></div>
+                <div class="sd-skeleton sd-skeleton--bar"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ════════════════════════════
+             SECTION: ASSIGNMENTS
+        ════════════════════════════ -->
+        <section class="sd-section" id="section-assignments" aria-labelledby="assignmentsHeading">
+          <div class="sd-section__header">
+            <h2 id="assignmentsHeading" data-i18n="lmsAssignments">Assignments & Quizzes</h2>
+            <!-- Tabs: Pending / Submitted / Graded -->
+            <div class="sd-filter-tabs" role="tablist">
+              <button class="sd-filter-tab active" role="tab" data-filter="pending" data-i18n="lmsTabPending">Pending</button>
+              <button class="sd-filter-tab" role="tab" data-filter="submitted" data-i18n="lmsTabSubmitted">Submitted</button>
+              <button class="sd-filter-tab" role="tab" data-filter="graded" data-i18n="lmsTabGraded">Graded</button>
+            </div>
+          </div>
+          <div class="sd-assignment-list" id="assignmentList">
+            <!-- Populated by JS -->
+            <div class="sd-empty-state" id="assignmentEmpty">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <p data-i18n="lmsNoAssignments">No assignments here</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ════════════════════════════
+             SECTION: SCHEDULE
+        ════════════════════════════ -->
+        <section class="sd-section" id="section-schedule" aria-labelledby="scheduleHeading">
+          <div class="sd-section__header">
+            <h2 id="scheduleHeading" data-i18n="lmsSchedule">Schedule & Calendar</h2>
+          </div>
+          <div class="sd-schedule-full" id="scheduleFullContent">
+            <!-- View toggle: list / month -->
+            <div class="sd-view-toggle" role="group" aria-label="Calendar view">
+              <button class="sd-view-btn active" data-view="list" data-i18n="lmsViewList">List</button>
+              <button class="sd-view-btn" data-view="calendar" data-i18n="lmsViewCalendar">Calendar</button>
+            </div>
+            <div class="sd-schedule-full__list" id="scheduleFullList">
+              <!-- Populated by JS -->
+              <div class="sd-empty-state" id="scheduleFullEmpty">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <p data-i18n="lmsNoSchedule">No upcoming events</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ════════════════════════════
+             SECTION: CERTIFICATES
+        ════════════════════════════ -->
+        <section class="sd-section" id="section-certificates" aria-labelledby="certHeading">
+          <div class="sd-section__header">
+            <h2 id="certHeading" data-i18n="lmsCertificates">Certificates</h2>
+          </div>
+          <div class="sd-cert-grid" id="certGrid">
+            <!-- Populated by JS -->
+            <div class="sd-empty-state" id="certEmpty">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+              <p data-i18n="lmsNoCertificates">No certificates yet. Complete a course to earn one!</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ════════════════════════════
+             SECTION: MESSAGES
+        ════════════════════════════ -->
+        <section class="sd-section" id="section-messages" aria-labelledby="messagesHeading">
+          <div class="sd-section__header">
+            <h2 id="messagesHeading" data-i18n="lmsMessages">Messages</h2>
+            <button class="sd-btn sd-btn--primary" id="newMessageBtn" data-i18n="lmsNewMessage">New Message</button>
+          </div>
+          <div class="sd-messages-layout">
+            <!-- Inbox List -->
+            <div class="sd-inbox" id="inboxList">
+              <div class="sd-empty-state" id="inboxEmpty">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <p data-i18n="lmsNoMessages">No messages yet</p>
+              </div>
+            </div>
+            <!-- Message View -->
+            <div class="sd-message-view" id="messageView">
+              <div class="sd-message-view__empty" id="messageViewEmpty">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <p data-i18n="lmsSelectMessage">Select a message to view</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ════════════════════════════
+             SECTION: RESOURCES
+        ════════════════════════════ -->
+        <section class="sd-section" id="section-resources" aria-labelledby="resourcesHeading">
+          <div class="sd-section__header">
+            <h2 id="resourcesHeading" data-i18n="lmsResources">Resources & Materials</h2>
+            <!-- Search Resources -->
+            <div class="sd-search sd-search--inline">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="search" id="resourceSearch" data-i18n="lmsSearchResources" placeholder="Search resources..." />
+            </div>
+          </div>
+          <!-- Category Filter -->
+          <div class="sd-filter-tabs sd-filter-tabs--scroll" role="tablist" id="resourceCategoryTabs">
+            <button class="sd-filter-tab active" role="tab" data-category="all" data-i18n="lmsFilterAll">All</button>
+            <button class="sd-filter-tab" role="tab" data-category="aged-care">Aged Care</button>
+            <button class="sd-filter-tab" role="tab" data-category="first-aid">First Aid</button>
+            <button class="sd-filter-tab" role="tab" data-category="mental-health">Mental Health</button>
+            <button class="sd-filter-tab" role="tab" data-category="medication">Medication</button>
+          </div>
+          <div class="sd-resource-grid" id="resourceGrid">
+            <div class="sd-empty-state" id="resourceEmpty">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              <p data-i18n="lmsNoResources">No resources available</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ════════════════════════════
+             SECTION: PROFILE
+        ════════════════════════════ -->
+        <section class="sd-section" id="section-profile" aria-labelledby="profileHeading">
+          <div class="sd-section__header">
+            <h2 id="profileHeading" data-i18n="lmsProfile">My Profile</h2>
+          </div>
+
+          <div class="sd-profile-layout">
+
+            <!-- Left: Avatar + Quick Info -->
+            <div class="sd-profile-card sd-card">
+              <div class="sd-profile-card__avatar-wrap">
+                <div class="sd-avatar sd-avatar--xl" id="profileAvatar">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                </div>
+                <button class="sd-avatar-upload-btn" id="avatarUploadBtn" aria-label="Change avatar" title="Change photo">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </button>
+                <input type="file" id="avatarInput" accept="image/*" style="display:none" aria-hidden="true" />
+              </div>
+              <p class="sd-profile-card__name" id="profileCardName">—</p>
+              <p class="sd-profile-card__id">
+                <span data-i18n="lmsStudentIdLabel">Student ID:</span>
+                <strong id="profileCardId">—</strong>
+              </p>
+              <p class="sd-profile-card__email" id="profileCardEmail">—</p>
+              <div class="sd-profile-card__divider"></div>
+              <p class="sd-profile-card__joined">
+                <span data-i18n="lmsJoinedLabel">Joined:</span>
+                <span id="profileCardJoined">—</span>
+              </p>
+            </div>
+
+            <!-- Right: Editable Form -->
+            <div class="sd-profile-form-wrap sd-card">
+              <h3 class="sd-profile-form-title" data-i18n="lmsEditProfile">Edit Profile</h3>
+              <!-- NOTE: no <form> tag - use divs + JS submit per codebase convention -->
+              <div class="sd-profile-form">
+
+                <div class="sd-field-row">
+                  <div class="sd-field">
+                    <label class="sd-label" for="pfFullName" data-i18n="fullNameLabel">Full Name</label>
+                    <input class="sd-input" type="text" id="pfFullName" autocomplete="name" />
+                  </div>
+                  <div class="sd-field">
+                    <label class="sd-label" for="pfPhone" data-i18n="phoneLabel">Phone Number</label>
+                    <input class="sd-input" type="tel" id="pfPhone" autocomplete="tel" />
+                  </div>
+                </div>
+
+                <div class="sd-field-row">
+                  <div class="sd-field">
+                    <label class="sd-label" for="pfDob" data-i18n="dobLabel">Date of Birth</label>
+                    <input class="sd-input" type="date" id="pfDob" />
+                  </div>
+                  <div class="sd-field">
+                    <label class="sd-label" for="pfTimezone" data-i18n="lmsTimezone">Timezone</label>
+                    <select class="sd-input sd-select" id="pfTimezone">
+                      <option value="Australia/Sydney">Australia/Sydney (AEST)</option>
+                      <option value="Australia/Melbourne">Australia/Melbourne</option>
+                      <option value="Australia/Brisbane">Australia/Brisbane</option>
+                      <option value="Asia/Jakarta">Asia/Jakarta (WIB)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="sd-field">
+                  <label class="sd-label" for="pfAddress" data-i18n="addressLabel">Address</label>
+                  <input class="sd-input" type="text" id="pfAddress" autocomplete="street-address" />
+                </div>
+
+                <div class="sd-field-row">
+                  <div class="sd-field">
+                    <label class="sd-label" for="pfCity" data-i18n="lmsCityLabel">City</label>
+                    <input class="sd-input" type="text" id="pfCity" />
+                  </div>
+                  <div class="sd-field">
+                    <label class="sd-label" for="pfPostcode" data-i18n="postcodeLabel">Postcode</label>
+                    <input class="sd-input" type="text" id="pfPostcode" autocomplete="postal-code" />
+                  </div>
+                </div>
+
+                <div class="sd-field">
+                  <label class="sd-label" for="pfBio" data-i18n="lmsBioLabel">Bio</label>
+                  <textarea class="sd-input sd-textarea" id="pfBio" rows="3" placeholder="Tell us a little about yourself..."></textarea>
+                </div>
+
+                <div class="sd-profile-form__actions">
+                  <p class="sd-profile-form__msg" id="profileMsg" aria-live="polite"></p>
+                  <button class="sd-btn sd-btn--primary" id="saveProfileBtn" type="button" data-i18n="lmsSaveProfile">Save Changes</button>
+                </div>
+
+              </div>
+
+              <!-- Change Password Accordion -->
+              <div class="sd-accordion" id="changePasswordAccordion">
+                <button class="sd-accordion__trigger" id="changePasswordToggle" aria-expanded="false" type="button">
+                  <span data-i18n="lmsChangePassword">Change Password</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="sd-accordion__body" id="changePasswordBody" hidden>
+                  <div class="sd-field">
+                    <label class="sd-label" for="pfCurrentPw" data-i18n="lmsCurrentPassword">Current Password</label>
+                    <input class="sd-input" type="password" id="pfCurrentPw" autocomplete="current-password" />
+                  </div>
+                  <div class="sd-field">
+                    <label class="sd-label" for="pfNewPw" data-i18n="lmsNewPassword">New Password</label>
+                    <input class="sd-input" type="password" id="pfNewPw" autocomplete="new-password" />
+                  </div>
+                  <div class="sd-field">
+                    <label class="sd-label" for="pfConfirmPw" data-i18n="lmsConfirmPassword">Confirm New Password</label>
+                    <input class="sd-input" type="password" id="pfConfirmPw" autocomplete="new-password" />
+                  </div>
+                  <button class="sd-btn sd-btn--outline" id="changePasswordBtn" type="button" data-i18n="lmsUpdatePassword">Update Password</button>
+                  <p class="sd-profile-form__msg" id="passwordMsg" aria-live="polite"></p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         NOTIFICATION DROPDOWN (injected by JS)
+    ══════════════════════════════════════════ -->
+    <div class="sd-notif-panel" id="notifPanel" role="dialog" aria-label="Notifications" hidden>
+      <div class="sd-notif-panel__header">
+        <h3 data-i18n="lmsNotifications">Notifications</h3>
+        <button class="sd-notif-panel__mark-all" id="markAllRead" data-i18n="lmsMarkAllRead">Mark all read</button>
+      </div>
+      <ul class="sd-notif-list" id="notifList" role="list">
+        <li class="sd-notif-empty" data-i18n="lmsNoNotifications">No notifications</li>
+      </ul>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         SCRIPTS
+         Order matters: supabase SDK → config → auth → guard → dashboard
+    ══════════════════════════════════════════ -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/script.js"></script>
     <script src="../js/supabase-client.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/guard.js"></script>
+    <script src="../js/dashboard-student.js"></script>
+
   </body>
 </html>
