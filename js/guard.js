@@ -12,10 +12,15 @@
   }
 
   async function loadDashboard() {
-    const expectedRole = document.body.dataset.lmsRole;
-    if (!expectedRole) {
+    const expectedRoleRaw = document.body.dataset.lmsRole;
+    if (!expectedRoleRaw) {
       return;
     }
+
+    const allowedRoles = expectedRoleRaw
+      .split(",")
+      .map((role) => role.trim())
+      .filter(Boolean);
 
     const user = await window.lmsAuth.getSessionUser();
     if (!user) {
@@ -30,48 +35,71 @@
     }
 
     const profile = profileRes.profile;
-    if (profile.role !== expectedRole) {
+    if (!allowedRoles.includes(profile.role)) {
       const target = window.lmsAuth.getDashboardRouteByRole(profile.role);
+      const currentPage = window.location.pathname.split("/").pop() || "";
+      if (target.endsWith(currentPage)) {
+        return;
+      }
       window.location.replace(target);
       return;
     }
 
-    if (expectedRole === "student") {
+    document.body.classList.toggle("is-admin", profile.role === "admin");
+    document.body.classList.toggle("is-trainer", profile.role === "trainer");
+
+    if (profile.role === "student") {
       const nameEl = document.getElementById("studentName");
       const idEl = document.getElementById("studentId");
       const emailEl = document.getElementById("studentEmail");
 
-      nameEl.textContent = profile.full_name || "-";
-      idEl.textContent = profile.student_id || "-";
-      emailEl.textContent = profile.email || user.email || "-";
+      if (nameEl) {
+        nameEl.textContent = profile.full_name || "-";
+      }
+      if (idEl) {
+        idEl.textContent = profile.student_id || "-";
+      }
+      if (emailEl) {
+        emailEl.textContent = profile.email || user.email || "-";
+      }
     }
 
-    if (expectedRole === "admin") {
+    if (profile.role === "admin" || profile.role === "trainer") {
       const nameEl = document.getElementById("adminName");
       const idEl = document.getElementById("adminId");
       const emailEl = document.getElementById("adminEmail");
 
-      nameEl.textContent = profile.full_name || "-";
-      idEl.textContent = profile.admin_id || "-";
-      emailEl.textContent = profile.email || user.email || "-";
+      if (nameEl) {
+        nameEl.textContent = profile.full_name || "-";
+      }
+      if (idEl) {
+        idEl.textContent = profile.admin_id || "-";
+      }
+      if (emailEl) {
+        emailEl.textContent = profile.email || user.email || "-";
+      }
 
-      const { data, error } = await window.lmsSupabase
-        .from("profiles")
-        .select("full_name, student_id, email")
-        .eq("role", "student")
-        .order("full_name", { ascending: true });
+      if (profile.role === "admin") {
+        const { data, error } = await window.lmsSupabase
+          .from("profiles")
+          .select("full_name, student_id, email")
+          .eq("role", "student")
+          .order("full_name", { ascending: true });
 
-      const tableBody = document.getElementById("studentTableBody");
-      if (error) {
-        tableBody.innerHTML = `<tr><td colspan="3">${tt("lmsErrLoadStudents", "Gagal memuat data student.")}</td></tr>`;
-      } else if (!data || data.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="3">${tt("lmsNoStudents", "Belum ada student.")}</td></tr>`;
-      } else {
-        tableBody.innerHTML = data
-          .map((item) => {
-            return `<tr><td>${escapeHtml(item.full_name || "-")}</td><td>${escapeHtml(item.student_id || "-")}</td><td>${escapeHtml(item.email || "-")}</td></tr>`;
-          })
-          .join("");
+        const tableBody = document.getElementById("studentTableBody");
+        if (tableBody) {
+          if (error) {
+            tableBody.innerHTML = `<tr><td colspan="3">${tt("lmsErrLoadStudents", "Gagal memuat data student.")}</td></tr>`;
+          } else if (!data || data.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="3">${tt("lmsNoStudents", "Belum ada student.")}</td></tr>`;
+          } else {
+            tableBody.innerHTML = data
+              .map((item) => {
+                return `<tr><td>${escapeHtml(item.full_name || "-")}</td><td>${escapeHtml(item.student_id || "-")}</td><td>${escapeHtml(item.email || "-")}</td></tr>`;
+              })
+              .join("");
+          }
+        }
       }
     }
 

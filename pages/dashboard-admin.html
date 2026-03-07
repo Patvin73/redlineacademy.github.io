@@ -17,7 +17,7 @@
   </head>
 
   <!-- data-lms-role dipakai guard.js — trainer OR admin sama-sama masuk ke file ini -->
-  <body class="lms-dashboard-page ad-body" data-lms-role="admin">
+  <body class="lms-dashboard-page ad-body" data-lms-role="admin,trainer">
 
     <!-- ═══════════════════════════════════════
          MOBILE OVERLAY
@@ -773,7 +773,7 @@
         <!-- ══════════════════════════════
              SECTION: USER MANAGEMENT (Admin only)
         ══════════════════════════════ -->
-        <section class="ad-section" id="section-users">
+        <section class="ad-section ad-admin-only" id="section-users">
           <div class="ad-section__header">
             <h2 data-i18n="adNavUsers">User Management</h2>
             <div class="ad-section__header-actions">
@@ -819,7 +819,7 @@
         <!-- ══════════════════════════════
              SECTION: ENROLLMENTS & PAYMENTS (Admin only)
         ══════════════════════════════ -->
-        <section class="ad-section" id="section-enrollments">
+        <section class="ad-section ad-admin-only" id="section-enrollments">
           <div class="ad-section__header">
             <h2 data-i18n="adNavEnrollments">Enrollments & Payments</h2>
             <button class="ad-btn ad-btn--outline" id="exportPaymentsBtn">
@@ -869,7 +869,7 @@
         <!-- ══════════════════════════════
              SECTION: ANNOUNCEMENTS (Admin only)
         ══════════════════════════════ -->
-        <section class="ad-section" id="section-announcements">
+        <section class="ad-section ad-admin-only" id="section-announcements">
           <div class="ad-section__header">
             <h2 data-i18n="adNavAnnouncements">Announcements</h2>
             <button class="ad-btn ad-btn--primary" id="createAnnouncementBtn">
@@ -936,7 +936,7 @@
         <!-- ══════════════════════════════
              SECTION: SYSTEM SETTINGS (Admin only)
         ══════════════════════════════ -->
-        <section class="ad-section" id="section-settings">
+        <section class="ad-section ad-admin-only" id="section-settings">
           <div class="ad-section__header">
             <h2 data-i18n="adNavSettings">System Settings</h2>
           </div>

@@ -2,6 +2,7 @@
   const roleRoutes = {
     student: "./dashboard-student.html",
     admin: "./dashboard-admin.html",
+    trainer: "./dashboard-admin.html",
   };
   const tt = (key, fallback) => (typeof t === "function" ? t(key) : fallback);
 

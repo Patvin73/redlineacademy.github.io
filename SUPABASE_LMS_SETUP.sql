@@ -1,10 +1,10 @@
-﻿-- Supabase setup for Redline Academy LMS (student/admin)
+﻿-- Supabase setup for Redline Academy LMS (student/admin/trainer)
 -- Run in Supabase SQL Editor.
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text,
-  role text not null check (role in ('student', 'admin')) default 'student',
+  role text not null check (role in ('student', 'admin', 'trainer')) default 'student',
   student_id text unique,
   admin_id text unique,
   email text,
@@ -87,3 +87,4 @@ create policy "profiles_update_own"
 -- update public.profiles
 -- set role = 'admin', admin_id = 'ADM-001'
 -- where id = '00000000-0000-0000-0000-000000000000';
+
