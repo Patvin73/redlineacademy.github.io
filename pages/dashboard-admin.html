@@ -18,7 +18,6 @@
 
   <!-- data-lms-role dipakai guard.js — trainer OR admin sama-sama masuk ke file ini -->
   <body class="lms-dashboard-page ad-body" data-lms-role="admin,trainer">
-
     <!-- ═══════════════════════════════════════
          MOBILE OVERLAY
     ═══════════════════════════════════════ -->
@@ -27,23 +26,55 @@
     <!-- ═══════════════════════════════════════
          SIDEBAR
     ═══════════════════════════════════════ -->
-    <aside class="ad-sidebar" id="adSidebar" role="navigation" aria-label="Admin navigation">
-
+    <aside
+      class="ad-sidebar"
+      id="adSidebar"
+      role="navigation"
+      aria-label="Admin navigation"
+    >
       <!-- Logo -->
       <div class="ad-sidebar__logo">
         <a href="../index.html" aria-label="Redline Academy Home">
-          <span class="ad-logo-mark">R</span>
-          <span class="ad-logo-text">Redline <strong>Academy</strong></span>
+          <img
+            src="../assets/images/dashboard-32x32.png"
+            alt="Redline Academy Logo"
+            class="ad-logo-image"
+          />
+          <span class="ad-logo-text"><strong>Redline</strong> Academy</span>
         </a>
-        <button class="ad-sidebar__close" id="adSidebarClose" aria-label="Close sidebar">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <button
+          class="ad-sidebar__close"
+          id="adSidebarClose"
+          aria-label="Close sidebar"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
         </button>
       </div>
 
       <!-- Admin Profile -->
       <div class="ad-sidebar__profile">
         <div class="ad-avatar ad-avatar--lg" id="sidebarAvatar">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+          >
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+          </svg>
         </div>
         <div class="ad-sidebar__profile-info">
           <p class="ad-sidebar__profile-name" id="sidebarName">—</p>
@@ -58,75 +89,208 @@
         <li class="ad-nav__group-label" data-i18n="adNavGroupMain">Main</li>
 
         <li>
-          <button class="ad-nav__item active" data-section="home" aria-current="page">
-            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/></svg>
+          <button
+            class="ad-nav__item active"
+            data-section="home"
+            aria-current="page"
+          >
+            <svg
+              class="ad-nav__icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path d="M3 12L12 3l9 9" />
+              <path d="M9 21V12h6v9" />
+            </svg>
             <span data-i18n="adNavDashboard">Dashboard</span>
           </button>
         </li>
         <li>
           <button class="ad-nav__item" data-section="students">
-            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <svg
+              class="ad-nav__icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
             <span data-i18n="adNavStudents">My Students</span>
-            <span class="ad-nav__badge" id="atRiskBadge" style="display:none">0</span>
+            <span class="ad-nav__badge" id="atRiskBadge" style="display: none"
+              >0</span
+            >
           </button>
         </li>
         <li>
           <button class="ad-nav__item" data-section="courses">
-            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            <svg
+              class="ad-nav__icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <path d="M8 21h8M12 17v4" />
+            </svg>
             <span data-i18n="adNavCourses">Course Management</span>
           </button>
         </li>
         <li>
           <button class="ad-nav__item" data-section="grading">
-            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <svg
+              class="ad-nav__icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+            </svg>
             <span data-i18n="adNavGrading">Assignments & Grading</span>
-            <span class="ad-nav__badge ad-nav__badge--red" id="gradingBadge" style="display:none">0</span>
+            <span
+              class="ad-nav__badge ad-nav__badge--red"
+              id="gradingBadge"
+              style="display: none"
+              >0</span
+            >
           </button>
         </li>
         <li>
           <button class="ad-nav__item" data-section="schedule">
-            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <svg
+              class="ad-nav__icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
             <span data-i18n="adNavSchedule">Schedule</span>
           </button>
         </li>
         <li>
           <button class="ad-nav__item" data-section="messages">
-            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <svg
+              class="ad-nav__icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path
+                d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+              />
+            </svg>
             <span data-i18n="adNavMessages">Messages</span>
-            <span class="ad-nav__badge ad-nav__badge--red" id="adMsgBadge" style="display:none">0</span>
+            <span
+              class="ad-nav__badge ad-nav__badge--red"
+              id="adMsgBadge"
+              style="display: none"
+              >0</span
+            >
           </button>
         </li>
         <li>
           <button class="ad-nav__item" data-section="reports">
-            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <svg
+              class="ad-nav__icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <line x1="18" y1="20" x2="18" y2="10" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="14" />
+            </svg>
             <span data-i18n="adNavReports">Reports & Analytics</span>
           </button>
         </li>
 
         <!-- ── Admin-only section (hidden for trainer role) ── -->
-        <li class="ad-nav__group-label ad-admin-only" data-i18n="adNavGroupAdmin">Administration</li>
+        <li
+          class="ad-nav__group-label ad-admin-only"
+          data-i18n="adNavGroupAdmin"
+        >
+          Administration
+        </li>
 
         <li class="ad-admin-only">
           <button class="ad-nav__item" data-section="users">
-            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <svg
+              class="ad-nav__icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
             <span data-i18n="adNavUsers">User Management</span>
           </button>
         </li>
         <li class="ad-admin-only">
           <button class="ad-nav__item" data-section="enrollments">
-            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+            <svg
+              class="ad-nav__icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path
+                d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+              />
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+            </svg>
             <span data-i18n="adNavEnrollments">Enrollments & Payments</span>
           </button>
         </li>
         <li class="ad-admin-only">
           <button class="ad-nav__item" data-section="announcements">
-            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 3L2 10l7 4 4 7 9-18z"/></svg>
+            <svg
+              class="ad-nav__icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path d="M22 3L2 10l7 4 4 7 9-18z" />
+            </svg>
             <span data-i18n="adNavAnnouncements">Announcements</span>
           </button>
         </li>
         <li class="ad-admin-only">
           <button class="ad-nav__item" data-section="settings">
-            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <svg
+              class="ad-nav__icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+              />
+            </svg>
             <span data-i18n="adNavSettings">System Settings</span>
           </button>
         </li>
@@ -134,131 +298,291 @@
 
       <!-- Sidebar Footer -->
       <div class="ad-sidebar__footer">
-        <div class="ad-language-switcher" role="navigation" aria-label="Language selector">
-          <button class="lang-btn ad-lang-btn" data-lang="id" aria-label="Bahasa Indonesia">
-            <img src="../assets/images/flags/id.png" alt="" class="flag" aria-hidden="true" />
+        <div
+          class="ad-language-switcher"
+          role="navigation"
+          aria-label="Language selector"
+        >
+          <button
+            class="lang-btn ad-lang-btn"
+            data-lang="id"
+            aria-label="Bahasa Indonesia"
+          >
+            <img
+              src="../assets/images/flags/id.png"
+              alt=""
+              class="flag"
+              aria-hidden="true"
+            />
             <span>ID</span>
           </button>
-          <button class="lang-btn ad-lang-btn" data-lang="en" aria-label="English">
-            <img src="../assets/images/flags/en.png" alt="" class="flag" aria-hidden="true" />
+          <button
+            class="lang-btn ad-lang-btn"
+            data-lang="en"
+            aria-label="English"
+          >
+            <img
+              src="../assets/images/flags/en.png"
+              alt=""
+              class="flag"
+              aria-hidden="true"
+            />
             <span>EN</span>
           </button>
         </div>
         <button id="logoutBtn" class="ad-logout-btn" type="button">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
           <span data-i18n="lmsLogout">Log Out</span>
         </button>
       </div>
-
-    </aside><!-- /sidebar -->
+    </aside>
+    <!-- /sidebar -->
 
     <!-- ═══════════════════════════════════════
          MAIN WRAPPER
     ═══════════════════════════════════════ -->
     <div class="ad-main" id="adMain">
-
       <!-- TOP BAR -->
       <header class="ad-topbar">
         <div class="ad-topbar__left">
-          <button class="ad-hamburger" id="adHamburger" aria-label="Open sidebar" aria-expanded="false">
+          <button
+            class="ad-hamburger"
+            id="adHamburger"
+            aria-label="Open sidebar"
+            aria-expanded="false"
+          >
             <span></span><span></span><span></span>
           </button>
-          <span class="ad-topbar__title" id="topBarTitle" data-i18n="adNavDashboard">Dashboard</span>
+          <span
+            class="ad-topbar__title"
+            id="topBarTitle"
+            data-i18n="adNavDashboard"
+            >Dashboard</span
+          >
         </div>
         <div class="ad-topbar__right">
           <div class="ad-search">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="search" id="adSearchInput" data-i18n="adSearchPlaceholder" placeholder="Search students, courses..." aria-label="Search" />
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="search"
+              id="adSearchInput"
+              data-i18n="adSearchPlaceholder"
+              placeholder="Search students, courses..."
+              aria-label="Search"
+            />
           </div>
-          <div class="ad-notif" id="adNotifBtn" role="button" tabindex="0" aria-label="Notifications" aria-haspopup="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span class="ad-notif__dot" id="adNotifDot" style="display:none"></span>
+          <div
+            class="ad-notif"
+            id="adNotifBtn"
+            role="button"
+            tabindex="0"
+            aria-label="Notifications"
+            aria-haspopup="true"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            <span
+              class="ad-notif__dot"
+              id="adNotifDot"
+              style="display: none"
+            ></span>
           </div>
-          <div class="ad-topbar__profile" id="adTopbarProfileBtn" role="button" tabindex="0" aria-haspopup="true">
+          <div
+            class="ad-topbar__profile"
+            id="adTopbarProfileBtn"
+            role="button"
+            tabindex="0"
+            aria-haspopup="true"
+          >
             <div class="ad-avatar ad-avatar--sm" id="topbarAvatar">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+              </svg>
             </div>
             <span class="ad-topbar__name" id="topbarName">—</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
           </div>
         </div>
       </header>
 
       <!-- PAGE SECTIONS -->
       <main class="ad-page" id="adPage">
-
         <!-- ══════════════════════════════
              SECTION: HOME / DASHBOARD
         ══════════════════════════════ -->
         <section class="ad-section active" id="section-home">
-
           <!-- Welcome Banner -->
           <div class="ad-welcome-banner">
             <div class="ad-welcome-banner__text">
-              <p class="ad-welcome-banner__greeting" data-i18n="adWelcomeBack">Welcome back,</p>
+              <p class="ad-welcome-banner__greeting" data-i18n="adWelcomeBack">
+                Welcome back,
+              </p>
               <h1 class="ad-welcome-banner__name" id="welcomeName">—</h1>
-              <p class="ad-welcome-banner__sub" id="welcomeRoleSub">Trainer · Redline Academy</p>
+              <p class="ad-welcome-banner__sub" id="welcomeRoleSub">
+                Trainer · Redline Academy
+              </p>
             </div>
             <div class="ad-welcome-banner__date" id="welcomeDate"></div>
           </div>
 
           <!-- KPI Stats Row -->
           <div class="ad-kpi-grid" role="list" aria-label="KPI Overview">
-
             <div class="ad-kpi-card" role="listitem">
               <div class="ad-kpi-card__icon ad-kpi-icon--blue">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                >
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
               </div>
               <div>
                 <p class="ad-kpi-card__value" id="kpiTotalStudents">—</p>
-                <p class="ad-kpi-card__label" data-i18n="adKpiStudents">Total Students</p>
+                <p class="ad-kpi-card__label" data-i18n="adKpiStudents">
+                  Total Students
+                </p>
               </div>
             </div>
 
             <div class="ad-kpi-card" role="listitem">
               <div class="ad-kpi-card__icon ad-kpi-icon--green">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                >
+                  <rect x="2" y="3" width="20" height="14" rx="2" />
+                  <path d="M8 21h8M12 17v4" />
+                </svg>
               </div>
               <div>
                 <p class="ad-kpi-card__value" id="kpiActiveCourses">—</p>
-                <p class="ad-kpi-card__label" data-i18n="adKpiCourses">Active Courses</p>
+                <p class="ad-kpi-card__label" data-i18n="adKpiCourses">
+                  Active Courses
+                </p>
               </div>
             </div>
 
             <div class="ad-kpi-card" role="listitem">
               <div class="ad-kpi-card__icon ad-kpi-icon--orange">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                >
+                  <path
+                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                  />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
               </div>
               <div>
                 <p class="ad-kpi-card__value" id="kpiPendingGrading">—</p>
-                <p class="ad-kpi-card__label" data-i18n="adKpiGrading">Pending Grading</p>
+                <p class="ad-kpi-card__label" data-i18n="adKpiGrading">
+                  Pending Grading
+                </p>
               </div>
             </div>
 
             <div class="ad-kpi-card" role="listitem">
               <div class="ad-kpi-card__icon ad-kpi-icon--red">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                >
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                </svg>
               </div>
               <div>
                 <p class="ad-kpi-card__value" id="kpiCompletionRate">—%</p>
-                <p class="ad-kpi-card__label" data-i18n="adKpiCompletion">Avg. Completion Rate</p>
+                <p class="ad-kpi-card__label" data-i18n="adKpiCompletion">
+                  Avg. Completion Rate
+                </p>
               </div>
             </div>
-
-          </div><!-- /kpi-grid -->
+          </div>
+          <!-- /kpi-grid -->
 
           <!-- Mid Row: Activity Feed + Pending Actions -->
           <div class="ad-mid-row">
-
             <!-- Live Activity Feed -->
             <div class="ad-card">
               <div class="ad-card__header">
-                <h2 class="ad-card__title" data-i18n="adActivityFeed">Activity Feed</h2>
+                <h2 class="ad-card__title" data-i18n="adActivityFeed">
+                  Activity Feed
+                </h2>
                 <span class="ad-live-dot" title="Live"></span>
               </div>
               <ul class="ad-activity-list" id="adActivityList" role="list">
                 <li class="ad-activity-empty" id="adActivityEmpty">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <svg
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.4"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
                   <span data-i18n="adNoActivity">No recent activity</span>
                 </li>
               </ul>
@@ -267,7 +591,9 @@
             <!-- Pending Actions -->
             <div class="ad-card">
               <div class="ad-card__header">
-                <h2 class="ad-card__title" data-i18n="adPendingActions">Pending Actions</h2>
+                <h2 class="ad-card__title" data-i18n="adPendingActions">
+                  Pending Actions
+                </h2>
                 <span class="ad-pending-count" id="pendingActionCount">0</span>
               </div>
               <ul class="ad-pending-list" id="pendingList" role="list">
@@ -276,14 +602,17 @@
                 </li>
               </ul>
             </div>
-
           </div>
 
           <!-- Students At-Risk Table -->
           <div class="ad-card">
             <div class="ad-card__header">
-              <h2 class="ad-card__title" data-i18n="adAtRiskTitle">Students At Risk</h2>
-              <span class="ad-tag ad-tag--orange" data-i18n="adAtRiskSub">Inactive 7+ days</span>
+              <h2 class="ad-card__title" data-i18n="adAtRiskTitle">
+                Students At Risk
+              </h2>
+              <span class="ad-tag ad-tag--orange" data-i18n="adAtRiskSub"
+                >Inactive 7+ days</span
+              >
             </div>
             <div class="ad-table-wrap">
               <table class="ad-table lms-table" aria-label="At-risk students">
@@ -298,13 +627,18 @@
                 </thead>
                 <tbody id="atRiskTableBody">
                   <tr id="atRiskEmpty">
-                    <td colspan="5" class="ad-table-empty" data-i18n="adNoAtRisk">No at-risk students 🎉</td>
+                    <td
+                      colspan="5"
+                      class="ad-table-empty"
+                      data-i18n="adNoAtRisk"
+                    >
+                      No at-risk students 🎉
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
-
         </section>
 
         <!-- ══════════════════════════════
@@ -315,20 +649,67 @@
             <h2 data-i18n="adNavStudents">My Students</h2>
             <div class="ad-section__header-actions">
               <div class="ad-search ad-search--inline">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="search" id="studentSearchInput" data-i18n="adSearchStudents" placeholder="Search students..." />
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  type="search"
+                  id="studentSearchInput"
+                  data-i18n="adSearchStudents"
+                  placeholder="Search students..."
+                />
               </div>
               <div class="ad-filter-tabs" role="tablist">
-                <button class="ad-filter-tab active" role="tab" data-filter="all" data-i18n="adFilterAll">All</button>
-                <button class="ad-filter-tab" role="tab" data-filter="active" data-i18n="adFilterActive">Active</button>
-                <button class="ad-filter-tab" role="tab" data-filter="completed" data-i18n="adFilterCompleted">Completed</button>
-                <button class="ad-filter-tab" role="tab" data-filter="at_risk" data-i18n="adFilterAtRisk">At Risk</button>
+                <button
+                  class="ad-filter-tab active"
+                  role="tab"
+                  data-filter="all"
+                  data-i18n="adFilterAll"
+                >
+                  All
+                </button>
+                <button
+                  class="ad-filter-tab"
+                  role="tab"
+                  data-filter="active"
+                  data-i18n="adFilterActive"
+                >
+                  Active
+                </button>
+                <button
+                  class="ad-filter-tab"
+                  role="tab"
+                  data-filter="completed"
+                  data-i18n="adFilterCompleted"
+                >
+                  Completed
+                </button>
+                <button
+                  class="ad-filter-tab"
+                  role="tab"
+                  data-filter="at_risk"
+                  data-i18n="adFilterAtRisk"
+                >
+                  At Risk
+                </button>
               </div>
             </div>
           </div>
           <div class="ad-card ad-card--no-pad">
             <div class="ad-table-wrap">
-              <table class="ad-table lms-table" aria-label="Student list" id="studentsTable">
+              <table
+                class="ad-table lms-table"
+                aria-label="Student list"
+                id="studentsTable"
+              >
                 <thead>
                   <tr>
                     <th data-i18n="adColStudent">Student</th>
@@ -342,7 +723,13 @@
                 </thead>
                 <tbody id="studentTableBody">
                   <tr id="studentTableEmpty">
-                    <td colspan="7" class="ad-table-empty" data-i18n="lmsNoStudents">No students found</td>
+                    <td
+                      colspan="7"
+                      class="ad-table-empty"
+                      data-i18n="lmsNoStudents"
+                    >
+                      No students found
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -357,7 +744,17 @@
           <div class="ad-section__header">
             <h2 data-i18n="adNavCourses">Course Management</h2>
             <button class="ad-btn ad-btn--primary" id="createCourseBtn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
               <span data-i18n="adCreateCourse">Create Course</span>
             </button>
           </div>
@@ -386,31 +783,84 @@
           <!-- Course Builder Panel (hidden until "Create Course" clicked) -->
           <div class="ad-builder-panel" id="courseBuilderPanel" hidden>
             <div class="ad-builder-panel__header">
-              <h3 class="ad-builder-panel__title" id="builderTitle" data-i18n="adCreateCourse">Create Course</h3>
-              <button class="ad-icon-btn" id="closeCourseBuilder" aria-label="Close builder">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <h3
+                class="ad-builder-panel__title"
+                id="builderTitle"
+                data-i18n="adCreateCourse"
+              >
+                Create Course
+              </h3>
+              <button
+                class="ad-icon-btn"
+                id="closeCourseBuilder"
+                aria-label="Close builder"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
               </button>
             </div>
             <!-- Builder Tabs -->
             <div class="ad-builder-tabs" role="tablist">
-              <button class="ad-builder-tab active" role="tab" data-tab="info" data-i18n="adTabCourseInfo">Course Info</button>
-              <button class="ad-builder-tab" role="tab" data-tab="modules" data-i18n="adTabModules">Modules & Lessons</button>
-              <button class="ad-builder-tab" role="tab" data-tab="settings" data-i18n="adTabCourseSettings">Settings</button>
+              <button
+                class="ad-builder-tab active"
+                role="tab"
+                data-tab="info"
+                data-i18n="adTabCourseInfo"
+              >
+                Course Info
+              </button>
+              <button
+                class="ad-builder-tab"
+                role="tab"
+                data-tab="modules"
+                data-i18n="adTabModules"
+              >
+                Modules & Lessons
+              </button>
+              <button
+                class="ad-builder-tab"
+                role="tab"
+                data-tab="settings"
+                data-i18n="adTabCourseSettings"
+              >
+                Settings
+              </button>
             </div>
 
             <!-- Tab: Course Info -->
             <div class="ad-builder-tab-content active" id="builderTab-info">
               <div class="ad-field-row">
                 <div class="ad-field">
-                  <label class="ad-label" for="cbTitle" data-i18n="adCourseTitle">Course Title</label>
+                  <label
+                    class="ad-label"
+                    for="cbTitle"
+                    data-i18n="adCourseTitle"
+                    >Course Title</label
+                  >
                   <input class="ad-input" type="text" id="cbTitle" />
                 </div>
                 <div class="ad-field">
-                  <label class="ad-label" for="cbCategory" data-i18n="adCourseCategory">Category</label>
+                  <label
+                    class="ad-label"
+                    for="cbCategory"
+                    data-i18n="adCourseCategory"
+                    >Category</label
+                  >
                   <select class="ad-input ad-select" id="cbCategory">
                     <option value="">-- Select --</option>
                     <option value="aged-care">Aged Care</option>
-                    <option value="disability-support">Disability Support</option>
+                    <option value="disability-support">
+                      Disability Support
+                    </option>
                     <option value="first-aid">First Aid</option>
                     <option value="mental-health">Mental Health</option>
                     <option value="medication">Medication Assistance</option>
@@ -421,12 +871,23 @@
                 </div>
               </div>
               <div class="ad-field">
-                <label class="ad-label" for="cbDesc" data-i18n="adCourseDesc">Description</label>
-                <textarea class="ad-input ad-textarea" id="cbDesc" rows="4"></textarea>
+                <label class="ad-label" for="cbDesc" data-i18n="adCourseDesc"
+                  >Description</label
+                >
+                <textarea
+                  class="ad-input ad-textarea"
+                  id="cbDesc"
+                  rows="4"
+                ></textarea>
               </div>
               <div class="ad-field-row">
                 <div class="ad-field">
-                  <label class="ad-label" for="cbLevel" data-i18n="adCourseLevel">Level</label>
+                  <label
+                    class="ad-label"
+                    for="cbLevel"
+                    data-i18n="adCourseLevel"
+                    >Level</label
+                  >
                   <select class="ad-input ad-select" id="cbLevel">
                     <option value="beginner">Beginner</option>
                     <option value="intermediate">Intermediate</option>
@@ -434,12 +895,34 @@
                   </select>
                 </div>
                 <div class="ad-field">
-                  <label class="ad-label" for="cbDuration" data-i18n="adCourseDuration">Duration (hours)</label>
-                  <input class="ad-input" type="number" id="cbDuration" min="1" />
+                  <label
+                    class="ad-label"
+                    for="cbDuration"
+                    data-i18n="adCourseDuration"
+                    >Duration (hours)</label
+                  >
+                  <input
+                    class="ad-input"
+                    type="number"
+                    id="cbDuration"
+                    min="1"
+                  />
                 </div>
                 <div class="ad-field">
-                  <label class="ad-label" for="cbPassMark" data-i18n="adPassMark">Pass Mark (%)</label>
-                  <input class="ad-input" type="number" id="cbPassMark" min="1" max="100" value="70" />
+                  <label
+                    class="ad-label"
+                    for="cbPassMark"
+                    data-i18n="adPassMark"
+                    >Pass Mark (%)</label
+                  >
+                  <input
+                    class="ad-input"
+                    type="number"
+                    id="cbPassMark"
+                    min="1"
+                    max="100"
+                    value="70"
+                  />
                 </div>
               </div>
             </div>
@@ -449,10 +932,42 @@
               <div class="ad-modules-list" id="builderModulesList">
                 <div class="ad-module-item" id="moduleTemplate">
                   <div class="ad-module-item__header">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ad-drag-handle"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
-                    <input class="ad-input ad-input--inline" type="text" placeholder="Module title..." />
-                    <button class="ad-icon-btn ad-icon-btn--danger" aria-label="Remove module">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      class="ad-drag-handle"
+                    >
+                      <circle cx="9" cy="5" r="1" />
+                      <circle cx="9" cy="12" r="1" />
+                      <circle cx="9" cy="19" r="1" />
+                      <circle cx="15" cy="5" r="1" />
+                      <circle cx="15" cy="12" r="1" />
+                      <circle cx="15" cy="19" r="1" />
+                    </svg>
+                    <input
+                      class="ad-input ad-input--inline"
+                      type="text"
+                      placeholder="Module title..."
+                    />
+                    <button
+                      class="ad-icon-btn ad-icon-btn--danger"
+                      aria-label="Remove module"
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                      >
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
                     </button>
                   </div>
                   <!-- Lessons inside module -->
@@ -465,17 +980,46 @@
                         <option value="quiz">❓ Quiz</option>
                         <option value="assignment">📋 Assignment</option>
                       </select>
-                      <input class="ad-input ad-input--grow" type="text" placeholder="Lesson title..." />
-                      <button class="ad-icon-btn ad-icon-btn--danger" aria-label="Remove lesson">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      <input
+                        class="ad-input ad-input--grow"
+                        type="text"
+                        placeholder="Lesson title..."
+                      />
+                      <button
+                        class="ad-icon-btn ad-icon-btn--danger"
+                        aria-label="Remove lesson"
+                      >
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.5"
+                        >
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
                       </button>
                     </li>
                   </ul>
-                  <button class="ad-add-lesson-btn" data-i18n="adAddLesson">+ Add Lesson</button>
+                  <button class="ad-add-lesson-btn" data-i18n="adAddLesson">
+                    + Add Lesson
+                  </button>
                 </div>
               </div>
               <button class="ad-btn ad-btn--outline" id="addModuleBtn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
                 <span data-i18n="adAddModule">Add Module</span>
               </button>
             </div>
@@ -484,33 +1028,74 @@
             <div class="ad-builder-tab-content" id="builderTab-settings">
               <div class="ad-field-row">
                 <div class="ad-field">
-                  <label class="ad-label" for="cbEnrollType" data-i18n="adEnrollmentType">Enrollment Type</label>
+                  <label
+                    class="ad-label"
+                    for="cbEnrollType"
+                    data-i18n="adEnrollmentType"
+                    >Enrollment Type</label
+                  >
                   <select class="ad-input ad-select" id="cbEnrollType">
                     <option value="open" data-i18n="adEnrollOpen">Open</option>
-                    <option value="invite_only" data-i18n="adEnrollInvite">Invite Only</option>
+                    <option value="invite_only" data-i18n="adEnrollInvite">
+                      Invite Only
+                    </option>
                     <option value="paid" data-i18n="adEnrollPaid">Paid</option>
                   </select>
                 </div>
                 <div class="ad-field">
-                  <label class="ad-label" for="cbMaxStudents" data-i18n="adMaxStudents">Max Students</label>
-                  <input class="ad-input" type="number" id="cbMaxStudents" placeholder="Unlimited" />
+                  <label
+                    class="ad-label"
+                    for="cbMaxStudents"
+                    data-i18n="adMaxStudents"
+                    >Max Students</label
+                  >
+                  <input
+                    class="ad-input"
+                    type="number"
+                    id="cbMaxStudents"
+                    placeholder="Unlimited"
+                  />
                 </div>
                 <div class="ad-field">
-                  <label class="ad-label" for="cbPrice" data-i18n="adPrice">Price (AUD)</label>
-                  <input class="ad-input" type="number" id="cbPrice" value="0" step="0.01" />
+                  <label class="ad-label" for="cbPrice" data-i18n="adPrice"
+                    >Price (AUD)</label
+                  >
+                  <input
+                    class="ad-input"
+                    type="number"
+                    id="cbPrice"
+                    value="0"
+                    step="0.01"
+                  />
                 </div>
               </div>
               <div class="ad-field-row">
                 <div class="ad-field">
-                  <label class="ad-label" for="cbStatus" data-i18n="adCourseStatus">Status</label>
+                  <label
+                    class="ad-label"
+                    for="cbStatus"
+                    data-i18n="adCourseStatus"
+                    >Status</label
+                  >
                   <select class="ad-input ad-select" id="cbStatus">
-                    <option value="draft" data-i18n="adStatusDraft">Draft</option>
-                    <option value="published" data-i18n="adStatusPublished">Published</option>
-                    <option value="archived" data-i18n="adStatusArchived">Archived</option>
+                    <option value="draft" data-i18n="adStatusDraft">
+                      Draft
+                    </option>
+                    <option value="published" data-i18n="adStatusPublished">
+                      Published
+                    </option>
+                    <option value="archived" data-i18n="adStatusArchived">
+                      Archived
+                    </option>
                   </select>
                 </div>
                 <div class="ad-field">
-                  <label class="ad-label" for="cbIsFeatured" data-i18n="adFeatured">Featured Course</label>
+                  <label
+                    class="ad-label"
+                    for="cbIsFeatured"
+                    data-i18n="adFeatured"
+                    >Featured Course</label
+                  >
                   <select class="ad-input ad-select" id="cbIsFeatured">
                     <option value="false">No</option>
                     <option value="true">Yes</option>
@@ -522,8 +1107,20 @@
             <div class="ad-builder-panel__footer">
               <p class="ad-builder-msg" id="builderMsg" aria-live="polite"></p>
               <div class="ad-builder-panel__footer-btns">
-                <button class="ad-btn ad-btn--outline" id="saveDraftBtn" data-i18n="adSaveDraft">Save as Draft</button>
-                <button class="ad-btn ad-btn--primary" id="saveCourseBtn" data-i18n="adSaveCourse">Save & Publish</button>
+                <button
+                  class="ad-btn ad-btn--outline"
+                  id="saveDraftBtn"
+                  data-i18n="adSaveDraft"
+                >
+                  Save as Draft
+                </button>
+                <button
+                  class="ad-btn ad-btn--primary"
+                  id="saveCourseBtn"
+                  data-i18n="adSaveCourse"
+                >
+                  Save & Publish
+                </button>
               </div>
             </div>
           </div>
@@ -536,18 +1133,50 @@
           <div class="ad-section__header">
             <h2 data-i18n="adNavGrading">Assignments & Grading</h2>
             <div class="ad-filter-tabs" role="tablist">
-              <button class="ad-filter-tab active" role="tab" data-filter="submitted" data-i18n="adGradeTabPending">Needs Grading</button>
-              <button class="ad-filter-tab" role="tab" data-filter="graded" data-i18n="adGradeTabGraded">Graded</button>
-              <button class="ad-filter-tab" role="tab" data-filter="all" data-i18n="adFilterAll">All</button>
+              <button
+                class="ad-filter-tab active"
+                role="tab"
+                data-filter="submitted"
+                data-i18n="adGradeTabPending"
+              >
+                Needs Grading
+              </button>
+              <button
+                class="ad-filter-tab"
+                role="tab"
+                data-filter="graded"
+                data-i18n="adGradeTabGraded"
+              >
+                Graded
+              </button>
+              <button
+                class="ad-filter-tab"
+                role="tab"
+                data-filter="all"
+                data-i18n="adFilterAll"
+              >
+                All
+              </button>
             </div>
           </div>
 
           <div class="ad-grading-layout" id="gradingLayout">
-
             <!-- Submission Queue (left) -->
             <div class="ad-submission-queue" id="submissionQueue">
               <div class="ad-empty-state" id="submissionEmpty">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.2"
+                >
+                  <path
+                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                  />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
                 <p data-i18n="adNoSubmissions">No submissions to grade</p>
               </div>
             </div>
@@ -555,53 +1184,124 @@
             <!-- Grading Panel (right) -->
             <div class="ad-grading-panel" id="gradingPanel">
               <div class="ad-grading-panel__empty" id="gradingPanelEmpty">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
-                <p data-i18n="adSelectSubmission">Select a submission to grade</p>
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.2"
+                >
+                  <path
+                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                  />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                </svg>
+                <p data-i18n="adSelectSubmission">
+                  Select a submission to grade
+                </p>
               </div>
               <!-- Grading form (shown when submission selected) -->
               <div class="ad-grading-form" id="gradingForm" hidden>
                 <div class="ad-grading-form__header">
                   <div>
-                    <p class="ad-grading-form__student" id="gradeStudentName">—</p>
-                    <p class="ad-grading-form__assignment" id="gradeAssignmentTitle">—</p>
+                    <p class="ad-grading-form__student" id="gradeStudentName">
+                      —
+                    </p>
+                    <p
+                      class="ad-grading-form__assignment"
+                      id="gradeAssignmentTitle"
+                    >
+                      —
+                    </p>
                   </div>
                   <span class="ad-tag" id="gradeCurrentStatus">Submitted</span>
                 </div>
                 <!-- File preview -->
                 <div class="ad-file-preview" id="gradeFilePreview">
-                  <p class="ad-file-preview__label" data-i18n="adSubmittedFiles">Submitted Files</p>
+                  <p
+                    class="ad-file-preview__label"
+                    data-i18n="adSubmittedFiles"
+                  >
+                    Submitted Files
+                  </p>
                   <div class="ad-file-list" id="gradeFileList"></div>
                 </div>
                 <!-- Student notes -->
                 <div class="ad-field">
-                  <label class="ad-label" data-i18n="adStudentNotes">Student Notes</label>
-                  <p class="ad-grading-form__student-notes" id="gradeStudentNotes">—</p>
+                  <label class="ad-label" data-i18n="adStudentNotes"
+                    >Student Notes</label
+                  >
+                  <p
+                    class="ad-grading-form__student-notes"
+                    id="gradeStudentNotes"
+                  >
+                    —
+                  </p>
                 </div>
                 <!-- Grade input -->
                 <div class="ad-field-row">
                   <div class="ad-field">
-                    <label class="ad-label" for="gradeScore" data-i18n="adGrade">Grade (%)</label>
-                    <input class="ad-input" type="number" id="gradeScore" min="0" max="100" placeholder="0–100" />
+                    <label class="ad-label" for="gradeScore" data-i18n="adGrade"
+                      >Grade (%)</label
+                    >
+                    <input
+                      class="ad-input"
+                      type="number"
+                      id="gradeScore"
+                      min="0"
+                      max="100"
+                      placeholder="0–100"
+                    />
                   </div>
                   <div class="ad-field">
-                    <label class="ad-label" data-i18n="adPassFail">Result</label>
+                    <label class="ad-label" data-i18n="adPassFail"
+                      >Result</label
+                    >
                     <p class="ad-grade-result" id="gradeResult">—</p>
                   </div>
                 </div>
                 <div class="ad-field">
-                  <label class="ad-label" for="gradeFeedback" data-i18n="adFeedback">Feedback to Student</label>
-                  <textarea class="ad-input ad-textarea" id="gradeFeedback" rows="4" data-i18n="adFeedbackPlaceholder" placeholder="Write your feedback..."></textarea>
+                  <label
+                    class="ad-label"
+                    for="gradeFeedback"
+                    data-i18n="adFeedback"
+                    >Feedback to Student</label
+                  >
+                  <textarea
+                    class="ad-input ad-textarea"
+                    id="gradeFeedback"
+                    rows="4"
+                    data-i18n="adFeedbackPlaceholder"
+                    placeholder="Write your feedback..."
+                  ></textarea>
                 </div>
                 <div class="ad-grading-form__footer">
-                  <p class="ad-grading-msg" id="gradingMsg" aria-live="polite"></p>
+                  <p
+                    class="ad-grading-msg"
+                    id="gradingMsg"
+                    aria-live="polite"
+                  ></p>
                   <div>
-                    <button class="ad-btn ad-btn--outline" id="reqResubmitBtn" data-i18n="adReqResubmit">Request Resubmit</button>
-                    <button class="ad-btn ad-btn--primary" id="saveGradeBtn" data-i18n="adSaveGrade">Save & Notify Student</button>
+                    <button
+                      class="ad-btn ad-btn--outline"
+                      id="reqResubmitBtn"
+                      data-i18n="adReqResubmit"
+                    >
+                      Request Resubmit
+                    </button>
+                    <button
+                      class="ad-btn ad-btn--primary"
+                      id="saveGradeBtn"
+                      data-i18n="adSaveGrade"
+                    >
+                      Save & Notify Student
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
-
           </div>
         </section>
 
@@ -612,21 +1312,37 @@
           <div class="ad-section__header">
             <h2 data-i18n="adNavSchedule">Schedule Management</h2>
             <button class="ad-btn ad-btn--primary" id="createEventBtn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
               <span data-i18n="adCreateEvent">Create Event</span>
             </button>
           </div>
 
           <!-- Create Event Form -->
           <div class="ad-event-form ad-card" id="eventFormCard" hidden>
-            <h3 class="ad-card__title" data-i18n="adCreateEvent">Create Event</h3>
+            <h3 class="ad-card__title" data-i18n="adCreateEvent">
+              Create Event
+            </h3>
             <div class="ad-field-row">
               <div class="ad-field">
-                <label class="ad-label" for="evTitle" data-i18n="adEventTitle">Event Title</label>
+                <label class="ad-label" for="evTitle" data-i18n="adEventTitle"
+                  >Event Title</label
+                >
                 <input class="ad-input" type="text" id="evTitle" />
               </div>
               <div class="ad-field">
-                <label class="ad-label" for="evType" data-i18n="adEventType">Type</label>
+                <label class="ad-label" for="evType" data-i18n="adEventType"
+                  >Type</label
+                >
                 <select class="ad-input ad-select" id="evType">
                   <option value="live_session">Live Session</option>
                   <option value="webinar">Webinar</option>
@@ -638,27 +1354,48 @@
             </div>
             <div class="ad-field-row">
               <div class="ad-field">
-                <label class="ad-label" for="evStart" data-i18n="adEventStart">Start Date & Time</label>
+                <label class="ad-label" for="evStart" data-i18n="adEventStart"
+                  >Start Date & Time</label
+                >
                 <input class="ad-input" type="datetime-local" id="evStart" />
               </div>
               <div class="ad-field">
-                <label class="ad-label" for="evEnd" data-i18n="adEventEnd">End Date & Time</label>
+                <label class="ad-label" for="evEnd" data-i18n="adEventEnd"
+                  >End Date & Time</label
+                >
                 <input class="ad-input" type="datetime-local" id="evEnd" />
               </div>
             </div>
             <div class="ad-field">
-              <label class="ad-label" for="evMeetingUrl" data-i18n="adMeetingUrl">Meeting URL (Zoom / Teams)</label>
-              <input class="ad-input" type="url" id="evMeetingUrl" placeholder="https://zoom.us/j/..." />
+              <label
+                class="ad-label"
+                for="evMeetingUrl"
+                data-i18n="adMeetingUrl"
+                >Meeting URL (Zoom / Teams)</label
+              >
+              <input
+                class="ad-input"
+                type="url"
+                id="evMeetingUrl"
+                placeholder="https://zoom.us/j/..."
+              />
             </div>
             <div class="ad-field-row">
               <div class="ad-field">
-                <label class="ad-label" for="evCourse" data-i18n="adColCourse">Course</label>
+                <label class="ad-label" for="evCourse" data-i18n="adColCourse"
+                  >Course</label
+                >
                 <select class="ad-input ad-select" id="evCourse">
                   <option value="">All Enrolled Students</option>
                 </select>
               </div>
               <div class="ad-field">
-                <label class="ad-label" for="evMandatory" data-i18n="adMandatory">Mandatory</label>
+                <label
+                  class="ad-label"
+                  for="evMandatory"
+                  data-i18n="adMandatory"
+                  >Mandatory</label
+                >
                 <select class="ad-input ad-select" id="evMandatory">
                   <option value="false">No</option>
                   <option value="true">Yes</option>
@@ -668,8 +1405,20 @@
             <div class="ad-event-form__footer">
               <p class="ad-event-msg" id="eventMsg" aria-live="polite"></p>
               <div>
-                <button class="ad-btn ad-btn--outline" id="cancelEventBtn" data-i18n="adCancel">Cancel</button>
-                <button class="ad-btn ad-btn--primary" id="saveEventBtn" data-i18n="adSaveEvent">Save Event</button>
+                <button
+                  class="ad-btn ad-btn--outline"
+                  id="cancelEventBtn"
+                  data-i18n="adCancel"
+                >
+                  Cancel
+                </button>
+                <button
+                  class="ad-btn ad-btn--primary"
+                  id="saveEventBtn"
+                  data-i18n="adSaveEvent"
+                >
+                  Save Event
+                </button>
               </div>
             </div>
           </div>
@@ -677,11 +1426,25 @@
           <!-- Upcoming Events List -->
           <div class="ad-card ad-card--no-pad">
             <div class="ad-card__header ad-card__header--padded">
-              <h2 class="ad-card__title" data-i18n="adUpcomingEvents">Upcoming Events</h2>
+              <h2 class="ad-card__title" data-i18n="adUpcomingEvents">
+                Upcoming Events
+              </h2>
             </div>
             <div class="ad-events-list" id="adminEventsList">
               <div class="ad-empty-state" id="eventsEmpty">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.2"
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
                 <p data-i18n="adNoEvents">No upcoming events</p>
               </div>
             </div>
@@ -694,18 +1457,46 @@
         <section class="ad-section" id="section-messages">
           <div class="ad-section__header">
             <h2 data-i18n="adNavMessages">Messages</h2>
-            <button class="ad-btn ad-btn--primary" id="adNewMsgBtn" data-i18n="lmsNewMessage">New Message</button>
+            <button
+              class="ad-btn ad-btn--primary"
+              id="adNewMsgBtn"
+              data-i18n="lmsNewMessage"
+            >
+              New Message
+            </button>
           </div>
           <div class="ad-messages-layout">
             <div class="ad-inbox" id="adInboxList">
               <div class="ad-empty-state" id="adInboxEmpty">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.2"
+                >
+                  <path
+                    d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                  />
+                </svg>
                 <p data-i18n="lmsNoMessages">No messages</p>
               </div>
             </div>
             <div class="ad-message-view" id="adMessageView">
               <div class="ad-message-view__empty" id="adMsgViewEmpty">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.2"
+                >
+                  <path
+                    d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                  />
+                </svg>
                 <p data-i18n="lmsSelectMessage">Select a message to view</p>
               </div>
             </div>
@@ -719,7 +1510,18 @@
           <div class="ad-section__header">
             <h2 data-i18n="adNavReports">Reports & Analytics</h2>
             <button class="ad-btn ad-btn--outline" id="exportReportBtn">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
               <span data-i18n="adExportCSV">Export CSV</span>
             </button>
           </div>
@@ -727,19 +1529,27 @@
           <!-- Metrics Row -->
           <div class="ad-metrics-grid">
             <div class="ad-metric-card">
-              <p class="ad-metric-card__label" data-i18n="adMetricAvgScore">Avg. Quiz Score</p>
+              <p class="ad-metric-card__label" data-i18n="adMetricAvgScore">
+                Avg. Quiz Score
+              </p>
               <p class="ad-metric-card__value" id="metricAvgScore">—%</p>
             </div>
             <div class="ad-metric-card">
-              <p class="ad-metric-card__label" data-i18n="adMetricDropout">Dropout Rate</p>
+              <p class="ad-metric-card__label" data-i18n="adMetricDropout">
+                Dropout Rate
+              </p>
               <p class="ad-metric-card__value" id="metricDropout">—%</p>
             </div>
             <div class="ad-metric-card">
-              <p class="ad-metric-card__label" data-i18n="adMetricCerts">Certificates Issued</p>
+              <p class="ad-metric-card__label" data-i18n="adMetricCerts">
+                Certificates Issued
+              </p>
               <p class="ad-metric-card__value" id="metricCerts">—</p>
             </div>
             <div class="ad-metric-card ad-admin-only">
-              <p class="ad-metric-card__label" data-i18n="adMetricRevenue">Total Revenue (AUD)</p>
+              <p class="ad-metric-card__label" data-i18n="adMetricRevenue">
+                Total Revenue (AUD)
+              </p>
               <p class="ad-metric-card__value" id="metricRevenue">$—</p>
             </div>
           </div>
@@ -747,7 +1557,9 @@
           <!-- Course Overview Table -->
           <div class="ad-card ad-card--no-pad">
             <div class="ad-card__header ad-card__header--padded">
-              <h3 class="ad-card__title" data-i18n="adCourseOverview">Course Overview</h3>
+              <h3 class="ad-card__title" data-i18n="adCourseOverview">
+                Course Overview
+              </h3>
             </div>
             <div class="ad-table-wrap">
               <table class="ad-table lms-table" aria-label="Course overview">
@@ -762,7 +1574,9 @@
                 </thead>
                 <tbody id="courseOverviewBody">
                   <tr id="courseOverviewEmpty">
-                    <td colspan="5" class="ad-table-empty" data-i18n="adNoData">No data available</td>
+                    <td colspan="5" class="ad-table-empty" data-i18n="adNoData">
+                      No data available
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -778,17 +1592,70 @@
             <h2 data-i18n="adNavUsers">User Management</h2>
             <div class="ad-section__header-actions">
               <div class="ad-search ad-search--inline">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="search" id="userSearchInput" data-i18n="adSearchUsers" placeholder="Search users..." />
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  type="search"
+                  id="userSearchInput"
+                  data-i18n="adSearchUsers"
+                  placeholder="Search users..."
+                />
               </div>
               <div class="ad-filter-tabs" role="tablist">
-                <button class="ad-filter-tab active" role="tab" data-filter="all" data-i18n="adFilterAll">All</button>
-                <button class="ad-filter-tab" role="tab" data-filter="student" data-i18n="adFilterStudents">Students</button>
-                <button class="ad-filter-tab" role="tab" data-filter="trainer" data-i18n="adFilterTrainers">Trainers</button>
-                <button class="ad-filter-tab" role="tab" data-filter="admin" data-i18n="adFilterAdmins">Admins</button>
+                <button
+                  class="ad-filter-tab active"
+                  role="tab"
+                  data-filter="all"
+                  data-i18n="adFilterAll"
+                >
+                  All
+                </button>
+                <button
+                  class="ad-filter-tab"
+                  role="tab"
+                  data-filter="student"
+                  data-i18n="adFilterStudents"
+                >
+                  Students
+                </button>
+                <button
+                  class="ad-filter-tab"
+                  role="tab"
+                  data-filter="trainer"
+                  data-i18n="adFilterTrainers"
+                >
+                  Trainers
+                </button>
+                <button
+                  class="ad-filter-tab"
+                  role="tab"
+                  data-filter="admin"
+                  data-i18n="adFilterAdmins"
+                >
+                  Admins
+                </button>
               </div>
               <button class="ad-btn ad-btn--primary" id="addUserBtn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
                 <span data-i18n="adAddUser">Add User</span>
               </button>
             </div>
@@ -808,7 +1675,13 @@
                 </thead>
                 <tbody id="userTableBody">
                   <tr id="userTableEmpty">
-                    <td colspan="6" class="ad-table-empty" data-i18n="adNoUsers">No users found</td>
+                    <td
+                      colspan="6"
+                      class="ad-table-empty"
+                      data-i18n="adNoUsers"
+                    >
+                      No users found
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -823,28 +1696,58 @@
           <div class="ad-section__header">
             <h2 data-i18n="adNavEnrollments">Enrollments & Payments</h2>
             <button class="ad-btn ad-btn--outline" id="exportPaymentsBtn">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
               <span data-i18n="adExportCSV">Export CSV</span>
             </button>
           </div>
           <!-- Payment summary cards -->
           <div class="ad-payment-summary">
             <div class="ad-payment-card">
-              <p class="ad-payment-card__label" data-i18n="adPayTotal">Total Payments</p>
+              <p class="ad-payment-card__label" data-i18n="adPayTotal">
+                Total Payments
+              </p>
               <p class="ad-payment-card__value" id="payTotal">—</p>
             </div>
             <div class="ad-payment-card">
-              <p class="ad-payment-card__label" data-i18n="adPayPending">Pending</p>
-              <p class="ad-payment-card__value ad-payment-card__value--warn" id="payPending">—</p>
+              <p class="ad-payment-card__label" data-i18n="adPayPending">
+                Pending
+              </p>
+              <p
+                class="ad-payment-card__value ad-payment-card__value--warn"
+                id="payPending"
+              >
+                —
+              </p>
             </div>
             <div class="ad-payment-card">
-              <p class="ad-payment-card__label" data-i18n="adPayRevenue">Revenue (AUD)</p>
-              <p class="ad-payment-card__value ad-payment-card__value--green" id="payRevenue">$—</p>
+              <p class="ad-payment-card__label" data-i18n="adPayRevenue">
+                Revenue (AUD)
+              </p>
+              <p
+                class="ad-payment-card__value ad-payment-card__value--green"
+                id="payRevenue"
+              >
+                $—
+              </p>
             </div>
           </div>
           <div class="ad-card ad-card--no-pad">
             <div class="ad-table-wrap">
-              <table class="ad-table lms-table" aria-label="Enrollment & payments">
+              <table
+                class="ad-table lms-table"
+                aria-label="Enrollment & payments"
+              >
                 <thead>
                   <tr>
                     <th data-i18n="adColStudent">Student</th>
@@ -858,7 +1761,9 @@
                 </thead>
                 <tbody id="enrollmentTableBody">
                   <tr id="enrollmentTableEmpty">
-                    <td colspan="7" class="ad-table-empty" data-i18n="adNoData">No data available</td>
+                    <td colspan="7" class="ad-table-empty" data-i18n="adNoData">
+                      No data available
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -873,21 +1778,47 @@
           <div class="ad-section__header">
             <h2 data-i18n="adNavAnnouncements">Announcements</h2>
             <button class="ad-btn ad-btn--primary" id="createAnnouncementBtn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
               <span data-i18n="adCreateAnnouncement">Create Announcement</span>
             </button>
           </div>
 
           <!-- Create Announcement Form -->
-          <div class="ad-announcement-form ad-card" id="announcementFormCard" hidden>
-            <h3 class="ad-card__title" data-i18n="adCreateAnnouncement">Create Announcement</h3>
+          <div
+            class="ad-announcement-form ad-card"
+            id="announcementFormCard"
+            hidden
+          >
+            <h3 class="ad-card__title" data-i18n="adCreateAnnouncement">
+              Create Announcement
+            </h3>
             <div class="ad-field-row">
               <div class="ad-field">
-                <label class="ad-label" for="anTitle" data-i18n="adAnnouncementTitle">Title</label>
+                <label
+                  class="ad-label"
+                  for="anTitle"
+                  data-i18n="adAnnouncementTitle"
+                  >Title</label
+                >
                 <input class="ad-input" type="text" id="anTitle" />
               </div>
               <div class="ad-field">
-                <label class="ad-label" for="anTarget" data-i18n="adAnnouncementTarget">Target Audience</label>
+                <label
+                  class="ad-label"
+                  for="anTarget"
+                  data-i18n="adAnnouncementTarget"
+                  >Target Audience</label
+                >
                 <select class="ad-input ad-select" id="anTarget">
                   <option value="all" data-i18n="adFilterAll">All</option>
                   <option value="student">Students Only</option>
@@ -896,30 +1827,74 @@
               </div>
             </div>
             <div class="ad-field">
-              <label class="ad-label" for="anBody" data-i18n="adAnnouncementBody">Content</label>
-              <textarea class="ad-input ad-textarea" id="anBody" rows="5"></textarea>
+              <label
+                class="ad-label"
+                for="anBody"
+                data-i18n="adAnnouncementBody"
+                >Content</label
+              >
+              <textarea
+                class="ad-input ad-textarea"
+                id="anBody"
+                rows="5"
+              ></textarea>
             </div>
             <div class="ad-field-row">
               <div class="ad-field">
-                <label class="ad-label" for="anCourse" data-i18n="adAnnouncementCourse">Target Course (optional)</label>
+                <label
+                  class="ad-label"
+                  for="anCourse"
+                  data-i18n="adAnnouncementCourse"
+                  >Target Course (optional)</label
+                >
                 <select class="ad-input ad-select" id="anCourse">
                   <option value="">All Courses (Global)</option>
                 </select>
               </div>
               <div class="ad-field">
-                <label class="ad-label" for="anPublishAt" data-i18n="adPublishAt">Publish At</label>
-                <input class="ad-input" type="datetime-local" id="anPublishAt" />
+                <label
+                  class="ad-label"
+                  for="anPublishAt"
+                  data-i18n="adPublishAt"
+                  >Publish At</label
+                >
+                <input
+                  class="ad-input"
+                  type="datetime-local"
+                  id="anPublishAt"
+                />
               </div>
               <div class="ad-field">
-                <label class="ad-label" for="anExpiresAt" data-i18n="adExpiresAt">Expires At (optional)</label>
-                <input class="ad-input" type="datetime-local" id="anExpiresAt" />
+                <label
+                  class="ad-label"
+                  for="anExpiresAt"
+                  data-i18n="adExpiresAt"
+                  >Expires At (optional)</label
+                >
+                <input
+                  class="ad-input"
+                  type="datetime-local"
+                  id="anExpiresAt"
+                />
               </div>
             </div>
             <div class="ad-announcement-form__footer">
               <p class="ad-ann-msg" id="annMsg" aria-live="polite"></p>
               <div>
-                <button class="ad-btn ad-btn--outline" id="cancelAnnouncementBtn" data-i18n="adCancel">Cancel</button>
-                <button class="ad-btn ad-btn--primary" id="saveAnnouncementBtn" data-i18n="adPublish">Publish</button>
+                <button
+                  class="ad-btn ad-btn--outline"
+                  id="cancelAnnouncementBtn"
+                  data-i18n="adCancel"
+                >
+                  Cancel
+                </button>
+                <button
+                  class="ad-btn ad-btn--primary"
+                  id="saveAnnouncementBtn"
+                  data-i18n="adPublish"
+                >
+                  Publish
+                </button>
               </div>
             </div>
           </div>
@@ -927,7 +1902,16 @@
           <!-- Announcements List -->
           <div class="ad-announcements-list" id="announcementsList">
             <div class="ad-empty-state" id="announcementsEmpty">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M22 3L2 10l7 4 4 7 9-18z"/></svg>
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.2"
+              >
+                <path d="M22 3L2 10l7 4 4 7 9-18z" />
+              </svg>
               <p data-i18n="adNoAnnouncements">No announcements yet</p>
             </div>
           </div>
@@ -941,64 +1925,138 @@
             <h2 data-i18n="adNavSettings">System Settings</h2>
           </div>
           <div class="ad-settings-layout">
-
             <!-- Platform Branding -->
             <div class="ad-card">
-              <h3 class="ad-card__title" data-i18n="adSettingsBranding">Platform Branding</h3>
+              <h3 class="ad-card__title" data-i18n="adSettingsBranding">
+                Platform Branding
+              </h3>
               <div class="ad-field">
-                <label class="ad-label" for="settPlatformName" data-i18n="adPlatformName">Platform Name</label>
-                <input class="ad-input" type="text" id="settPlatformName" value="Redline Academy" />
+                <label
+                  class="ad-label"
+                  for="settPlatformName"
+                  data-i18n="adPlatformName"
+                  >Platform Name</label
+                >
+                <input
+                  class="ad-input"
+                  type="text"
+                  id="settPlatformName"
+                  value="Redline Academy"
+                />
               </div>
               <div class="ad-field">
-                <label class="ad-label" for="settDefaultTimezone" data-i18n="lmsTimezone">Default Timezone</label>
+                <label
+                  class="ad-label"
+                  for="settDefaultTimezone"
+                  data-i18n="lmsTimezone"
+                  >Default Timezone</label
+                >
                 <select class="ad-input ad-select" id="settDefaultTimezone">
-                  <option value="Australia/Sydney">Australia/Sydney (AEST)</option>
-                  <option value="Australia/Melbourne">Australia/Melbourne</option>
+                  <option value="Australia/Sydney">
+                    Australia/Sydney (AEST)
+                  </option>
+                  <option value="Australia/Melbourne">
+                    Australia/Melbourne
+                  </option>
                   <option value="Asia/Jakarta">Asia/Jakarta (WIB)</option>
                 </select>
               </div>
               <div class="ad-field">
-                <label class="ad-label" for="settDefaultLang" data-i18n="adDefaultLanguage">Default Language</label>
+                <label
+                  class="ad-label"
+                  for="settDefaultLang"
+                  data-i18n="adDefaultLanguage"
+                  >Default Language</label
+                >
                 <select class="ad-input ad-select" id="settDefaultLang">
                   <option value="id">Bahasa Indonesia</option>
                   <option value="en">English</option>
                 </select>
               </div>
-              <button class="ad-btn ad-btn--primary" id="saveBrandingBtn" data-i18n="adSaveSettings">Save Settings</button>
-              <p class="ad-settings-msg" id="brandingMsg" aria-live="polite"></p>
+              <button
+                class="ad-btn ad-btn--primary"
+                id="saveBrandingBtn"
+                data-i18n="adSaveSettings"
+              >
+                Save Settings
+              </button>
+              <p
+                class="ad-settings-msg"
+                id="brandingMsg"
+                aria-live="polite"
+              ></p>
             </div>
 
             <!-- Email Notifications -->
             <div class="ad-card">
-              <h3 class="ad-card__title" data-i18n="adSettingsEmail">Email Notifications</h3>
+              <h3 class="ad-card__title" data-i18n="adSettingsEmail">
+                Email Notifications
+              </h3>
               <div class="ad-toggle-list">
                 <label class="ad-toggle-row">
                   <span data-i18n="adEmailNewEnroll">New enrollment</span>
-                  <input type="checkbox" class="ad-toggle" id="emailNewEnroll" checked />
+                  <input
+                    type="checkbox"
+                    class="ad-toggle"
+                    id="emailNewEnroll"
+                    checked
+                  />
                 </label>
                 <label class="ad-toggle-row">
-                  <span data-i18n="adEmailSubmission">Assignment submitted</span>
-                  <input type="checkbox" class="ad-toggle" id="emailSubmission" checked />
+                  <span data-i18n="adEmailSubmission"
+                    >Assignment submitted</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="ad-toggle"
+                    id="emailSubmission"
+                    checked
+                  />
                 </label>
                 <label class="ad-toggle-row">
                   <span data-i18n="adEmailGraded">Assignment graded</span>
-                  <input type="checkbox" class="ad-toggle" id="emailGraded" checked />
+                  <input
+                    type="checkbox"
+                    class="ad-toggle"
+                    id="emailGraded"
+                    checked
+                  />
                 </label>
                 <label class="ad-toggle-row">
                   <span data-i18n="adEmailCertificate">Certificate issued</span>
-                  <input type="checkbox" class="ad-toggle" id="emailCertificate" checked />
+                  <input
+                    type="checkbox"
+                    class="ad-toggle"
+                    id="emailCertificate"
+                    checked
+                  />
                 </label>
                 <label class="ad-toggle-row">
-                  <span data-i18n="adEmailReminder">Session reminders (24h before)</span>
-                  <input type="checkbox" class="ad-toggle" id="emailReminder" checked />
+                  <span data-i18n="adEmailReminder"
+                    >Session reminders (24h before)</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="ad-toggle"
+                    id="emailReminder"
+                    checked
+                  />
                 </label>
               </div>
-              <button class="ad-btn ad-btn--primary" id="saveEmailSettingsBtn" data-i18n="adSaveSettings">Save Settings</button>
+              <button
+                class="ad-btn ad-btn--primary"
+                id="saveEmailSettingsBtn"
+                data-i18n="adSaveSettings"
+              >
+                Save Settings
+              </button>
             </div>
 
             <!-- Storage Monitor -->
             <div class="ad-card">
-              <h3 class="ad-card__title" data-i18n="adSettingsStorage">Storage Monitor</h3>
+              <h3 class="ad-card__title" data-i18n="adSettingsStorage">
+                Storage Monitor
+              </h3>
               <div class="ad-storage-info" id="storageInfo">
                 <div class="ad-storage-row">
                   <span data-i18n="adStorageDB">Database</span>
@@ -1006,38 +2064,62 @@
                 </div>
                 <div class="ad-progress">
                   <div class="ad-progress__bar">
-                    <div class="ad-progress__fill" id="storageDBBar" style="width:0%"></div>
+                    <div
+                      class="ad-progress__fill"
+                      id="storageDBBar"
+                      style="width: 0%"
+                    ></div>
                   </div>
                 </div>
-                <div class="ad-storage-row" style="margin-top:.75rem">
+                <div class="ad-storage-row" style="margin-top: 0.75rem">
                   <span data-i18n="adStorageFiles">File Storage</span>
                   <span class="ad-storage-val" id="storageFiles">— / 1 GB</span>
                 </div>
                 <div class="ad-progress">
                   <div class="ad-progress__bar">
-                    <div class="ad-progress__fill" id="storageFilesBar" style="width:0%"></div>
+                    <div
+                      class="ad-progress__fill"
+                      id="storageFilesBar"
+                      style="width: 0%"
+                    ></div>
                   </div>
                 </div>
-                <p class="ad-storage-note" data-i18n="adStorageNote">Supabase Free Tier limits</p>
+                <p class="ad-storage-note" data-i18n="adStorageNote">
+                  Supabase Free Tier limits
+                </p>
               </div>
             </div>
-
           </div>
         </section>
-
-      </main><!-- /ad-page -->
-    </div><!-- /ad-main -->
+      </main>
+      <!-- /ad-page -->
+    </div>
+    <!-- /ad-main -->
 
     <!-- ═══════════════════════════════════════
          NOTIFICATION PANEL
     ═══════════════════════════════════════ -->
-    <div class="ad-notif-panel" id="adNotifPanel" role="dialog" aria-label="Notifications" hidden>
+    <div
+      class="ad-notif-panel"
+      id="adNotifPanel"
+      role="dialog"
+      aria-label="Notifications"
+      hidden
+    >
       <div class="ad-notif-panel__header">
         <h3 data-i18n="lmsNotifications">Notifications</h3>
-        <button class="ad-notif-panel__mark-all" id="adMarkAllRead" data-i18n="lmsMarkAllRead">Mark all read</button>
+        <button
+          class="ad-notif-panel__mark-all"
+          id="adMarkAllRead"
+          data-i18n="lmsMarkAllRead"
+        >
+          Mark all read
+        </button>
       </div>
       <ul class="ad-notif-list" id="adNotifList" role="list">
-        <li class="ad-notif-empty" data-i18n="lmsNoNotifications">No notifications</li>
+        <li class="ad-notif-empty" data-i18n="lmsNoNotifications">
+          No notifications
+        </li>
       </ul>
     </div>
 
@@ -1050,6 +2132,5 @@
     <script src="../js/auth.js"></script>
     <script src="../js/guard.js"></script>
     <script src="../js/dashboard-admin.js"></script>
-
   </body>
 </html>

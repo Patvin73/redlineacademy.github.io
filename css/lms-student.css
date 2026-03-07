@@ -121,6 +121,14 @@
   text-decoration: none;
 }
 
+.sd-logo-image {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: block;
+  flex-shrink: 0;
+}
+
 .sd-logo-mark {
   width: 32px;
   height: 32px;

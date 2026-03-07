@@ -46,7 +46,7 @@
     <div class="container">
       <div class="header-content">
         <div class="logo">
-          <img src="../assets/images/redlinelogo.png" alt="Redline Academy Logo">
+          <img src="../assets/images/redlinewlogo.png" alt="Redline Academy Logo">
           <!-- <span>Redline Academy</span> -->
         </div>
         
@@ -322,7 +322,7 @@
                       <label class="required" data-i18n="idNumberLabel">Nomor KTP</label>
                       <div style="display:flex; gap:0.5rem; align-items:center;">
                         <input type="text" name="id_number" required placeholder="Nomor KTP Anda" data-i18n="idNumberPlaceholder" style="flex:1;" />
-                        <label class="btn btn-secondary btn-sm" style="margin:0; padding:0.5rem 0.75rem; display:inline-flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                        <label class="btn btn-secondary btn-sm enroll-inline-btn upload-id-btn">
                           <input type="file" name="id_document" id="id_document" accept="image/*,.pdf" style="display:none;" />
                           <span data-i18n="uploadIdBtn">Unggah KTP</span>
                         </label>
@@ -349,10 +349,8 @@
                         data-i18n="postcodePlaceholder">
                     </div>
                   </fieldset>
-                </div>
 
-                <div>
-                  <!-- EDUCATION (right column, top) -->
+                  <!-- EDUCATION (left column, bottom) -->
                   <fieldset>
                     <legend data-i18n="educationLegend">Pendidikan & Latar Belakang</legend>
 
@@ -381,6 +379,131 @@
                         data-i18n="experiencePlaceholder"></textarea>
                     </div>
                   </fieldset>
+                </div>
+
+                <div>
+                  <!-- PAYMENT (right column, top) -->
+                  <fieldset class="payment-fieldset" data-gateway-ready="true">
+                    <legend data-i18n="paymentLegend">Pembayaran</legend>
+                    <p class="payment-intro" data-i18n="paymentIntro">
+                      Lengkapi data pembayaran berikut. Setelah formulir dikirim, transaksi akan dibuat ke payment gateway.
+                    </p>
+
+                    <div class="payment-grid">
+                      <div class="form-group">
+                        <label class="required" for="selected_program" data-i18n="selectedProgramLabel">Program Dipilih</label>
+                        <select name="selected_program" id="selected_program" required>
+                          <option value="" selected data-price="0" data-i18n="selectedProgramPlaceholder">Pilih Program</option>
+                          <option value="assistant_carer" data-price="8900000" data-i18n="paymentProgramCaregiver">Asisten Perawat - Rp8.900.000</option>
+                        </select>
+                      </div>
+
+                      <div class="form-group">
+                        <label class="required" data-i18n="paymentPlanLabel">Skema Pembayaran</label>
+                        <div class="payment-plan-options" role="radiogroup" aria-label="Skema pembayaran">
+                          <label class="payment-plan-option" for="payment_plan_full">
+                            <input type="radio" id="payment_plan_full" name="payment_plan" value="full" data-discount="0.05" required>
+                            <span class="payment-plan-icon" aria-hidden="true">
+                              <svg viewBox="0 0 24 24" focusable="false">
+                                <circle cx="12" cy="12" r="9"></circle>
+                                <path d="M8.5 12.5l2.3 2.3 4.7-5.2"></path>
+                              </svg>
+                            </span>
+                            <span class="payment-plan-content">
+                              <strong data-i18n="paymentPlanFullTitle">Lunas</strong>
+                              <small data-i18n="paymentPlanFullDesc">Diskon 5%</small>
+                            </span>
+                          </label>
+                          <label class="payment-plan-option" for="payment_plan_installment">
+                            <input type="radio" id="payment_plan_installment" name="payment_plan" value="installment" data-discount="0">
+                            <span class="payment-plan-icon" aria-hidden="true">
+                              <svg viewBox="0 0 24 24" focusable="false">
+                                <rect x="4" y="5" width="16" height="14" rx="2"></rect>
+                                <path d="M8 3v4M16 3v4M4 10h16"></path>
+                              </svg>
+                            </span>
+                            <span class="payment-plan-content">
+                              <strong data-i18n="paymentPlanInstallmentTitle">Cicilan</strong>
+                              <small data-i18n="paymentPlanInstallmentDesc">Tanpa Diskon</small>
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label class="required" for="payment_method" data-i18n="paymentMethodLabel">Metode Pembayaran</label>
+                        <select name="payment_method" id="payment_method" required>
+                          <option value="" selected data-i18n="paymentMethodPlaceholder">Pilih Metode Pembayaran</option>
+                          <option value="va_bca" data-i18n="paymentMethodVa">Virtual Account (BCA/BNI/BRI)</option>
+                          <option value="qris" data-i18n="paymentMethodQris">QRIS / QR Code</option>
+                          <option value="ewallet" data-i18n="paymentMethodEwallet">E-Wallet (GoPay/OVO/DANA)</option>
+                          <option value="card" data-i18n="paymentMethodCard">Kartu Debit/Kredit</option>
+                          <option value="bank_transfer" data-i18n="paymentMethodTransfer">Transfer Bank Manual</option>
+                        </select>
+                      </div>
+
+                      <div class="form-group">
+                        <label class="required" for="invoice_name" data-i18n="invoiceNameLabel">Nama pada Tagihan</label>
+                        <input type="text" id="invoice_name" name="invoice_name" required placeholder="Nama sesuai rekening / e-wallet" data-i18n="invoiceNamePlaceholder">
+                      </div>
+
+                      <div class="form-group">
+                        <label class="required" for="invoice_email" data-i18n="invoiceEmailLabel">Email Tagihan</label>
+                        <input type="email" id="invoice_email" name="invoice_email" required placeholder="Email untuk receipt pembayaran" data-i18n="invoiceEmailPlaceholder">
+                      </div>
+
+                      <div class="form-group">
+                        <label for="promo_code" data-i18n="promoCodeLabel">Kode Promo (Opsional)</label>
+                        <div class="payment-inline">
+                          <input type="text" id="promo_code" name="promo_code" placeholder="Contoh: EARLYBIRD10" data-i18n="promoCodePlaceholder" autocomplete="off">
+                          <button type="button" class="btn btn-secondary btn-sm enroll-inline-btn" id="apply-promo-btn" data-i18n="applyPromoBtn">Terapkan</button>
+                        </div>
+                        <small id="promo-feedback" class="payment-feedback" data-i18n="paymentPrepDefault">Isi detail pembayaran lalu klik "Siapkan Pembayaran".</small>
+                      </div>
+                    </div>
+
+                    <div class="payment-summary" aria-live="polite">
+                      <h5 data-i18n="paymentSummaryTitle">Ringkasan Pembayaran</h5>
+                      <ul>
+                        <li>
+                          <span data-i18n="summaryProgramFee">Biaya Program</span>
+                          <strong id="summary_program_fee">Rp0</strong>
+                        </li>
+                        <li>
+                          <span data-i18n="summaryPlanDiscount">Diskon Skema</span>
+                          <strong id="summary_plan_discount">-Rp0</strong>
+                        </li>
+                        <li>
+                          <span data-i18n="summaryPromoDiscount">Diskon Promo</span>
+                          <strong id="summary_promo_discount">-Rp0</strong>
+                        </li>
+                      </ul>
+                      <div class="payment-total-row">
+                        <span data-i18n="summaryTotal">Total</span>
+                        <strong id="summary_total">Rp0</strong>
+                      </div>
+                      <p class="payment-note" data-i18n="paymentGatewayNote">
+                        Setelah menekan tombol "Siapkan Pembayaran", sistem akan menandai transaksi siap diproses oleh payment gateway.
+                      </p>
+                    </div>
+
+                    <div class="payment-actions">
+                      <button type="button" class="btn btn-secondary" id="prepare-payment-btn" data-i18n="preparePaymentBtn">Siapkan Pembayaran</button>
+                      <small id="payment-prep-feedback" class="payment-feedback" data-i18n="paymentPrepDefault">Isi detail pembayaran lalu klik "Siapkan Pembayaran".</small>
+                    </div>
+
+                    <!-- Gateway-ready payload fields -->
+                    <input type="hidden" name="program_fee" id="program_fee" value="0">
+                    <input type="hidden" name="admin_fee" id="admin_fee" value="0">
+                    <input type="hidden" name="plan_discount" id="plan_discount" value="0">
+                    <input type="hidden" name="promo_discount" id="promo_discount" value="0">
+                    <input type="hidden" name="payment_total" id="payment_total" value="0">
+                    <input type="hidden" name="payment_currency" value="IDR">
+                    <input type="hidden" name="payment_status" id="payment_status" value="draft">
+                    <input type="hidden" name="payment_reference" id="payment_reference" value="">
+                    <input type="hidden" name="gateway_session_id" id="gateway_session_id" value="">
+                    <input type="hidden" name="gateway_checkout_url" id="gateway_checkout_url" value="">
+                  </fieldset>
 
                   <!-- DECLARATION (right column, bottom) -->
                   <fieldset>
@@ -400,6 +523,15 @@
                         <input type="checkbox" name="terms" required>
                         <span data-i18n="termsDeclaration">
                           Saya menyetujui Syarat & Ketentuan serta Kebijakan Privasi.
+                        </span>
+                      </label>
+                    </div>
+
+                    <div class="form-group">
+                      <label>
+                        <input type="checkbox" name="payment_consent" required>
+                        <span data-i18n="paymentConsent">
+                          Saya menyetujui biaya program, kebijakan pembayaran, dan proses transaksi melalui payment gateway.
                         </span>
                       </label>
                     </div>
@@ -431,7 +563,7 @@
       <div class="grid-3">
         <div class="card fade-in">
           <div class="card-body text-center">
-            <div class="card-icon">🏆</div>
+            <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></div>
             <h3 class="card-title">Sertifikasi Internasional</h3>
             <p class="card-text">Semua program kami diakui secara internasional dan sesuai dengan standar industri global.</p>
           </div>
@@ -439,7 +571,7 @@
 
         <div class="card fade-in">
           <div class="card-body text-center">
-            <div class="card-icon">👨‍🏫</div>
+            <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
             <h3 class="card-title">Instruktur Berpengalaman</h3>
             <p class="card-text">Belajar dari para ahli industri yang memiliki pengalaman praktis bertahun-tahun.</p>
           </div>
@@ -447,7 +579,7 @@
 
         <div class="card fade-in">
           <div class="card-body text-center">
-            <div class="card-icon">💼</div>
+            <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
             <h3 class="card-title">Penempatan Kerja</h3>
             <p class="card-text">Kami membantu Anda mendapatkan penempatan kerja melalui jaringan mitra industri kami.</p>
           </div>
@@ -455,7 +587,7 @@
 
         <div class="card fade-in">
           <div class="card-body text-center">
-            <div class="card-icon">🛠️</div>
+            <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
             <h3 class="card-title">Pembelajaran Praktis</h3>
             <p class="card-text">Fokus pada pembelajaran hands-on dengan peralatan dan lingkungan kerja yang realistis.</p>
           </div>
@@ -463,7 +595,7 @@
 
         <div class="card fade-in">
           <div class="card-body text-center">
-            <div class="card-icon">🌍</div>
+            <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></div>
             <h3 class="card-title">Standar Global</h3>
             <p class="card-text">Kurikulum kami dirancang mengikuti standar internasional dan kebutuhan pasar global.</p>
           </div>
@@ -471,7 +603,7 @@
 
         <div class="card fade-in">
           <div class="card-body text-center">
-            <div class="card-icon">📱</div>
+            <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></svg></div>
             <h3 class="card-title">Dukungan Berkelanjutan</h3>
             <p class="card-text">Kami memberikan dukungan karier dan bimbingan bahkan setelah Anda lulus dari program.</p>
           </div>
@@ -629,17 +761,19 @@
     })();
   </script>
 
-  <!-- Photo ID validation -->
+    <!-- Photo ID validation -->
+  <script>
     (function () {
-      const fileInput   = document.getElementById('id_document');
-      const fileName    = document.getElementById('id_document_name');
-      const errorBox    = document.getElementById('id_document_error');
-      const form        = document.querySelector('.enroll-form');
+      const fileInput = document.getElementById('id_document');
+      const fileName = document.getElementById('id_document_name');
+      const errorBox = document.getElementById('id_document_error');
+      const form = document.querySelector('.enroll-form');
+      if (!fileInput || !fileName || !errorBox || !form) return;
 
       // Show selected file name when user picks a file
       fileInput.addEventListener('change', function () {
         if (this.files && this.files.length > 0) {
-          fileName.textContent = '✅ ' + this.files[0].name;
+          fileName.textContent = 'File dipilih: ' + this.files[0].name;
           fileName.style.color = '#16a34a';
           errorBox.style.display = 'none';
         } else {
@@ -659,6 +793,147 @@
     })();
   </script>
 
+  <!-- Payment section interactions -->
+  <script>
+    (function () {
+      const form = document.querySelector('.enroll-form');
+      const selectedProgram = document.getElementById('selected_program');
+      const paymentMethod = document.getElementById('payment_method');
+      const promoCodeInput = document.getElementById('promo_code');
+      const applyPromoBtn = document.getElementById('apply-promo-btn');
+      const preparePaymentBtn = document.getElementById('prepare-payment-btn');
+      const promoFeedback = document.getElementById('promo-feedback');
+      const paymentPrepFeedback = document.getElementById('payment-prep-feedback');
+
+      if (!form || !selectedProgram || !paymentMethod || !applyPromoBtn || !preparePaymentBtn) return;
+
+      const summaryProgramFee = document.getElementById('summary_program_fee');
+      const summaryPlanDiscount = document.getElementById('summary_plan_discount');
+      const summaryPromoDiscount = document.getElementById('summary_promo_discount');
+      const summaryTotal = document.getElementById('summary_total');
+
+      const programFeeInput = document.getElementById('program_fee');
+      const adminFeeInput = document.getElementById('admin_fee');
+      const planDiscountInput = document.getElementById('plan_discount');
+      const promoDiscountInput = document.getElementById('promo_discount');
+      const paymentTotalInput = document.getElementById('payment_total');
+      const paymentStatusInput = document.getElementById('payment_status');
+      const paymentReferenceInput = document.getElementById('payment_reference');
+
+      const promoDiscountMap = {
+        EARLYBIRD10: 0.1,
+        REDLINE5: 0.05
+      };
+
+      let promoRate = 0;
+
+      function formatCurrency(value) {
+        return new Intl.NumberFormat('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+          maximumFractionDigits: 0
+        }).format(value || 0);
+      }
+
+      function parseNumeric(value) {
+        const number = Number(value);
+        return Number.isFinite(number) ? number : 0;
+      }
+
+      function getSelectedPlanDiscountRate() {
+        const selectedPlan = form.querySelector('input[name="payment_plan"]:checked');
+        if (!selectedPlan) return 0;
+        return parseNumeric(selectedPlan.dataset.discount);
+      }
+
+      function updateSummary() {
+        const selectedOption = selectedProgram.options[selectedProgram.selectedIndex];
+        const programFee = selectedOption ? parseNumeric(selectedOption.dataset.price) : 0;
+        const planDiscount = Math.round(programFee * getSelectedPlanDiscountRate());
+        const promoDiscount = Math.round(programFee * promoRate);
+        const total = Math.max(programFee - planDiscount - promoDiscount, 0);
+
+        summaryProgramFee.textContent = formatCurrency(programFee);
+        summaryPlanDiscount.textContent = '-' + formatCurrency(planDiscount);
+        summaryPromoDiscount.textContent = '-' + formatCurrency(promoDiscount);
+        summaryTotal.textContent = formatCurrency(total);
+
+        programFeeInput.value = String(programFee);
+        adminFeeInput.value = '0';
+        planDiscountInput.value = String(planDiscount);
+        promoDiscountInput.value = String(promoDiscount);
+        paymentTotalInput.value = String(total);
+      }
+
+      function setFeedback(element, message, variant) {
+        if (!element) return;
+        element.textContent = message;
+        element.classList.remove('success', 'error');
+        if (variant) element.classList.add(variant);
+      }
+
+      applyPromoBtn.addEventListener('click', function () {
+        const code = (promoCodeInput.value || '').trim().toUpperCase();
+        if (!code) {
+          promoRate = 0;
+          updateSummary();
+          setFeedback(promoFeedback, 'Kode promo kosong. Ringkasan kembali ke harga normal.', 'error');
+          return;
+        }
+
+        if (!promoDiscountMap[code]) {
+          promoRate = 0;
+          updateSummary();
+          setFeedback(promoFeedback, 'Kode promo tidak valid.', 'error');
+          return;
+        }
+
+        promoRate = promoDiscountMap[code];
+        updateSummary();
+        setFeedback(promoFeedback, 'Kode promo diterapkan: ' + code, 'success');
+      });
+
+      selectedProgram.addEventListener('change', updateSummary);
+      form.querySelectorAll('input[name="payment_plan"]').forEach(function (radio) {
+        radio.addEventListener('change', updateSummary);
+      });
+
+      preparePaymentBtn.addEventListener('click', function () {
+        const selectedPlan = form.querySelector('input[name="payment_plan"]:checked');
+        const total = parseNumeric(paymentTotalInput.value);
+        if (!selectedProgram.value || !selectedPlan || !paymentMethod.value || total <= 0) {
+          setFeedback(paymentPrepFeedback, 'Lengkapi detail pembayaran terlebih dahulu.', 'error');
+          return;
+        }
+
+        const reference = 'RL-' + Date.now();
+        paymentStatusInput.value = 'ready_for_gateway';
+        paymentReferenceInput.value = reference;
+
+        setFeedback(
+          paymentPrepFeedback,
+          'Pembayaran siap diproses. Referensi: ' + reference + '. Backend dapat langsung membuat transaksi gateway.',
+          'success'
+        );
+      });
+
+      form.addEventListener('submit', function () {
+        const selectedPlan = form.querySelector('input[name="payment_plan"]:checked');
+        const total = parseNumeric(paymentTotalInput.value);
+        if (!selectedProgram.value || !selectedPlan || !paymentMethod.value || total <= 0) return;
+
+        if (paymentStatusInput.value !== 'ready_for_gateway') {
+          paymentStatusInput.value = 'ready_for_gateway';
+        }
+        if (!paymentReferenceInput.value) {
+          paymentReferenceInput.value = 'RL-' + Date.now();
+        }
+      });
+
+      updateSummary();
+    })();
+  </script>
+
   <!-- Sticky WhatsApp quick access -->
   <a href="https://wa.me/6282120171731" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp +62 821-2017-1731">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -668,4 +943,3 @@
   </a>
 </body>
 </html>
-

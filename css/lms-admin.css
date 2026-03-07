@@ -103,6 +103,14 @@
   text-decoration: none;
 }
 
+.ad-logo-image {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: block;
+  flex-shrink: 0;
+}
+
 .ad-logo-mark {
   width: 32px; height: 32px;
   background: var(--sd-red);
