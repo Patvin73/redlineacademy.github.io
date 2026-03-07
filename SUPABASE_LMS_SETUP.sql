@@ -36,6 +36,8 @@ alter table public.profiles add column if not exists postcode text;
 alter table public.profiles add column if not exists bio text;
 alter table public.profiles add column if not exists avatar_url text;
 alter table public.profiles add column if not exists batch text;
+alter table public.profiles add column if not exists student_id text;
+alter table public.profiles add column if not exists admin_id text;
 alter table public.profiles add column if not exists is_active boolean not null default true;
 alter table public.profiles add column if not exists updated_at timestamptz not null default now();
 
@@ -242,29 +244,144 @@ create table if not exists public.activity_logs (
 -- ==========================================================
 create or replace function public.is_admin(user_id uuid)
 returns boolean
-language sql
+language plpgsql
 stable
 security definer
 set search_path = public
 as $$
-  select exists (
+begin
+  return exists (
     select 1 from public.profiles
     where id = user_id and role = 'admin' and is_active = true
   );
+exception
+  when undefined_column then
+    return exists (
+      select 1 from public.profiles
+      where id = user_id and role = 'admin'
+    );
+  when undefined_table then
+    return false;
+end;
 $$;
 
 create or replace function public.is_staff(user_id uuid)
 returns boolean
-language sql
+language plpgsql
 stable
 security definer
 set search_path = public
 as $$
-  select exists (
+begin
+  return exists (
     select 1 from public.profiles
     where id = user_id and role in ('trainer','admin') and is_active = true
   );
+exception
+  when undefined_column then
+    return exists (
+      select 1 from public.profiles
+      where id = user_id and role in ('trainer','admin')
+    );
+  when undefined_table then
+    return false;
+end;
 $$;
+
+create sequence if not exists public.student_code_seq as bigint start with 1 increment by 1;
+create sequence if not exists public.trainer_code_seq as bigint start with 1 increment by 1;
+create sequence if not exists public.admin_code_seq as bigint start with 1 increment by 1;
+
+do $$
+begin
+  perform setval(
+    'public.student_code_seq',
+    coalesce((select max((regexp_match(student_id, '^STD-([0-9]+)$'))[1]::bigint) from public.profiles where student_id ~ '^STD-[0-9]+$'), 0) + 1,
+    false
+  );
+
+  perform setval(
+    'public.trainer_code_seq',
+    coalesce((select max((regexp_match(admin_id, '^TRN-([0-9]+)$'))[1]::bigint) from public.profiles where admin_id ~ '^TRN-[0-9]+$'), 0) + 1,
+    false
+  );
+
+  perform setval(
+    'public.admin_code_seq',
+    coalesce((select max((regexp_match(admin_id, '^ADM-([0-9]+)$'))[1]::bigint) from public.profiles where admin_id ~ '^ADM-[0-9]+$'), 0) + 1,
+    false
+  );
+end
+$$;
+
+create or replace function public.next_role_id(role_name text)
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_role text := lower(coalesce(role_name, ''));
+begin
+  if v_role = 'student' then
+    return 'STD-' || lpad(nextval('public.student_code_seq')::text, 5, '0');
+  elsif v_role = 'trainer' then
+    return 'TRN-' || lpad(nextval('public.trainer_code_seq')::text, 5, '0');
+  elsif v_role = 'admin' then
+    return 'ADM-' || lpad(nextval('public.admin_code_seq')::text, 5, '0');
+  end if;
+  return null;
+end;
+$$;
+
+create or replace function public.assign_profile_role_ids()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.role = 'student' then
+    if coalesce(new.student_id, '') = '' then
+      new.student_id := public.next_role_id('student');
+    end if;
+    new.admin_id := null;
+  elsif new.role = 'trainer' then
+    if coalesce(new.admin_id, '') = '' or new.admin_id !~ '^TRN-[0-9]+$' then
+      new.admin_id := public.next_role_id('trainer');
+    end if;
+    new.student_id := null;
+  elsif new.role = 'admin' then
+    if coalesce(new.admin_id, '') = '' or new.admin_id !~ '^ADM-[0-9]+$' then
+      new.admin_id := public.next_role_id('admin');
+    end if;
+    new.student_id := null;
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_profiles_assign_role_ids on public.profiles;
+create trigger trg_profiles_assign_role_ids
+  before insert or update of role on public.profiles
+  for each row execute procedure public.assign_profile_role_ids();
+
+-- Backfill existing users that still don't have role IDs.
+update public.profiles
+set student_id = public.next_role_id('student')
+where role = 'student'
+  and coalesce(student_id, '') = '';
+
+update public.profiles
+set admin_id = public.next_role_id('trainer')
+where role = 'trainer'
+  and (coalesce(admin_id, '') = '' or admin_id !~ '^TRN-[0-9]+$');
+
+update public.profiles
+set admin_id = public.next_role_id('admin')
+where role = 'admin'
+  and (coalesce(admin_id, '') = '' or admin_id !~ '^ADM-[0-9]+$');
 
 create or replace function public.handle_new_user()
 returns trigger
@@ -411,6 +528,8 @@ group by c.id, c.title, t.full_name;
 -- ==========================================================
 -- RLS POLICIES
 -- ==========================================================
+-- Uses helper functions defined in HELPERS + TRIGGERS above.
+
 alter table public.profiles enable row level security;
 alter table public.categories enable row level security;
 alter table public.courses enable row level security;
@@ -536,6 +655,8 @@ grant select on public.v_course_overview to authenticated;
 -- ==========================================================
 -- STORAGE BUCKET FOR AVATARS
 -- ==========================================================
+-- Uses helper function public.is_staff(...) defined in HELPERS + TRIGGERS.
+
 insert into storage.buckets (id, name, public)
 values ('avatars', 'avatars', true)
 on conflict (id) do update
