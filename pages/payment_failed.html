@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pembayaran Gagal — Redline Academy</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="canonical" href="https://redlineacademy.com.au/pages/payment_failed.html" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .payment-result-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: #f9fafb;
+    }
+    .result-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+      padding: 3rem 2.5rem;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+    }
+    .result-icon {
+      width: 80px;
+      height: 80px;
+      background: #fef2f2;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+    .result-icon svg { width: 44px; height: 44px; }
+    .result-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #dc2626;
+      margin-bottom: 0.75rem;
+    }
+    .result-subtitle {
+      color: #555;
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .error-box {
+      background: #fff5f5;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+      padding: 0.85rem 1.25rem;
+      margin-bottom: 1.75rem;
+      font-size: 0.9rem;
+      color: #b91c1c;
+      display: none;
+    }
+    .result-actions { display: flex; flex-direction: column; gap: 0.75rem; }
+    .btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 8px;
+           font-weight: 600; font-size: 0.97rem; text-decoration: none; cursor: pointer;
+           border: none; transition: opacity .2s; }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary  { background: var(--primary-color, #d62b2b); color: #fff; }
+    .btn-outline  { background: transparent; border: 2px solid #6b7280; color: #374151; }
+    .contact-hint {
+      margin-top: 1.5rem;
+      font-size: 0.87rem;
+      color: #888;
+    }
+    .contact-hint a { color: var(--primary-color, #d62b2b); }
+  </style>
+</head>
+<body class="payment-result-page">
+  <div class="result-card">
+
+    <div class="result-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="8" y1="8" x2="16" y2="16"/>
+        <line x1="16" y1="8" x2="8" y2="16"/>
+      </svg>
+    </div>
+
+    <h1 class="result-title">Pembayaran Gagal</h1>
+    <p class="result-subtitle">
+      Transaksi Anda tidak dapat diproses. Jangan khawatir — tidak ada dana yang ditarik.
+      Silakan coba lagi atau pilih metode pembayaran lain.
+    </p>
+
+    <div class="error-box" id="error-box"></div>
+
+    <div class="result-actions">
+      <a href="programs.html#enroll-form" class="btn btn-primary">Coba Lagi</a>
+      <a href="../" class="btn btn-outline">Kembali ke Beranda</a>
+    </div>
+
+    <p class="contact-hint">
+      Butuh bantuan? Hubungi kami via
+      <a href="https://wa.me/6282120171731" target="_blank" rel="noopener">WhatsApp</a>
+      atau <a href="contact.html">halaman kontak</a>.
+    </p>
+
+  </div>
+
+  <script>
+    const params   = new URLSearchParams(window.location.search);
+    const errorMsg = params.get('error');
+    if (errorMsg) {
+      const box = document.getElementById('error-box');
+      box.style.display = 'block';
+      box.textContent   = 'Detail: ' + decodeURIComponent(errorMsg);
+    }
+  </script>
+</body>
+</html>

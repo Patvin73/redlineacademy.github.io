@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pembayaran Berhasil — Redline Academy</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="canonical" href="https://redlineacademy.com.au/pages/payment_success.html" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .payment-result-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: #f9fafb;
+    }
+    .result-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+      padding: 3rem 2.5rem;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+    }
+    .result-icon {
+      width: 80px;
+      height: 80px;
+      background: #e6f9ef;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+    .result-icon svg { width: 44px; height: 44px; }
+    .result-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #16a34a;
+      margin-bottom: 0.75rem;
+    }
+    .result-subtitle {
+      color: #555;
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .invoice-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.75rem;
+      font-size: 0.93rem;
+      color: #15803d;
+      word-break: break-all;
+    }
+    .invoice-box strong { display: block; font-size: 1.05rem; }
+    .result-actions { display: flex; flex-direction: column; gap: 0.75rem; }
+    .btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 8px;
+           font-weight: 600; font-size: 0.97rem; text-decoration: none; cursor: pointer;
+           border: none; transition: opacity .2s; }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary  { background: var(--primary-color, #d62b2b); color: #fff; }
+    .btn-outline  { background: transparent; border: 2px solid var(--primary-color, #d62b2b);
+                    color: var(--primary-color, #d62b2b); }
+  </style>
+</head>
+<body class="payment-result-page">
+  <div class="result-card">
+
+    <div class="result-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="7 12.5 10.5 16 17 9"/>
+      </svg>
+    </div>
+
+    <h1 class="result-title">Pembayaran Berhasil!</h1>
+    <p class="result-subtitle">
+      Terima kasih, <strong id="customer-name"></strong>. Pendaftaran Anda telah kami terima.
+      Tim Redline Academy akan menghubungi Anda melalui email dalam <strong>1×24 jam</strong>.
+    </p>
+
+    <div class="invoice-box" id="invoice-box" style="display:none;">
+      Nomor Invoice<br/>
+      <strong id="invoice-number">—</strong>
+    </div>
+
+    <div class="result-actions">
+      <a href="../" class="btn btn-primary">Kembali ke Beranda</a>
+      <a href="programs.html" class="btn btn-outline">Lihat Program Lainnya</a>
+    </div>
+
+  </div>
+
+  <script>
+    // Tampilkan data dari session yang dikirim via query string oleh PHP
+    // (DOKU juga menambahkan param seperti ?invoice_number=... saat redirect)
+    const params = new URLSearchParams(window.location.search);
+    const inv    = params.get('invoice_number') || sessionStorage.getItem('ra_invoice');
+    const name   = params.get('name')           || sessionStorage.getItem('ra_name') || 'Peserta';
+
+    document.getElementById('customer-name').textContent = name;
+
+    if (inv) {
+      document.getElementById('invoice-number').textContent = inv;
+      document.getElementById('invoice-box').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
