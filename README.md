@@ -1,253 +1,227 @@
-# Redline Academy - Website Statis Multi-Language
+# Redline Academy - Static Website
 
-Website modern dan responsif untuk Redline Academy dengan dukungan multi-language (Indonesia dan Inggris).
+Website statis Redline Academy dengan dukungan 2 bahasa (`id` dan `en`), halaman publik, serta modul LMS sederhana (login + dashboard student/admin).  
+Redline Academy static website with 2-language support (`id` and `en`), public pages, and a simple LMS module (login + student/admin dashboards).
 
-## 📋 Deskripsi Proyek
+## Ringkasan | Overview
 
-Redline Academy adalah platform pelatihan vokasi bersertifikat Australia yang menawarkan berbagai program pelatihan profesional. Website ini dibangun sebagai aplikasi web statis dengan HTML, CSS, dan JavaScript vanilla, tanpa dependencies eksternal.
+- Tanpa build step (HTML, CSS, JavaScript vanilla).  
+  No build step required (HTML, CSS, vanilla JavaScript).
+- Multi-language via atribut `data-i18n` dan objek `translations` di `js/script.js`.  
+  Multi-language support via `data-i18n` attributes and the `translations` object in `js/script.js`.
+- Form registrasi publik diproses oleh `submit_registration.php`.  
+  Public registration form is handled by `submit_registration.php`.
+- Modul LMS frontend terhubung ke Supabase (`js/supabase-client.js`, `js/auth.js`, `js/guard.js`).  
+  LMS frontend is connected to Supabase (`js/supabase-client.js`, `js/auth.js`, `js/guard.js`).
 
-## Fitur Utama
+## Struktur Repository (Detail) | Repository Structure (Detailed)
 
-- **Multi-Language Support**: Dukungan penuh untuk Bahasa Indonesia dan Bahasa Inggris
-- **Responsive Design**: Desain yang responsif dan mobile-friendly
-- **Modern Corporate Style**: Desain modern dengan warna profesional (merah dan biru)
-- **Multi-Page Navigation**: 6 halaman utama dengan navigasi yang intuitif
-- **Static Website**: Tidak memerlukan server backend, hanya HTML/CSS/JS
-- **Smooth Animations**: Animasi yang halus dan engaging
-- **SEO Friendly**: Meta tags dan struktur HTML yang SEO-friendly
-
-## Struktur Folder
-
-```
-redline-academy/
-├── index.html                 # Halaman utama (Homepage)
-├── pages/
-│   ├── about.html            # Halaman Tentang Kami
-│   ├── programs.html         # Halaman Program
-│   ├── contact.html          # Halaman Hubungi Kami
-│   ├── blog.html             # Halaman Blog
-│   └── legal.html            # Halaman Legal (Terms & Privacy)
-├── css/
-│   └── style.css             # Stylesheet utama
-├── js/
-│   └── script.js             # JavaScript untuk multi-language dan interaksi
-├── assets/
-│   └── images/               # Folder untuk semua gambar/logo
-│       ├── redlineacademy_logo.png
-│       ├── redlineacademy_logo_header.png
-│       ├── hero_pict.png
-│       ├── assistant_carer.png
-│       ├── bartender.png
-│       ├── cooking.png
-│       ├── barista.png
-│       ├── coding.jpg
-│       └── electrician.png
-└── README.md                 # File dokumentasi ini
-```
-
-## Halaman-Halaman
-
-### 1. Homepage (index.html)
-
-- Hero section dengan call-to-action
-- Program showcase dengan 6 program utama
-- Komitmen dan nilai-nilai academy
-- Testimonial dari alumni
-- Contact form terintegrasi
-
-### 2. About Us (pages/about.html)
-
-- Deskripsi lengkap tentang academy
-- Visi dan misi
-- Nilai-nilai perusahaan
-- Tim management
-
-### 3. Programs (pages/programs.html)
-
-- Detail 6 program pelatihan:
-  - Assistant Carer (Asisten Perawat)
-  - Bartender
-  - Cooking (Chef)
-  - Barista
-  - Coding (IT)
-  - Electrician (Teknisi Listrik)
-- Deskripsi, durasi, dan sertifikasi setiap program
-
-### 4. Contact Us (pages/contact.html)
-
-- Formulir kontak interaktif
-- Informasi kontak lengkap
-- Jam kerja
-- FAQ (Frequently Asked Questions)
-- Integrasi Google Maps
-
-### 5. Blog (pages/blog.html)
-
-- Daftar artikel blog
-- Pagination
-- Newsletter subscription
-
-### 6. Legal (pages/legal.html)
-
-- Terms & Conditions
-- Privacy Policy
-- Tab navigation untuk switching antar section
-
-## Desain & Styling
-
-### Warna Utama
-
-- **Primary Color**: #EF4444 (Merah terang)
-- **Secondary Color**: #3B82F6 (Biru)
-- **Background**: #FFFFFF (Putih)
-- **Text Dark**: #1F2937 (Abu-abu gelap)
-- **Text Light**: #6B7280 (Abu-abu terang)
-
-### Typography
-
-- Font: System fonts (Segoe UI, Roboto, sans-serif)
-- Responsive font sizes
-- Proper line heights untuk readability
-
-### Responsive Breakpoints
-
-- Mobile: < 768px
-- Tablet: 768px - 1024px
-- Desktop: > 1024px
-
-## Multi-Language System
-
-Website menggunakan sistem i18n (internationalization) sederhana dengan JavaScript:
-
-### Cara Kerja
-
-1. Semua text yang perlu diterjemahkan memiliki atribut `data-i18n="key"`
-2. File `script.js` mengandung object dengan semua terjemahan
-3. Tombol language switcher di header mengubah bahasa secara real-time
-4. Bahasa yang dipilih disimpan di localStorage
-
-### Menambah Terjemahan Baru
-
-1. Buka `js/script.js`
-2. Cari object `translations`
-3. Tambahkan key baru dengan terjemahan untuk ID dan EN
-4. Tambahkan `data-i18n="key"` pada elemen HTML yang ingin diterjemahkan
-
-Contoh:
-
-```javascript
-translations = {
-  id: {
-    home: "Beranda",
-    about: "Tentang Kami",
-    // ... tambah key baru di sini
-  },
-  en: {
-    home: "Home",
-    about: "About Us",
-    // ... tambah key baru di sini
-  },
-};
+```text
+redlineacademy.github.io/
+|-- .github/
+|   `-- copilot-instructions.md
+|-- .vscode/
+|   `-- sftp.json
+|-- assets/
+|   |-- images/
+|   |   |-- apple-touch-icon.png
+|   |   |-- assistant_carer.png
+|   |   |-- barista.png
+|   |   |-- bartender.png
+|   |   |-- caregiver.jpg
+|   |   |-- carer_in_the_park.png
+|   |   |-- care_and_love.png
+|   |   |-- caring_hand.png
+|   |   |-- coding.jpg
+|   |   |-- cooking.png
+|   |   |-- dashboard-32x32.png
+|   |   |-- elder_support.png
+|   |   |-- electrician.png
+|   |   |-- favicon-16x16.png
+|   |   |-- favicon-32x32.png
+|   |   |-- hero_pict.png
+|   |   |-- redlinelogo.png
+|   |   |-- redlinewlogo.png
+|   |   |-- red_line.png
+|   |   |-- user_registration.png
+|   |   `-- flags/
+|   |       |-- en.png
+|   |       `-- id.png
+|   `-- videos/
+|       |-- dengan_kakek.mp4
+|       `-- with_grandma.mp4
+|-- css/
+|   |-- lms-admin.css
+|   |-- lms-student.css
+|   |-- lms.css
+|   `-- style.css
+|-- js/
+|   |-- auth.js
+|   |-- dashboard-admin.js
+|   |-- dashboard-student.js
+|   |-- guard.js
+|   |-- script.js
+|   `-- supabase-client.js
+|-- pages/
+|   |-- about.html
+|   |-- blog.html
+|   |-- contact.html
+|   |-- dashboard-admin.html
+|   |-- dashboard-student.html
+|   |-- legal.html
+|   |-- login.html
+|   `-- programs.html
+|-- tools/
+|   `-- generate_favicons.py
+|-- CHANGELOG.md
+|-- favicon.ico
+|-- index.html
+|-- LMS_QUICKSTART.md
+|-- package-lock.json
+|-- package.json
+|-- README.md
+|-- robots.txt
+|-- serve_favicon.ps1
+|-- serve_one.ps1
+|-- sitemap.xml
+|-- submit_registration.php
+|-- SUPABASE_LMS_SETUP.sql
+|-- SUPABASE_USER_ROLE_TEMPLATE.sql
+`-- test-lang.html
 ```
 
-## Cara Menggunakan
+Catatan: folder `node_modules/` ada di local environment dan tidak didokumentasikan rinci di atas.  
+Note: `node_modules/` exists in local environment and is intentionally not listed in detail above.
 
-### 1. Membuka Website Secara Lokal
+## Bagan Struktur | Structure Diagram (Mermaid)
 
-- Buka file `index.html` langsung di browser
-- Atau gunakan local server:
-  ```bash
-  python3 -m http.server 8000
-  ```
-  Kemudian akses `http://localhost:8000` (local only)
+```mermaid
+flowchart TD
+    ROOT[redlineacademy.github.io]
 
-### 2. Mengedit Konten
+    ROOT --> A[assets/]
+    ROOT --> C[css/]
+    ROOT --> J[js/]
+    ROOT --> P[pages/]
+    ROOT --> T[tools/]
+    ROOT --> F1[index.html]
+    ROOT --> F2[submit_registration.php]
+    ROOT --> F3[sitemap.xml]
+    ROOT --> F4[robots.txt]
+    ROOT --> F5[LMS_QUICKSTART.md]
+    ROOT --> F6[SUPABASE_LMS_SETUP.sql]
+    ROOT --> F7[SUPABASE_USER_ROLE_TEMPLATE.sql]
 
-- Edit file HTML di folder `pages/` untuk mengubah konten
-- Edit `css/style.css` untuk mengubah styling
-- Edit `js/script.js` untuk mengubah JavaScript atau terjemahan
+    A --> A1[images/]
+    A --> A2[videos/]
+    A1 --> A1a[flags/]
+    A1a --> A1b[id.png]
+    A1a --> A1c[en.png]
 
-### 3. Menambah Halaman Baru
+    C --> C1[style.css]
+    C --> C2[lms.css]
+    C --> C3[lms-admin.css]
+    C --> C4[lms-student.css]
 
-1. Buat file HTML baru di folder `pages/`
-2. Copy struktur dari halaman existing
-3. Update navigation links di semua halaman
-4. Tambahkan terjemahan di `script.js` jika diperlukan
+    J --> J1[script.js (i18n + UI logic)]
+    J --> J2[supabase-client.js]
+    J --> J3[auth.js]
+    J --> J4[guard.js]
+    J --> J5[dashboard-admin.js]
+    J --> J6[dashboard-student.js]
 
-### 4. Mengubah Gambar/Assets
+    P --> P1[about.html]
+    P --> P2[programs.html]
+    P --> P3[contact.html]
+    P --> P4[blog.html]
+    P --> P5[legal.html]
+    P --> P6[login.html]
+    P --> P7[dashboard-admin.html]
+    P --> P8[dashboard-student.html]
+```
 
-- Ganti file di folder `assets/images/`
-- Pastikan nama file sesuai dengan referensi di HTML
-- Gunakan format yang dioptimalkan (PNG untuk logo, JPG untuk foto)
+## Peta Halaman | Page Map
 
-## Browser Support
+- Publik | Public:
+  - `/index.html`
+  - `/pages/about.html`
+  - `/pages/programs.html`
+  - `/pages/contact.html`
+  - `/pages/blog.html`
+  - `/pages/legal.html`
+- LMS:
+  - `/pages/login.html`
+  - `/pages/dashboard-student.html`
+  - `/pages/dashboard-admin.html`
 
-- Chrome/Edge (Latest)
-- Firefox (Latest)
-- Safari (Latest)
-- Mobile browsers (iOS Safari, Chrome Mobile)
+## Komponen Penting | Key Components
 
-## SEO Optimization
+- `js/script.js`: dictionary terjemahan + logika pergantian bahasa.  
+  `js/script.js`: translation dictionary + language switching logic.
+- `js/supabase-client.js`: inisialisasi Supabase client di frontend.  
+  `js/supabase-client.js`: Supabase client initialization on frontend.
+- `js/auth.js`: login/logout + redirect dashboard berbasis role.  
+  `js/auth.js`: login/logout + role-based dashboard redirect.
+- `js/guard.js`: proteksi/validasi akses halaman LMS.  
+  `js/guard.js`: LMS page access guard/validation.
+- `submit_registration.php`: endpoint server-side untuk submit registrasi.  
+  `submit_registration.php`: server-side endpoint for registration submission.
+- `SUPABASE_LMS_SETUP.sql` dan `SUPABASE_USER_ROLE_TEMPLATE.sql`: template setup database dan role.  
+  `SUPABASE_LMS_SETUP.sql` and `SUPABASE_USER_ROLE_TEMPLATE.sql`: database and role setup templates.
 
-- Semantic HTML structure
-- Meta descriptions pada setiap halaman
-- Open Graph tags untuk social sharing
-- Mobile-friendly viewport settings
-- Fast loading times (static files)
+## Menjalankan Secara Lokal | Run Locally
+
+1. Buka terminal di root project.  
+   Open terminal in the project root.
+2. Jalankan static server:  
+   Start the static server:
+
+```bash
+python -m http.server 8000
+```
+
+3. Buka `http://localhost:8000` di browser.  
+   Open `http://localhost:8000` in your browser.
+
+Alternatif Windows | Windows helpers:
+
+- `serve_one.ps1` untuk skenario serve halaman tertentu.  
+  `serve_one.ps1` for single-page serve scenarios.
+- `serve_favicon.ps1` untuk validasi favicon route.  
+  `serve_favicon.ps1` for favicon route checks.
+
+## Workflow Multi-language | Internationalization Workflow
+
+1. Tambahkan `data-i18n="yourKey"` pada elemen HTML.  
+   Add `data-i18n="yourKey"` to HTML elements.
+2. Tambahkan `yourKey` pada `translations.id` dan `translations.en` di `js/script.js`.  
+   Add `yourKey` to both `translations.id` and `translations.en` in `js/script.js`.
+3. Pastikan konten yang harus diterjemahkan tidak hardcoded di luar alur i18n.  
+   Ensure translatable content is not hardcoded outside the i18n flow.
 
 ## Deployment
 
-Website dapat di-deploy ke berbagai platform:
+Target deployment yang cocok | Suitable deployment targets:
 
-### GitHub Pages
+- GitHub Pages
+- Netlify
+- Vercel (static mode)
+- Shared/static hosting lainnya | Other static/shared hosting
 
-1. Push repository ke GitHub
-2. Enable GitHub Pages di settings
-3. Website akan accessible di `username.github.io/redline-academy`
+Checklist sebelum deploy | Pre-deploy checklist:
 
-### Netlify
+- Perbarui `sitemap.xml` jika URL berubah.  
+  Update `sitemap.xml` when URLs change.
+- Pastikan `robots.txt` sesuai environment target.  
+  Verify `robots.txt` for the target environment.
+- Cek ulang path aset relatif pada semua file di `pages/`.  
+  Recheck relative asset paths in all files under `pages/`.
 
-1. Connect repository ke Netlify
-2. Set build command: (tidak perlu, static site)
-3. Deploy
+## Kontak Redline Academy | Redline Academy Contact
 
-### Traditional Hosting
-
-1. Upload semua file ke hosting server
-2. Pastikan struktur folder tetap sama
-3. Website siap diakses
-
-## Troubleshooting
-
-### Language tidak berubah
-
-- Buka browser console (F12)
-- Pastikan tidak ada error
-- Cek localStorage di DevTools
-
-### Gambar tidak muncul
-
-- Pastikan path gambar benar
-- Cek apakah file ada di folder `assets/images/`
-- Gunakan path relatif yang benar
-
-### Styling tidak sesuai
-
-- Clear browser cache (Ctrl+Shift+Delete)
-- Reload halaman (Ctrl+F5)
-- Cek apakah file `css/style.css` ter-load dengan baik
-
-## Lisensi
-
-Copyright © 2025 Redline Academy. Semua hak dilindungi.
-
-## Kontak
-
-- Email: hello@redlineacademy.com.au
-- Telepon: +61 408 578 253
-- WhatsApp: Chat dengan kami
-- Alamat: Jl. Terusan Jakarta No.330 KAV. 25, Bandung - West Java, Indonesia
+- Email: `hello@redlineacademy.com.au`
+- Telepon | Phone: `+61 408 578 253` `+62 821-2017-1731`
 
 ---
 
-**Dibuat oleh Patrio Vincentio for Redline Academy**
+**Developed and maintained by Patrio Vincentio, Email: patvin73@gmail.com** Update: 2026-03-08
