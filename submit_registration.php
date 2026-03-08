@@ -44,7 +44,7 @@ define('FAILED_URL',  BASE_URL . '/pages/payment_failed.html');
 // Simpan KTP DI LUAR webroot (aman dari akses URL langsung)
 // Contoh: /home/username/private_uploads/ktp/  (di atas public_html)
 // Jika tidak bisa, gunakan .htaccess di folder uploads/ untuk blokir akses
-define('UPLOAD_DIR', dirname(__DIR__) . '/private_uploads/ktp/');
+define('UPLOAD_DIR', dirname(__DIR__) . '/uploads_private/ktp/');
 
 // ─────────────────────────────────────────────
 //  HARGA & DISKON — SOURCE OF TRUTH DI SERVER
