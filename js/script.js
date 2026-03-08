@@ -180,6 +180,7 @@ const translations = {
     emailValue: "hello@redlineacademy.com.au",
     whatsapp: "WhatsApp",
     whatsappText: "Chat dengan kami",
+    whatsappQuickAccess: "Hubungi kami",
     ourLocation: "Lokasi Kami",
     mapsPlaceholder: "Google Maps akan ditampilkan di sini",
 
@@ -550,6 +551,7 @@ const translations = {
     emailValue: "hello@redlineacademy.com.au",
     whatsapp: "WhatsApp",
     whatsappText: "Chat with us",
+    whatsappQuickAccess: "Contact us",
     ourLocation: "Our Location",
     mapsPlaceholder: "Google Maps will be displayed here",
 
