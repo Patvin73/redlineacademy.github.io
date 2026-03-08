@@ -99,7 +99,7 @@
           <nav>
             <a href="../index.html" data-i18n="home">Beranda</a>
             <a href="about.html" data-i18n="about">Tentang Kami</a>
-            <a href="programs.php" data-i18n="programs">Program</a>
+            <a href="programs.html" data-i18n="programs">Program</a>
             <a href="contact.html" data-i18n="contact">Hubungi Kami</a>
             <!-- <a href="blog.html" data-i18n="blog">Blog</a> -->
             <a href="legal.html" data-i18n="legal">Legal</a>
@@ -249,7 +249,7 @@
             <h3 class="mt-4 mb-2">8. Hubungi Kami</h3>
             <p>
               Jika Anda memiliki pertanyaan tentang syarat dan ketentuan ini,
-              silakan hubungi kami di <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2b42454d446b594e4f4742454e4a484a4f4e465205484446054a5e">[email&#160;protected]</a> atau melalui
+              silakan hubungi kami di info@redlineacademy.com.au atau melalui
               formulir kontak kami.
             </p>
           </div>
@@ -369,7 +369,7 @@
               silakan hubungi kami di:
             </p>
             <p>
-              <strong>Email:</strong> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1b6b69726d7a78625b697e7f7772757e7a787a7f7e766235787476">[email&#160;protected]</a><br /><strong
+              <strong>Email:</strong> privacy@redlineacademy.com<br /><strong
                 >Alamat:</strong
               >
               Jl. Pendidikan No. 123, Jakarta, Indonesia 12345
@@ -427,22 +427,22 @@
             <h4 data-i18n="programs">Program</h4>
             <ul>
               <li>
-                <a href="programs.php" data-i18n="assistantCarer"
+                <a href="programs.html" data-i18n="assistantCarer"
                   >Asisten Perawat</a
                 >
               </li>
               <li>
-                <a href="programs.php" data-i18n="bartender">Bartender</a>
+                <a href="programs.html" data-i18n="bartender">Bartender</a>
               </li>
               <li>
-                <a href="programs.php" data-i18n="cooking">Memasak (Chef)</a>
+                <a href="programs.html" data-i18n="cooking">Memasak (Chef)</a>
               </li>
-              <li><a href="programs.php" data-i18n="barista">Barista</a></li>
+              <li><a href="programs.html" data-i18n="barista">Barista</a></li>
               <li>
-                <a href="programs.php" data-i18n="coding">Pemrograman (IT)</a>
+                <a href="programs.html" data-i18n="coding">Pemrograman (IT)</a>
               </li>
               <li>
-                <a href="programs.php" data-i18n="electrician"
+                <a href="programs.html" data-i18n="electrician"
                   >Teknisi Listrik</a
                 >
               </li>
@@ -486,7 +486,7 @@
       </div>
     </footer>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="../js/script.js"></script>
+    <script src="../js/script.js"></script>
     <script>
       function showTab(tabName) {
         // Hide all tab contents
@@ -496,4 +496,15 @@
         // Remove active class from all buttons
         const buttons = document.querySelectorAll(".tab-btn");
         buttons.forEach((btn) => {
-          btn.style.color = "var(--text-lig
+          btn.style.color = "var(--text-light)";
+          btn.style.borderBottom = "none";
+        });
+
+        // Show selected tab and mark button as active
+        document.getElementById(tabName).style.display = "block";
+        event.target.style.color = "var(--text-dark)";
+        event.target.style.borderBottom = "3px solid var(--primary-color)";
+      }
+    </script>
+  </body>
+</html>

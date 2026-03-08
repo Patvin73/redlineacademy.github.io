@@ -942,5 +942,42 @@
     <span class="whatsapp-float__label" data-i18n="whatsappQuickAccess">Hubungi kami</span>
     <span class="sr-only">WhatsApp +62 821-2017-1731</span>
   </a>
+  <!-- CSRF Token: fetch dari server sebelum form di-submit -->
+  <script>
+    (function () {
+      const form = document.querySelector(".enroll-form");
+      if (!form) return;
+
+      // 1. Ambil token saat halaman load
+      fetch("../get_csrf_token.php", { credentials: "include" })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          var input = document.createElement("input");
+          input.type  = "hidden";
+          input.name  = "csrf_token";
+          input.value = data.token;
+          input.id    = "csrf_token_input";
+          form.appendChild(input);
+        })
+        .catch(function () {
+          // Jika fetch gagal, tombol submit dinonaktifkan
+          var btn = form.querySelector("[type=submit]");
+          if (btn) {
+            btn.disabled = true;
+            btn.title    = "Gagal memuat token keamanan. Refresh halaman.";
+          }
+        });
+
+      // 2. Refresh token tiap 25 menit (expired sebelum 30 menit session PHP)
+      setInterval(function () {
+        fetch("../get_csrf_token.php", { credentials: "include" })
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            var input = document.getElementById("csrf_token_input");
+            if (input) input.value = data.token;
+          });
+      }, 25 * 60 * 1000);
+    })();
+  </script>
 </body>
 </html>

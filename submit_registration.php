@@ -292,8 +292,17 @@ if (!move_uploaded_file($_FILES['id_document']['tmp_name'], $filePath)) {
 }
 
 // 6. Generate invoice number unik
-$invoiceNumber = 'RA-' . strtoupper(substr($selectedProgram, 0, 3)) . '-'
-               . date('Ymd') . '-' . strtoupper(substr(md5(uniqid('', true)), 0, 6));
+// Gunakan kode program yang sudah aman (bukan 3 karakter pertama nama)
+$programCodes = [
+    'assistant_carer' => 'CGV',
+    'bartender'       => 'BAR',
+    'barista'         => 'BRS',
+    'cooking'         => 'CHF',
+    'coding'          => 'ITC',
+    'electrician'     => 'ELC',
+];
+$programCode   = $programCodes[$selectedProgram] ?? 'PRG';
+$invoiceNumber = 'RA-' . $programCode . '-' . date('Ymd') . '-' . strtoupper(substr(md5(uniqid('', true)), 0, 6));
 
 // 7. Susun payload DOKU Checkout
 //    FIX: 'notification_url' (bukan 'callback_url')
