@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portal Marketer – Redline Academy</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/lms-marketer.css" />
+  </head>
+  <!-- data-lms-role tells guard.js which roles are allowed on this page -->
+  <body class="marketer-page" data-lms-role="marketer,staff">
+
+    <!-- ══════════════════════════════════════
+         STICKY HEADER
+    ══════════════════════════════════════ -->
+    <header class="mk-header" role="banner">
+      <div class="mk-header-inner">
+
+        <!-- Brand -->
+        <a href="../index.html" class="mk-brand" aria-label="Redline Academy – Home">
+          <div class="mk-brand-mark" aria-hidden="true"><span>RA</span></div>
+          <div class="mk-brand-text">
+            <h1>Redline Academy</h1>
+            <p data-i18n="staffPortalLabel">Marketing Portal</p>
+          </div>
+        </a>
+
+        <!-- Navigation Tabs -->
+        <nav class="mk-nav-tabs" role="tablist" aria-label="Menu portal marketer">
+          <button class="mk-nav-tab active" role="tab" data-tab="overview"
+            aria-selected="true" aria-controls="panel-overview" id="tab-overview">
+            <span data-i18n="mkTabOverview">Ringkasan</span>
+          </button>
+          <button class="mk-nav-tab" role="tab" data-tab="schools"
+            aria-selected="false" aria-controls="panel-schools" id="tab-schools">
+            <span data-i18n="mkTabSchools">Sekolah</span>
+            <span class="mk-nav-tab-count" id="schoolCount">0</span>
+          </button>
+          <button class="mk-nav-tab" role="tab" data-tab="claim"
+            aria-selected="false" aria-controls="panel-claim" id="tab-claim">
+            <span data-i18n="mkTabClaim">Ajukan Klaim</span>
+          </button>
+          <button class="mk-nav-tab" role="tab" data-tab="reports"
+            aria-selected="false" aria-controls="panel-reports" id="tab-reports">
+            <span data-i18n="mkTabReports">Laporan Komisi</span>
+            <span class="mk-nav-tab-count" id="reportCount">0</span>
+          </button>
+          <button class="mk-nav-tab" role="tab" data-tab="guide"
+            aria-selected="false" aria-controls="panel-guide" id="tab-guide">
+            <span data-i18n="mkTabGuide">Panduan</span>
+          </button>
+        </nav>
+
+        <!-- User info + logout -->
+        <div class="mk-header-right">
+          <div class="mk-user-info">
+            <span class="mk-user-name" id="marketerName">–</span>
+            <span class="mk-user-role" id="marketerRole" data-i18n="mkRoleLabel">Marketer</span>
+          </div>
+          <div class="mk-avatar" id="marketerAvatar" aria-hidden="true">M</div>
+          <button class="mk-logout-btn" id="logoutBtn" data-i18n="lmsLogout">Keluar</button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- ══════════════════════════════════════
+         MAIN CONTENT
+    ══════════════════════════════════════ -->
+    <main class="mk-content" id="mkMain">
+
+      <!-- ─────────────────────────────────
+           PANEL 1: OVERVIEW / DASHBOARD
+      ───────────────────────────────── -->
+      <section class="mk-panel active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview">
+
+        <div>
+          <p class="mk-eyebrow" data-i18n="mkOverviewEyebrow">Dashboard</p>
+          <h2 class="mk-section-title" data-i18n="mkOverviewTitle">Ringkasan Aktivitas</h2>
+          <p class="mk-section-sub" data-i18n="mkOverviewSub">Pantau performa komisi dan status klaim Anda secara real-time.</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="mk-stats-row">
+          <div class="mk-stat-card accent">
+            <span class="mk-stat-label" data-i18n="mkStatTotalEarnings">Total Komisi</span>
+            <span class="mk-stat-value currency" id="statTotalEarnings">Rp 0</span>
+            <span class="mk-stat-delta neutral" data-i18n="mkStatAllTime">Sepanjang waktu</span>
+          </div>
+          <div class="mk-stat-card amber">
+            <span class="mk-stat-label" data-i18n="mkStatPending">Menunggu Pencairan</span>
+            <span class="mk-stat-value currency" id="statPending">Rp 0</span>
+            <span class="mk-stat-delta warning" data-i18n="mkStatPendingNote">Belum dibayarkan</span>
+          </div>
+          <div class="mk-stat-card green">
+            <span class="mk-stat-label" data-i18n="mkStatEnrolled">Siswa Terdaftar</span>
+            <span class="mk-stat-value" id="statEnrolled">0</span>
+            <span class="mk-stat-delta positive" data-i18n="mkStatEnrolledNote">Dari semua sekolah</span>
+          </div>
+          <div class="mk-stat-card blue">
+            <span class="mk-stat-label" data-i18n="mkStatSchools">Sekolah Aktif</span>
+            <span class="mk-stat-value" id="statSchools">0</span>
+            <span class="mk-stat-delta neutral" data-i18n="mkStatSchoolsNote">Presentasi dilakukan</span>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="mk-card">
+          <div class="mk-card-header">
+            <div class="mk-card-icon" aria-hidden="true">📋</div>
+            <h3 data-i18n="mkRecentActivity">Aktivitas Terbaru</h3>
+            <span class="mk-card-badge" data-i18n="mkLast30Days">30 hari terakhir</span>
+          </div>
+          <div class="mk-card-body" style="padding: 0;">
+            <table class="mk-table" aria-label="Aktivitas terbaru">
+              <thead>
+                <tr>
+                  <th data-i18n="mkColDate">Tanggal</th>
+                  <th data-i18n="mkColSchool">Sekolah</th>
+                  <th data-i18n="mkColType">Jenis</th>
+                  <th data-i18n="mkColAmount">Jumlah</th>
+                  <th data-i18n="mkColStatus">Status</th>
+                </tr>
+              </thead>
+              <tbody id="activityTableBody">
+                <tr>
+                  <td colspan="5">
+                    <div class="mk-empty">
+                      <span class="mk-empty-icon">📭</span>
+                      <p data-i18n="mkNoActivity">Belum ada aktivitas tercatat.</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Commission structure quick reference -->
+        <div class="mk-card">
+          <div class="mk-card-header">
+            <div class="mk-card-icon" aria-hidden="true">💰</div>
+            <h3 data-i18n="mkCommStructureTitle">Struktur Komisi</h3>
+            <span class="mk-card-badge" data-i18n="mkBadgeRef">Referensi</span>
+          </div>
+          <div class="mk-card-body">
+            <table class="mk-structure-table" aria-label="Struktur komisi">
+              <thead>
+                <tr>
+                  <th data-i18n="mkStructType">Tipe</th>
+                  <th data-i18n="mkStructCond">Syarat</th>
+                  <th data-i18n="mkStructValue">Nilai</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong data-i18n="mkStructAccessFee">Access Fee (Presentasi)</strong></td>
+                  <td data-i18n="mkStructAccessCond">Min. 30 siswa hadir, presentasi selesai</td>
+                  <td><strong>Rp 350.000</strong></td>
+                </tr>
+                <tr>
+                  <td><strong data-i18n="mkStructEnrollComm">Komisi Pendaftaran</strong></td>
+                  <td data-i18n="mkStructEnrollCond">Siswa lunas dari sekolah yang difasilitasi</td>
+                  <td><strong>10% / siswa</strong></td>
+                </tr>
+                <tr>
+                  <td><strong data-i18n="mkStructBonus5">Bonus Performa – 5 siswa</strong></td>
+                  <td>≥ 5 siswa terdaftar dari 1 sekolah</td>
+                  <td><strong>Rp 500.000</strong></td>
+                </tr>
+                <tr class="mk-highlight-row">
+                  <td><strong data-i18n="mkStructBonus10">Bonus Performa – 10 siswa</strong></td>
+                  <td>≥ 10 siswa terdaftar dari 1 sekolah</td>
+                  <td><strong>Rp 1.500.000</strong></td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="margin: 12px 0 0; font-size: 0.8rem; color: #b0a99f;" data-i18n="mkStructNote">
+              * Komisi berlaku untuk pendaftaran dalam 60 hari setelah presentasi di sekolah tersebut.
+            </p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ─────────────────────────────────
+           PANEL 2: SCHOOLS
+      ───────────────────────────────── -->
+      <section class="mk-panel" id="panel-schools" role="tabpanel" aria-labelledby="tab-schools">
+
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+          <div>
+            <p class="mk-eyebrow" data-i18n="mkSchoolsEyebrow">Manajemen</p>
+            <h2 class="mk-section-title" data-i18n="mkSchoolsTitle">Daftar Sekolah</h2>
+            <p class="mk-section-sub" style="margin:0" data-i18n="mkSchoolsSub">Sekolah SMK yang telah Anda fasilitasi untuk presentasi program.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="addSchoolBtn" data-i18n="mkAddSchool">+ Tambah Sekolah</button>
+        </div>
+
+        <!-- Add/Edit School Form (hidden by default) -->
+        <div class="mk-card" id="addSchoolForm" style="display:none;">
+          <div class="mk-card-header">
+            <div class="mk-card-icon" aria-hidden="true">🏫</div>
+            <h3 data-i18n="mkAddSchoolTitle">Tambah / Edit Sekolah</h3>
+          </div>
+          <div class="mk-card-body">
+            <div class="mk-form-grid-2">
+              <div class="mk-field">
+                <label for="schoolName">
+                  <span data-i18n="mkSchoolNameLabel">Nama Sekolah</span>
+                  <span class="req">*</span>
+                </label>
+                <input id="schoolName" type="text" required data-i18n="mkSchoolNamePH" placeholder="Contoh: SMKN 1 Surabaya" />
+              </div>
+              <div class="mk-field">
+                <label for="schoolCity">
+                  <span data-i18n="mkSchoolCityLabel">Kota / Kabupaten</span>
+                  <span class="req">*</span>
+                </label>
+                <input id="schoolCity" type="text" required data-i18n="mkSchoolCityPH" placeholder="Contoh: Surabaya" />
+              </div>
+              <div class="mk-field">
+                <label for="schoolContact">
+                  <span data-i18n="mkSchoolContactLabel">Nama PIC Sekolah</span>
+                </label>
+                <input id="schoolContact" type="text" data-i18n="mkSchoolContactPH" placeholder="Nama guru / wakil kepala sekolah" />
+              </div>
+              <div class="mk-field">
+                <label for="schoolPhone">
+                  <span data-i18n="mkSchoolPhoneLabel">No. Telepon PIC</span>
+                </label>
+                <input id="schoolPhone" type="tel" data-i18n="mkSchoolPhonePH" placeholder="08xx-xxxx-xxxx" />
+              </div>
+              <div class="mk-field mk-col-span-2">
+                <label for="schoolNotes">
+                  <span data-i18n="mkSchoolNotesLabel">Catatan</span>
+                </label>
+                <textarea id="schoolNotes" data-i18n="mkSchoolNotesPH" placeholder="Status negosiasi, jadwal presentasi, dll."></textarea>
+              </div>
+            </div>
+            <div class="mk-form-actions">
+              <button class="btn btn-primary btn-sm" id="saveSchoolBtn" data-i18n="mkSaveSchool">Simpan</button>
+              <button class="btn btn-secondary btn-sm" id="cancelSchoolBtn" data-i18n="mkCancel">Batal</button>
+              <span class="mk-form-feedback" id="schoolFormMsg" aria-live="polite"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schools Table -->
+        <div class="mk-card">
+          <div class="mk-card-header">
+            <div class="mk-card-icon" aria-hidden="true">📍</div>
+            <h3 data-i18n="mkSchoolListTitle">Semua Sekolah</h3>
+            <span class="mk-card-badge" id="schoolCountBadge">0</span>
+          </div>
+          <div class="mk-card-body" style="padding:0;">
+            <table class="mk-table" aria-label="Daftar sekolah">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th data-i18n="mkColSchoolName">Nama Sekolah</th>
+                  <th data-i18n="mkColCity">Kota</th>
+                  <th data-i18n="mkColContact">PIC</th>
+                  <th data-i18n="mkColEnrolled">Siswa Daftar</th>
+                  <th data-i18n="mkColStatus">Status</th>
+                  <th data-i18n="mkColActions">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="schoolTableBody">
+                <tr>
+                  <td colspan="7">
+                    <div class="mk-empty">
+                      <span class="mk-empty-icon">🏫</span>
+                      <p data-i18n="mkNoSchools">Belum ada sekolah ditambahkan.</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ─────────────────────────────────
+           PANEL 3: SUBMIT CLAIM
+      ───────────────────────────────── -->
+      <section class="mk-panel" id="panel-claim" role="tabpanel" aria-labelledby="tab-claim">
+
+        <div>
+          <p class="mk-eyebrow" data-i18n="mkClaimEyebrow">Form</p>
+          <h2 class="mk-section-title" data-i18n="mkClaimTitle">Ajukan Klaim Komisi</h2>
+          <p class="mk-section-sub" data-i18n="mkClaimSub">Isi data presentasi dan jumlah siswa yang mendaftar untuk menghitung dan mengajukan klaim komisi Anda.</p>
+        </div>
+
+        <div class="mk-alert info" role="note">
+          <span class="mk-alert-icon">ℹ️</span>
+          <span data-i18n="mkClaimAlertInfo">Klaim Access Fee dan Komisi Pendaftaran diajukan dalam satu form. Pastikan data sudah terverifikasi oleh tim Redline Academy sebelum submission.</span>
+        </div>
+
+        <!-- Form -->
+        <div class="mk-card">
+          <div class="mk-card-header">
+            <div class="mk-card-icon" aria-hidden="true">📝</div>
+            <h3 data-i18n="mkClaimFormTitle">Data Presentasi &amp; Pendaftaran</h3>
+            <span class="mk-id-tag" id="claimRefId">ID: –</span>
+          </div>
+          <div class="mk-card-body">
+            <form id="claimForm" novalidate>
+
+              <!-- Section: School & Presentation -->
+              <div class="mk-card" style="border-left: 3px solid var(--primary-color); margin-bottom: 20px;">
+                <div class="mk-card-header" style="background:#fff0f2;">
+                  <h3 style="font-size:12px; color: var(--primary-color);" data-i18n="mkClaimSec1">1. Data Sekolah &amp; Presentasi</h3>
+                </div>
+                <div class="mk-card-body">
+                  <div class="mk-form-grid-2">
+                    <div class="mk-field">
+                      <label for="claimSchool">
+                        <span data-i18n="mkClaimSchoolLabel">Nama Sekolah</span>
+                        <span class="req">*</span>
+                      </label>
+                      <div class="mk-select-wrap">
+                        <select id="claimSchool" required>
+                          <option value="" data-i18n="mkClaimSchoolPH">Pilih sekolah...</option>
+                        </select>
+                      </div>
+                      <span class="mk-field-hint" data-i18n="mkClaimSchoolHint">Sekolah harus sudah ditambahkan di tab Sekolah.</span>
+                    </div>
+                    <div class="mk-field">
+                      <label for="claimPresDate">
+                        <span data-i18n="mkClaimPresDateLabel">Tanggal Presentasi</span>
+                        <span class="req">*</span>
+                      </label>
+                      <input id="claimPresDate" type="date" required />
+                    </div>
+                    <div class="mk-field">
+                      <label for="claimStudentsPresent">
+                        <span data-i18n="mkClaimStudentsPresentLabel">Jumlah Siswa Hadir</span>
+                        <span class="req">*</span>
+                      </label>
+                      <input id="claimStudentsPresent" type="number" min="0" required placeholder="Min. 30 untuk Access Fee" />
+                      <span class="mk-field-hint" data-i18n="mkClaimStudentsPresentHint">Minimal 30 siswa untuk memenuhi syarat Access Fee.</span>
+                    </div>
+                    <div class="mk-field">
+                      <label for="claimStudentsEnrolled">
+                        <span data-i18n="mkClaimStudentsEnrolledLabel">Jumlah Siswa Mendaftar &amp; Lunas</span>
+                        <span class="req">*</span>
+                      </label>
+                      <input id="claimStudentsEnrolled" type="number" min="0" required placeholder="0" />
+                      <span class="mk-field-hint" data-i18n="mkClaimStudentsEnrolledHint">Hanya siswa yang sudah lunas pembayaran.</span>
+                    </div>
+                    <div class="mk-field mk-col-span-2">
+                      <label for="claimProgramFee">
+                        <span data-i18n="mkClaimProgramFeeLabel">Biaya Program Per Siswa (Rp)</span>
+                        <span class="req">*</span>
+                      </label>
+                      <input id="claimProgramFee" type="number" min="0" required placeholder="Contoh: 4600000" />
+                      <span class="mk-field-hint" data-i18n="mkClaimProgramFeeHint">Digunakan untuk menghitung 10% komisi pendaftaran.</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section: Commission Calculator -->
+              <div class="mk-card" style="margin-bottom: 20px;">
+                <div class="mk-card-header">
+                  <div class="mk-card-icon" aria-hidden="true">🧮</div>
+                  <h3 data-i18n="mkClaimSec2">2. Kalkulasi Komisi</h3>
+                </div>
+                <div class="mk-card-body">
+                  <div class="mk-calc-box" aria-label="Kalkulasi komisi" aria-live="polite">
+                    <p class="mk-calc-title" data-i18n="mkCalcTitle">Estimasi Komisi</p>
+                    <div class="mk-calc-row">
+                      <div>
+                        <div class="mk-calc-label" data-i18n="mkCalcAccessFee">Access Fee Presentasi</div>
+                        <div class="mk-calc-formula" data-i18n="mkCalcAccessFeeFormula">Rp 350.000 × 1 presentasi (min. 30 siswa hadir)</div>
+                      </div>
+                      <div class="mk-calc-value" id="calcAccessFee">Rp 0</div>
+                    </div>
+                    <div class="mk-calc-row">
+                      <div>
+                        <div class="mk-calc-label" data-i18n="mkCalcEnrollComm">Komisi Pendaftaran</div>
+                        <div class="mk-calc-formula" id="calcEnrollFormula">10% × Rp 0 × 0 siswa</div>
+                      </div>
+                      <div class="mk-calc-value" id="calcEnrollComm">Rp 0</div>
+                    </div>
+                    <div class="mk-calc-row">
+                      <div>
+                        <div class="mk-calc-label" data-i18n="mkCalcBonus">Bonus Performa</div>
+                        <div class="mk-calc-formula" id="calcBonusFormula" data-i18n="mkCalcBonusFormulaNone">Belum ada (min. 5 siswa)</div>
+                      </div>
+                      <div class="mk-calc-value" id="calcBonus">Rp 0</div>
+                    </div>
+                    <div class="mk-calc-row total">
+                      <div>
+                        <div class="mk-calc-label" data-i18n="mkCalcTotal">TOTAL ESTIMASI</div>
+                      </div>
+                      <div class="mk-calc-value" id="calcTotal">Rp 0</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section: Supporting Notes -->
+              <div class="mk-card" style="margin-bottom: 20px;">
+                <div class="mk-card-header">
+                  <div class="mk-card-icon" aria-hidden="true">📎</div>
+                  <h3 data-i18n="mkClaimSec3">3. Catatan &amp; Verifikasi</h3>
+                </div>
+                <div class="mk-card-body">
+                  <div class="mk-form-grid-2">
+                    <div class="mk-field mk-col-span-2">
+                      <label for="claimNotes">
+                        <span data-i18n="mkClaimNotesLabel">Catatan Tambahan</span>
+                      </label>
+                      <textarea id="claimNotes" rows="3" data-i18n="mkClaimNotesPH" placeholder="Informasi tambahan, kendala, atau catatan untuk tim admin..."></textarea>
+                    </div>
+                    <div class="mk-field mk-col-span-2">
+                      <label>
+                        <input type="checkbox" id="claimConsent" required style="width:auto; margin-right:8px; accent-color: var(--primary-color);" />
+                        <span data-i18n="mkClaimConsent">Saya menyatakan data yang diajukan akurat dan dapat diverifikasi oleh tim Redline Academy.</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Submit -->
+              <div class="mk-form-actions">
+                <button type="submit" class="btn btn-primary" data-i18n="mkClaimSubmitBtn">Kirim Klaim</button>
+                <button type="button" class="btn btn-secondary" id="claimResetBtn" data-i18n="mkCancel">Reset</button>
+                <span class="mk-form-feedback" id="claimFormMsg" aria-live="polite"></span>
+              </div>
+
+            </form>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ─────────────────────────────────
+           PANEL 4: REPORTS
+      ───────────────────────────────── -->
+      <section class="mk-panel" id="panel-reports" role="tabpanel" aria-labelledby="tab-reports">
+
+        <div>
+          <p class="mk-eyebrow" data-i18n="mkReportsEyebrow">Riwayat</p>
+          <h2 class="mk-section-title" data-i18n="mkReportsTitle">Laporan Komisi</h2>
+          <p class="mk-section-sub" data-i18n="mkReportsSub">Seluruh klaim yang telah Anda ajukan beserta statusnya.</p>
+        </div>
+
+        <!-- Reports List -->
+        <div class="mk-card" id="reportsList">
+          <div class="mk-card-header">
+            <div class="mk-card-icon" aria-hidden="true">📊</div>
+            <h3 data-i18n="mkReportsListTitle">Semua Klaim</h3>
+            <span class="mk-card-badge" id="reportCountBadge">0 klaim</span>
+          </div>
+          <div class="mk-card-body" style="padding:0;">
+            <table class="mk-table" aria-label="Daftar klaim komisi">
+              <thead>
+                <tr>
+                  <th data-i18n="mkColRef">Ref. ID</th>
+                  <th data-i18n="mkColDate">Tanggal</th>
+                  <th data-i18n="mkColSchool">Sekolah</th>
+                  <th data-i18n="mkColStudents">Siswa</th>
+                  <th data-i18n="mkColTotal">Total Komisi</th>
+                  <th data-i18n="mkColStatus">Status</th>
+                  <th data-i18n="mkColActions">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="reportTableBody">
+                <tr>
+                  <td colspan="7">
+                    <div class="mk-empty">
+                      <span class="mk-empty-icon">📂</span>
+                      <p data-i18n="mkNoReports">Belum ada klaim yang diajukan.</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Individual Report Detail (shown when viewing a specific claim) -->
+        <div id="reportDetail" style="display:none;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <button class="btn btn-secondary btn-sm" id="backToReports" data-i18n="mkBackToList">← Kembali ke Daftar</button>
+          </div>
+
+          <div class="mk-card">
+            <div class="mk-card-body">
+              <!-- Report Header -->
+              <div class="mk-report-header">
+                <div>
+                  <div style="font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #888; font-family: 'DM Sans'; margin-bottom: 4px;" data-i18n="mkReportBrand">Redline Academy</div>
+                  <div class="mk-report-ref" id="detailRefId">RA-COM-001</div>
+                  <div class="mk-report-type" data-i18n="mkReportTypeLbl">Laporan Komisi Marketing</div>
+                  <div class="mk-report-date" id="detailDate">–</div>
+                </div>
+                <div style="text-align: right;">
+                  <div class="mk-id-tag" id="detailMarketer">–</div>
+                </div>
+              </div>
+
+              <!-- Status Banner -->
+              <div class="mk-status-banner">
+                <div class="mk-status-banner-item">
+                  <div class="label" data-i18n="mkDetailSchool">Sekolah</div>
+                  <div class="value" id="detailSchool">–</div>
+                </div>
+                <div class="mk-status-banner-item">
+                  <div class="label" data-i18n="mkDetailPresDate">Tgl Presentasi</div>
+                  <div class="value" id="detailPresDate">–</div>
+                </div>
+                <div class="mk-status-banner-item">
+                  <div class="label" data-i18n="mkDetailStudents">Siswa Hadir / Daftar</div>
+                  <div class="value" id="detailStudents">– / –</div>
+                </div>
+                <div class="mk-status-pill" id="detailStatusPill">Pending</div>
+              </div>
+
+              <!-- Commission Breakdown -->
+              <div class="mk-calc-box">
+                <p class="mk-calc-title" data-i18n="mkCalcTitle">Rincian Komisi</p>
+                <div class="mk-calc-row">
+                  <div>
+                    <div class="mk-calc-label" data-i18n="mkCalcAccessFee">Access Fee Presentasi</div>
+                  </div>
+                  <div class="mk-calc-value" id="detailAccessFee">Rp 0</div>
+                </div>
+                <div class="mk-calc-row">
+                  <div>
+                    <div class="mk-calc-label" data-i18n="mkCalcEnrollComm">Komisi Pendaftaran</div>
+                    <div class="mk-calc-formula" id="detailEnrollFormula">–</div>
+                  </div>
+                  <div class="mk-calc-value" id="detailEnrollComm">Rp 0</div>
+                </div>
+                <div class="mk-calc-row">
+                  <div>
+                    <div class="mk-calc-label" data-i18n="mkCalcBonus">Bonus Performa</div>
+                  </div>
+                  <div class="mk-calc-value" id="detailBonus">Rp 0</div>
+                </div>
+                <div class="mk-calc-row total">
+                  <div>
+                    <div class="mk-calc-label" data-i18n="mkCalcTotal">TOTAL KOMISI</div>
+                  </div>
+                  <div class="mk-calc-value" id="detailTotal">Rp 0</div>
+                </div>
+              </div>
+
+              <div id="detailNotes" style="margin-top: 16px; font-size: 0.85rem; color: #888; line-height: 1.6;"></div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ─────────────────────────────────
+           PANEL 5: GUIDE / KNOWLEDGE BASE
+      ───────────────────────────────── -->
+      <section class="mk-panel" id="panel-guide" role="tabpanel" aria-labelledby="tab-guide">
+
+        <div>
+          <p class="mk-eyebrow" data-i18n="mkGuideEyebrow">Panduan</p>
+          <h2 class="mk-section-title" data-i18n="mkGuideTitle">Cara Mengajukan Klaim Komisi</h2>
+          <p class="mk-section-sub" data-i18n="mkGuideSub">Panduan langkah demi langkah untuk marketer Redline Academy.</p>
+        </div>
+
+        <!-- Steps -->
+        <div class="mk-guide-steps" aria-label="Langkah-langkah pengajuan klaim">
+          <div class="mk-guide-step">
+            <div class="mk-step-num s1" aria-hidden="true">1</div>
+            <div class="mk-step-body">
+              <div class="mk-step-title" data-i18n="mkStep1Title">Tambahkan Sekolah</div>
+              <p class="mk-step-desc" data-i18n="mkStep1Desc">Buka tab <strong>Sekolah</strong> dan klik "Tambah Sekolah". Isi data SMK yang akan Anda fasilitasi: nama, kota, dan kontak PIC sekolah.</p>
+            </div>
+          </div>
+          <div class="mk-guide-step">
+            <div class="mk-step-num s2" aria-hidden="true">2</div>
+            <div class="mk-step-body">
+              <div class="mk-step-title" data-i18n="mkStep2Title">Laksanakan Presentasi</div>
+              <p class="mk-step-desc" data-i18n="mkStep2Desc">Koordinasikan jadwal presentasi program Redline Academy dengan pihak sekolah. Pastikan minimal <strong>30 siswa hadir</strong> untuk memenuhi syarat Access Fee sebesar Rp 350.000.</p>
+            </div>
+          </div>
+          <div class="mk-guide-step">
+            <div class="mk-step-num s3" aria-hidden="true">3</div>
+            <div class="mk-step-body">
+              <div class="mk-step-title" data-i18n="mkStep3Title">Catat Data Pendaftaran</div>
+              <p class="mk-step-desc" data-i18n="mkStep3Desc">Setelah presentasi, catat jumlah siswa yang mendaftar dan telah <strong>menyelesaikan pembayaran</strong>. Komisi pendaftaran (10%) hanya berlaku untuk siswa yang sudah lunas dalam 60 hari sejak presentasi.</p>
+            </div>
+          </div>
+          <div class="mk-guide-step">
+            <div class="mk-step-num s4" aria-hidden="true">4</div>
+            <div class="mk-step-body">
+              <div class="mk-step-title" data-i18n="mkStep4Title">Ajukan Klaim</div>
+              <p class="mk-step-desc" data-i18n="mkStep4Desc">Buka tab <strong>Ajukan Klaim</strong>, pilih sekolah, isi data presentasi, dan sistem akan otomatis menghitung total komisi Anda. Centang persetujuan dan kirimkan klaim.</p>
+            </div>
+          </div>
+          <div class="mk-guide-step">
+            <div class="mk-step-num s5" aria-hidden="true">5</div>
+            <div class="mk-step-body">
+              <div class="mk-step-title" data-i18n="mkStep5Title">Pembayaran Komisi</div>
+              <p class="mk-step-desc" data-i18n="mkStep5Desc">Setelah verifikasi oleh tim Redline Academy, komisi akan dibayarkan secara periodik (bulanan). Pantau status klaim di tab <strong>Laporan Komisi</strong>.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mk-divider"></div>
+
+        <!-- Commission structure full -->
+        <div class="mk-card">
+          <div class="mk-card-header">
+            <div class="mk-card-icon" aria-hidden="true">📄</div>
+            <h3 data-i18n="mkGuideStructTitle">Struktur Komisi Lengkap</h3>
+          </div>
+          <div class="mk-card-body">
+            <table class="mk-structure-table" aria-label="Struktur komisi lengkap">
+              <thead>
+                <tr>
+                  <th data-i18n="mkStructType">Tipe</th>
+                  <th data-i18n="mkStructCond">Syarat</th>
+                  <th data-i18n="mkStructValue">Nilai</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <strong data-i18n="mkStructAccessFee">Access Fee</strong>
+                    <div style="font-size:0.78rem; color:#888; margin-top:2px;" data-i18n="mkStructAccessFeeSub">Per presentasi</div>
+                  </td>
+                  <td data-i18n="mkStructAccessCondFull">Presentasi disetujui sekolah, min. 30 siswa hadir, presentasi berhasil dilaksanakan</td>
+                  <td><strong>Rp 350.000</strong></td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong data-i18n="mkStructEnrollComm">Komisi Pendaftaran</strong>
+                    <div style="font-size:0.78rem; color:#888; margin-top:2px;" data-i18n="mkStructEnrollCommSub">Per siswa</div>
+                  </td>
+                  <td data-i18n="mkStructEnrollCondFull">Siswa dari sekolah yang difasilitasi, menyelesaikan pembayaran, dalam 60 hari setelah presentasi</td>
+                  <td><strong>10%</strong> <span style="font-size:0.8rem; color:#888;" data-i18n="mkStructPerStudent">dari biaya program per siswa</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong data-i18n="mkStructBonus5">Bonus 5 Siswa</strong>
+                  </td>
+                  <td>≥ 5 siswa terdaftar dari 1 sekolah</td>
+                  <td><strong>Rp 500.000</strong></td>
+                </tr>
+                <tr class="mk-highlight-row">
+                  <td>
+                    <strong data-i18n="mkStructBonus10">Bonus 10 Siswa</strong>
+                  </td>
+                  <td>≥ 10 siswa terdaftar dari 1 sekolah</td>
+                  <td><strong>Rp 1.500.000</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Scenario Example -->
+        <div class="mk-card">
+          <div class="mk-card-header">
+            <div class="mk-card-icon" aria-hidden="true">💡</div>
+            <h3 data-i18n="mkScenarioTitle">Contoh Skenario Penghasilan</h3>
+          </div>
+          <div class="mk-card-body">
+            <div class="mk-alert info">
+              <span class="mk-alert-icon">📌</span>
+              <span data-i18n="mkScenarioDesc">1 presentasi di 1 SMK, 60 siswa hadir, 6 siswa mendaftar dan lunas (biaya program Rp 4.600.000/siswa).</span>
+            </div>
+            <div class="mk-calc-box" style="margin-top: 16px;">
+              <p class="mk-calc-title" data-i18n="mkScenarioResult">Hasil Estimasi</p>
+              <div class="mk-calc-row">
+                <div>
+                  <div class="mk-calc-label" data-i18n="mkCalcAccessFee">Access Fee Presentasi</div>
+                  <div class="mk-calc-formula">1 × Rp 350.000</div>
+                </div>
+                <div class="mk-calc-value">Rp 350.000</div>
+              </div>
+              <div class="mk-calc-row">
+                <div>
+                  <div class="mk-calc-label" data-i18n="mkCalcEnrollComm">Komisi Pendaftaran</div>
+                  <div class="mk-calc-formula">10% × Rp 4.600.000 × 6 siswa</div>
+                </div>
+                <div class="mk-calc-value">Rp 2.760.000</div>
+              </div>
+              <div class="mk-calc-row">
+                <div>
+                  <div class="mk-calc-label" data-i18n="mkCalcBonus">Bonus 5 Siswa</div>
+                  <div class="mk-calc-formula" data-i18n="mkScenarioBonusFormula">6 siswa ≥ 5 → Bonus aktif</div>
+                </div>
+                <div class="mk-calc-value">Rp 500.000</div>
+              </div>
+              <div class="mk-calc-row total">
+                <div><div class="mk-calc-label" data-i18n="mkCalcTotal">TOTAL KOMISI</div></div>
+                <div class="mk-calc-value">Rp 3.610.000</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="mk-card">
+          <div class="mk-card-header">
+            <div class="mk-card-icon" aria-hidden="true">❓</div>
+            <h3 data-i18n="mkFaqTitle">FAQ</h3>
+          </div>
+          <div class="mk-card-body">
+            <div style="display: grid; gap: 16px;">
+              <div>
+                <strong style="font-size:0.9rem; color:#0d0d0d; display:block; margin-bottom:4px;" data-i18n="mkFaq1Q">Kapan komisi dibayarkan?</strong>
+                <p style="margin:0; font-size:0.85rem; color:#8f8880;" data-i18n="mkFaq1A">Komisi direkap dan dibayarkan secara periodik (bulanan) setelah siswa menyelesaikan pembayaran dan diverifikasi oleh tim Redline Academy.</p>
+              </div>
+              <div class="mk-divider"></div>
+              <div>
+                <strong style="font-size:0.9rem; color:#0d0d0d; display:block; margin-bottom:4px;" data-i18n="mkFaq2Q">Apakah Access Fee otomatis didapat jika presentasi dilakukan?</strong>
+                <p style="margin:0; font-size:0.85rem; color:#8f8880;" data-i18n="mkFaq2A">Tidak. Access Fee diberikan hanya jika: (1) presentasi disetujui sekolah, (2) minimal 30 siswa hadir, dan (3) presentasi berhasil dilaksanakan.</p>
+              </div>
+              <div class="mk-divider"></div>
+              <div>
+                <strong style="font-size:0.9rem; color:#0d0d0d; display:block; margin-bottom:4px;" data-i18n="mkFaq3Q">Apakah ada batas waktu pendaftaran siswa?</strong>
+                <p style="margin:0; font-size:0.85rem; color:#8f8880;" data-i18n="mkFaq3A">Ya. Komisi hanya berlaku untuk pendaftaran yang terjadi dalam <strong>60 hari</strong> setelah tanggal presentasi di sekolah tersebut. Kecuali ada perjanjian khusus (referral code, rujukan personal, dll.).</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/script.js"></script>
+    <script src="../js/supabase-client.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/guard.js"></script>
+    <script src="../js/dashboard-marketer.js"></script>
+  </body>
+</html>

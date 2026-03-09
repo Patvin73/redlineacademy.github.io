@@ -1,16 +1,48 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login LMS - Redline Academy</title>
+    <title>Login - Redline Academy</title>
     <meta name="robots" content="noindex, nofollow" />
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/lms.css" />
+
+    <!--
+      Inline i18n patch: keys baru untuk tab login dan staff portal.
+      Di-merge ke window.translations setelah script.js dimuat.
+    -->
+    <script>
+      window.__loginI18nPatch = {
+        id: {
+          loginTabLMS:               "Login LMS",
+          loginTabStaff:             "Staff / Marketer",
+          staffLoginTitle:           "Staff / Marketer",
+          staffLoginBadge:           "Portal",
+          staffLoginSubtitle:        "Masuk ke portal komisi & manajemen pemasaran.",
+          staffLoginButton:          "Masuk ke Portal",
+          staffLoginSuccessRedirect: "Login berhasil. Mengarahkan ke portal...",
+          lmsErrWrongRoleForPortal:  "Akun ini tidak memiliki akses ke portal ini. Gunakan form login yang sesuai.",
+        },
+        en: {
+          loginTabLMS:               "LMS Login",
+          loginTabStaff:             "Staff / Marketer",
+          staffLoginTitle:           "Staff / Marketer",
+          staffLoginBadge:           "Portal",
+          staffLoginSubtitle:        "Sign in to the commission & marketing management portal.",
+          staffLoginButton:          "Sign In to Portal",
+          staffLoginSuccessRedirect: "Login successful. Redirecting to portal...",
+          lmsErrWrongRoleForPortal:  "This account does not have access to this portal. Please use the correct login form.",
+        },
+      };
+    </script>
   </head>
+
   <body class="lms-auth-page">
     <main class="lms-auth-wrap">
       <section class="lms-auth-card">
+
+        <!-- Language Switcher -->
         <div class="language-switcher" role="navigation" aria-label="Language selector">
           <button class="lang-btn" data-lang="id" aria-label="Bahasa Indonesia">
             <img src="../assets/images/flags/id.png" alt="" class="flag" aria-hidden="true" />
@@ -22,77 +54,220 @@
           </button>
         </div>
 
-        <h1 data-i18n="lmsLoginTitle">Login LMS</h1>
-        <p data-i18n="lmsLoginSubtitle">Masuk dengan akun resmi Redline Academy.</p>
+        <!-- Tab Switcher -->
+        <div class="login-tabs" role="tablist" aria-label="Pilih jenis login">
+          <button
+            class="login-tab-btn active"
+            role="tab"
+            aria-selected="true"
+            aria-controls="panel-lms"
+            id="tab-lms"
+            data-tab="lms"
+          >
+            <span class="login-tab-dot" aria-hidden="true"></span>
+            <span id="tabLabelLMS">Login LMS</span>
+          </button>
+          <button
+            class="login-tab-btn"
+            role="tab"
+            aria-selected="false"
+            aria-controls="panel-staff"
+            id="tab-staff"
+            data-tab="staff"
+          >
+            <span class="login-tab-dot" aria-hidden="true"></span>
+            <span id="tabLabelStaff">Staff / Marketer</span>
+          </button>
+        </div>
 
-        <form id="loginForm" class="lms-form">
-          <label for="email" data-i18n="email">Email</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            autocomplete="email"
-            data-i18n="emailPlaceholder"
-          />
+        <!-- ══════════════════════════════
+             PANEL 1 — LMS LOGIN
+        ══════════════════════════════ -->
+        <div class="login-panel active" id="panel-lms" role="tabpanel" aria-labelledby="tab-lms">
+          <h1 data-i18n="lmsLoginTitle">Login LMS</h1>
+          <p data-i18n="lmsLoginSubtitle">Masuk dengan akun resmi Redline Academy.</p>
 
-          <label for="password" data-i18n="password">Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            autocomplete="current-password"
-            data-i18n="lmsPasswordPlaceholder"
-          />
+          <form id="loginFormLMS" class="lms-form" novalidate>
+            <label for="lms-email" data-i18n="email">Email</label>
+            <input
+              id="lms-email"
+              name="email"
+              type="email"
+              required
+              autocomplete="email"
+              placeholder="email@example.com"
+            />
 
-          <button type="submit" class="btn btn-primary" data-i18n="lmsLoginButton">Masuk</button>
-        </form>
+            <label for="lms-password" data-i18n="password">Password</label>
+            <input
+              id="lms-password"
+              name="password"
+              type="password"
+              required
+              autocomplete="current-password"
+              placeholder="Password"
+            />
 
-        <p id="loginMessage" class="lms-message" aria-live="polite"></p>
+            <button type="submit" class="btn btn-primary" data-i18n="lmsLoginButton">Masuk</button>
+          </form>
 
-        <a href="../index.html" class="lms-back-link" data-i18n="lmsBackToSite"
-          >Kembali ke website utama</a
-        >
+          <p id="loginMessageLMS" class="lms-message" aria-live="polite"></p>
+        </div>
+
+        <!-- ══════════════════════════════
+             PANEL 2 — STAFF / MARKETER
+        ══════════════════════════════ -->
+        <div class="login-panel" id="panel-staff" role="tabpanel" aria-labelledby="tab-staff">
+          <h1>
+            <span id="staffPanelTitle">Staff / Marketer</span>
+            <span class="login-role-badge" id="staffPanelBadge">Portal</span>
+          </h1>
+          <p id="staffPanelSubtitle">Masuk ke portal komisi &amp; manajemen pemasaran.</p>
+
+          <form id="loginFormStaff" class="lms-form" novalidate>
+            <label for="staff-email" data-i18n="email">Email</label>
+            <input
+              id="staff-email"
+              name="email"
+              type="email"
+              required
+              autocomplete="email"
+              placeholder="email@example.com"
+            />
+
+            <label for="staff-password" data-i18n="password">Password</label>
+            <input
+              id="staff-password"
+              name="password"
+              type="password"
+              required
+              autocomplete="current-password"
+              placeholder="Password"
+            />
+
+            <button type="submit" class="btn btn-primary" id="staffLoginBtn">Masuk ke Portal</button>
+          </form>
+
+          <p id="loginMessageStaff" class="lms-message" aria-live="polite"></p>
+        </div>
+
+        <!-- Back link -->
+        <a href="../index.html" class="lms-back-link" data-i18n="lmsBackToSite">
+          Kembali ke website utama
+        </a>
+
       </section>
     </main>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/script.js"></script>
     <script src="../js/supabase-client.js"></script>
     <script src="../js/auth.js"></script>
+
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener("DOMContentLoaded", function () {
+
+        // 1. Merge i18n patch ke window.translations
+        if (window.translations && window.__loginI18nPatch) {
+          Object.keys(window.__loginI18nPatch).forEach(function (lang) {
+            if (window.translations[lang]) {
+              Object.assign(window.translations[lang], window.__loginI18nPatch[lang]);
+            }
+          });
+          if (typeof updatePageLanguage === "function") updatePageLanguage();
+        }
+
+        // 2. Helper
+        function tSafe(key, fallback) {
+          return typeof t === "function" ? t(key) : fallback;
+        }
+
+        // 3. Terapkan label yang tidak pakai data-i18n
+        function applyStaffLabels() {
+          var map = {
+            tabLabelLMS:      ["loginTabLMS",      "Login LMS"],
+            tabLabelStaff:    ["loginTabStaff",    "Staff / Marketer"],
+            staffPanelTitle:  ["staffLoginTitle",  "Staff / Marketer"],
+            staffPanelBadge:  ["staffLoginBadge",  "Portal"],
+            staffPanelSubtitle:["staffLoginSubtitle","Masuk ke portal komisi & manajemen pemasaran."],
+            staffLoginBtn:    ["staffLoginButton", "Masuk ke Portal"],
+          };
+          Object.keys(map).forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) el.textContent = tSafe(map[id][0], map[id][1]);
+          });
+        }
+
+        applyStaffLabels();
+
+        // Re-apply saat bahasa diganti
+        document.querySelectorAll(".lang-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            setTimeout(applyStaffLabels, 30);
+          });
+        });
+
+        // 4. Redirect jika sudah login
         window.lmsAuth.redirectIfLoggedIn();
 
-        const form = document.getElementById("loginForm");
-        const message = document.getElementById("loginMessage");
+        // 5. Tab switching
+        var tabBtns = document.querySelectorAll(".login-tab-btn");
+        var panels  = document.querySelectorAll(".login-panel");
 
-        form.addEventListener("submit", async (event) => {
-          event.preventDefault();
+        tabBtns.forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var target = btn.dataset.tab;
+            tabBtns.forEach(function (b) {
+              b.classList.toggle("active", b.dataset.tab === target);
+              b.setAttribute("aria-selected", b.dataset.tab === target ? "true" : "false");
+            });
+            panels.forEach(function (p) {
+              p.classList.toggle("active", p.id === "panel-" + target);
+            });
+            ["loginMessageLMS","loginMessageStaff"].forEach(function (id) {
+              var el = document.getElementById(id);
+              if (el) { el.textContent = ""; el.classList.remove("error"); }
+            });
+          });
+        });
 
-          const formData = new FormData(form);
-          const email = String(formData.get("email") || "").trim();
-          const password = String(formData.get("password") || "");
-          const tSafe = (key, fallback) =>
-            typeof t === "function" ? t(key) : fallback;
+        // 6. LMS login
+        document.getElementById("loginFormLMS").addEventListener("submit", async function (e) {
+          e.preventDefault();
+          var email    = document.getElementById("lms-email").value.trim();
+          var password = document.getElementById("lms-password").value;
+          var msg      = document.getElementById("loginMessageLMS");
+          if (!email || !password) return;
 
-          message.textContent = tSafe("lmsLoggingIn", "Memproses login...");
-          message.classList.remove("error");
+          msg.textContent = tSafe("lmsLoggingIn", "Memproses login...");
+          msg.classList.remove("error");
 
-          const result = await window.lmsAuth.signIn(email, password);
-          if (!result.ok) {
-            message.textContent = result.error;
-            message.classList.add("error");
-            return;
-          }
+          var result = await window.lmsAuth.signIn(email, password, ["student","admin","trainer"]);
+          if (!result.ok) { msg.textContent = result.error; msg.classList.add("error"); return; }
 
-          message.textContent = tSafe(
-            "lmsLoginSuccessRedirect",
-            "Login berhasil. Mengarahkan dashboard...",
-          );
+          msg.textContent = tSafe("lmsLoginSuccessRedirect", "Login berhasil. Mengarahkan dashboard...");
           window.location.replace(result.redirectTo);
         });
+
+        // 7. Staff / Marketer login
+        document.getElementById("loginFormStaff").addEventListener("submit", async function (e) {
+          e.preventDefault();
+          var email    = document.getElementById("staff-email").value.trim();
+          var password = document.getElementById("staff-password").value;
+          var msg      = document.getElementById("loginMessageStaff");
+          if (!email || !password) return;
+
+          msg.textContent = tSafe("lmsLoggingIn", "Memproses login...");
+          msg.classList.remove("error");
+
+          var result = await window.lmsAuth.signIn(email, password, ["marketer","staff"]);
+          if (!result.ok) { msg.textContent = result.error; msg.classList.add("error"); return; }
+
+          msg.textContent = tSafe("staffLoginSuccessRedirect", "Login berhasil. Mengarahkan ke portal...");
+          window.location.replace(result.redirectTo);
+        });
+
       });
     </script>
   </body>

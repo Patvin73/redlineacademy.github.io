@@ -51,12 +51,12 @@ define('UPLOAD_DIR', dirname(__DIR__) . '/uploads_private/ktp/');
 //  Jangan pernah percaya nilai dari POST/form!
 // ─────────────────────────────────────────────
 const PROGRAM_PRICES = [
-    'assistant_carer' => 8_900_000,
-    'bartender'       => 8_900_000,
-    'barista'         => 8_900_000,
-    'cooking'         => 8_900_000,
-    'coding'          => 8_900_000,
-    'electrician'     => 8_900_000,
+    'assistant_carer' => 4_600_000,
+    'bartender'       => 4_600_000,
+    'barista'         => 4_600_000,
+    'cooking'         => 4_600_000,
+    'coding'          => 4_600_000,
+    'electrician'     => 4_600_000,
 ];
 
 const PROGRAM_NAMES = [
