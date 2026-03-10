@@ -906,26 +906,55 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Set up navigation active state
-  const currentPath = window.location.pathname;
-  document.querySelectorAll("nav a").forEach((link) => {
-    const href = link.getAttribute("href");
-    if (
-      currentPath.includes(href) ||
-      (currentPath === "/" && href === "index.html")
-    ) {
-      link.classList.add("active");
-    } else {
-      link.classList.remove("active");
+  const normalizePath = (path) => {
+    const cleanPath = (path || "").replace(/\/+$/, "");
+    return cleanPath || "/";
+  };
+
+  const normalizeHrefPath = (href) => {
+    if (!href || href.startsWith("#") || href.startsWith("javascript:")) {
+      return "";
     }
+
+    try {
+      return normalizePath(new URL(href, window.location.href).pathname);
+    } catch (err) {
+      return "";
+    }
+  };
+
+  const currentPath = normalizePath(window.location.pathname);
+
+  document.querySelectorAll("nav .nav-links a").forEach((link) => {
+    const href = link.getAttribute("href");
+    const hrefPath = normalizeHrefPath(href);
+    const isHomeHref = hrefPath === "/" || hrefPath.endsWith("/index.html");
+    const isHomeCurrent =
+      currentPath === "/" || currentPath.endsWith("/index.html");
+    const isActive =
+      (isHomeHref && isHomeCurrent) ||
+      (!isHomeHref && hrefPath !== "" && hrefPath === currentPath);
+
+    link.classList.toggle("active", isActive);
   });
 
   // Mobile menu toggle
   const menuToggle = document.querySelector(".menu-toggle");
   const nav = document.querySelector("nav");
-  if (menuToggle) {
+  if (menuToggle && nav) {
+    menuToggle.setAttribute("aria-expanded", "false");
+
     menuToggle.addEventListener("click", function () {
       // Toggle the CSS `active` class so the menu appearance is driven by CSS
-      nav.classList.toggle("active");
+      const isOpen = nav.classList.toggle("active");
+      menuToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    });
+
+    nav.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", function () {
+        nav.classList.remove("active");
+        menuToggle.setAttribute("aria-expanded", "false");
+      });
     });
   }
 

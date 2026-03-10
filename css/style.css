@@ -313,7 +313,7 @@ a:hover {
    ---------------------- */
 header {
   background-color: var(--dark-900);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 3px solid var(--primary-color);
   position: sticky;
   top: 0;
   z-index: 100;

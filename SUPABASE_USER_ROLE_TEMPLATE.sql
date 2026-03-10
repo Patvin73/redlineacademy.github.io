@@ -27,9 +27,12 @@ as $$
 declare
   v_user_id uuid;
   v_email text;
+  v_role text;
 begin
-  if p_role not in ('student', 'trainer', 'admin') then
-    raise exception 'Invalid role: %. Allowed: student, trainer, admin', p_role;
+  v_role := lower(trim(coalesce(p_role, '')));
+
+  if v_role not in ('student', 'trainer', 'admin', 'marketer', 'staff') then
+    raise exception 'Invalid role: %. Allowed: student, trainer, admin, marketer, staff', p_role;
   end if;
 
   select id, email
@@ -48,9 +51,9 @@ begin
   values (
     v_user_id,
     coalesce(p_full_name, split_part(v_email, '@', 1)),
-    p_role,
-    case when p_role = 'student' then p_student_id else null end,
-    case when p_role = 'admin' then p_admin_id else null end,
+    v_role,
+    case when v_role = 'student' then p_student_id else null end,
+    case when v_role in ('admin', 'trainer') then p_admin_id else null end,
     v_email
   )
   on conflict (id) do update
@@ -98,6 +101,24 @@ revoke all on function public.assign_user_role(text, text, text, text, text) fro
 --   'ADM-001'
 -- );
 
+-- MARKETER template
+-- select public.assign_user_role(
+--   'marketer_email@domain.com',
+--   'marketer',
+--   'Marketer Name',
+--   null,
+--   null
+-- );
+
+-- STAFF template
+-- select public.assign_user_role(
+--   'staff_email@domain.com',
+--   'staff',
+--   'Staff Name',
+--   null,
+--   null
+-- );
+
 -- ----------------------------------------------------------
 -- STEP 3: verification query
 -- ----------------------------------------------------------
@@ -126,3 +147,6 @@ select public.assign_user_role(
   null,
   null
 );
+
+
+
