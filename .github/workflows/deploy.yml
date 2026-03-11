@@ -28,3 +28,19 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./ # folder yang mau di-upload (./  = semua file)
           server-dir: /home/u838818830/domains/redlineacademy.com.au/public_html/ # folder tujuan di Hostinger
+          exclude: |
+            **/.git*
+            **/.github/**
+            **/.vscode/**
+            **/.venv/**
+            **/node_modules/**
+            **/logs/**
+            **/output/**
+            **/tools/**
+            **/docs/**
+            **/*.md
+            **/*.sql
+            **/*.ps1
+            **/test-lang.html
+            **/uploads_private/**
+            **/package*.json
