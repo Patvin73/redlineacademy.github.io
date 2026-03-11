@@ -16,8 +16,8 @@ jobs:
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ${{ ftp.redlineacademy.com.au.FTP_SERVER }}
-          username: ${{ u838818830.u838818830.FTP_USERNAME }}
-          password: ${{ Stefi-redline1.FTP_PASSWORD }}
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./ # folder yang mau di-upload (./  = semua file)
           server-dir: /home/u838818830/domains/redlineacademy.com.au/public_html/ # folder tujuan di Hostinger
