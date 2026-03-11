@@ -1,13 +1,13 @@
-<?php
+﻿<?php
 /**
  * submit_registration.php
- * Redline Academy — DOKU Checkout Integration
+ * Redline Academy â€” DOKU Checkout Integration
  *
  * Flow:
  *  1. Terima POST dari programs.html
  *  2. Validasi CSRF + input
  *  3. Hitung total di SERVER (tidak percaya nilai dari form)
- *  4. Panggil DOKU Checkout API → dapat payment_url
+ *  4. Panggil DOKU Checkout API â†’ dapat payment_url
  *  5. Redirect user ke halaman pembayaran DOKU (hosted page)
  *
  * CHANGELOG (fixes):
@@ -15,26 +15,28 @@
  *  - [KRITIS] program_fee dihitung ulang di server (tidak dari POST)
  *  - [KRITIS] promo_discount divalidasi di server (tidak dari POST)
  *  - [KRITIS] line_items price disesuaikan dengan finalAmount (anti-reject DOKU)
- *  - [KRITIS] 'callback_url' → 'notification_url' (field benar di DOKU v1)
+ *  - [KRITIS] 'callback_url' â†’ 'notification_url' (field benar di DOKU v1)
  *  - [PENTING] Tambah CSRF token protection
  *  - [PENTING] Tambah curl_error() handling
  *  - [PENTING] Tambah validasi format phone +62
  *  - [PENTING] Field payment_method dipass ke payload DOKU
- *  - [PENTING] Return type 'never' → void + exit (kompatibel PHP 7.4+)
+ *  - [PENTING] Return type 'never' â†’ void + exit (kompatibel PHP 7.4+)
  *  - [INFO] Hapus field non-standar: auto_redirect, callback_url_key
  */
 
-// ─────────────────────────────────────────────
-//  KONFIGURASI — ISI VIA ENVIRONMENT VARIABLE
+require_once __DIR__ . '/db.php';
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+//  KONFIGURASI â€” ISI VIA ENVIRONMENT VARIABLE
 //  Jangan pernah hardcode kredensial di sini!
 //
 //  Di server (cPanel/VPS), set env var:
 //    DOKU_CLIENT_ID=BRN-xxxx-xxxx
 //    DOKU_SECRET_KEY=SK-xxxxxxxx
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 define('DOKU_CLIENT_ID',  getenv('DOKU_CLIENT_ID')  ?: '');
 define('DOKU_SECRET_KEY', getenv('DOKU_SECRET_KEY') ?: '');
-define('DOKU_SANDBOX',    true);   // ← ubah ke false saat production
+$envSandbox = getenv('DOKU_SANDBOX');
+define('DOKU_SANDBOX',    filter_var($envSandbox ?? 'true', FILTER_VALIDATE_BOOLEAN));
 
 define('BASE_URL',    'https://redlineacademy.com.au');
 define('NOTIFY_URL',  BASE_URL . '/doku_notify.php');
@@ -46,10 +48,10 @@ define('FAILED_URL',  BASE_URL . '/pages/payment_failed.html');
 // Jika tidak bisa, gunakan .htaccess di folder uploads/ untuk blokir akses
 define('UPLOAD_DIR', dirname(__DIR__) . '/uploads_private/ktp/');
 
-// ─────────────────────────────────────────────
-//  HARGA & DISKON — SOURCE OF TRUTH DI SERVER
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+//  HARGA & DISKON â€” SOURCE OF TRUTH DI SERVER
 //  Jangan pernah percaya nilai dari POST/form!
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const PROGRAM_PRICES = [
     'assistant_carer' => 4_600_000,
     'bartender'       => 4_600_000,
@@ -81,9 +83,9 @@ const PROMO_CODES = [
 ];
 
 
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 //  HELPER FUNCTIONS
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /** Redirect ke halaman gagal dengan pesan error */
 function redirectError(string $message): void
@@ -97,6 +99,75 @@ function redirectError(string $message): void
 function clean(string $val): string
 {
     return htmlspecialchars(strip_tags(trim($val)), ENT_QUOTES, 'UTF-8');
+}
+
+/** Insert registration row into database (if DB configured). */
+function dbInsertRegistration(array $data): void
+{
+    $db = db();
+    if (!$db) {
+        return;
+    }
+
+    $sql = "insert into public.registrations (
+        invoice_number, full_name, email, phone, date_of_birth, gender, id_number,
+        address, postcode, qualification, employment, experience,
+        selected_program, payment_plan, payment_method,
+        program_fee, plan_discount, promo_code, promo_discount, final_amount,
+        status, ktp_file
+    ) values (
+        :invoice_number, :full_name, :email, :phone, :date_of_birth, :gender, :id_number,
+        :address, :postcode, :qualification, :employment, :experience,
+        :selected_program, :payment_plan, :payment_method,
+        :program_fee, :plan_discount, :promo_code, :promo_discount, :final_amount,
+        :status, :ktp_file
+    )";
+
+    try {
+        $stmt = $db->prepare($sql);
+        $stmt->execute($data);
+    } catch (Throwable $e) {
+        error_log('DB insert failed: ' . $e->getMessage());
+    }
+}
+
+/** Update registration row by invoice (if DB configured). */
+function dbUpdateRegistration(string $invoiceNumber, array $fields): void
+{
+    $db = db();
+    if (!$db || !$fields) {
+        return;
+    }
+
+    $allowed = [
+        'status',
+        'transaction_id',
+        'payment_url',
+        'doku_response',
+        'last_error',
+    ];
+
+    $setParts = [];
+    $params = [':invoice_number' => $invoiceNumber];
+    foreach ($fields as $key => $value) {
+        if (!in_array($key, $allowed, true)) {
+            continue;
+        }
+        $setParts[] = $key . ' = :' . $key;
+        $params[':' . $key] = $value;
+    }
+
+    if (!$setParts) {
+        return;
+    }
+
+    $sql = 'update public.registrations set ' . implode(', ', $setParts) . ', updated_at = now() where invoice_number = :invoice_number';
+    try {
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+    } catch (Throwable $e) {
+        error_log('DB update failed: ' . $e->getMessage());
+    }
 }
 
 /**
@@ -170,9 +241,9 @@ function dokuRequest(string $endpoint, array $payload): array
 }
 
 
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 //  MULAI PROSES REQUEST
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 // Pastikan server memiliki kredensial
 if (empty(DOKU_CLIENT_ID) || empty(DOKU_SECRET_KEY)) {
@@ -233,7 +304,7 @@ if (!preg_match('/^(\+62|62|0)[0-9]{8,13}$/', $phone)) {
     redirectError('Format nomor telepon tidak valid. Gunakan format: 08xx atau +628xx');
 }
 
-// 4. FIX: Hitung harga DI SERVER — tidak percaya nilai dari form
+// 4. FIX: Hitung harga DI SERVER â€” tidak percaya nilai dari form
 if (!array_key_exists($selectedProgram, PROGRAM_PRICES)) {
     redirectError('Program tidak valid.');
 }
@@ -246,7 +317,7 @@ $programLabel     = PROGRAM_NAMES[$selectedProgram];
 $planDiscountRate = PLAN_DISCOUNTS[$paymentPlan];
 $planDiscount     = (int) round($programFee * $planDiscountRate);
 
-// FIX: Validasi kode promo di server — tidak percaya nilai diskon dari form
+// FIX: Validasi kode promo di server â€” tidak percaya nilai diskon dari form
 $promoDiscount = 0;
 $promoRate     = 0.0;
 if (!empty($promoCode)) {
@@ -304,6 +375,33 @@ $programCodes = [
 $programCode   = $programCodes[$selectedProgram] ?? 'PRG';
 $invoiceNumber = 'RA-' . $programCode . '-' . date('Ymd') . '-' . strtoupper(substr(md5(uniqid('', true)), 0, 6));
 
+// 6b. Persist registration (best-effort)
+$dbData = [
+    'invoice_number'  => $invoiceNumber,
+    'full_name'       => $fullname,
+    'email'           => $email,
+    'phone'           => $phone,
+    'date_of_birth'   => $dob ?: null,
+    'gender'          => $gender,
+    'id_number'       => $idNumber,
+    'address'         => $address,
+    'postcode'        => $postcode,
+    'qualification'   => $qualification,
+    'employment'      => $employment,
+    'experience'      => $experience,
+    'selected_program'=> $selectedProgram,
+    'payment_plan'    => $paymentPlan,
+    'payment_method'  => $paymentMethod,
+    'program_fee'     => $programFee,
+    'plan_discount'   => $planDiscount,
+    'promo_code'      => $promoCode ?: null,
+    'promo_discount'  => $promoDiscount,
+    'final_amount'    => $finalAmount,
+    'status'          => 'initiated',
+    'ktp_file'        => $fileName,
+];
+
+dbInsertRegistration($dbData);
 // 7. Susun payload DOKU Checkout
 //    FIX: 'notification_url' (bukan 'callback_url')
 //    FIX: line_items price = finalAmount (bukan programFee) agar total cocok
@@ -358,6 +456,12 @@ $result = dokuRequest('/checkout/v1/payment', $payload);
 
 if ($result['http_code'] !== 200) {
     $errMsg = $result['body']['message'] ?? 'Gagal membuat sesi pembayaran DOKU.';
+    dbUpdateRegistration($invoiceNumber, [
+        'status' => 'failed',
+        'last_error' => $errMsg,
+        'doku_response' => json_encode($result['body'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+    ]);
+
     redirectError($errMsg);
 }
 
@@ -371,6 +475,21 @@ if (empty($paymentUrl)) {
     redirectError('URL pembayaran tidak ditemukan. Coba beberapa saat lagi.');
 }
 
+// Update registration with payment URL (best-effort)
+dbUpdateRegistration($invoiceNumber, [
+    'status' => 'awaiting_payment',
+    'payment_url' => $paymentUrl,
+    'doku_response' => json_encode($result['body'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+]);
+
 // 10. Redirect ke DOKU Checkout hosted page
 header('Location: ' . $paymentUrl);
 exit;
+
+
+
+
+
+
+
+

@@ -1,23 +1,24 @@
-<?php
+﻿<?php
 /**
  * doku_notify.php
- * Redline Academy — DOKU Webhook / Notification Handler
+ * Redline Academy - DOKU Webhook / Notification Handler
  *
  * DOKU akan POST ke URL ini setelah transaksi selesai (sukses/gagal).
  * Verifikasi signature sebelum memproses notifikasi.
- *
- * Dokumentasi: https://developers.doku.com/accept-payment/checkout/notify
  */
 
-define('DOKU_SECRET_KEY', getenv('DOKU_SECRET_KEY') ?: 'YOUR_SECRET_KEY');
-define('DOKU_CLIENT_ID',  getenv('DOKU_CLIENT_ID')  ?: 'YOUR_CLIENT_ID');
+require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/mail_helper.php';
+
+define('DOKU_SECRET_KEY', getenv('DOKU_SECRET_KEY') ?: '');
+define('DOKU_CLIENT_ID',  getenv('DOKU_CLIENT_ID')  ?: '');
 
 // Log file (opsional, pastikan writable)
 define('LOG_FILE', __DIR__ . '/logs/doku_notify.log');
 
-// ─────────────────────────────────────────────
-//  HELPER
-// ─────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// Helper
+// -----------------------------------------------------------------------------
 
 function writeLog(string $message): void
 {
@@ -25,6 +26,69 @@ function writeLog(string $message): void
         mkdir(dirname(LOG_FILE), 0755, true);
     }
     file_put_contents(LOG_FILE, '[' . date('Y-m-d H:i:s') . '] ' . $message . PHP_EOL, FILE_APPEND);
+}
+
+function dbLogPaymentEvent(string $invoiceNumber, string $eventType, array $payload): void
+{
+    $db = db();
+    if (!$db) {
+        return;
+    }
+
+    $stmt = $db->prepare('insert into public.payment_events (invoice_number, event_type, payload) values (:invoice, :event_type, :payload)');
+    $stmt->execute([
+        ':invoice' => $invoiceNumber ?: null,
+        ':event_type' => $eventType,
+        ':payload' => json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+    ]);
+}
+
+function dbUpsertRegistrationStatus(
+    string $invoiceNumber,
+    string $status,
+    string $transactionId,
+    $amount,
+    array $payload,
+    ?string $lastError
+): void {
+    $db = db();
+    if (!$db) {
+        return;
+    }
+
+    $stmt = $db->prepare(
+        'insert into public.registrations (invoice_number, status, transaction_id, final_amount, last_error, doku_response)\n'
+        . 'values (:invoice, :status, :transaction_id, :final_amount, :last_error, :doku_response)\n'
+        . 'on conflict (invoice_number) do update set\n'
+        . '  status = excluded.status,\n'
+        . '  transaction_id = coalesce(excluded.transaction_id, public.registrations.transaction_id),\n'
+        . '  final_amount = coalesce(public.registrations.final_amount, excluded.final_amount),\n'
+        . '  last_error = coalesce(excluded.last_error, public.registrations.last_error),\n'
+        . '  doku_response = excluded.doku_response,\n'
+        . '  updated_at = now()'
+    );
+
+    $stmt->execute([
+        ':invoice' => $invoiceNumber,
+        ':status' => $status,
+        ':transaction_id' => $transactionId ?: null,
+        ':final_amount' => $amount ?: null,
+        ':last_error' => $lastError,
+        ':doku_response' => json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+    ]);
+}
+
+function dbFetchRegistration(string $invoiceNumber): ?array
+{
+    $db = db();
+    if (!$db) {
+        return null;
+    }
+
+    $stmt = $db->prepare('select full_name, email, final_amount from public.registrations where invoice_number = :invoice limit 1');
+    $stmt->execute([':invoice' => $invoiceNumber]);
+    $row = $stmt->fetch();
+    return $row ?: null;
 }
 
 /** Verifikasi DOKU signature dari header request */
@@ -47,12 +111,12 @@ function verifyDokuSignature(string $rawBody): bool
     return hash_equals($expected, $sigHeader);
 }
 
-// ─────────────────────────────────────────────
-//  PROSES NOTIFIKASI
-// ─────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// Proses notifikasi
+// -----------------------------------------------------------------------------
 
 $rawBody = file_get_contents('php://input');
-writeLog("Notif masuk: " . $rawBody);
+writeLog('Notif masuk: ' . $rawBody);
 
 // Hanya terima POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -60,16 +124,23 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit('Method Not Allowed');
 }
 
+// Pastikan kredensial DOKU tersedia
+if (empty(DOKU_SECRET_KEY) || empty(DOKU_CLIENT_ID)) {
+    writeLog('ERROR: DOKU credentials missing.');
+    http_response_code(500);
+    exit('Server misconfigured');
+}
+
 // Verifikasi signature
 if (!verifyDokuSignature($rawBody)) {
-    writeLog("GAGAL: Signature tidak valid.");
+    writeLog('GAGAL: Signature tidak valid.');
     http_response_code(401);
     exit('Unauthorized');
 }
 
 $data = json_decode($rawBody, true);
 if (!$data) {
-    writeLog("GAGAL: Body bukan JSON valid.");
+    writeLog('GAGAL: Body bukan JSON valid.');
     http_response_code(400);
     exit('Bad Request');
 }
@@ -82,36 +153,55 @@ $transactionId  = $data['transaction']['id']          ?? '';
 
 writeLog("Invoice: {$invoiceNumber} | Status: {$resultCode} | Amount: {$amount} | TxID: {$transactionId}");
 
-// ─────────────────────────────────────────────
-//  LOGIKA BISNIS — sesuaikan dengan database Anda
-// ─────────────────────────────────────────────
+$statusMap = [
+    'SUCCESS' => 'paid',
+    'PENDING' => 'pending',
+    'FAILED'  => 'failed',
+    'EXPIRED' => 'expired',
+];
 
-switch ($resultCode) {
-    case 'SUCCESS':
-        /**
-         * TODO: Update status order di database:
-         *   UPDATE registrations SET status='paid', transaction_id='...'
-         *   WHERE invoice_number = '{$invoiceNumber}';
-         *
-         * Kirim email konfirmasi ke customer (gunakan PHPMailer / SMTP).
-         * Notif ke tim internal (Slack/email).
-         */
+$mappedStatus = $statusMap[$resultCode] ?? 'unknown';
+$lastError = null;
+if (in_array($mappedStatus, ['failed', 'expired', 'unknown'], true)) {
+    $lastError = 'DOKU status: ' . ($resultCode ?: 'UNKNOWN');
+}
+
+// Persist status + audit trail (best-effort)
+dbUpsertRegistrationStatus($invoiceNumber, $mappedStatus, $transactionId, $amount, $data, $lastError);
+dbLogPaymentEvent($invoiceNumber, 'webhook_' . $mappedStatus, $data);
+
+switch ($mappedStatus) {
+    case 'paid':
         writeLog("SUKSES: Pembayaran {$invoiceNumber} berhasil. TxID: {$transactionId}");
+
+        $reg = dbFetchRegistration($invoiceNumber);
+        $customerName = $reg['full_name'] ?? ($data['customer']['name'] ?? 'Customer');
+        $customerEmail = $reg['email'] ?? ($data['customer']['email'] ?? '');
+        $finalAmount = $reg['final_amount'] ?? $amount;
+
+        if (!empty($customerEmail)) {
+            $amountText = number_format((float) $finalAmount, 0, ',', '.');
+            $subject = 'Pembayaran berhasil - Redline Academy';
+            $html = "<p>Halo {$customerName},</p>"
+                  . "<p>Pembayaran Anda telah kami terima.</p>"
+                  . "<p><strong>Invoice:</strong> {$invoiceNumber}<br>"
+                  . "<strong>Jumlah:</strong> IDR {$amountText}</p>"
+                  . "<p>Terima kasih telah mendaftar di Redline Academy.</p>";
+
+            if (!sendPaymentEmail($customerEmail, $customerName, $subject, $html)) {
+                writeLog("ERROR: Email gagal dikirim ke {$customerEmail} (invoice {$invoiceNumber}).");
+            }
+        } else {
+            writeLog("WARN: Email customer tidak ditemukan untuk invoice {$invoiceNumber}.");
+        }
         break;
 
-    case 'PENDING':
-        /**
-         * TODO: Update status = 'pending' di database.
-         */
+    case 'pending':
         writeLog("PENDING: Menunggu konfirmasi bank untuk {$invoiceNumber}.");
         break;
 
-    case 'FAILED':
-    case 'EXPIRED':
-        /**
-         * TODO: Update status = 'failed'/'expired' di database.
-         * Kirim notif ke user bahwa pembayaran gagal.
-         */
+    case 'failed':
+    case 'expired':
         writeLog("GAGAL/EXPIRED: Invoice {$invoiceNumber} status {$resultCode}.");
         break;
 
