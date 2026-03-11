@@ -1,0 +1,23 @@
+﻿name: Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - main # ganti dengan nama branch utama kamu
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ ftp.redlineacademy.com.au.FTP_SERVER }}
+          username: ${{ u838818830.u838818830.FTP_USERNAME }}
+          password: ${{ Stefi-redline1.FTP_PASSWORD }}
+          local-dir: ./ # folder yang mau di-upload (./  = semua file)
+          server-dir: /home/u838818830/domains/redlineacademy.com.au/public_html/ # folder tujuan di Hostinger
