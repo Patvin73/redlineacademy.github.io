@@ -17,7 +17,8 @@ jobs:
         shell: bash
         run: |
           echo "commit: $GITHUB_SHA" > deploy-info.txt
-          echo "deployed_at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> deploy-info.txt
+          echo "deployed_at_utc: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> deploy-info.txt
+          echo "deployed_at_wib: $(TZ=Asia/Jakarta date '+%Y-%m-%d %H:%M:%S WIB')" >> deploy-info.txt
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
