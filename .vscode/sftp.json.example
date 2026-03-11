@@ -1,10 +1,10 @@
 {
   "name": "Hostinger",
-  "host": "145.223.108.32",
+  "host": "<host>",
   "protocol": "ftp",
   "port": 21,
-  "username": "u838818830.u838818830",
-  "remotePath": "/home/u838818830/domains/redlineacademy.com.au/public_html",
+  "username": "<username>",
+  "remotePath": "/home/<user>/domains/<domain>/public_html",
   "uploadOnSave": false,
   "useTempFile": false,
   "openSsh": false,

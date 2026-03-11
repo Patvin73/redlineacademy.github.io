@@ -48,6 +48,13 @@ define('FAILED_URL',  BASE_URL . '/pages/payment_failed.html');
 // Jika tidak bisa, gunakan .htaccess di folder uploads/ untuk blokir akses
 define('UPLOAD_DIR', dirname(__DIR__) . '/uploads_private/ktp/');
 
+// Rate limiting (anti-spam) untuk endpoint registrasi
+define('RATE_LIMIT_DIR', __DIR__ . '/logs/rate_limit');
+define('RATE_LIMIT_LOG', __DIR__ . '/logs/rate_limit.log');
+define('RATE_LIMIT_WINDOW_SEC', (int) (getenv('RATE_LIMIT_WINDOW_SEC') ?: 600)); // default 10 menit
+define('RATE_LIMIT_MAX', (int) (getenv('RATE_LIMIT_MAX') ?: 5));                 // default 5 request / window
+define('RATE_LIMIT_TRUST_PROXY', filter_var(getenv('RATE_LIMIT_TRUST_PROXY') ?? 'false', FILTER_VALIDATE_BOOLEAN));
+
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 //  HARGA & DISKON â€” SOURCE OF TRUTH DI SERVER
 //  Jangan pernah percaya nilai dari POST/form!
@@ -99,6 +106,89 @@ function redirectError(string $message): void
 function clean(string $val): string
 {
     return htmlspecialchars(strip_tags(trim($val)), ENT_QUOTES, 'UTF-8');
+}
+/** Ambil IP client dengan opsi trust proxy */
+function getClientIp(): string
+{
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    if (RATE_LIMIT_TRUST_PROXY && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $parts = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $ip = trim($parts[0]);
+    }
+    return $ip ?: 'unknown';
+}
+
+/** Log event rate limit dalam format JSON Lines */
+function logRateLimitEvent(string $message, array $context = []): void
+{
+    $dir = dirname(RATE_LIMIT_LOG);
+    if (!is_dir($dir)) {
+        mkdir($dir, 0755, true);
+    }
+    $entry = [
+        'ts' => gmdate('c'),
+        'level' => 'warn',
+        'message' => $message,
+        'context' => $context,
+    ];
+    file_put_contents(
+        RATE_LIMIT_LOG,
+        json_encode($entry, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . PHP_EOL,
+        FILE_APPEND
+    );
+}
+
+/** Enforce rate limit sederhana per IP */
+function enforceRateLimit(): void
+{
+    if (RATE_LIMIT_MAX <= 0 || RATE_LIMIT_WINDOW_SEC <= 0) {
+        return;
+    }
+
+    $ip = getClientIp();
+    $now = time();
+    $key = hash('sha256', $ip);
+    $path = RATE_LIMIT_DIR . '/' . $key . '.json';
+
+    if (!is_dir(RATE_LIMIT_DIR)) {
+        mkdir(RATE_LIMIT_DIR, 0755, true);
+    }
+
+    $fp = fopen($path, 'c+');
+    if ($fp === false) {
+        return; // fail-open jika file tidak bisa diakses
+    }
+
+    flock($fp, LOCK_EX);
+    $raw = stream_get_contents($fp);
+    $data = $raw ? json_decode($raw, true) : null;
+    $timestamps = is_array($data['timestamps'] ?? null) ? $data['timestamps'] : [];
+
+    // Buang timestamp di luar window
+    $cutoff = $now - RATE_LIMIT_WINDOW_SEC;
+    $timestamps = array_values(array_filter($timestamps, function ($ts) use ($cutoff) {
+        return is_int($ts) && $ts >= $cutoff;
+    }));
+
+    if (count($timestamps) >= RATE_LIMIT_MAX) {
+        logRateLimitEvent('Rate limit exceeded', [
+            'ip' => $ip,
+            'count' => count($timestamps),
+            'window_sec' => RATE_LIMIT_WINDOW_SEC,
+        ]);
+        flock($fp, LOCK_UN);
+        fclose($fp);
+        http_response_code(429);
+        redirectError('Terlalu banyak percobaan. Silakan tunggu beberapa menit lalu coba lagi.');
+    }
+
+    $timestamps[] = $now;
+    ftruncate($fp, 0);
+    rewind($fp);
+    fwrite($fp, json_encode(['timestamps' => $timestamps], JSON_UNESCAPED_SLASHES));
+    fflush($fp);
+    flock($fp, LOCK_UN);
+    fclose($fp);
 }
 
 /** Insert registration row into database (if DB configured). */
@@ -255,6 +345,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: /pages/programs.html');
     exit;
 }
+// Rate limiting anti-spam (per IP)
+enforceRateLimit();
+
 
 // FIX: CSRF Token Validation
 session_start();
@@ -485,6 +578,9 @@ dbUpdateRegistration($invoiceNumber, [
 // 10. Redirect ke DOKU Checkout hosted page
 header('Location: ' . $paymentUrl);
 exit;
+
+
+
 
 
 

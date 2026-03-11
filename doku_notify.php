@@ -13,21 +13,190 @@ require_once __DIR__ . '/mail_helper.php';
 define('DOKU_SECRET_KEY', getenv('DOKU_SECRET_KEY') ?: '');
 define('DOKU_CLIENT_ID',  getenv('DOKU_CLIENT_ID')  ?: '');
 
-// Log file (opsional, pastikan writable)
-define('LOG_FILE', __DIR__ . '/logs/doku_notify.log');
+// Logging + metrics (structured)
+define('LOG_DIR', __DIR__ . '/logs');
+define('LOG_FILE', LOG_DIR . '/doku_notify.log');
+define('METRICS_FILE', LOG_DIR . '/webhook_metrics.json');
+
+define('WEBHOOK_ALERT_WINDOW_SEC', (int) (getenv('WEBHOOK_ALERT_WINDOW_SEC') ?: 900));
+define('WEBHOOK_ALERT_THRESHOLD', (int) (getenv('WEBHOOK_ALERT_THRESHOLD') ?: 5));
+define('WEBHOOK_ALERT_COOLDOWN_SEC', (int) (getenv('WEBHOOK_ALERT_COOLDOWN_SEC') ?: 1800));
+
+define('ALERT_EMAIL', getenv('ALERT_EMAIL') ?: '');
+define('ALERT_NAME', getenv('ALERT_NAME') ?: 'Admin');
 
 // -----------------------------------------------------------------------------
 // Helper
 // -----------------------------------------------------------------------------
 
-function writeLog(string $message): void
+function ensureLogDir(): void
 {
-    if (!is_dir(dirname(LOG_FILE))) {
-        mkdir(dirname(LOG_FILE), 0755, true);
+    if (!is_dir(LOG_DIR)) {
+        mkdir(LOG_DIR, 0755, true);
     }
-    file_put_contents(LOG_FILE, '[' . date('Y-m-d H:i:s') . '] ' . $message . PHP_EOL, FILE_APPEND);
 }
 
+function logEvent(string $level, string $message, array $context = []): void
+{
+    ensureLogDir();
+    $entry = [
+        'ts' => gmdate('c'),
+        'level' => $level,
+        'message' => $message,
+        'context' => $context,
+    ];
+    file_put_contents(
+        LOG_FILE,
+        json_encode($entry, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . PHP_EOL,
+        FILE_APPEND
+    );
+
+    if ($level === 'error') {
+        error_log($message);
+    }
+}
+
+function writeLog(string $message): void
+{
+    logEvent('info', $message);
+}
+
+function readWebhookMetrics(): array
+{
+    if (!is_file(METRICS_FILE)) {
+        return [
+            'total_success' => 0,
+            'total_error' => 0,
+            'errors_window' => [],
+        ];
+    }
+
+    $raw = file_get_contents(METRICS_FILE);
+    $data = $raw ? json_decode($raw, true) : null;
+    if (!is_array($data)) {
+        return [
+            'total_success' => 0,
+            'total_error' => 0,
+            'errors_window' => [],
+        ];
+    }
+
+    if (!isset($data['errors_window']) || !is_array($data['errors_window'])) {
+        $data['errors_window'] = [];
+    }
+
+    return $data;
+}
+
+function writeWebhookMetrics(array $metrics): void
+{
+    ensureLogDir();
+    file_put_contents(
+        METRICS_FILE,
+        json_encode($metrics, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+        LOCK_EX
+    );
+}
+
+function pruneWindow(array $timestamps, int $windowSec, ?int $now = null): array
+{
+    $now = $now ?? time();
+    $cutoff = $now - $windowSec;
+    return array_values(array_filter($timestamps, function ($ts) use ($cutoff) {
+        return is_int($ts) && $ts >= $cutoff;
+    }));
+}
+
+function recordWebhookSuccess(array $context = []): void
+{
+    $metrics = readWebhookMetrics();
+    $metrics['last_success_at'] = time();
+    $metrics['total_success'] = ($metrics['total_success'] ?? 0) + 1;
+
+    if ($context) {
+        $metrics['last_success_context'] = $context;
+    }
+
+    writeWebhookMetrics($metrics);
+}
+
+function sendAlertEmail(string $subject, string $html): bool
+{
+    if (empty(ALERT_EMAIL)) {
+        return false;
+    }
+
+    return sendPaymentEmail(ALERT_EMAIL, ALERT_NAME, $subject, $html);
+}
+
+function maybeAlertWebhookFailures(array $metrics, string $reason, array $context = []): bool
+{
+    if (empty(ALERT_EMAIL)) {
+        return false;
+    }
+
+    $errors = $metrics['errors_window'] ?? [];
+    if (!is_array($errors) || count($errors) < WEBHOOK_ALERT_THRESHOLD) {
+        return false;
+    }
+
+    $lastAlertAt = $metrics['last_alert_at'] ?? 0;
+    if ($lastAlertAt && (time() - $lastAlertAt) < WEBHOOK_ALERT_COOLDOWN_SEC) {
+        return false;
+    }
+
+    $count = count($errors);
+    $lastErrorAt = $metrics['last_error_at'] ?? null;
+
+    $subject = 'ALERT: DOKU webhook failure spike';
+    $html = '<p>Terjadi ' . $count . ' error webhook dalam ' . WEBHOOK_ALERT_WINDOW_SEC . " detik terakhir.</p>"
+          . '<p><strong>Alasan terakhir:</strong> ' . htmlspecialchars($reason, ENT_QUOTES, 'UTF-8') . '</p>';
+
+    if ($lastErrorAt) {
+        $html .= '<p><strong>Waktu terakhir (UTC):</strong> ' . gmdate('c', (int) $lastErrorAt) . '</p>';
+    }
+
+    if (!empty($context)) {
+        $html .= '<pre>' . htmlspecialchars(json_encode($context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . '</pre>';
+    }
+
+    return sendAlertEmail($subject, $html);
+}
+
+function recordWebhookError(string $reason, int $httpCode, array $context = []): void
+{
+    $metrics = readWebhookMetrics();
+    $now = time();
+
+    $metrics['last_error_at'] = $now;
+    $metrics['last_error_message'] = $reason;
+    $metrics['last_error_code'] = $httpCode;
+    $metrics['total_error'] = ($metrics['total_error'] ?? 0) + 1;
+
+    $errors = $metrics['errors_window'] ?? [];
+    if (!is_array($errors)) {
+        $errors = [];
+    }
+    $errors = pruneWindow($errors, WEBHOOK_ALERT_WINDOW_SEC, $now);
+    $errors[] = $now;
+    $metrics['errors_window'] = $errors;
+
+    $alertSent = maybeAlertWebhookFailures($metrics, $reason, $context);
+    if ($alertSent) {
+        $metrics['last_alert_at'] = $now;
+        $metrics['last_alert_reason'] = $reason;
+    }
+
+    writeWebhookMetrics($metrics);
+}
+
+function respondWithError(int $statusCode, string $message, array $context = []): void
+{
+    logEvent('error', $message, array_merge($context, ['http_code' => $statusCode]));
+    recordWebhookError($message, $statusCode, $context);
+    http_response_code($statusCode);
+    exit($message);
+}
 function dbLogPaymentEvent(string $invoiceNumber, string $eventType, array $payload): void
 {
     $db = db();
@@ -116,35 +285,36 @@ function verifyDokuSignature(string $rawBody): bool
 // -----------------------------------------------------------------------------
 
 $rawBody = file_get_contents('php://input');
-writeLog('Notif masuk: ' . $rawBody);
+logEvent('info', 'Webhook received', [
+    'ip' => $_SERVER['REMOTE_ADDR'] ?? '',
+    'request_id' => $_SERVER['HTTP_REQUEST_ID'] ?? '',
+    'client_id' => $_SERVER['HTTP_CLIENT_ID'] ?? '',
+    'body_len' => strlen($rawBody),
+]);
 
 // Hanya terima POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    logEvent('warn', 'Method not allowed', [
+        'method' => $_SERVER['REQUEST_METHOD'] ?? '',
+    ]);
     http_response_code(405);
     exit('Method Not Allowed');
 }
-
 // Pastikan kredensial DOKU tersedia
 if (empty(DOKU_SECRET_KEY) || empty(DOKU_CLIENT_ID)) {
-    writeLog('ERROR: DOKU credentials missing.');
-    http_response_code(500);
-    exit('Server misconfigured');
+    respondWithError(500, 'DOKU credentials missing');
 }
-
 // Verifikasi signature
 if (!verifyDokuSignature($rawBody)) {
-    writeLog('GAGAL: Signature tidak valid.');
-    http_response_code(401);
-    exit('Unauthorized');
+    respondWithError(401, 'Invalid signature', [
+        'request_id' => $_SERVER['HTTP_REQUEST_ID'] ?? '',
+        'client_id' => $_SERVER['HTTP_CLIENT_ID'] ?? '',
+    ]);
 }
-
 $data = json_decode($rawBody, true);
 if (!$data) {
-    writeLog('GAGAL: Body bukan JSON valid.');
-    http_response_code(400);
-    exit('Bad Request');
+    respondWithError(400, 'Invalid JSON body');
 }
-
 // Ambil data transaksi dari payload DOKU
 $invoiceNumber  = $data['order']['invoice_number']    ?? '';
 $resultCode     = $data['transaction']['status']      ?? '';
@@ -211,5 +381,18 @@ switch ($mappedStatus) {
 }
 
 // Wajib balas 200 OK agar DOKU tidak retry
+recordWebhookSuccess([
+    'invoice_number' => $invoiceNumber,
+    'status' => $mappedStatus,
+]);
 http_response_code(200);
 echo json_encode(['status' => 'OK']);
+
+
+
+
+
+
+
+
+
