@@ -21,6 +21,7 @@ create table if not exists public.profiles (
   postcode text,
   bio text,
   avatar_url text,
+  id_document_path text,
   batch text,
   is_active boolean not null default true,
   created_at timestamptz not null default now(),
@@ -35,6 +36,7 @@ alter table public.profiles add column if not exists city text;
 alter table public.profiles add column if not exists postcode text;
 alter table public.profiles add column if not exists bio text;
 alter table public.profiles add column if not exists avatar_url text;
+alter table public.profiles add column if not exists id_document_path text;
 alter table public.profiles add column if not exists batch text;
 alter table public.profiles add column if not exists student_id text;
 alter table public.profiles add column if not exists admin_id text;
@@ -215,13 +217,36 @@ create table if not exists public.payments (
   student_id uuid not null references public.profiles(id) on delete cascade,
   course_id uuid not null references public.courses(id) on delete cascade,
   amount numeric(12,2) not null default 0,
-  currency text not null default 'AUD',
+  currency text not null default 'IDR',
   payment_method text,
   status text not null default 'pending' check (status in ('pending','completed','failed','refunded')),
+  payment_plan text not null default 'full' check (payment_plan in ('full','installment')),
+  installment_total integer not null default 1,
+  installment_paid integer not null default 0,
+  next_due_at timestamptz,
   paid_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.payments alter column currency set default 'IDR';
+
+create unique index if not exists payments_student_course_unique on public.payments(student_id, course_id);
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'payments_installment_check'
+  ) then
+    alter table public.payments
+      add constraint payments_installment_check
+      check (
+        installment_total between 1 and 4
+        and installment_paid between 0 and installment_total
+      );
+  end if;
+end
+$$;
 
 create table if not exists public.certificates (
   id uuid primary key default gen_random_uuid(),
@@ -394,7 +419,7 @@ begin
   values (
     new.id,
     coalesce(new.raw_user_meta_data ->> 'full_name', ''),
-    'student',
+    coalesce(nullif(lower(new.raw_user_meta_data ->> 'role'), ''), 'student'),
     new.email,
     true
   )

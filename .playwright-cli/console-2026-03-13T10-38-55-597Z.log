@@ -1,0 +1,5 @@
+Total messages: 12 (Errors: 0, Warnings: 2)
+Returning 2 messages for level "warning"
+
+[WARNING] Translation missing for key: assistantCarer @ http://localhost:8000/js/script.js:824
+[WARNING] Translation missing for key: blog @ http://localhost:8000/js/script.js:824

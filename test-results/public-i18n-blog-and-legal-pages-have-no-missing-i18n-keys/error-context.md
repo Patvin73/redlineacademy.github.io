@@ -1,0 +1,150 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - img "Redline Academy Logo" [ref=e6]
+      - navigation [ref=e7]:
+        - generic [ref=e8]:
+          - link "Beranda" [ref=e9] [cursor=pointer]:
+            - /url: ../index.html
+          - link "Tentang Kami" [ref=e10] [cursor=pointer]:
+            - /url: about.html
+          - link "Program" [ref=e11] [cursor=pointer]:
+            - /url: programs.html
+          - link "Hubungi Kami" [ref=e12] [cursor=pointer]:
+            - /url: contact.html
+        - navigation "Language selector" [ref=e14]:
+          - button "Bahasa Indonesia" [ref=e15] [cursor=pointer]:
+            - img [ref=e16]
+            - generic [ref=e17]: Bahasa Indonesia
+          - button "English" [ref=e18] [cursor=pointer]:
+            - img [ref=e19]
+            - generic [ref=e20]: English
+  - generic [ref=e22]:
+    - heading "Blog" [level=1] [ref=e23]
+    - paragraph [ref=e24]: Baca artikel terbaru kami tentang pendidikan, karier, dan tips industri.
+    - generic [ref=e25]:
+      - article [ref=e26]:
+        - img "Blog Post 1" [ref=e27]
+        - generic [ref=e28]:
+          - paragraph [ref=e29]: blogPost1Date
+          - heading "blogPost1Title" [level=2] [ref=e30]
+          - paragraph [ref=e31]: blogPost1Excerpt
+          - link "blogReadMore" [ref=e32] [cursor=pointer]:
+            - /url: "#"
+      - article [ref=e33]:
+        - img "Blog Post 2" [ref=e34]
+        - generic [ref=e35]:
+          - paragraph [ref=e36]: blogPost2Date
+          - heading "blogPost2Title" [level=2] [ref=e37]
+          - paragraph [ref=e38]: blogPost2Excerpt
+          - link "blogReadMore" [ref=e39] [cursor=pointer]:
+            - /url: "#"
+      - article [ref=e40]:
+        - img "Blog Post 3" [ref=e41]
+        - generic [ref=e42]:
+          - paragraph [ref=e43]: blogPost3Date
+          - heading "blogPost3Title" [level=2] [ref=e44]
+          - paragraph [ref=e45]: blogPost3Excerpt
+          - link "blogReadMore" [ref=e46] [cursor=pointer]:
+            - /url: "#"
+      - article [ref=e47]:
+        - img "Blog Post 4" [ref=e48]
+        - generic [ref=e49]:
+          - paragraph [ref=e50]: blogPost4Date
+          - heading "blogPost4Title" [level=2] [ref=e51]
+          - paragraph [ref=e52]: blogPost4Excerpt
+          - link "blogReadMore" [ref=e53] [cursor=pointer]:
+            - /url: "#"
+      - article [ref=e54]:
+        - img "Blog Post 5" [ref=e55]
+        - generic [ref=e56]:
+          - paragraph [ref=e57]: blogPost5Date
+          - heading "blogPost5Title" [level=2] [ref=e58]
+          - paragraph [ref=e59]: blogPost5Excerpt
+          - link "blogReadMore" [ref=e60] [cursor=pointer]:
+            - /url: "#"
+      - article [ref=e61]:
+        - img "Blog Post 6" [ref=e62]
+        - generic [ref=e63]:
+          - paragraph [ref=e64]: blogPost6Date
+          - heading "blogPost6Title" [level=2] [ref=e65]
+          - paragraph [ref=e66]: blogPost6Excerpt
+          - link "blogReadMore" [ref=e67] [cursor=pointer]:
+            - /url: "#"
+    - generic [ref=e68]:
+      - button "Sebelumnya" [ref=e69] [cursor=pointer]: ← Sebelumnya
+      - generic [ref=e70]: Halaman 1 dari 3
+      - button "Berikutnya" [ref=e71] [cursor=pointer]: Berikutnya →
+  - generic [ref=e74]:
+    - heading "Berlangganan Newsletter Kami" [level=2] [ref=e75]
+    - paragraph [ref=e76]: Dapatkan artikel terbaru, tips karier, dan informasi program langsung ke email Anda.
+    - generic [ref=e77]:
+      - textbox "Email Anda" [ref=e78]
+      - button "Berlangganan" [ref=e79] [cursor=pointer]
+  - contentinfo [ref=e80]:
+    - link "WhatsApp +62 821-2017-1731" [ref=e81] [cursor=pointer]:
+      - /url: https://wa.me/6282120171731
+      - img [ref=e82]
+      - generic [ref=e84]: Hubungi kami
+      - generic [ref=e85]: WhatsApp +62 821-2017-1731
+    - generic [ref=e86]:
+      - generic [ref=e87]:
+        - generic [ref=e88]:
+          - heading "brandName" [level=4] [ref=e89]
+          - paragraph [ref=e90]: Platform pelatihan vokasi bersertifikat Australia yang diakui secara internasional.
+          - generic [ref=e91]:
+            - link "f" [ref=e92] [cursor=pointer]:
+              - /url: https://facebook.com
+            - link "𝕏" [ref=e93] [cursor=pointer]:
+              - /url: https://twitter.com
+            - link "📷" [ref=e94] [cursor=pointer]:
+              - /url: https://instagram.com
+            - link "in" [ref=e95] [cursor=pointer]:
+              - /url: https://linkedin.com
+        - generic [ref=e96]:
+          - heading "Program" [level=4] [ref=e97]
+          - list [ref=e98]:
+            - listitem [ref=e99]:
+              - link "Asisten Perawat" [ref=e100] [cursor=pointer]:
+                - /url: programs.html
+            - listitem [ref=e101]:
+              - link "Bartender" [ref=e102] [cursor=pointer]:
+                - /url: programs.html
+            - listitem [ref=e103]:
+              - link "Memasak (Chef)" [ref=e104] [cursor=pointer]:
+                - /url: programs.html
+            - listitem [ref=e105]:
+              - link "Barista" [ref=e106] [cursor=pointer]:
+                - /url: programs.html
+            - listitem [ref=e107]:
+              - link "Pemrograman (IT)" [ref=e108] [cursor=pointer]:
+                - /url: programs.html
+            - listitem [ref=e109]:
+              - link "Teknisi Listrik" [ref=e110] [cursor=pointer]:
+                - /url: programs.html
+        - generic [ref=e111]:
+          - heading "Perusahaan" [level=4] [ref=e112]
+          - list [ref=e113]:
+            - listitem [ref=e114]:
+              - link "Tentang Kami" [ref=e115] [cursor=pointer]:
+                - /url: about.html
+            - listitem [ref=e116]:
+              - link "Blog" [ref=e117] [cursor=pointer]:
+                - /url: blog.html
+            - listitem [ref=e118]:
+              - link "Hubungi Kami" [ref=e119] [cursor=pointer]:
+                - /url: contact.html
+        - generic [ref=e120]:
+          - heading "Legal" [level=4] [ref=e121]
+          - list [ref=e122]:
+            - listitem [ref=e123]:
+              - link "Syarat & Ketentuan" [ref=e124] [cursor=pointer]:
+                - /url: legal.html
+            - listitem [ref=e125]:
+              - link "Kebijakan Privasi" [ref=e126] [cursor=pointer]:
+                - /url: legal.html
+      - paragraph [ref=e128]: footerCopyright Semua Hak Dilindungi.
+```

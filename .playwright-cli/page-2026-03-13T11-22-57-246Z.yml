@@ -1,0 +1,17 @@
+- generic [ref=e2]:
+  - img [ref=e4]
+  - heading "Pembayaran Gagal" [level=1] [ref=e8]
+  - paragraph [ref=e9]: Transaksi Anda tidak dapat diproses. Jangan khawatir — tidak ada dana yang ditarik. Silakan coba lagi atau pilih metode pembayaran lain.
+  - generic [ref=e10]:
+    - link "Coba Lagi" [ref=e11] [cursor=pointer]:
+      - /url: programs.html#enroll-form
+    - link "Kembali ke Beranda" [ref=e12] [cursor=pointer]:
+      - /url: ../
+  - paragraph [ref=e13]:
+    - text: Butuh bantuan? Hubungi kami via
+    - link "WhatsApp" [ref=e14] [cursor=pointer]:
+      - /url: https://wa.me/6282120171731
+    - text: atau
+    - link "halaman kontak" [ref=e15] [cursor=pointer]:
+      - /url: contact.html
+    - text: .

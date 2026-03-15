@@ -1,0 +1,253 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - img "Redline Academy Logo" [ref=e6]
+      - navigation [ref=e7]:
+        - generic [ref=e8]:
+          - link "Beranda" [ref=e9] [cursor=pointer]:
+            - /url: ../index.html
+          - link "Tentang Kami" [ref=e10] [cursor=pointer]:
+            - /url: about.html
+          - link "Program" [ref=e11] [cursor=pointer]:
+            - /url: programs.html
+          - link "Hubungi Kami" [ref=e12] [cursor=pointer]:
+            - /url: contact.html
+        - navigation "Language selector" [ref=e14]:
+          - button "Bahasa Indonesia" [ref=e15] [cursor=pointer]:
+            - img [ref=e16]
+            - generic [ref=e17]: Bahasa Indonesia
+          - button "English" [ref=e18] [cursor=pointer]:
+            - img [ref=e19]
+            - generic [ref=e20]: English
+  - generic [ref=e22]:
+    - heading "Program Kami" [level=1] [ref=e23]
+    - paragraph [ref=e24]: Pendampingan Perawatan (Unit Pelatihan Terakreditasi Australia). Kita mungkin tidak bisa mengubah seluruh dunia, namun jika Anda memiliki rasa kasih sayang, Anda dapat mengubah kehidupan orang-orang di sekitar Anda yang membutuhkan bantuan. Apakah Anda baru saja akan menyelesaikan pendidikan dan bingung memilih jalur karier? Atau mungkin pekerjaan Anda saat ini terasa membosankan dan tidak memberikan kepuasan batin yang nyata? Hanya dalam enam belas minggu pelatihan berkualitas standar Australia yang diakui secara internasional, Anda dapat mengubah segalanya. Pelatihan yang kami tawarkan dirancang untuk membuka pintu peluang nyata menuju karier yang bermakna, di mana Anda dapat memberikan dampak yang nyata. Kursus ini terdiri dari dua belas minggu pelatihan daring (online) ditambah 3 ½ minggu praktik kerja lapangan untuk mendapatkan pengalaman langsung. Dengan bekal pelatihan ini, Anda siap untuk mengubah dunia Anda.
+    - generic [ref=e26]:
+      - generic "Galeri gambar program" [ref=e27]:
+        - generic [ref=e28]:
+          - img "Caregiver" [ref=e30]
+          - img "Assistant Carer" [ref=e32]
+          - img "Carer in the park" [ref=e34]
+          - img "Caring hand" [ref=e36]
+          - img "Care and love" [ref=e38]
+          - img "Elder support" [ref=e40]
+          - img "Caregiver" [ref=e42]
+          - img "Assistant Carer" [ref=e44]
+      - generic [ref=e45]:
+        - heading "Care Giver" [level=2] [ref=e46]
+        - paragraph [ref=e47]: Dapatkan keterampilan dasar perawatan kesehatan dan pelatihan berbasis empati untuk mendukung pasien di rumah sakit, panti jompo, dan lingkungan masyarakat.
+        - generic [ref=e48]:
+          - generic [ref=e49]:
+            - heading "Materi Pembelajaran" [level=4] [ref=e50]
+            - list [ref=e51]:
+              - listitem [ref=e52]: Keterampilan Perawatan Lansia.
+              - listitem [ref=e53]: Komunikasi Efektif di Layanan Kesehatan.
+              - listitem [ref=e54]: Standar Keselamatan Klien dan Pengendalian Infeksi.
+              - listitem [ref=e55]: Strategi Pemberdayaan Klien.
+              - listitem [ref=e56]: Dukungan berorientasi Pelayanan Klien.
+              - listitem [ref=e57]: Pencegahan & Manajemen Risiko Cedera.
+          - generic [ref=e58]:
+            - heading "Ringkasan Program" [level=4] [ref=e59]
+            - list [ref=e60]:
+              - listitem [ref=e61]: "Durasi: 12 Minggu Online + 3.5 Minggu Praktik Lapangan."
+              - listitem [ref=e62]: "Tipe Studi: Hybrid (Fleksibilitas Online & Tatap Muka)."
+              - listitem [ref=e63]: "Sertifikat: Ya (Diberikan setelah penyelesaian seluruh modul)."
+              - listitem [ref=e64]: "Prasyarat: Semangat untuk merawat dan komitmen untuk belajar (Tidak memerlukan pengalaman medis sebelumnya)."
+          - generic [ref=e65]:
+            - heading "Metode Penilaian" [level=4] [ref=e66]
+            - heading "Anda akan dinilai melalui:" [level=5] [ref=e67]
+            - list [ref=e68]:
+              - listitem [ref=e69]: Penilaian tertulis (studi kasus, pertanyaan pilihan ganda, esai).
+              - listitem [ref=e70]: Demonstrasi praktik dan observasi.
+              - listitem [ref=e71]: Portofolio bukti.
+              - listitem [ref=e72]: Proyek dan presentasi.
+        - link "Daftar Sekarang" [ref=e74] [cursor=pointer]:
+          - /url: "#enroll-form"
+  - generic [ref=e76]:
+    - heading "Formulir Pendaftaran Program" [level=2] [ref=e77]
+    - generic [ref=e78]:
+      - paragraph [ref=e79]:
+        - text: Silakan lengkapi formulir di bawah ini dan tim kami akan menghubungi Anda.
+        - paragraph [ref=e80]: "Di Redline Academy, kami menjaga privasi Anda. Informasi yang Anda bagikan kepada kami akan tetap aman bersama kami dan kami tidak akan membagikannya kepada pihak diluar Redline Academy, kecuali:"
+        - list [ref=e81]:
+          - listitem [ref=e82]: Anda memberikan izin tertulis kepada kami.
+          - listitem [ref=e83]: Atau, Kami diwajibkan secara hukum untuk membagikannya.
+        - paragraph [ref=e84]: Kepercayaan Anda sangat berarti bagi kami, dan kami berkomitmen untuk menjaga keamanan informasi Anda.
+      - img "Ilustrasi Mengisi Formulir" [ref=e85]
+    - generic [ref=e87]:
+      - generic [ref=e88]:
+        - group "Informasi Pribadi" [ref=e89]:
+          - generic [ref=e90]: Informasi Pribadi
+          - generic [ref=e91]:
+            - generic [ref=e92]: Nama Lengkap *
+            - textbox "Nama lengkap Anda" [ref=e93]
+          - generic [ref=e94]:
+            - generic [ref=e95]: Tanggal Lahir *
+            - textbox [ref=e96]
+          - generic [ref=e97]:
+            - generic [ref=e98]: Jenis Kelamin *
+            - combobox [ref=e99]:
+              - option "Pilih" [disabled] [selected]
+              - option "Laki-laki"
+              - option "Perempuan"
+              - option "Lainnya"
+          - generic [ref=e100]:
+            - generic [ref=e101]: Email *
+            - textbox "Email Anda" [ref=e102]
+          - generic [ref=e103]:
+            - generic [ref=e104]: Nomor Telepon *
+            - textbox "Nomor telepon Anda" [ref=e105]
+          - generic [ref=e106]:
+            - generic [ref=e107]: Nomor KTP *
+            - generic [ref=e108]:
+              - textbox "Nomor KTP Anda" [ref=e109]
+              - generic [ref=e111] [cursor=pointer]: Unggah KTP
+            - generic [ref=e112]: Belum ada file dipilih
+          - generic [ref=e113]:
+            - generic [ref=e114]: Alamat *
+            - textbox "Alamat lengkap" [ref=e115]
+          - generic [ref=e116]:
+            - generic [ref=e117]: Kode Pos *
+            - textbox "Kode Pos Anda" [ref=e118]
+        - group "Pendidikan & Latar Belakang" [ref=e119]:
+          - generic [ref=e120]: Pendidikan & Latar Belakang
+          - generic [ref=e121]:
+            - generic [ref=e122]: Pendidikan Terakhir
+            - 'textbox "Contoh: SMA / Diploma / Sarjana" [ref=e123]'
+          - generic [ref=e124]:
+            - generic [ref=e125]: Status Pekerjaan
+            - combobox [ref=e126]:
+              - option "Pilih" [selected]
+              - option "Bekerja"
+              - option "Tidak Bekerja"
+              - option "Pelajar"
+              - option "Lainnya"
+          - generic [ref=e127]:
+            - generic [ref=e128]: Pengalaman Relevan
+            - textbox "Ceritakan pengalaman Anda (jika ada)" [ref=e129]
+      - generic [ref=e130]:
+        - group "Pembayaran" [ref=e131]:
+          - generic [ref=e132]: Pembayaran
+          - paragraph [ref=e133]: Lengkapi data pembayaran berikut. Setelah formulir dikirim, transaksi akan dibuat ke payment gateway.
+          - generic [ref=e134]:
+            - generic [ref=e135]:
+              - generic [ref=e136]: Program Dipilih *
+              - combobox "Program Dipilih *" [ref=e137]:
+                - option "Pilih Program" [selected]
+                - option "Asisten Perawat - Rp4.600.000"
+            - generic [ref=e138]:
+              - generic [ref=e139]: Skema Pembayaran *
+              - radiogroup "Skema pembayaran" [ref=e140]:
+                - generic [ref=e141] [cursor=pointer]:
+                  - radio "Lunas Diskon 5%" [ref=e142]
+                  - img [ref=e144]
+                  - generic [ref=e147]:
+                    - strong [ref=e148]: Lunas
+                    - generic [ref=e149]: Diskon 5%
+                - generic [ref=e150] [cursor=pointer]:
+                  - radio "Cicilan Tanpa Diskon" [ref=e151]
+                  - img [ref=e153]
+                  - generic [ref=e156]:
+                    - strong [ref=e157]: Cicilan
+                    - generic [ref=e158]: Tanpa Diskon
+            - generic [ref=e159]:
+              - generic [ref=e160]: Metode Pembayaran *
+              - combobox "Metode Pembayaran *" [ref=e161]:
+                - option "Pilih Metode Pembayaran" [selected]
+                - option "Virtual Account (BCA/BNI/BRI)"
+                - option "QRIS / QR Code"
+                - option "E-Wallet (GoPay/OVO/DANA)"
+                - option "Kartu Debit/Kredit"
+                - option "Transfer Bank Manual"
+            - generic [ref=e162]:
+              - generic [ref=e163]: Nama pada Tagihan *
+              - textbox "Nama pada Tagihan *" [ref=e164]:
+                - /placeholder: Nama sesuai rekening / e-wallet
+            - generic [ref=e165]:
+              - generic [ref=e166]: Email Tagihan *
+              - textbox "Email Tagihan *" [ref=e167]:
+                - /placeholder: Email untuk receipt pembayaran
+            - generic [ref=e168]:
+              - generic [ref=e169]: Kode Promo (Opsional)
+              - generic [ref=e170]:
+                - textbox "Kode Promo (Opsional)" [ref=e171]:
+                  - /placeholder: "Contoh: EARLYBIRD10"
+                - button "Terapkan" [ref=e172] [cursor=pointer]
+              - generic [ref=e173]: Isi detail pembayaran lalu klik "Siapkan Pembayaran".
+          - generic [ref=e174]:
+            - heading "Ringkasan Pembayaran" [level=5] [ref=e175]
+            - list [ref=e176]:
+              - listitem [ref=e177]:
+                - generic [ref=e178]: Biaya Program
+                - strong [ref=e179]: Rp 0
+              - listitem [ref=e180]:
+                - generic [ref=e181]: Diskon Skema
+                - strong [ref=e182]: "-Rp 0"
+              - listitem [ref=e183]:
+                - generic [ref=e184]: Diskon Promo
+                - strong [ref=e185]: "-Rp 0"
+            - generic [ref=e186]:
+              - generic [ref=e187]: Total
+              - strong [ref=e188]: Rp 0
+            - paragraph [ref=e189]: Setelah menekan tombol "Siapkan Pembayaran", sistem akan menandai transaksi siap diproses oleh payment gateway.
+          - generic [ref=e190]:
+            - button "Siapkan Pembayaran" [ref=e191] [cursor=pointer]
+            - generic [ref=e192]: Isi detail pembayaran lalu klik "Siapkan Pembayaran".
+        - group "Pernyataan" [ref=e193]:
+          - generic [ref=e194]: Pernyataan
+          - generic [ref=e196]:
+            - checkbox "Saya menyatakan bahwa informasi yang diberikan adalah benar." [ref=e197]
+            - text: Saya menyatakan bahwa informasi yang diberikan adalah benar.
+          - generic [ref=e199]:
+            - checkbox "Saya menyetujui Syarat & Ketentuan serta Kebijakan Privasi." [ref=e200]
+            - text: Saya menyetujui Syarat & Ketentuan serta Kebijakan Privasi.
+          - generic [ref=e202]:
+            - checkbox "Saya menyetujui biaya program, kebijakan pembayaran, dan proses transaksi melalui payment gateway." [ref=e203]
+            - text: Saya menyetujui biaya program, kebijakan pembayaran, dan proses transaksi melalui payment gateway.
+        - button "Kirim Pendaftaran" [ref=e205] [cursor=pointer]
+        - img "Redline Academy Logo" [ref=e207]
+  - contentinfo [ref=e208]:
+    - generic [ref=e209]:
+      - generic [ref=e210]:
+        - generic [ref=e211]:
+          - heading "Redline Academy" [level=4] [ref=e212]
+          - paragraph [ref=e213]: Platform pelatihan vokasi bersertifikat Australia yang diakui secara internasional.
+          - generic [ref=e214]:
+            - link "f" [ref=e215] [cursor=pointer]:
+              - /url: https://facebook.com
+            - link "𝕏" [ref=e216] [cursor=pointer]:
+              - /url: https://twitter.com
+            - link "📷" [ref=e217] [cursor=pointer]:
+              - /url: https://instagram.com
+            - link "in" [ref=e218] [cursor=pointer]:
+              - /url: https://linkedin.com
+        - generic [ref=e219]:
+          - heading "Program" [level=4] [ref=e220]
+          - list [ref=e221]:
+            - listitem [ref=e222]:
+              - link "Care Giver" [ref=e223] [cursor=pointer]:
+                - /url: programs.html
+        - generic [ref=e224]:
+          - heading "Perusahaan" [level=4] [ref=e225]
+          - list [ref=e226]:
+            - listitem [ref=e227]:
+              - link "Tentang Kami" [ref=e228] [cursor=pointer]:
+                - /url: about.html
+            - listitem [ref=e229]:
+              - link "Hubungi Kami" [ref=e230] [cursor=pointer]:
+                - /url: contact.html
+        - generic [ref=e231]:
+          - heading "Legal" [level=4] [ref=e232]
+          - list [ref=e233]:
+            - listitem [ref=e234]:
+              - link "Syarat & Ketentuan" [ref=e235] [cursor=pointer]:
+                - /url: legal.html
+            - listitem [ref=e236]:
+              - link "Kebijakan Privasi" [ref=e237] [cursor=pointer]:
+                - /url: legal.html
+      - paragraph [ref=e239]: © 2025 Redline Academy. Semua Hak Dilindungi.
+  - link "WhatsApp +62 821-2017-1731" [ref=e240] [cursor=pointer]:
+    - /url: https://wa.me/6282120171731
+    - img [ref=e241]
+    - generic [ref=e243]: Hubungi kami
+    - generic [ref=e244]: WhatsApp +62 821-2017-1731

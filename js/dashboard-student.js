@@ -616,6 +616,8 @@
       await Promise.all([
         loadDashboardStats(user.id),
         loadContinueLearning(user.id),
+        loadCourseGrid(user.id),
+        loadAssignments(user.id),
         loadUpcomingSchedule(user.id),
         loadActivityFeed(user.id),
         loadNotifications(user.id),
@@ -779,6 +781,260 @@
   }
 
   /* ── Upcoming Schedule ──────────────────────────────────────────── */
+  async function loadCourseGrid(userId) {
+    const grid = $("courseGrid");
+    if (!grid) return;
+
+    const renderEmpty = () => {
+      grid.innerHTML = `
+        <div class="sd-empty-state" style="padding:1.5rem 0">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          <p data-i18n="lmsNoCourses" style="margin:0;font-size:.875rem">No active courses</p>
+        </div>`;
+      if (typeof updatePageLanguage === "function") updatePageLanguage();
+    };
+
+    const applyFilter = (filter) => {
+      const activeFilter = (filter || "all").toLowerCase();
+      const cards = grid.querySelectorAll(".sd-course-card");
+      cards.forEach((card) => {
+        const status = (card.dataset.status || "active").toLowerCase();
+        const isVisible = activeFilter === "all" || status === activeFilter;
+        card.style.display = isVisible ? "" : "none";
+      });
+    };
+
+    const setupFilterHandler = () => {
+      if (grid.dataset.filterBound) return;
+      const section = $("section-courses");
+      if (!section) return;
+      grid.dataset.filterBound = "true";
+      section.addEventListener("sd:filter-change", (event) => {
+        applyFilter(event.detail?.filter || "all");
+      });
+      const activeTab = section.querySelector(".sd-filter-tab.active");
+      applyFilter(activeTab?.dataset.filter || "all");
+    };
+
+    try {
+      const { data: enrollments, error: enrollErr } = await window.lmsSupabase
+        .from("enrollments")
+        .select("course_id, status, progress_percent")
+        .eq("student_id", userId);
+
+      if (enrollErr) throw enrollErr;
+      if (!enrollments || enrollments.length === 0) {
+        renderEmpty();
+        setupFilterHandler();
+        return;
+      }
+
+      const courseIds = enrollments.map((e) => e.course_id).filter(Boolean);
+      if (courseIds.length === 0) {
+        renderEmpty();
+        setupFilterHandler();
+        return;
+      }
+
+      const { data: courses, error: courseErr } = await window.lmsSupabase
+        .from("courses")
+        .select("id, title, thumbnail_url, category, trainer_name")
+        .in("id", courseIds);
+
+      if (courseErr) throw courseErr;
+
+      const courseMap = new Map((courses || []).map((c) => [c.id, c]));
+
+      grid.innerHTML = "";
+
+      const cards = enrollments.map((enroll) => {
+        const course = courseMap.get(enroll.course_id) || {};
+        const statusRaw = (enroll.status || "active").toLowerCase();
+        const status = statusRaw === "completed" ? "completed" : "active";
+        const statusLabel = typeof t === "function"
+          ? t(status === "completed" ? "lmsFilterCompleted" : "lmsFilterActive")
+          : status === "completed" ? "Completed" : "Active";
+        const badgeClass = status === "completed"
+          ? "sd-status-badge--completed"
+          : "sd-status-badge--active";
+        const progress = Math.round(enroll.progress_percent || 0);
+        const progressLabel = typeof t === "function" ? t("lmsProgress") : "Progress";
+        const thumbSrc = course.thumbnail_url || "";
+        const category = course.category || "Course";
+        const trainer = course.trainer_name || "Redline Academy";
+
+        return `
+          <div class="sd-course-card" data-status="${status}">
+            <div class="sd-course-card__thumb">
+              ${thumbSrc
+                ? `<img src="${escHtml(thumbSrc)}" alt="${escHtml(course.title || "Course")}" loading="lazy" />`
+                : `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>`
+              }
+            </div>
+            <div class="sd-course-card__body">
+              <p class="sd-course-card__category">${escHtml(category)}</p>
+              <h3 class="sd-course-card__title">${escHtml(course.title || "Course")}</h3>
+              <p class="sd-course-card__trainer">${escHtml(trainer)}</p>
+              <div class="sd-course-card__footer">
+                <span class="sd-status-badge ${badgeClass}">${escHtml(statusLabel)}</span>
+                <span class="sd-course-card__progress">${progress}% ${escHtml(progressLabel)}</span>
+              </div>
+            </div>
+          </div>`;
+      }).join("");
+
+      grid.insertAdjacentHTML("beforeend", cards);
+      setupFilterHandler();
+    } catch (err) {
+      console.warn("Course load error:", err.message);
+      renderEmpty();
+      setupFilterHandler();
+    }
+  }
+
+  /* ── Assignments / Quizzes ───────────────────────────────────── */
+  async function loadAssignments(userId) {
+    const list = $("assignmentList");
+    const empty = $("assignmentEmpty");
+    if (!list) return;
+
+    const renderEmpty = () => {
+      if (empty) empty.style.display = "flex";
+    };
+
+    const hideEmpty = () => {
+      if (empty) empty.style.display = "none";
+    };
+
+    const applyFilter = (filter) => {
+      const activeFilter = (filter || "pending").toLowerCase();
+      const items = list.querySelectorAll(".sd-assignment-item");
+      items.forEach((item) => {
+        const status = (item.dataset.status || "pending").toLowerCase();
+        const isVisible = activeFilter === status;
+        item.style.display = isVisible ? "" : "none";
+      });
+    };
+
+    const setupFilterHandler = () => {
+      if (list.dataset.filterBound) return;
+      const section = $("section-assignments");
+      if (!section) return;
+      list.dataset.filterBound = "true";
+      section.addEventListener("sd:filter-change", (event) => {
+        applyFilter(event.detail?.filter || "pending");
+      });
+      const activeTab = section.querySelector(".sd-filter-tab.active");
+      applyFilter(activeTab?.dataset.filter || "pending");
+    };
+
+    try {
+      const { data: assignments, error: assignErr } = await window.lmsSupabase
+        .from("assignments")
+        .select("*")
+        .eq("student_id", userId)
+        .order("due_at", { ascending: true });
+
+      if (assignErr) throw assignErr;
+      if (!assignments || assignments.length === 0) {
+        renderEmpty();
+        setupFilterHandler();
+        return;
+      }
+
+      const { data: submissions } = await window.lmsSupabase
+        .from("assignment_submissions")
+        .select("*")
+        .eq("student_id", userId);
+
+      const submissionMap = new Map(
+        (submissions || []).map((s) => [s.assignment_id, s])
+      );
+
+      list.querySelectorAll(".sd-assignment-item").forEach((el) => el.remove());
+      hideEmpty();
+
+      assignments.forEach((assignment) => {
+        const submission = submissionMap.get(assignment.id);
+        const statusRaw = submission?.status || "pending";
+        const status = ["pending", "submitted", "graded"].includes(statusRaw)
+          ? statusRaw
+          : "pending";
+
+        const statusLabel = typeof t === "function"
+          ? t(
+              status === "graded"
+                ? "lmsTabGraded"
+                : status === "submitted"
+                ? "lmsTabSubmitted"
+                : "lmsTabPending"
+            )
+          : status;
+
+        const icon = assignment.type === "quiz" ? "📝" : "📘";
+        const title = assignment.title || "Assignment";
+        const courseLabel = assignment.course_title || "Course";
+        const dueLabel = assignment.due_at
+          ? new Date(assignment.due_at).toLocaleDateString("en-AU")
+          : "";
+
+        const actions = status === "pending"
+          ? `<button class="sd-btn sd-btn--primary sd-btn--sm" data-action="submit" data-assignment-id="${assignment.id}">
+               ${typeof t === "function" ? t("submit") : "Submit"}
+             </button>`
+          : `<span class="sd-status-badge ${
+               status === "graded"
+                 ? "sd-status-badge--completed"
+                 : "sd-status-badge--active"
+             }">${statusLabel}</span>`;
+
+        const item = document.createElement("div");
+        item.className = "sd-assignment-item";
+        item.dataset.status = status;
+        item.innerHTML = `
+          <div class="sd-assignment-item__icon">${icon}</div>
+          <div class="sd-assignment-item__body">
+            <p class="sd-assignment-item__title">${escHtml(title)}</p>
+            <p class="sd-assignment-item__meta">${escHtml(courseLabel)}${dueLabel ? ` • ${dueLabel}` : ""}</p>
+          </div>
+          <div class="sd-assignment-item__actions">
+            ${actions}
+          </div>`;
+
+        list.appendChild(item);
+      });
+
+      list.querySelectorAll("button[data-action='submit']").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const assignmentId = btn.getAttribute("data-assignment-id");
+          if (!assignmentId) return;
+          btn.disabled = true;
+          try {
+            await window.lmsSupabase
+              .from("assignment_submissions")
+              .insert({
+                student_id: userId,
+                assignment_id: assignmentId,
+                status: "submitted",
+                submitted_at: new Date().toISOString()
+              });
+            await loadAssignments(userId);
+          } catch (err) {
+            console.error("Submit assignment error:", err.message);
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      });
+
+      setupFilterHandler();
+    } catch (err) {
+      console.warn("Assignments load error:", err.message);
+      renderEmpty();
+      setupFilterHandler();
+    }
+  }
+
   async function loadUpcomingSchedule(userId) {
     const list  = $("scheduleList");
     const empty = $("scheduleEmpty");

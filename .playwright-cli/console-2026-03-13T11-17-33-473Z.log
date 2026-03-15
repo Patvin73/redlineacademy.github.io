@@ -1,0 +1,4 @@
+Total messages: 30 (Errors: 0, Warnings: 1)
+Returning 1 messages for level "warning"
+
+[WARNING] Not authenticated — guard.js should redirect @ http://localhost:8000/js/dashboard-student.js:593

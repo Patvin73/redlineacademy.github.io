@@ -1,0 +1,179 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - img "Redline Academy Logo" [ref=e6]
+        - generic [ref=e7]: Redline Academy
+      - navigation [ref=e8]:
+        - generic [ref=e9]:
+          - link "Home" [ref=e194] [cursor=pointer]:
+            - /url: /
+          - link "About Us" [ref=e195] [cursor=pointer]:
+            - /url: pages/about.html
+          - link "Programs" [ref=e196] [cursor=pointer]:
+            - /url: pages/programs.html
+          - link "Contact Us" [ref=e197] [cursor=pointer]:
+            - /url: pages/contact.html
+        - generic [ref=e14]:
+          - button "Login" [ref=e15] [cursor=pointer]
+          - navigation "Language selector" [ref=e16]:
+            - button "Bahasa Indonesia" [ref=e17] [cursor=pointer]:
+              - img [ref=e18]
+              - generic [ref=e19]: Bahasa Indonesia
+            - button "English" [active] [ref=e20] [cursor=pointer]:
+              - img [ref=e21]
+              - generic [ref=e22]: English
+  - generic [ref=e23]:
+    - generic:
+      - img "redlineacademy"
+      - img "redlineacademylibrary"
+    - generic [ref=e26]:
+      - heading "Welcome" [level=3] [ref=e198]
+      - heading "Redline is more than an academy" [level=1] [ref=e199]
+      - paragraph [ref=e29]: — it's a place to unlock potential, break boundaries and take control of what comes next. Dare to change your future?
+      - generic [ref=e30]:
+        - link "Apply Now" [ref=e200] [cursor=pointer]:
+          - /url: pages/programs.html
+        - link "Submit an Enquiry" [ref=e32] [cursor=pointer]:
+          - /url: "#contact"
+  - generic [ref=e35]:
+    - 'heading "Care Giver Excellence: Empowering Lives with a Person-Centred Care Approach" [level=2] [ref=e201]'
+    - paragraph [ref=e37]: Bridge your potential with a curriculum that aligns practical competence and person-centred care. This program equips you with the skills to excel in hospitals, aged care and community settings while honoring each person's dignity and choices. Join us to provide support that goes beyond service — a genuine commitment to improving quality of life. Start your journey to make meaningful change through compassionate care.
+  - generic [ref=e39]:
+    - heading "Our Programs" [level=2] [ref=e202]
+    - generic [ref=e42]:
+      - generic "Galeri gambar program" [ref=e43]:
+        - generic [ref=e44]:
+          - img "Caregiver" [ref=e46]
+          - img "Assistant Carer" [ref=e48]
+          - img "Carer in the park" [ref=e50]
+          - img "Caring hand" [ref=e52]
+          - img "Care and love" [ref=e54]
+          - img "Elder support" [ref=e56]
+          - img "Caregiver" [ref=e58]
+          - img "Assistant Carer" [ref=e60]
+      - generic [ref=e61]:
+        - heading "Care Giver" [level=3] [ref=e62]
+        - paragraph [ref=e63]: Gain essential healthcare skills and compassion-driven training to support patients in hospitals, aged care, and community settings.
+        - link "Program Detail" [ref=e203] [cursor=pointer]:
+          - /url: pages/programs.html
+  - generic [ref=e66]:
+    - heading "Our Commitment" [level=2] [ref=e204]
+    - generic [ref=e68]:
+      - generic [ref=e70]:
+        - img [ref=e72]
+        - heading "Dedicated Educator" [level=3] [ref=e205]
+        - paragraph [ref=e76]: Learning is easier when you have the right guidance. Our trainers are highly skilled in their fields and passionate about what they teach. They bring energy and real-world experience into every program, making learning both practical and engaging.
+      - generic [ref=e78]:
+        - img [ref=e80]
+        - heading "Australian Micro-Credentials Program" [level=3] [ref=e206]
+        - paragraph [ref=e84]: Whether you're a beginner or looking to refine your skills, our programs follow the Microcredentials Framework. This means you gain qualifications that meet international standards and are recognised across industries, giving you a solid foundation for future opportunities.
+      - generic [ref=e86]:
+        - img [ref=e88]
+        - heading "Commitment to Excellence" [level=3] [ref=e207]
+        - paragraph [ref=e91]: At RedLine Academy, excellence is more than a goal—it's our culture. We focus on developing critical thinking and problem-solving, encouraging students to go beyond memorization. With supportive educators and high standards, we create an environment where learners can grow with confidence and achieve lasting success.
+      - generic [ref=e93]:
+        - img [ref=e95]
+        - heading "Innovative Learning Environment" [level=3] [ref=e208]
+        - paragraph [ref=e98]: We embrace modern learning tools and interactive methods that make education dynamic and relevant. By combining theory with hands-on practice, we prepare students to meet real-world challenges.
+      - generic [ref=e100]:
+        - img [ref=e102]
+        - heading "Personalised Support" [level=3] [ref=e209]
+        - paragraph [ref=e108]: Every student's journey is different. We provide guidance and resources tailored to individual needs, ensuring learners feel supported as they move forward in their studies and careers.
+      - generic [ref=e110]:
+        - img [ref=e112]
+        - heading "Global Mindset" [level=3] [ref=e210]
+        - paragraph [ref=e116]: Our programs are designed with a global perspective, helping students develop the adaptability and confidence to succeed in diverse industries and international settings.
+  - generic [ref=e118]:
+    - heading "Contact Us" [level=2] [ref=e211]
+    - generic [ref=e120]:
+      - generic [ref=e121]:
+        - heading "Contact Form" [level=3] [ref=e212]
+        - generic [ref=e123]:
+          - generic [ref=e124]:
+            - generic [ref=e125]:
+              - generic [ref=e126]: Name
+              - textbox "Your Name" [ref=e213]
+            - generic [ref=e128]:
+              - generic [ref=e129]: Email
+              - textbox "Your email" [ref=e214]
+          - generic [ref=e131]:
+            - generic [ref=e132]:
+              - generic [ref=e133]: Course
+              - combobox [ref=e134]:
+                - option "Select Course" [selected]
+                - option "Care Giver"
+            - generic [ref=e135]:
+              - generic [ref=e136]: Gender
+              - combobox [ref=e137]:
+                - option "Select" [selected]
+                - option "Male"
+                - option "Female"
+          - generic [ref=e138]:
+            - generic [ref=e139]: Postal Code
+            - textbox "Your Postal Code" [ref=e215]
+          - generic [ref=e141]:
+            - generic [ref=e142]: Tell us how we can help
+            - textbox "Your Message..." [ref=e216]
+          - button "Submit" [ref=e217] [cursor=pointer]
+      - generic [ref=e145]:
+        - heading "Contact Information" [level=3] [ref=e218]
+        - generic [ref=e147]:
+          - heading "Phone" [level=4] [ref=e219]
+          - paragraph [ref=e149]:
+            - link "+62 821-2017-1731" [ref=e150] [cursor=pointer]:
+              - /url: tel:+6282120171731
+          - heading "Email" [level=4] [ref=e151]
+          - paragraph [ref=e152]:
+            - link "hello@redlineacademy.com.au" [ref=e153] [cursor=pointer]:
+              - /url: mailto:hello@redlineacademy.com.au
+          - heading "WhatsApp" [level=4] [ref=e154]
+          - paragraph [ref=e155]:
+            - link "Chat with us" [ref=e220] [cursor=pointer]:
+              - /url: https://wa.me/6282120171731
+  - contentinfo [ref=e157]:
+    - generic [ref=e158]:
+      - generic [ref=e159]:
+        - generic [ref=e160]:
+          - heading "Redline Academy" [level=4] [ref=e161]
+          - paragraph [ref=e162]: Australian-certified vocational training platform recognised internationally.
+          - generic [ref=e163]:
+            - link "f" [ref=e164] [cursor=pointer]:
+              - /url: https://facebook.com
+            - link "X" [ref=e165] [cursor=pointer]:
+              - /url: https://twitter.com
+            - link "📷" [ref=e166] [cursor=pointer]:
+              - /url: https://instagram.com
+            - link "in" [ref=e167] [cursor=pointer]:
+              - /url: https://linkedin.com
+        - generic [ref=e168]:
+          - heading "Programs" [level=4] [ref=e221]
+          - list [ref=e170]:
+            - listitem [ref=e171]:
+              - link "Care Giver" [ref=e172] [cursor=pointer]:
+                - /url: pages/programs.html
+        - generic [ref=e173]:
+          - heading "Company" [level=4] [ref=e222]
+          - list [ref=e175]:
+            - listitem [ref=e176]:
+              - link "About Us" [ref=e223] [cursor=pointer]:
+                - /url: pages/about.html
+            - listitem
+            - listitem [ref=e178]:
+              - link "Contact Us" [ref=e224] [cursor=pointer]:
+                - /url: pages/contact.html
+        - generic [ref=e180]:
+          - heading "Legal" [level=4] [ref=e181]
+          - list [ref=e182]:
+            - listitem [ref=e183]:
+              - link "Terms & Conditions" [ref=e225] [cursor=pointer]:
+                - /url: pages/legal.html
+            - listitem [ref=e185]:
+              - link "Privacy Policy" [ref=e226] [cursor=pointer]:
+                - /url: pages/legal.html
+      - paragraph [ref=e188]: © 2025 Redline Academy. All Rights Reserved.
+  - link "WhatsApp +62 821-2017-1731" [ref=e189] [cursor=pointer]:
+    - /url: https://wa.me/6282120171731
+    - img [ref=e190]
+    - generic [ref=e192]: Contact us
+    - generic [ref=e193]: WhatsApp +62 821-2017-1731

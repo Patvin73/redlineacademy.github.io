@@ -1152,6 +1152,14 @@
               <button
                 class="ad-filter-tab"
                 role="tab"
+                data-filter="resubmit_required"
+                data-i18n="adGradeTabResubmit"
+              >
+                Resubmit
+              </button>
+              <button
+                class="ad-filter-tab"
+                role="tab"
                 data-filter="all"
                 data-i18n="adFilterAll"
               >
@@ -1695,7 +1703,8 @@
         <section class="ad-section ad-admin-only" id="section-enrollments">
           <div class="ad-section__header">
             <h2 data-i18n="adNavEnrollments">Enrollments & Payments</h2>
-            <button class="ad-btn ad-btn--outline" id="exportPaymentsBtn">
+            <div class="ad-section__header-actions">
+              <button class="ad-btn ad-btn--outline" id="exportPaymentsBtn">
               <svg
                 width="15"
                 height="15"
@@ -1710,6 +1719,21 @@
               </svg>
               <span data-i18n="adExportCSV">Export CSV</span>
             </button>
+              <button class="ad-btn ad-btn--primary" id="recordPaymentBtn">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                >
+                  <path d="M12 5v14" />
+                  <path d="M5 12h14" />
+                </svg>
+                <span data-i18n="adRecordPayment">Record Payment</span>
+              </button>
+            </div>
           </div>
           <!-- Payment summary cards -->
           <div class="ad-payment-summary">
@@ -2096,10 +2120,145 @@
     </div>
     <!-- /ad-main -->
 
+    <!-- ==========================================================
+         ADD USER MODAL
+    ========================================================== -->
+    <div class="ad-modal" id="addUserModal" aria-hidden="true" hidden>
+      <div class="ad-modal__backdrop" data-modal-close></div>
+      <div
+        class="ad-modal__card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="addUserTitle"
+      >
+        <div class="ad-modal__header">
+          <h3 id="addUserTitle" data-i18n="adAddUser">Add User</h3>
+          <button class="ad-modal__close" type="button" data-modal-close aria-label="Close">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <form id="addUserForm" class="ad-modal__body" autocomplete="off">
+          <div class="ad-field">
+            <label class="ad-label" for="addUserName" data-i18n="adAddUserName">Full name</label>
+            <input class="ad-input" id="addUserName" name="full_name" type="text" placeholder="Full name" required />
+          </div>
+          <div class="ad-field">
+            <label class="ad-label" for="addUserEmail" data-i18n="adAddUserEmail">Email</label>
+            <input class="ad-input" id="addUserEmail" name="email" type="email" placeholder="email@example.com" required />
+          </div>
+          <div class="ad-field-row">
+            <div class="ad-field">
+              <label class="ad-label" for="addUserRole" data-i18n="adAddUserRole">Role</label>
+              <select class="ad-input ad-select" id="addUserRole" name="role" required>
+                <option value="student" data-i18n="adFilterStudents">Students</option>
+                <option value="trainer" data-i18n="adFilterTrainers">Trainers</option>
+                <option value="admin" data-i18n="adFilterAdmins">Admins</option>
+              </select>
+            </div>
+            <div class="ad-field">
+              <label class="ad-label" for="addUserPassword" data-i18n="adAddUserPassword">Temporary password</label>
+              <input class="ad-input" id="addUserPassword" name="password" type="text" placeholder="Leave blank to auto-generate" />
+            </div>
+          </div>
+          <div class="ad-modal__actions">
+            <button class="ad-btn ad-btn--outline" type="button" id="addUserCancel" data-i18n="adCancel">Cancel</button>
+            <button class="ad-btn ad-btn--primary" type="submit" id="addUserSubmit" data-i18n="adAddUserCreate">Create User</button>
+          </div>
+          <p class="ad-modal__msg" id="addUserMessage" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </div>
     <!-- ═══════════════════════════════════════
          NOTIFICATION PANEL
     ═══════════════════════════════════════ -->
-    <div
+    
+    <!-- ==========================================================
+         RECORD PAYMENT MODAL
+    ========================================================== -->
+    <div class="ad-modal" id="recordPaymentModal" aria-hidden="true" hidden>
+      <div class="ad-modal__backdrop" data-modal-close></div>
+      <div
+        class="ad-modal__card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="recordPaymentTitle"
+      >
+        <div class="ad-modal__header">
+          <h3 id="recordPaymentTitle" data-i18n="adRecordPayment">Record Payment</h3>
+          <button class="ad-modal__close" type="button" data-modal-close aria-label="Close">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <form id="recordPaymentForm" class="ad-modal__body ad-modal__body--compact" autocomplete="off">
+          <div class="ad-field">
+            <label class="ad-label" for="paymentStudent" data-i18n="adPaymentStudent">Student</label>
+            <select class="ad-input ad-select" id="paymentStudent" name="student_id" required></select>
+          </div>
+          <div class="ad-field">
+            <label class="ad-label" for="paymentCourse" data-i18n="adPaymentCourse">Course</label>
+            <select class="ad-input ad-select" id="paymentCourse" name="course_id" required></select>
+          </div>
+          <div class="ad-field-row ad-field-row--thirds">
+            <div class="ad-field">
+              <label class="ad-label" for="paymentAmount" data-i18n="adPaymentAmount">Amount</label>
+              <input class="ad-input" id="paymentAmount" name="amount" type="number" step="0.01" min="0" placeholder="0" required />
+            </div>
+            <div class="ad-field">
+              <label class="ad-label" for="paymentCurrency" data-i18n="adPaymentCurrency">Currency</label>
+              <select class="ad-input ad-select" id="paymentCurrency" name="currency">
+                <option value="IDR">IDR</option>
+                <option value="AUD">AUD</option>
+              </select>
+            </div>
+            <div class="ad-field">
+              <label class="ad-label" for="paymentPlan" data-i18n="adPaymentPlan">Payment Plan</label>
+              <select class="ad-input ad-select" id="paymentPlan" name="payment_plan">
+                <option value="full" data-i18n="adPaymentPlanFull">Full payment</option>
+                <option value="installment" data-i18n="adPaymentPlanInstallment">Installment</option>
+              </select>
+            </div>
+          </div>
+          <div class="ad-field-row" id="paymentInstallmentField" hidden>
+            <div class="ad-field">
+              <label class="ad-label" for="paymentInstallmentPaid" data-i18n="adPaymentInstallmentPaid">Installment #</label>
+              <input class="ad-input" id="paymentInstallmentPaid" name="installment_paid" type="number" min="1" max="4" placeholder="1" />
+            </div>
+            <div class="ad-field">
+              <label class="ad-label" for="paymentInstallmentTotal" data-i18n="adPaymentInstallmentTotal">Total Installments</label>
+              <input class="ad-input" id="paymentInstallmentTotal" name="installment_total" type="number" min="2" max="4" placeholder="2" />
+            </div>
+          </div>
+          <div class="ad-field-row">
+            <div class="ad-field">
+              <label class="ad-label" for="paymentMethod" data-i18n="adPaymentMethod">Method</label>
+              <input class="ad-input" id="paymentMethod" name="payment_method" type="text" value="Manual Transfer" />
+            </div>
+            <div class="ad-field">
+              <label class="ad-label" for="paymentStatus" data-i18n="adPaymentStatus">Status</label>
+              <select class="ad-input ad-select" id="paymentStatus" name="status">
+                <option value="completed" data-i18n="adPaymentStatusPaid">Paid</option>
+                <option value="pending" data-i18n="adPaymentStatusPending">Pending</option>
+              </select>
+            </div>
+          </div>
+          <div class="ad-field" id="paymentNextDueField" hidden>
+            <label class="ad-label" for="paymentNextDue" data-i18n="adPaymentNextDue">Next Due Date</label>
+            <input class="ad-input" id="paymentNextDue" name="next_due_at" type="date" />
+          </div>
+          <div class="ad-modal__actions">
+            <button class="ad-btn ad-btn--outline" type="button" id="recordPaymentCancel" data-i18n="adCancel">Cancel</button>
+            <button class="ad-btn ad-btn--primary" type="submit" id="recordPaymentSubmit" data-i18n="adSavePayment">Save Payment</button>
+          </div>
+          <p class="ad-modal__msg" id="recordPaymentMessage" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </div><div
       class="ad-notif-panel"
       id="adNotifPanel"
       role="dialog"

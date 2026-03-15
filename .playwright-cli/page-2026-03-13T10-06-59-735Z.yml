@@ -1,0 +1,179 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - img "Redline Academy Logo" [ref=e6]
+        - generic [ref=e7]: Redline Academy
+      - navigation [ref=e8]:
+        - generic [ref=e9]:
+          - link "Beranda" [ref=e10] [cursor=pointer]:
+            - /url: /
+          - link "Tentang Kami" [ref=e11] [cursor=pointer]:
+            - /url: pages/about.html
+          - link "Program" [ref=e12] [cursor=pointer]:
+            - /url: pages/programs.html
+          - link "Hubungi Kami" [ref=e13] [cursor=pointer]:
+            - /url: pages/contact.html
+        - generic [ref=e14]:
+          - button "Login" [ref=e15] [cursor=pointer]
+          - navigation "Language selector" [ref=e16]:
+            - button "Bahasa Indonesia" [ref=e17] [cursor=pointer]:
+              - img [ref=e18]
+              - generic [ref=e19]: Bahasa Indonesia
+            - button "English" [ref=e20] [cursor=pointer]:
+              - img [ref=e21]
+              - generic [ref=e22]: English
+  - generic [ref=e23]:
+    - generic:
+      - img "redlineacademy"
+      - img "redlineacademylibrary"
+    - generic [ref=e26]:
+      - heading "Selamat datang" [level=3] [ref=e27]
+      - heading "Redline bukan sekadar akademi" [level=1] [ref=e28]
+      - paragraph [ref=e29]: — ini adalah tempat untuk membuka potensi, menembus batas, dan mengambil kendali atas masa depanmu. Berani mengubah masa depanmu?
+      - generic [ref=e30]:
+        - link "Daftar Sekarang" [ref=e31] [cursor=pointer]:
+          - /url: pages/programs.html
+        - link "Submit an Enquiry" [ref=e32] [cursor=pointer]:
+          - /url: "#contact"
+  - generic [ref=e35]:
+    - 'heading "Keunggulan Care Giver: Memberdayakan Hidup dengan Pendekatan Person-Centred Care" [level=2] [ref=e36]'
+    - paragraph [ref=e37]: Jembatani potensi Anda dengan kurikulum yang menyelaraskan kompetensi praktis dan pendekatan perawatan yang berpusat pada individu (person-centred care). Program ini membekali Anda dengan kecakapan yang diperlukan untuk unggul di rumah sakit, perawatan lansia, maupun lingkungan masyarakat dengan tetap menghargai martabat serta pilihan unik setiap pribadi. Bergabunglah bersama kami untuk memberikan dukungan yang bukan sekadar layanan, melainkan komitmen tulus untuk meningkatkan kualitas hidup sesama. Mulailah langkah Anda untuk membawa perubahan berarti bagi dunia, melalui pengabdian tulus bagi setiap pribadi yang Anda rawat.
+  - generic [ref=e39]:
+    - heading "Program Kami" [level=2] [ref=e40]
+    - generic [ref=e42]:
+      - generic "Galeri gambar program" [ref=e43]:
+        - generic [ref=e44]:
+          - img "Caregiver" [ref=e46]
+          - img "Assistant Carer" [ref=e48]
+          - img "Carer in the park" [ref=e50]
+          - img "Caring hand" [ref=e52]
+          - img "Care and love" [ref=e54]
+          - img "Elder support" [ref=e56]
+          - img "Caregiver" [ref=e58]
+          - img "Assistant Carer" [ref=e60]
+      - generic [ref=e61]:
+        - heading "Care Giver" [level=3] [ref=e62]
+        - paragraph [ref=e63]: Dapatkan keterampilan dasar perawatan kesehatan dan pelatihan berbasis empati untuk mendukung pasien di rumah sakit, panti jompo, dan lingkungan masyarakat.
+        - link "Detail Program" [ref=e64] [cursor=pointer]:
+          - /url: pages/programs.html
+  - generic [ref=e66]:
+    - heading "Komitmen Kami" [level=2] [ref=e67]
+    - generic [ref=e68]:
+      - generic [ref=e70]:
+        - img [ref=e72]
+        - heading "Pendidik yang Berdedikasi" [level=3] [ref=e75]
+        - paragraph [ref=e76]: Belajar jadi lebih mudah ketika ada bimbingan yang tepat. Para pelatih kami sangat terampil di bidangnya dan memiliki semangat tinggi terhadap apa yang mereka ajarkan. Mereka membawa energi dan pengalaman nyata ke setiap program, menjadikan proses belajar lebih praktis dan menarik.
+      - generic [ref=e78]:
+        - img [ref=e80]
+        - heading "Program Micro-Credentials Australia" [level=3] [ref=e83]
+        - paragraph [ref=e84]: Baik kamu pemula maupun ingin mengasah kemampuan, program kami mengikuti Microcredentials Framework. Artinya, kamu memperoleh kualifikasi yang memenuhi standar internasional dan diakui lintas industri, memberi dasar yang kuat untuk peluang karier di masa depan.
+      - generic [ref=e86]:
+        - img [ref=e88]
+        - heading "Komitmen terhadap Keunggulan" [level=3] [ref=e90]
+        - paragraph [ref=e91]: Di RedLine Academy, keunggulan bukan sekadar tujuan — ini adalah budaya kami. Kami berfokus pada pengembangan berpikir kritis dan pemecahan masalah, mendorong siswa melampaui sekadar menghafal. Dengan dukungan pengajar yang kompeten dan standar tinggi, kami menciptakan lingkungan di mana pembelajar dapat tumbuh percaya diri dan meraih kesuksesan yang berkelanjutan.
+      - generic [ref=e93]:
+        - img [ref=e95]
+        - heading "Lingkungan Belajar Inovatif" [level=3] [ref=e97]
+        - paragraph [ref=e98]: Kami mengadopsi alat pembelajaran modern dan metode interaktif yang membuat pendidikan lebih dinamis dan relevan. Dengan menggabungkan teori dan praktik langsung, kami mempersiapkan siswa menghadapi tantangan dunia nyata.
+      - generic [ref=e100]:
+        - img [ref=e102]
+        - heading "Dukungan Personalisasi" [level=3] [ref=e107]
+        - paragraph [ref=e108]: Setiap perjalanan belajar itu unik. Kami menyediakan bimbingan dan sumber daya yang disesuaikan dengan kebutuhan masing-masing individu, memastikan setiap siswa merasa didukung dalam studi dan karier mereka.
+      - generic [ref=e110]:
+        - img [ref=e112]
+        - heading "Wawasan Global" [level=3] [ref=e115]
+        - paragraph [ref=e116]: Program kami dirancang dengan perspektif global, membantu siswa mengembangkan kemampuan beradaptasi dan kepercayaan diri untuk sukses di berbagai industri dan lingkungan internasional.
+  - generic [ref=e118]:
+    - heading "Hubungi Kami" [level=2] [ref=e119]
+    - generic [ref=e120]:
+      - generic [ref=e121]:
+        - heading "Formulir Kontak" [level=3] [ref=e122]
+        - generic [ref=e123]:
+          - generic [ref=e124]:
+            - generic [ref=e125]:
+              - generic [ref=e126]: Nama
+              - textbox "Nama Anda" [ref=e127]
+            - generic [ref=e128]:
+              - generic [ref=e129]: Email
+              - textbox "Email Anda" [ref=e130]
+          - generic [ref=e131]:
+            - generic [ref=e132]:
+              - generic [ref=e133]: Kursus
+              - combobox [ref=e134]:
+                - option "Pilih Kursus" [selected]
+                - option "Care Giver"
+            - generic [ref=e135]:
+              - generic [ref=e136]: Jenis Kelamin
+              - combobox [ref=e137]:
+                - option "Pilih" [selected]
+                - option "Laki-laki"
+                - option "Perempuan"
+          - generic [ref=e138]:
+            - generic [ref=e139]: Kode Pos
+            - textbox "Kode Pos Anda" [ref=e140]
+          - generic [ref=e141]:
+            - generic [ref=e142]: Beritahu kami apa yang bisa dibantu
+            - textbox "Pesan Anda..." [ref=e143]
+          - button "Kirim" [ref=e144] [cursor=pointer]
+      - generic [ref=e145]:
+        - heading "Informasi Kontak" [level=3] [ref=e146]
+        - generic [ref=e147]:
+          - heading "Telepon" [level=4] [ref=e148]
+          - paragraph [ref=e149]:
+            - link "+62 821-2017-1731" [ref=e150] [cursor=pointer]:
+              - /url: tel:+6282120171731
+          - heading "Email" [level=4] [ref=e151]
+          - paragraph [ref=e152]:
+            - link "hello@redlineacademy.com.au" [ref=e153] [cursor=pointer]:
+              - /url: mailto:hello@redlineacademy.com.au
+          - heading "WhatsApp" [level=4] [ref=e154]
+          - paragraph [ref=e155]:
+            - link "Chat dengan kami" [ref=e156] [cursor=pointer]:
+              - /url: https://wa.me/6282120171731
+  - contentinfo [ref=e157]:
+    - generic [ref=e158]:
+      - generic [ref=e159]:
+        - generic [ref=e160]:
+          - heading "Redline Academy" [level=4] [ref=e161]
+          - paragraph [ref=e162]: Platform pelatihan vokasi bersertifikat Australia yang diakui secara internasional.
+          - generic [ref=e163]:
+            - link "f" [ref=e164] [cursor=pointer]:
+              - /url: https://facebook.com
+            - link "X" [ref=e165] [cursor=pointer]:
+              - /url: https://twitter.com
+            - link "📷" [ref=e166] [cursor=pointer]:
+              - /url: https://instagram.com
+            - link "in" [ref=e167] [cursor=pointer]:
+              - /url: https://linkedin.com
+        - generic [ref=e168]:
+          - heading "Program" [level=4] [ref=e169]
+          - list [ref=e170]:
+            - listitem [ref=e171]:
+              - link "Care Giver" [ref=e172] [cursor=pointer]:
+                - /url: pages/programs.html
+        - generic [ref=e173]:
+          - heading "Perusahaan" [level=4] [ref=e174]
+          - list [ref=e175]:
+            - listitem [ref=e176]:
+              - link "Tentang Kami" [ref=e177] [cursor=pointer]:
+                - /url: pages/about.html
+            - listitem
+            - listitem [ref=e178]:
+              - link "Hubungi Kami" [ref=e179] [cursor=pointer]:
+                - /url: pages/contact.html
+        - generic [ref=e180]:
+          - heading "Legal" [level=4] [ref=e181]
+          - list [ref=e182]:
+            - listitem [ref=e183]:
+              - link "Syarat & Ketentuan" [ref=e184] [cursor=pointer]:
+                - /url: pages/legal.html
+            - listitem [ref=e185]:
+              - link "Kebijakan Privasi" [ref=e186] [cursor=pointer]:
+                - /url: pages/legal.html
+      - paragraph [ref=e188]: © 2025 Redline Academy. Semua Hak Dilindungi.
+  - link "WhatsApp +62 821-2017-1731" [ref=e189] [cursor=pointer]:
+    - /url: https://wa.me/6282120171731
+    - img [ref=e190]
+    - generic [ref=e192]: Hubungi kami
+    - generic [ref=e193]: WhatsApp +62 821-2017-1731

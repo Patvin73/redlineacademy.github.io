@@ -1,0 +1,154 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - img "Redline Academy Logo" [ref=e6]
+      - navigation [ref=e7]:
+        - generic [ref=e8]:
+          - link "Beranda" [ref=e9] [cursor=pointer]:
+            - /url: ../index.html
+          - link "Tentang Kami" [ref=e10] [cursor=pointer]:
+            - /url: about.html
+          - link "Program" [ref=e11] [cursor=pointer]:
+            - /url: programs.html
+          - link "Hubungi Kami" [ref=e12] [cursor=pointer]:
+            - /url: contact.html
+        - navigation "Language selector" [ref=e14]:
+          - button "Bahasa Indonesia" [ref=e15] [cursor=pointer]:
+            - img [ref=e16]
+            - generic [ref=e17]: Bahasa Indonesia
+          - button "English" [ref=e18] [cursor=pointer]:
+            - img [ref=e19]
+            - generic [ref=e20]: English
+  - generic [ref=e22]:
+    - heading "Hubungi Kami" [level=1] [ref=e23]
+    - paragraph [ref=e24]: Kami siap membantu Anda. Hubungi kami melalui formulir di bawah ini atau gunakan informasi kontak kami.
+    - generic [ref=e25]:
+      - generic [ref=e26]:
+        - heading "Formulir Kontak" [level=2] [ref=e27]
+        - generic [ref=e28]:
+          - generic [ref=e29]:
+            - generic [ref=e30]: Nama
+            - textbox "Nama Anda" [ref=e31]
+          - generic [ref=e32]:
+            - generic [ref=e33]: Email
+            - textbox "Email Anda" [ref=e34]
+          - generic [ref=e35]:
+            - generic [ref=e36]:
+              - generic [ref=e37]: Kursus
+              - combobox [ref=e38]:
+                - option "Pilih Kursus" [selected]
+                - option "Care Giver"
+            - generic [ref=e39]:
+              - generic [ref=e40]: Jenis Kelamin
+              - combobox [ref=e41]:
+                - option "Pilih" [selected]
+                - option "Laki-laki"
+                - option "Perempuan"
+                - option "Lainnya"
+          - generic [ref=e42]:
+            - generic [ref=e43]: Kode Pos
+            - textbox "Kode Pos Anda" [ref=e44]
+          - generic [ref=e45]:
+            - generic [ref=e46]: Beritahu kami apa yang bisa dibantu
+            - textbox "Pesan Anda..." [ref=e47]
+          - button "Kirim" [ref=e48] [cursor=pointer]
+      - generic [ref=e49]:
+        - heading "Informasi Kontak" [level=2] [ref=e50]
+        - generic [ref=e51]:
+          - generic [ref=e52]:
+            - generic [ref=e53]: 📞
+            - generic [ref=e54]:
+              - heading "Telepon" [level=4] [ref=e55]
+              - paragraph [ref=e56]:
+                - link "+62 821-2017-1731" [ref=e57] [cursor=pointer]:
+                  - /url: tel:+6282120171731
+          - generic [ref=e58]:
+            - generic [ref=e59]: ✉️
+            - generic [ref=e60]:
+              - heading "Email" [level=4] [ref=e61]
+              - paragraph [ref=e62]:
+                - link "hello@redlineacademy.com.au" [ref=e63] [cursor=pointer]:
+                  - /url: mailto:hello@redlineacademy.com.au
+          - generic [ref=e64]:
+            - generic [ref=e65]: 💬
+            - generic [ref=e66]:
+              - heading "WhatsApp" [level=4] [ref=e67]
+              - paragraph [ref=e68]:
+                - link "Chat dengan kami" [ref=e69] [cursor=pointer]:
+                  - /url: https://wa.me/6282120171731
+        - generic [ref=e70]:
+          - heading "Jam Kerja" [level=4] [ref=e71]
+          - list [ref=e72]:
+            - listitem [ref=e73]: "Senin - Jumat: 08:00 - 17:00"
+            - listitem [ref=e74]: "Sabtu: 09:00 - 13:00"
+            - listitem [ref=e75]: "Minggu: Tutup"
+  - generic [ref=e77]:
+    - heading "Pertanyaan yang Sering Diajukan" [level=2] [ref=e78]
+    - generic [ref=e79]:
+      - group [ref=e80]:
+        - generic "Apakah program ini terakreditasi?" [ref=e81] [cursor=pointer]:
+          - heading "Apakah program ini terakreditasi?" [level=4] [ref=e82]
+        - paragraph [ref=e83]: Ya. Anda akan menyelesaikan Unit Pelatihan Terakreditasi Australia yang diakui secara nasional.
+      - group [ref=e84]:
+        - generic "Berapa lama durasi kursusnya?" [ref=e85] [cursor=pointer]:
+          - heading "Berapa lama durasi kursusnya?" [level=4] [ref=e86]
+      - group [ref=e87]:
+        - generic "Apakah saya butuh pengalaman medis?" [ref=e88] [cursor=pointer]:
+          - heading "Apakah saya butuh pengalaman medis?" [level=4] [ref=e89]
+      - group [ref=e90]:
+        - generic "Apakah ada bantuan bahasa?" [ref=e91] [cursor=pointer]:
+          - heading "Apakah ada bantuan bahasa?" [level=4] [ref=e92]
+      - group [ref=e93]:
+        - generic "Bagaimana dengan bagian praktiknya?" [ref=e94] [cursor=pointer]:
+          - heading "Bagaimana dengan bagian praktiknya?" [level=4] [ref=e95]
+      - group [ref=e96]:
+        - generic "Pekerjaan apa yang bisa saya dapatkan?" [ref=e97] [cursor=pointer]:
+          - heading "Pekerjaan apa yang bisa saya dapatkan?" [level=4] [ref=e98]
+      - group [ref=e99]:
+        - generic "Apakah tersedia rencana pembayaran?" [ref=e100] [cursor=pointer]:
+          - heading "Apakah tersedia rencana pembayaran?" [level=4] [ref=e101]
+  - contentinfo [ref=e102]:
+    - link "WhatsApp +62 821-2017-1731" [ref=e103] [cursor=pointer]:
+      - /url: https://wa.me/6282120171731
+      - img [ref=e104]
+      - generic [ref=e106]: Hubungi kami
+      - generic [ref=e107]: WhatsApp +62 821-2017-1731
+    - generic [ref=e108]:
+      - generic [ref=e109]:
+        - generic [ref=e110]:
+          - heading "Redline Academy" [level=4] [ref=e111]
+          - paragraph [ref=e112]: Platform pelatihan vokasi bersertifikat Australia yang diakui secara internasional.
+          - generic [ref=e113]:
+            - link "f" [ref=e114] [cursor=pointer]:
+              - /url: https://facebook.com
+            - link "𝕏" [ref=e115] [cursor=pointer]:
+              - /url: https://twitter.com
+            - link "📷" [ref=e116] [cursor=pointer]:
+              - /url: https://instagram.com
+            - link "in" [ref=e117] [cursor=pointer]:
+              - /url: https://linkedin.com
+        - generic [ref=e118]:
+          - heading "Program" [level=4] [ref=e119]
+          - list [ref=e120]:
+            - listitem [ref=e121]:
+              - link "Care Giver" [ref=e122] [cursor=pointer]:
+                - /url: programs.html
+        - generic [ref=e123]:
+          - heading "Perusahaan" [level=4] [ref=e124]
+          - list [ref=e125]:
+            - listitem [ref=e126]:
+              - link "Tentang Kami" [ref=e127] [cursor=pointer]:
+                - /url: about.html
+            - listitem [ref=e128]:
+              - link "Hubungi Kami" [ref=e129] [cursor=pointer]:
+                - /url: contact.html
+        - generic [ref=e130]:
+          - heading "Legal" [level=4] [ref=e131]
+          - list [ref=e132]:
+            - listitem [ref=e133]:
+              - link "Syarat & Ketentuan" [ref=e134] [cursor=pointer]:
+                - /url: legal.html
+            - listitem [ref=e135]:
+              - link "Kebijakan Privasi" [ref=e136] [cursor=pointer]:
+                - /url: legal.html
+      - paragraph [ref=e138]: © 2025 Redline Academy. Semua Hak Dilindungi.

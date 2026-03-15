@@ -1,0 +1,146 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - img "Redline Academy Logo" [ref=e6]
+      - navigation [ref=e7]:
+        - generic [ref=e8]:
+          - link "Beranda" [ref=e9] [cursor=pointer]:
+            - /url: ../index.html
+          - link "Tentang Kami" [ref=e10] [cursor=pointer]:
+            - /url: about.html
+          - link "Program" [ref=e11] [cursor=pointer]:
+            - /url: programs.html
+          - link "Hubungi Kami" [ref=e12] [cursor=pointer]:
+            - /url: contact.html
+        - navigation "Language selector" [ref=e14]:
+          - button "Bahasa Indonesia" [ref=e15] [cursor=pointer]:
+            - img [ref=e16]
+            - generic [ref=e17]: Bahasa Indonesia
+          - button "English" [ref=e18] [cursor=pointer]:
+            - img [ref=e19]
+            - generic [ref=e20]: English
+  - generic [ref=e22]:
+    - heading "Blog" [level=1] [ref=e23]
+    - paragraph [ref=e24]: Baca artikel terbaru kami tentang pendidikan, karier, dan tips industri.
+    - generic [ref=e25]:
+      - article [ref=e26]:
+        - img "Blog Post 1" [ref=e27]
+        - generic [ref=e28]:
+          - paragraph [ref=e29]: 19 Oktober 2024
+          - heading "Tren Industri Perawatan Kesehatan 2024" [level=2] [ref=e30]
+          - paragraph [ref=e31]: Pelajari tentang tren terbaru dalam industri perawatan kesehatan dan bagaimana program Asisten Perawat kami mempersiapkan Anda untuk masa depan yang cerah.
+          - link "Baca Selengkapnya" [ref=e32] [cursor=pointer]:
+            - /url: "#"
+      - article [ref=e33]:
+        - img "Blog Post 2" [ref=e34]
+        - generic [ref=e35]:
+          - paragraph [ref=e36]: 15 Oktober 2024
+          - 'heading "Seni Kuliner Modern: Dari Dapur ke Meja" [level=2] [ref=e37]'
+          - paragraph [ref=e38]: Temukan bagaimana teknik memasak modern mengubah industri kuliner dan peluang karier yang menanti lulusan program Chef kami.
+          - link "Baca Selengkapnya" [ref=e39] [cursor=pointer]:
+            - /url: "#"
+      - article [ref=e40]:
+        - img "Blog Post 3" [ref=e41]
+        - generic [ref=e42]:
+          - paragraph [ref=e43]: 10 Oktober 2024
+          - 'heading "Budaya Kopi Spesialti: Peluang Bisnis yang Berkembang" [level=2] [ref=e44]'
+          - paragraph [ref=e45]: Jelajahi pertumbuhan pasar kopi spesialti dan bagaimana keterampilan barista profesional membuka pintu kesuksesan karier.
+          - link "Baca Selengkapnya" [ref=e46] [cursor=pointer]:
+            - /url: "#"
+      - article [ref=e47]:
+        - img "Blog Post 4" [ref=e48]
+        - generic [ref=e49]:
+          - paragraph [ref=e50]: 5 Oktober 2024
+          - 'heading "Masa Depan Pemrograman: Skill yang Paling Dicari" [level=2] [ref=e51]'
+          - paragraph [ref=e52]: Pelajari bahasa pemrograman dan skill yang paling dicari oleh perusahaan teknologi terkemuka di tahun 2024.
+          - link "Baca Selengkapnya" [ref=e53] [cursor=pointer]:
+            - /url: "#"
+      - article [ref=e54]:
+        - img "Blog Post 5" [ref=e55]
+        - generic [ref=e56]:
+          - paragraph [ref=e57]: 1 Oktober 2024
+          - 'heading "Industri Perhotelan: Peluang Karier Global" [level=2] [ref=e58]'
+          - paragraph [ref=e59]: Temukan bagaimana program Bartender kami membuka peluang karier internasional di industri perhotelan yang dinamis.
+          - link "Baca Selengkapnya" [ref=e60] [cursor=pointer]:
+            - /url: "#"
+      - article [ref=e61]:
+        - img "Blog Post 6" [ref=e62]
+        - generic [ref=e63]:
+          - paragraph [ref=e64]: 25 September 2024
+          - 'heading "Teknisi Listrik: Profesi Esensial untuk Masa Depan" [level=2] [ref=e65]'
+          - paragraph [ref=e66]: Pelajari mengapa teknisi listrik adalah profesi yang sangat dibutuhkan dan bagaimana program kami mempersiapkan Anda untuk kesuksesan.
+          - link "Baca Selengkapnya" [ref=e67] [cursor=pointer]:
+            - /url: "#"
+    - generic [ref=e68]:
+      - button "← Sebelumnya" [ref=e69] [cursor=pointer]
+      - text: Halaman 1 dari 3
+      - button "Berikutnya →" [ref=e70] [cursor=pointer]
+  - generic [ref=e73]:
+    - heading "Berlangganan Newsletter Kami" [level=2] [ref=e74]
+    - paragraph [ref=e75]: Dapatkan artikel terbaru, tips karier, dan informasi program langsung ke email Anda.
+    - generic [ref=e76]:
+      - textbox "Email Anda" [ref=e77]
+      - button "Berlangganan" [ref=e78] [cursor=pointer]
+  - contentinfo [ref=e79]:
+    - link "WhatsApp +62 821-2017-1731" [ref=e80] [cursor=pointer]:
+      - /url: https://wa.me/6282120171731
+      - img [ref=e81]
+      - generic [ref=e83]: Hubungi kami
+      - generic [ref=e84]: WhatsApp +62 821-2017-1731
+    - generic [ref=e85]:
+      - generic [ref=e86]:
+        - generic [ref=e87]:
+          - heading "Redline Academy" [level=4] [ref=e88]
+          - paragraph [ref=e89]: Platform pelatihan vokasi bersertifikat Australia yang diakui secara internasional.
+          - generic [ref=e90]:
+            - link "f" [ref=e91] [cursor=pointer]:
+              - /url: https://facebook.com
+            - link "𝕏" [ref=e92] [cursor=pointer]:
+              - /url: https://twitter.com
+            - link "📷" [ref=e93] [cursor=pointer]:
+              - /url: https://instagram.com
+            - link "in" [ref=e94] [cursor=pointer]:
+              - /url: https://linkedin.com
+        - generic [ref=e95]:
+          - heading "Program" [level=4] [ref=e96]
+          - list [ref=e97]:
+            - listitem [ref=e98]:
+              - link "Asisten Perawat" [ref=e99] [cursor=pointer]:
+                - /url: programs.html
+            - listitem [ref=e100]:
+              - link "Bartender" [ref=e101] [cursor=pointer]:
+                - /url: programs.html
+            - listitem [ref=e102]:
+              - link "Memasak (Chef)" [ref=e103] [cursor=pointer]:
+                - /url: programs.html
+            - listitem [ref=e104]:
+              - link "Barista" [ref=e105] [cursor=pointer]:
+                - /url: programs.html
+            - listitem [ref=e106]:
+              - link "Pemrograman (IT)" [ref=e107] [cursor=pointer]:
+                - /url: programs.html
+            - listitem [ref=e108]:
+              - link "Teknisi Listrik" [ref=e109] [cursor=pointer]:
+                - /url: programs.html
+        - generic [ref=e110]:
+          - heading "Perusahaan" [level=4] [ref=e111]
+          - list [ref=e112]:
+            - listitem [ref=e113]:
+              - link "Tentang Kami" [ref=e114] [cursor=pointer]:
+                - /url: about.html
+            - listitem [ref=e115]:
+              - link "Blog" [ref=e116] [cursor=pointer]:
+                - /url: blog.html
+            - listitem [ref=e117]:
+              - link "Hubungi Kami" [ref=e118] [cursor=pointer]:
+                - /url: contact.html
+        - generic [ref=e119]:
+          - heading "Legal" [level=4] [ref=e120]
+          - list [ref=e121]:
+            - listitem [ref=e122]:
+              - link "Syarat & Ketentuan" [ref=e123] [cursor=pointer]:
+                - /url: legal.html
+            - listitem [ref=e124]:
+              - link "Kebijakan Privasi" [ref=e125] [cursor=pointer]:
+                - /url: legal.html
+      - paragraph [ref=e127]: © 2025 Redline Academy. Semua Hak Dilindungi.

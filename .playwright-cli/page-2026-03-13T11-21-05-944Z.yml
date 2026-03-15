@@ -1,0 +1,14 @@
+- generic [ref=e2]:
+  - img [ref=e4]
+  - heading "Pembayaran Berhasil!" [level=1] [ref=e7]
+  - paragraph [ref=e8]:
+    - text: Terima kasih,
+    - strong [ref=e9]: Peserta
+    - text: . Pendaftaran Anda telah kami terima. Tim Redline Academy akan menghubungi Anda melalui email dalam
+    - strong [ref=e10]: 1×24 jam
+    - text: .
+  - generic [ref=e11]:
+    - link "Kembali ke Beranda" [ref=e12] [cursor=pointer]:
+      - /url: ../
+    - link "Lihat Program Lainnya" [ref=e13] [cursor=pointer]:
+      - /url: programs.html

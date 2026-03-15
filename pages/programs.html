@@ -689,6 +689,8 @@
   </footer>
 
   <script src="../js/script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
   <script>
   // Simple autoplay image carousel for Programs page
   (function(){
@@ -959,6 +961,56 @@
     })();
   </script>
 
+  <!-- Supabase enrollment submission -->
+  <script>
+    (function () {
+      const form = document.querySelector(".enroll-form");
+      const notice = document.getElementById("form-notification");
+      if (!form || !window.lmsConfig) return;
+
+      const submitBtn = form.querySelector("[type=submit]");
+      const showNotice = (type, message) => {
+        if (!notice) return;
+        notice.style.display = "block";
+        notice.style.border = type === "success" ? "1px solid #6ee7b7" : "1px solid #fca5a5";
+        notice.style.background = type === "success" ? "#d1fae5" : "#fee2e2";
+        notice.style.color = type === "success" ? "#065f46" : "#991b1b";
+        notice.textContent = message;
+        notice.scrollIntoView({ behavior: "smooth", block: "center" });
+      };
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        if (submitBtn) submitBtn.disabled = true;
+        if (notice) notice.style.display = "none";
+
+        try {
+          const formData = new FormData(form);
+          if (!formData.get("payment_status")) {
+            formData.set("payment_status", "ready_for_gateway");
+          }
+
+          const res = await fetch(
+            window.lmsConfig.supabaseUrl + "/functions/v1/public-enroll",
+            { method: "POST", body: formData }
+          );
+
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            throw new Error(data.error || "Gagal mengirim pendaftaran.");
+          }
+
+          showNotice("success", "✅ Pendaftaran berhasil dikirim! Tim kami akan menghubungi Anda segera.");
+          form.reset();
+        } catch (err) {
+          showNotice("error", "❌ " + (err.message || "Terjadi kesalahan. Silakan coba lagi."));
+        } finally {
+          if (submitBtn) submitBtn.disabled = false;
+        }
+      });
+    })();
+  </script>
+
   <!-- Sticky WhatsApp quick access -->
   <a href="https://wa.me/6282120171731" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp +62 821-2017-1731">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -972,6 +1024,7 @@
     (function () {
       const form = document.querySelector(".enroll-form");
       if (!form) return;
+      if (window.lmsConfig && window.lmsConfig.supabaseUrl) return;
 
       // 1. Ambil token saat halaman load
       fetch("../get_csrf_token.php", { credentials: "include" })

@@ -1,0 +1,108 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - img "Redline Academy Logo" [ref=e6]
+      - navigation [ref=e7]:
+        - generic [ref=e8]:
+          - link "Beranda" [ref=e9] [cursor=pointer]:
+            - /url: ../index.html
+          - link "Tentang Kami" [ref=e10] [cursor=pointer]:
+            - /url: about.html
+          - link "Program" [ref=e11] [cursor=pointer]:
+            - /url: programs.html
+          - link "Hubungi Kami" [ref=e12] [cursor=pointer]:
+            - /url: contact.html
+        - navigation "Language selector" [ref=e14]:
+          - button "Bahasa Indonesia" [ref=e15] [cursor=pointer]:
+            - img [ref=e16]
+            - generic [ref=e17]: Bahasa Indonesia
+          - button "English" [ref=e18] [cursor=pointer]:
+            - img [ref=e19]
+            - generic [ref=e20]: English
+  - generic [ref=e22]:
+    - heading "Legal" [level=1] [ref=e23]
+    - generic [ref=e24]:
+      - button "Syarat & Ketentuan" [ref=e25] [cursor=pointer]
+      - button "Kebijakan Privasi" [ref=e26] [cursor=pointer]
+    - generic [ref=e27]:
+      - heading "Syarat & Ketentuan" [level=2] [ref=e28]
+      - generic [ref=e29]:
+        - heading "1. Penerimaan Syarat" [level=3] [ref=e30]
+        - paragraph [ref=e31]: Dengan mengakses dan menggunakan website Redline Academy, Anda menerima dan setuju untuk terikat oleh syarat dan ketentuan serta kebijakan privasi kami. Jika Anda tidak setuju dengan bagian mana pun dari syarat ini, maka Anda tidak dapat menggunakan layanan kami.
+        - heading "2. Penggunaan Lisensi" [level=3] [ref=e32]
+        - paragraph [ref=e33]: Kami memberikan lisensi terbatas, non-eksklusif, dan dapat dicabut untuk mengakses dan menggunakan website kami untuk tujuan pribadi dan non-komersial. Anda tidak boleh mereproduksi, mendistribusikan, atau mengirimkan konten tanpa persetujuan tertulis dari kami.
+        - heading "3. Penafian Konten" [level=3] [ref=e34]
+        - paragraph [ref=e35]: Konten di website kami disediakan "sebagaimana adanya" tanpa jaminan apa pun. Kami tidak membuat pernyataan atau jaminan tentang keakuratan, kelengkapan, atau kualitas informasi yang disediakan. Anda menggunakan konten kami atas risiko Anda sendiri.
+        - heading "4. Batasan Tanggung Jawab" [level=3] [ref=e36]
+        - paragraph [ref=e37]: Dalam hal apa pun, Redline Academy tidak akan bertanggung jawab atas kerugian langsung, tidak langsung, insidental, khusus, atau konsekuensial yang timbul dari penggunaan atau ketidakmampuan menggunakan website kami atau layanan kami.
+        - heading "5. Tautan Pihak Ketiga" [level=3] [ref=e38]
+        - paragraph [ref=e39]: Website kami dapat berisi tautan ke website pihak ketiga. Kami tidak bertanggung jawab atas konten, akurasi, atau praktik privasi dari situs web eksternal. Penggunaan situs web pihak ketiga diatur oleh syarat dan kebijakan privasi mereka sendiri.
+        - heading "6. Modifikasi Syarat" [level=3] [ref=e40]
+        - paragraph [ref=e41]: Kami berhak untuk memodifikasi syarat dan ketentuan ini kapan saja. Perubahan akan berlaku segera setelah diposting di website. Penggunaan berkelanjutan dari website kami setelah perubahan berarti Anda menerima syarat yang dimodifikasi.
+        - heading "7. Hukum yang Berlaku" [level=3] [ref=e42]
+        - paragraph [ref=e43]: Syarat dan ketentuan ini diatur oleh dan ditafsirkan sesuai dengan hukum Indonesia, dan Anda secara tidak terbatas setuju untuk tunduk pada yurisdiksi eksklusif pengadilan di Indonesia.
+        - heading "8. Hubungi Kami" [level=3] [ref=e44]
+        - paragraph [ref=e45]: Jika Anda memiliki pertanyaan tentang syarat dan ketentuan ini, silakan hubungi kami di info@redlineacademy.com.au atau melalui formulir kontak kami.
+  - contentinfo [ref=e46]:
+    - link "WhatsApp +62 821-2017-1731" [ref=e47] [cursor=pointer]:
+      - /url: https://wa.me/6282120171731
+      - img [ref=e48]
+      - generic [ref=e50]: Hubungi kami
+      - generic [ref=e51]: WhatsApp +62 821-2017-1731
+    - generic [ref=e52]:
+      - generic [ref=e53]:
+        - generic [ref=e54]:
+          - heading "Redline Academy" [level=4] [ref=e55]
+          - paragraph [ref=e56]: Platform pelatihan vokasi bersertifikat Australia yang diakui secara internasional.
+          - generic [ref=e57]:
+            - link "f" [ref=e58] [cursor=pointer]:
+              - /url: https://facebook.com
+            - link "𝕏" [ref=e59] [cursor=pointer]:
+              - /url: https://twitter.com
+            - link "📷" [ref=e60] [cursor=pointer]:
+              - /url: https://instagram.com
+            - link "in" [ref=e61] [cursor=pointer]:
+              - /url: https://linkedin.com
+        - generic [ref=e62]:
+          - heading "Program" [level=4] [ref=e63]
+          - list [ref=e64]:
+            - listitem [ref=e65]:
+              - link "Asisten Perawat" [ref=e66] [cursor=pointer]:
+                - /url: programs.html
+            - listitem [ref=e67]:
+              - link "Bartender" [ref=e68] [cursor=pointer]:
+                - /url: programs.html
+            - listitem [ref=e69]:
+              - link "Memasak (Chef)" [ref=e70] [cursor=pointer]:
+                - /url: programs.html
+            - listitem [ref=e71]:
+              - link "Barista" [ref=e72] [cursor=pointer]:
+                - /url: programs.html
+            - listitem [ref=e73]:
+              - link "Pemrograman (IT)" [ref=e74] [cursor=pointer]:
+                - /url: programs.html
+            - listitem [ref=e75]:
+              - link "Teknisi Listrik" [ref=e76] [cursor=pointer]:
+                - /url: programs.html
+        - generic [ref=e77]:
+          - heading "Perusahaan" [level=4] [ref=e78]
+          - list [ref=e79]:
+            - listitem [ref=e80]:
+              - link "Tentang Kami" [ref=e81] [cursor=pointer]:
+                - /url: about.html
+            - listitem [ref=e82]:
+              - link "Blog" [ref=e83] [cursor=pointer]:
+                - /url: blog.html
+            - listitem [ref=e84]:
+              - link "Hubungi Kami" [ref=e85] [cursor=pointer]:
+                - /url: contact.html
+        - generic [ref=e86]:
+          - heading "Legal" [level=4] [ref=e87]
+          - list [ref=e88]:
+            - listitem [ref=e89]:
+              - link "Syarat & Ketentuan" [ref=e90] [cursor=pointer]:
+                - /url: legal.html
+            - listitem [ref=e91]:
+              - link "Kebijakan Privasi" [ref=e92] [cursor=pointer]:
+                - /url: legal.html
+      - paragraph [ref=e94]: © 2024 Redline Academy. Semua Hak Dilindungi.

@@ -1,0 +1,6 @@
+[  304218ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://vsxvojjqmryjncgrilku.supabase.co/functions/v1/public-enroll:0
+[  360636ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://vsxvojjqmryjncgrilku.supabase.co/functions/v1/public-enroll:0
+[  604052ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://vsxvojjqmryjncgrilku.supabase.co/functions/v1/public-enroll:0
+[  678672ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://vsxvojjqmryjncgrilku.supabase.co/functions/v1/public-enroll:0
+[  906157ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ https://vsxvojjqmryjncgrilku.supabase.co/functions/v1/public-enroll:0
+[  937739ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ https://vsxvojjqmryjncgrilku.supabase.co/functions/v1/public-enroll:0

@@ -1,0 +1,107 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - img "Redline Academy Logo" [ref=e6]
+      - navigation [ref=e7]:
+        - generic [ref=e8]:
+          - link "Beranda" [ref=e9] [cursor=pointer]:
+            - /url: ../index.html
+          - link "Tentang Kami" [ref=e10] [cursor=pointer]:
+            - /url: about.html
+          - link "Program" [ref=e11] [cursor=pointer]:
+            - /url: programs.html
+          - link "Hubungi Kami" [ref=e12] [cursor=pointer]:
+            - /url: contact.html
+        - navigation "Language selector" [ref=e14]:
+          - button "Bahasa Indonesia" [ref=e15] [cursor=pointer]:
+            - img [ref=e16]
+            - generic [ref=e17]: Bahasa Indonesia
+          - button "English" [ref=e18] [cursor=pointer]:
+            - img [ref=e19]
+            - generic [ref=e20]: English
+  - generic [ref=e22]:
+    - generic [ref=e23]:
+      - img "Redline Academy Logo" [ref=e24]
+      - heading "Tentang Kami" [level=1] [ref=e25]
+    - paragraph [ref=e27]: Program pelatihan ini dirancang khusus untuk membangun kompetensi unggul di bidang perawatan lansia secara komprehensif. Keterampilan yang Anda kuasai akan membuka gerbang karier di sektor pelayanan komunitas, pengabdian bagi keluarga, hingga peran strategis sebagai relawan dan pekerja sosial profesional. Melalui kurikulum terakreditasi yang menggabungkan metode klasikal, pembelajaran mandiri, dan praktik intensif, kami mengundang Anda untuk bergabung. Mari bersama Redline Academy, membentuk insan peduli yang berdaya saing global. Program ini mencakup 6 Australian Accredited Training Units serta 120 jam asesmen praktik, yang mencerminkan standar industri dan praktik perawatan terkini.
+  - generic [ref=e30]:
+    - generic [ref=e32]:
+      - img [ref=e34]
+      - heading "Visi Kami" [level=3] [ref=e37]
+      - paragraph [ref=e38]: Visi kami adalah menyediakan pelatihan vokasi bersertifikat Australia yang diakui secara internasional dan selaras dengan Kerangka Microcredentials, yang dirancang untuk membuka pintu menuju peluang nyata. Kami berkomitmen menciptakan jalur menuju karier yang bermakna, membantu siswa mengubah ambisi menjadi pencapaian, serta mempersiapkan mereka untuk unggul di dunia yang dinamis dan terus berubah.
+    - generic [ref=e40]:
+      - img [ref=e42]
+      - heading "Misi Kami" [level=3] [ref=e46]
+      - paragraph [ref=e47]: Memberdayakan setiap individu di setiap tahap perjalanan mereka — baik saat memulai karier maupun berpindah dari bidang lain — melalui pelatihan berkualitas tinggi yang berfokus pada kebutuhan industri. Kami berdedikasi untuk membekali siswa dengan keterampilan praktis, kepercayaan diri, dan pola pikir yang tangguh untuk berkembang di pasar kerja global yang kompetitif.
+  - generic [ref=e49]:
+    - heading "Nilai-Nilai Kami" [level=2] [ref=e50]
+    - generic [ref=e51]:
+      - generic [ref=e53]:
+        - img [ref=e55]
+        - heading "Pemberdayaan" [level=3] [ref=e57]
+        - paragraph [ref=e58]: Kami percaya setiap pembelajar berhak mendapatkan alat, kepercayaan diri, dan dukungan untuk mengambil kendali atas masa depannya dan mencapai potensi terbaiknya, tanpa memandang latar belakang.
+      - generic [ref=e60]:
+        - img [ref=e62]
+        - heading "Keunggulan" [level=3] [ref=e64]
+        - paragraph [ref=e65]: Kami menjaga standar tertinggi dalam pelatihan, pengajaran, dan dukungan agar siswa memperoleh keterampilan serta pengetahuan yang relevan dengan industri dan benar-benar bermanfaat.
+      - generic [ref=e67]:
+        - img [ref=e69]
+        - heading "Integritas" [level=3] [ref=e71]
+        - paragraph [ref=e72]: Kami beroperasi dengan kejujuran, transparansi, dan prinsip etika dalam setiap program dan interaksi, membangun kepercayaan dan rasa hormat di lingkungan belajar kami.
+      - generic [ref=e74]:
+        - img [ref=e76]
+        - heading "Inovasi" [level=3] [ref=e78]
+        - paragraph [ref=e79]: Kami mengadopsi metode pengajaran modern, pengalaman belajar praktis, dan pendekatan kreatif untuk mempersiapkan siswa menghadapi tuntutan dunia kerja global yang terus berkembang.
+      - generic [ref=e81]:
+        - img [ref=e83]
+        - heading "Inklusivitas" [level=3] [ref=e85]
+        - paragraph [ref=e86]: Kami berkomitmen menciptakan lingkungan yang inklusif di mana setiap individu merasa dihargai dan didukung, terlepas dari latar belakang atau pengalaman mereka.
+      - generic [ref=e88]:
+        - img [ref=e90]
+        - heading "Keberanian" [level=3] [ref=e92]
+        - paragraph [ref=e93]: Kami menginspirasi siswa untuk keluar dari zona nyaman, berani mengambil risiko, dan beradaptasi dengan perubahan — membantu mereka mengubah tantangan menjadi peluang.
+  - contentinfo [ref=e94]:
+    - link "WhatsApp +62 821-2017-1731" [ref=e95] [cursor=pointer]:
+      - /url: https://wa.me/6282120171731
+      - img [ref=e96]
+      - generic [ref=e98]: Hubungi kami
+      - generic [ref=e99]: WhatsApp +62 821-2017-1731
+    - generic [ref=e100]:
+      - generic [ref=e101]:
+        - generic [ref=e102]:
+          - heading "Redline Academy" [level=4] [ref=e103]
+          - paragraph [ref=e104]: Platform pelatihan vokasi bersertifikat Australia yang diakui secara internasional.
+          - generic [ref=e105]:
+            - link "f" [ref=e106] [cursor=pointer]:
+              - /url: https://facebook.com
+            - link "𝕏" [ref=e107] [cursor=pointer]:
+              - /url: https://twitter.com
+            - link "📷" [ref=e108] [cursor=pointer]:
+              - /url: https://instagram.com
+            - link "in" [ref=e109] [cursor=pointer]:
+              - /url: https://linkedin.com
+        - generic [ref=e110]:
+          - heading "Program" [level=4] [ref=e111]
+          - list [ref=e112]:
+            - listitem [ref=e113]:
+              - link "Care Giver" [ref=e114] [cursor=pointer]:
+                - /url: programs.html
+        - generic [ref=e115]:
+          - heading "Perusahaan" [level=4] [ref=e116]
+          - list [ref=e117]:
+            - listitem [ref=e118]:
+              - link "Tentang Kami" [ref=e119] [cursor=pointer]:
+                - /url: about.html
+            - listitem [ref=e120]:
+              - link "Hubungi Kami" [ref=e121] [cursor=pointer]:
+                - /url: contact.html
+        - generic [ref=e122]:
+          - heading "Legal" [level=4] [ref=e123]
+          - list [ref=e124]:
+            - listitem [ref=e125]:
+              - link "Syarat & Ketentuan" [ref=e126] [cursor=pointer]:
+                - /url: legal.html
+            - listitem [ref=e127]:
+              - link "Kebijakan Privasi" [ref=e128] [cursor=pointer]:
+                - /url: legal.html
+      - paragraph [ref=e130]: © 2025 Redline Academy. Semua Hak Dilindungi.

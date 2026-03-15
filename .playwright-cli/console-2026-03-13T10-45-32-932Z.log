@@ -1,0 +1,14 @@
+[   20514ms] [WARNING] Translation missing for key: lmsNewMessage @ http://localhost:8000/js/script.js:824
+[   20514ms] [WARNING] Translation missing for key: lmsNoMessages @ http://localhost:8000/js/script.js:824
+[   20515ms] [WARNING] Translation missing for key: lmsSelectMessage @ http://localhost:8000/js/script.js:824
+[   20516ms] [WARNING] Translation missing for key: lmsTimezone @ http://localhost:8000/js/script.js:824
+[   20521ms] [WARNING] Translation missing for key: lmsNotifications @ http://localhost:8000/js/script.js:824
+[   20521ms] [WARNING] Translation missing for key: lmsMarkAllRead @ http://localhost:8000/js/script.js:824
+[   20521ms] [WARNING] Translation missing for key: lmsNoNotifications @ http://localhost:8000/js/script.js:824
+[   20577ms] [WARNING] Translation missing for key: lmsNewMessage @ http://localhost:8000/js/script.js:824
+[   20577ms] [WARNING] Translation missing for key: lmsNoMessages @ http://localhost:8000/js/script.js:824
+[   20578ms] [WARNING] Translation missing for key: lmsSelectMessage @ http://localhost:8000/js/script.js:824
+[   20590ms] [WARNING] Translation missing for key: lmsTimezone @ http://localhost:8000/js/script.js:824
+[   20590ms] [WARNING] Translation missing for key: lmsNotifications @ http://localhost:8000/js/script.js:824
+[   20590ms] [WARNING] Translation missing for key: lmsMarkAllRead @ http://localhost:8000/js/script.js:824
+[   20591ms] [WARNING] Translation missing for key: lmsNoNotifications @ http://localhost:8000/js/script.js:824

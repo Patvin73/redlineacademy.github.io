@@ -1,0 +1,24 @@
+[    2959ms] [ERROR] Failed to load resource: net::ERR_INTERNET_DISCONNECTED @ https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Nunito:wght@400;500;600;700&display=swap:0
+[    3325ms] [ERROR] Failed to load resource: net::ERR_INTERNET_DISCONNECTED @ https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2:0
+[    3378ms] [ERROR] Failed to load resource: net::ERR_INTERNET_DISCONNECTED @ https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=DM+Sans:wght@300;400;500;600;700&display=swap:0
+[    6620ms] Error: Supabase SDK gagal dimuat.
+    at http://localhost:8000/js/supabase-client.js:8:11
+    at http://localhost:8000/js/supabase-client.js:23:3
+[    4404ms] [WARNING] Translation missing for key: lmsNewMessage @ http://localhost:8000/js/script.js:824
+[    4404ms] [WARNING] Translation missing for key: lmsNoMessages @ http://localhost:8000/js/script.js:824
+[    4404ms] [WARNING] Translation missing for key: lmsSelectMessage @ http://localhost:8000/js/script.js:824
+[    4405ms] [WARNING] Translation missing for key: lmsTimezone @ http://localhost:8000/js/script.js:824
+[    4406ms] [WARNING] Translation missing for key: lmsNotifications @ http://localhost:8000/js/script.js:824
+[    4406ms] [WARNING] Translation missing for key: lmsMarkAllRead @ http://localhost:8000/js/script.js:824
+[    4407ms] [WARNING] Translation missing for key: lmsNoNotifications @ http://localhost:8000/js/script.js:824
+[    4414ms] [WARNING] Translation missing for key: lmsNewMessage @ http://localhost:8000/js/script.js:824
+[    4414ms] [WARNING] Translation missing for key: lmsNoMessages @ http://localhost:8000/js/script.js:824
+[    4414ms] [WARNING] Translation missing for key: lmsSelectMessage @ http://localhost:8000/js/script.js:824
+[    4415ms] [WARNING] Translation missing for key: lmsTimezone @ http://localhost:8000/js/script.js:824
+[    4415ms] [WARNING] Translation missing for key: lmsNotifications @ http://localhost:8000/js/script.js:824
+[    4416ms] [WARNING] Translation missing for key: lmsMarkAllRead @ http://localhost:8000/js/script.js:824
+[    4416ms] [WARNING] Translation missing for key: lmsNoNotifications @ http://localhost:8000/js/script.js:824
+[   12474ms] Error: Client Supabase tidak tersedia.
+    at getClient (http://localhost:8000/js/auth.js:24:13)
+    at Object.getSessionUser (http://localhost:8000/js/auth.js:30:22)
+    at HTMLDocument.loadDashboard (http://localhost:8000/js/guard.js:29:39)
