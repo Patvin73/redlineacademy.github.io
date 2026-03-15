@@ -1,2 +1,3 @@
 # Local deploy configs
 .vscode/sftp.json
+uploads_private/
