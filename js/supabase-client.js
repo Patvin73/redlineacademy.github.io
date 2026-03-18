@@ -1,14 +1,23 @@
-﻿window.lmsConfig = {
-  supabaseUrl: "https://vsxvojjqmryjncgrilku.supabase.co",
-  supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzeHZvampxbXJ5am5jZ3JpbGt1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MTIyMjQsImV4cCI6MjA4ODE4ODIyNH0.SayRUStP0bdnOjSZvg4xKmQNoRQ0cYxeLoe7rYp8L5s",
-};
+window.lmsConfig = window.lmsConfig || {};
+window.lmsConfig.supabaseUrl =
+  window.lmsConfig.supabaseUrl ||
+  "https://vsxvojjqmryjncgrilku.supabase.co";
+window.lmsConfig.supabaseAnonKey =
+  window.lmsConfig.supabaseAnonKey ||
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzeHZvampxbXJ5am5jZ3JpbGt1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MTIyMjQsImV4cCI6MjA4ODE4ODIyNH0.SayRUStP0bdnOjSZvg4xKmQNoRQ0cYxeLoe7rYp8L5s";
 
 window.lmsSupabase = (() => {
   if (!window.supabase || !window.supabase.createClient) {
     throw new Error("Supabase SDK gagal dimuat.");
   }
 
-  const { supabaseUrl, supabaseAnonKey } = window.lmsConfig;
+  const runtimeConfig =
+    window.__LMS_SUPABASE_CONFIG__ ||
+    window.__lmsSupabaseConfig__ ||
+    {};
+  const supabaseUrl = runtimeConfig.supabaseUrl || window.lmsConfig.supabaseUrl;
+  const supabaseAnonKey =
+    runtimeConfig.supabaseAnonKey || window.lmsConfig.supabaseAnonKey;
   const missingConfig =
     !supabaseUrl ||
     !supabaseAnonKey ||

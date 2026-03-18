@@ -1,6 +1,155 @@
 ﻿-- Supabase setup for payments/registrations
 -- Safe to re-run in Supabase SQL Editor.
 
+-- ============================================================
+-- REQUIRED BASE STRUCTURE (shared with LMS)
+-- ============================================================
+create extension if not exists "uuid-ossp";
+
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  role text not null,
+  full_name text,
+  phone text,
+  created_at timestamptz default now()
+);
+
+alter table public.profiles add column if not exists role text;
+alter table public.profiles add column if not exists full_name text;
+alter table public.profiles add column if not exists phone text;
+alter table public.profiles add column if not exists created_at timestamptz default now();
+
+do $$
+declare
+  v_def text;
+begin
+  select pg_get_constraintdef(oid)
+    into v_def
+  from pg_constraint
+  where conname = 'profiles_role_check'
+    and conrelid = 'public.profiles'::regclass;
+
+  if v_def is null
+     or v_def !~ 'student'
+     or v_def !~ 'trainer'
+     or v_def !~ 'admin'
+     or v_def !~ 'marketer'
+     or v_def !~ 'staff' then
+    alter table public.profiles drop constraint if exists profiles_role_check;
+    alter table public.profiles
+      add constraint profiles_role_check
+      check (role in ('student','trainer','admin','marketer','staff'));
+  end if;
+end
+$$;
+
+create index if not exists idx_profiles_role on public.profiles(role);
+
+create table if not exists public.courses (
+  id uuid primary key default uuid_generate_v4(),
+  title text not null,
+  description text,
+  trainer_id uuid references public.profiles(id),
+  price numeric,
+  status text default 'draft',
+  created_at timestamptz default now()
+);
+
+alter table public.courses add column if not exists title text;
+alter table public.courses add column if not exists description text;
+alter table public.courses add column if not exists trainer_id uuid references public.profiles(id);
+alter table public.courses add column if not exists price numeric;
+alter table public.courses add column if not exists status text default 'draft';
+alter table public.courses add column if not exists created_at timestamptz default now();
+
+create index if not exists idx_courses_trainer on public.courses(trainer_id);
+
+create table if not exists public.lessons (
+  id uuid primary key default uuid_generate_v4(),
+  course_id uuid references public.courses(id) on delete cascade,
+  title text not null,
+  content text,
+  video_url text,
+  lesson_order integer,
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_lessons_course on public.lessons(course_id);
+
+create table if not exists public.enrollments (
+  id uuid primary key default uuid_generate_v4(),
+  student_id uuid references public.profiles(id),
+  course_id uuid references public.courses(id),
+  status text default 'active',
+  enrolled_at timestamptz default now()
+);
+
+create index if not exists idx_enrollments_student on public.enrollments(student_id);
+create index if not exists idx_enrollments_course on public.enrollments(course_id);
+
+create table if not exists public.progress (
+  id uuid primary key default uuid_generate_v4(),
+  student_id uuid references public.profiles(id),
+  lesson_id uuid references public.lessons(id),
+  completed boolean default false,
+  completed_at timestamptz
+);
+
+create index if not exists idx_progress_student on public.progress(student_id);
+
+create table if not exists public.payments (
+  id uuid primary key default uuid_generate_v4(),
+  student_id uuid references public.profiles(id),
+  course_id uuid references public.courses(id),
+  amount numeric,
+  status text,
+  payment_gateway text,
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_payments_student on public.payments(student_id);
+
+create table if not exists public.marketers (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references public.profiles(id),
+  referral_code text unique,
+  commission_rate numeric,
+  created_at timestamptz default now()
+);
+
+create table if not exists public.referrals (
+  id uuid primary key default uuid_generate_v4(),
+  marketer_id uuid references public.marketers(id),
+  student_id uuid references public.profiles(id),
+  course_id uuid references public.courses(id),
+  commission numeric,
+  status text default 'pending',
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_referrals_marketer on public.referrals(marketer_id);
+
+create table if not exists public.audit_logs (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references public.profiles(id),
+  action text,
+  target_table text,
+  target_id uuid,
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_audit_logs_user on public.audit_logs(user_id);
+
+alter table public.profiles enable row level security;
+alter table public.courses enable row level security;
+alter table public.lessons enable row level security;
+alter table public.enrollments enable row level security;
+alter table public.progress enable row level security;
+alter table public.payments enable row level security;
+alter table public.marketers enable row level security;
+alter table public.referrals enable row level security;
+alter table public.audit_logs enable row level security;
+
 create extension if not exists pgcrypto;
 
 create table if not exists public.registrations (

@@ -13,6 +13,37 @@ const translations = {
     blog: "Blog",
     // legal: "Legal",
     assistantCarer: "Asisten Perawat",
+    brandName: "Redline Academy",
+    footerCopyright: "© 2025 Redline Academy.",
+    allRightsReserved: "Semua Hak Dilindungi",
+    legalTitle: "Legal",
+    termsTitle: "Syarat & Ketentuan",
+    privacyTitle: "Kebijakan Privasi",
+    blogPost1Date: "19 Oktober 2024",
+    blogPost1Title: "Tren Industri Perawatan Kesehatan 2024",
+    blogPost1Excerpt:
+      "Pelajari tentang tren terbaru dalam industri perawatan kesehatan dan bagaimana program Asisten Perawat kami mempersiapkan Anda untuk sukses.",
+    blogPost2Date: "15 Oktober 2024",
+    blogPost2Title: "Seni Kuliner Modern: Dari Dapur ke Meja",
+    blogPost2Excerpt:
+      "Temukan bagaimana teknik memasak modern mengubah industri kuliner dan peluang karier yang menanti lulusan program Chef.",
+    blogPost3Date: "10 Oktober 2024",
+    blogPost3Title: "Budaya Kopi Spesialti: Peluang Bisnis yang Berkembang",
+    blogPost3Excerpt:
+      "Jelajahi pertumbuhan pasar kopi spesialti dan bagaimana keterampilan barista profesional membuka pintu kesuksesan.",
+    blogPost4Date: "5 Oktober 2024",
+    blogPost4Title: "Masa Depan Pemrograman: Skill yang Paling Dicari",
+    blogPost4Excerpt:
+      "Pelajari bahasa pemrograman dan skill yang paling dicari oleh perusahaan teknologi terkemuka di tahun 2024.",
+    blogPost5Date: "1 Oktober 2024",
+    blogPost5Title: "Industri Perhotelan: Peluang Karier Global",
+    blogPost5Excerpt:
+      "Temukan bagaimana program Bartender kami membuka peluang karier internasional di industri perhotelan yang dinamis.",
+    blogPost6Date: "25 September 2024",
+    blogPost6Title: "Teknisi Listrik: Profesi Esensial untuk Masa Depan",
+    blogPost6Excerpt:
+      "Pelajari mengapa teknisi listrik adalah profesi yang sangat dibutuhkan dan bagaimana program kami mempersiapkan Anda untuk berhasil di bidang ini.",
+    blogReadMore: "Baca Selengkapnya",
 
     // LMS common
     lmsNewMessage: "Pesan Baru",
@@ -432,6 +463,37 @@ const translations = {
     blog: "Blog",
     // legal: "Legal",
     assistantCarer: "Assistant Carer",
+    brandName: "Redline Academy",
+    footerCopyright: "© 2025 Redline Academy.",
+    allRightsReserved: "All Rights Reserved",
+    legalTitle: "Legal",
+    termsTitle: "Terms & Conditions",
+    privacyTitle: "Privacy Policy",
+    blogPost1Date: "October 19, 2024",
+    blogPost1Title: "2024 Healthcare Industry Trends",
+    blogPost1Excerpt:
+      "Learn about the latest trends in healthcare and how our Care Assistant program prepares you for success.",
+    blogPost2Date: "October 15, 2024",
+    blogPost2Title: "Modern Culinary Arts: From Kitchen to Table",
+    blogPost2Excerpt:
+      "Discover how modern cooking techniques are reshaping the culinary industry and the career paths awaiting Chef graduates.",
+    blogPost3Date: "October 10, 2024",
+    blogPost3Title: "Specialty Coffee Culture: A Growing Business Opportunity",
+    blogPost3Excerpt:
+      "Explore the rise of the specialty coffee market and how professional barista skills open the door to success.",
+    blogPost4Date: "October 5, 2024",
+    blogPost4Title: "The Future of Programming: Most In-Demand Skills",
+    blogPost4Excerpt:
+      "Learn which programming languages and skills are most sought after by leading technology companies in 2024.",
+    blogPost5Date: "October 1, 2024",
+    blogPost5Title: "The Hospitality Industry: Global Career Opportunities",
+    blogPost5Excerpt:
+      "See how our Bartender program opens up international career opportunities in a dynamic hospitality industry.",
+    blogPost6Date: "September 25, 2024",
+    blogPost6Title: "Electricians: An Essential Profession for the Future",
+    blogPost6Excerpt:
+      "Learn why electricians are in high demand and how our program prepares you to thrive in the field.",
+    blogReadMore: "Read More",
 
     // LMS common
     lmsNewMessage: "New Message",

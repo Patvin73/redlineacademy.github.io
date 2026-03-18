@@ -2,6 +2,7 @@
 -- Safe to re-run in Supabase SQL Editor.
 
 create extension if not exists pgcrypto;
+create extension if not exists "uuid-ossp";
 
 -- ==========================================================
 -- PROFILES (core auth-linked table)
@@ -60,6 +61,31 @@ $$;
 
 create unique index if not exists profiles_student_id_unique on public.profiles(student_id) where student_id is not null;
 create unique index if not exists profiles_admin_id_unique on public.profiles(admin_id) where admin_id is not null;
+create index if not exists idx_profiles_role on public.profiles(role);
+
+do $$
+declare
+  v_def text;
+begin
+  select pg_get_constraintdef(oid)
+    into v_def
+  from pg_constraint
+  where conname = 'profiles_role_check'
+    and conrelid = 'public.profiles'::regclass;
+
+  if v_def is null
+     or v_def !~ 'student'
+     or v_def !~ 'trainer'
+     or v_def !~ 'admin'
+     or v_def !~ 'marketer'
+     or v_def !~ 'staff' then
+    alter table public.profiles drop constraint if exists profiles_role_check;
+    alter table public.profiles
+      add constraint profiles_role_check
+      check (role in ('student','trainer','admin','marketer','staff'));
+  end if;
+end
+$$;
 
 -- ==========================================================
 -- LOOKUP + LMS TABLES REFERENCED BY JS
@@ -99,6 +125,23 @@ create table if not exists public.courses (
   updated_at timestamptz not null default now()
 );
 
+create index if not exists idx_courses_trainer on public.courses(trainer_id);
+
+-- ==========================================================
+-- LESSONS (core table required by base schema)
+-- ==========================================================
+create table if not exists public.lessons (
+  id uuid primary key default uuid_generate_v4(),
+  course_id uuid references public.courses(id) on delete cascade,
+  title text not null,
+  content text,
+  video_url text,
+  lesson_order integer,
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_lessons_course on public.lessons(course_id);
+
 create table if not exists public.enrollments (
   id uuid primary key default gen_random_uuid(),
   student_id uuid not null references public.profiles(id) on delete cascade,
@@ -110,6 +153,22 @@ create table if not exists public.enrollments (
   updated_at timestamptz not null default now(),
   unique(student_id, course_id)
 );
+
+create index if not exists idx_enrollments_student on public.enrollments(student_id);
+create index if not exists idx_enrollments_course on public.enrollments(course_id);
+
+-- ==========================================================
+-- PROGRESS (lesson-level)
+-- ==========================================================
+create table if not exists public.progress (
+  id uuid primary key default uuid_generate_v4(),
+  student_id uuid references public.profiles(id),
+  lesson_id uuid references public.lessons(id),
+  completed boolean default false,
+  completed_at timestamptz
+);
+
+create index if not exists idx_progress_student on public.progress(student_id);
 
 create table if not exists public.course_progress (
   id uuid primary key default gen_random_uuid(),
@@ -218,6 +277,7 @@ create table if not exists public.payments (
   course_id uuid not null references public.courses(id) on delete cascade,
   amount numeric(12,2) not null default 0,
   currency text not null default 'IDR',
+  payment_gateway text,
   payment_method text,
   status text not null default 'pending' check (status in ('pending','completed','failed','refunded')),
   payment_plan text not null default 'full' check (payment_plan in ('full','installment')),
@@ -229,9 +289,11 @@ create table if not exists public.payments (
   updated_at timestamptz not null default now()
 );
 
+alter table public.payments add column if not exists payment_gateway text;
 alter table public.payments alter column currency set default 'IDR';
 
 create unique index if not exists payments_student_course_unique on public.payments(student_id, course_id);
+create index if not exists idx_payments_student on public.payments(student_id);
 
 do $$
 begin
@@ -247,6 +309,43 @@ begin
   end if;
 end
 $$;
+
+-- ==========================================================
+-- MARKETERS + REFERRALS (base schema)
+-- ==========================================================
+create table if not exists public.marketers (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references public.profiles(id),
+  referral_code text unique,
+  commission_rate numeric,
+  created_at timestamptz default now()
+);
+
+create table if not exists public.referrals (
+  id uuid primary key default uuid_generate_v4(),
+  marketer_id uuid references public.marketers(id),
+  student_id uuid references public.profiles(id),
+  course_id uuid references public.courses(id),
+  commission numeric,
+  status text default 'pending',
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_referrals_marketer on public.referrals(marketer_id);
+
+-- ==========================================================
+-- AUDIT LOG (base schema)
+-- ==========================================================
+create table if not exists public.audit_logs (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references public.profiles(id),
+  action text,
+  target_table text,
+  target_id uuid,
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_audit_logs_user on public.audit_logs(user_id);
 
 create table if not exists public.certificates (
   id uuid primary key default gen_random_uuid(),
@@ -558,7 +657,9 @@ group by c.id, c.title, t.full_name;
 alter table public.profiles enable row level security;
 alter table public.categories enable row level security;
 alter table public.courses enable row level security;
+alter table public.lessons enable row level security;
 alter table public.enrollments enable row level security;
+alter table public.progress enable row level security;
 alter table public.course_progress enable row level security;
 alter table public.assignments enable row level security;
 alter table public.assignment_submissions enable row level security;
@@ -568,7 +669,10 @@ alter table public.messages enable row level security;
 alter table public.notifications enable row level security;
 alter table public.announcements enable row level security;
 alter table public.payments enable row level security;
+alter table public.marketers enable row level security;
+alter table public.referrals enable row level security;
 alter table public.certificates enable row level security;
+alter table public.audit_logs enable row level security;
 alter table public.activity_logs enable row level security;
 
 drop policy if exists "profiles_select_self_or_staff" on public.profiles;
@@ -659,7 +763,9 @@ grant usage on schema public to authenticated;
 grant select, insert, update, delete on public.profiles to authenticated;
 grant select on public.categories to authenticated;
 grant select, insert, update, delete on public.courses to authenticated;
+grant select, insert, update, delete on public.lessons to authenticated;
 grant select, insert, update, delete on public.enrollments to authenticated;
+grant select, insert, update, delete on public.progress to authenticated;
 grant select, insert, update, delete on public.course_progress to authenticated;
 grant select, insert, update, delete on public.assignments to authenticated;
 grant select, insert, update, delete on public.assignment_submissions to authenticated;
@@ -669,7 +775,10 @@ grant select, insert, update, delete on public.messages to authenticated;
 grant select, insert, update, delete on public.notifications to authenticated;
 grant select, insert, update, delete on public.announcements to authenticated;
 grant select, insert, update, delete on public.payments to authenticated;
+grant select, insert, update, delete on public.marketers to authenticated;
+grant select, insert, update, delete on public.referrals to authenticated;
 grant select, insert, update, delete on public.certificates to authenticated;
+grant select, insert, update, delete on public.audit_logs to authenticated;
 grant select, insert, update, delete on public.activity_logs to authenticated;
 
 grant select on public.v_student_dashboard to authenticated;
