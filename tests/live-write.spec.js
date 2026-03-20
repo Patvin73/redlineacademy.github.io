@@ -55,6 +55,12 @@ function runKey(label) {
   return `${label}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+const cleanupQueue = [];
+
+function trackCleanup(tableName, filters) {
+  cleanupQueue.push({ tableName, filters });
+}
+
 async function installLiveSupabaseConfig(page) {
   await page.addInitScript((config) => {
     window.__LMS_SUPABASE_CONFIG__ = config;
@@ -126,7 +132,7 @@ async function getProfileByEmail(page, email) {
 }
 
 async function insertRow(page, table, payload, select = "id") {
-  return page.evaluate(
+  const result = await page.evaluate(
     async ({ tableName, row, selectClause }) => {
       const query = window.lmsSupabase.from(tableName).insert(row);
       const { data, error } = await query.select(selectClause).single();
@@ -138,6 +144,12 @@ async function insertRow(page, table, payload, select = "id") {
     },
     { tableName: table, row: payload, selectClause: select }
   );
+
+  if (result.data?.id) {
+    trackCleanup(table, { id: result.data.id });
+  }
+
+  return result;
 }
 
 async function updateRow(page, table, updates, filters, select = "id") {
@@ -176,6 +188,22 @@ async function deleteRow(page, table, filters, select = "id") {
   );
 }
 
+async function cleanupLiveData(page) {
+  while (cleanupQueue.length > 0) {
+    const { tableName, filters } = cleanupQueue.pop();
+    await page.evaluate(
+      async ({ table, where }) => {
+        let query = window.lmsSupabase.from(table).delete();
+        for (const [column, value] of Object.entries(where)) {
+          query = query.eq(column, value);
+        }
+        await query;
+      },
+      { table: tableName, where: filters }
+    );
+  }
+}
+
 function expectRlsDenied(result, context) {
   expect(result.error, `${context}: expected an RLS error`).toBeTruthy();
   expect(result.error, `${context}: expected an RLS-style error message`).toMatch(
@@ -188,8 +216,16 @@ test.describe.serial("Live Supabase write workflows", {
 }, () => {
   test.setTimeout(120000);
 
-  test("admin payment workflow persists enrollment and course progress", async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
+    cleanupQueue.length = 0;
     await installLiveSupabaseConfig(page);
+  });
+
+  test.afterEach(async ({ page }) => {
+    await cleanupLiveData(page);
+  });
+
+  test("admin payment workflow persists enrollment and course progress", async ({ page }) => {
     await signIn(page, "admin");
 
     const admin = await getCurrentUser(page);
@@ -286,6 +322,10 @@ test.describe.serial("Live Supabase write workflows", {
     expect(persistence.progress.data).toBeTruthy();
     expect(persistence.progress.data.completion_percent).toBe(0);
 
+    trackCleanup("payments", { id: persistence.payment.data.id });
+    trackCleanup("enrollments", { id: persistence.enrollment.data.id });
+    trackCleanup("course_progress", { id: persistence.progress.data.id });
+
     const staffProgress = await updateRow(
       page,
       "course_progress",
@@ -304,7 +344,6 @@ test.describe.serial("Live Supabase write workflows", {
   });
 
   test("student submission writes succeed and unauthorized write/delete attempts fail", async ({ page }) => {
-    await installLiveSupabaseConfig(page);
     await signIn(page, "trainer");
 
     const trainer = await getCurrentUser(page);
@@ -401,7 +440,6 @@ test.describe.serial("Live Supabase write workflows", {
   });
 
   test("trainer course writes persist with trainer ownership", async ({ page }) => {
-    await installLiveSupabaseConfig(page);
     await signIn(page, "trainer");
 
     const trainer = await getCurrentUser(page);
@@ -451,7 +489,6 @@ test.describe.serial("Live Supabase write workflows", {
   });
 
   test("marketer claim writes persist and approval writes stay admin-only", async ({ page }) => {
-    await installLiveSupabaseConfig(page);
     await signIn(page, "marketer", "#tab-staff");
 
     const marketer = await getCurrentUser(page);

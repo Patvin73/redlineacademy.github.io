@@ -139,6 +139,21 @@
             "@supabase"
           ],
           "gap": "Validates live course CRUD for trainer-owned records with isolated slugs and delete cleanup."
+        },
+        {
+          "name": "Live test-data isolation and cleanup",
+          "risk": "high",
+          "coverage": "covered",
+          "tier": "live",
+          "tests": [
+            "tests/live-write.spec.js"
+          ],
+          "tags": [
+            "@supabase",
+            "@lms",
+            "@marketer"
+          ],
+          "gap": "Live write tests now register created rows for cleanup so repeat runs do not collide in Supabase."
         }
       ]
     },
@@ -210,6 +225,21 @@
             "@supabase"
           ],
           "gap": "Routes are covered, but the full matrix of direct URL access and stale-session behavior is still limited."
+        },
+        {
+          "name": "Expired, forged, and forced logout session handling",
+          "risk": "critical",
+          "coverage": "covered",
+          "tier": "regression",
+          "tests": [
+            "tests/session-edge-cases.spec.js"
+          ],
+          "tags": [
+            "@auth",
+            "@critical",
+            "@rbac"
+          ],
+          "gap": "Local guard coverage now verifies expired sessions, forged tokens, and forced logout recovery against the real route logic."
         },
         {
           "name": "RLS enforcement and role escalation prevention",

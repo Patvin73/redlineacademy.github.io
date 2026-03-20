@@ -29,8 +29,28 @@
   async function getSessionUser() {
     const supabase = getClient();
     const { data, error } = await supabase.auth.getSession();
-    if (error) return null;
-    return data.session ? data.session.user : null;
+    if (error || !data?.session) return null;
+
+    const session = data.session;
+    if (isSessionExpired(session)) {
+      await invalidateSession(supabase);
+      return null;
+    }
+
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData?.user) {
+      if (shouldInvalidateSession(userError?.message)) {
+        await invalidateSession(supabase);
+      }
+      return null;
+    }
+
+    if (session.user?.id && userData.user.id !== session.user.id) {
+      await invalidateSession(supabase);
+      return null;
+    }
+
+    return userData.user;
   }
 
   /**
@@ -51,6 +71,29 @@
 
   function getDashboardRouteByRole(role) {
     return roleRoutes[role] || "./login.html";
+  }
+
+  function isSessionExpired(session) {
+    if (!session) return false;
+    const expiresAt = Number(session.expires_at);
+    if (!Number.isFinite(expiresAt) || expiresAt <= 0) return false;
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    return expiresAt <= nowSeconds;
+  }
+
+  function shouldInvalidateSession(errorMessage) {
+    const message = String(errorMessage || "");
+    return /invalid|expired|jwt|session missing|refresh token|unauthorized|not authenticated/i.test(
+      message
+    );
+  }
+
+  async function invalidateSession(supabase) {
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      // Best-effort cleanup. Route guards will still redirect on null session.
+    }
   }
 
   /**
