@@ -181,6 +181,192 @@ async function cleanupLiveData(page) {
   }
 }
 
+async function findLiveQaLeftovers(page, { sinceIso, referenceIds = {} }) {
+  return page.evaluate(
+    async ({ sinceIso: since, referenceIds: refs }) => {
+      const queryRows = async (table, columns) => {
+        const { data, error } = await window.lmsSupabase
+          .from(table)
+          .select(columns)
+          .gte("created_at", since)
+          .order("created_at", { ascending: true });
+
+        if (error) {
+          throw new Error(`${table}: ${error.message}`);
+        }
+
+        return Array.isArray(data) ? data : [];
+      };
+
+      const qaText = (value) =>
+        typeof value === "string" &&
+        /^(qa[\s._-]|live submission from qa|live qa)/i.test(value.trim());
+
+      const qaRow = (...fields) => fields.some(qaText);
+      const leftovers = [];
+      const add = (table, row, reason) => {
+        leftovers.push({
+          table,
+          id: row.id ?? null,
+          reason,
+        });
+      };
+
+      const tables = {
+        profiles: await queryRows(
+          "profiles",
+          "id, created_at, full_name, role, student_id, admin_id, email"
+        ),
+        courses: await queryRows(
+          "courses",
+          "id, created_at, title, slug, trainer_id"
+        ),
+        enrollments: await queryRows(
+          "enrollments",
+          "id, created_at, student_id, course_id, status"
+        ),
+        payments: await queryRows(
+          "payments",
+          "id, created_at, student_id, course_id, status, amount, currency"
+        ),
+        course_progress: await queryRows(
+          "course_progress",
+          "id, created_at, student_id, course_id, completion_percent"
+        ),
+        assignments: await queryRows(
+          "assignments",
+          "id, created_at, title, course_id, trainer_id"
+        ),
+        assignment_submissions: await queryRows(
+          "assignment_submissions",
+          "id, created_at, assignment_id, student_id, status, notes, file_urls"
+        ),
+        marketer_schools: await queryRows(
+          "marketer_schools",
+          "id, created_at, marketer_id, name, city"
+        ),
+        marketer_claims: await queryRows(
+          "marketer_claims",
+          "id, created_at, marketer_id, school_id, ref_id, status, notes"
+        ),
+      };
+
+      const qaProfiles = tables.profiles.filter((row) =>
+        qaRow(row.full_name, row.email, row.student_id, row.admin_id)
+      );
+      const qaCourses = tables.courses.filter((row) => qaRow(row.title, row.slug));
+      const qaAssignments = tables.assignments.filter((row) =>
+        qaRow(row.title)
+      );
+      const qaSchools = tables.marketer_schools.filter((row) =>
+        qaRow(row.name)
+      );
+      const qaClaims = tables.marketer_claims.filter((row) =>
+        qaRow(row.ref_id, row.notes)
+      );
+      const qaSubmissions = tables.assignment_submissions.filter((row) =>
+        qaRow(
+          row.notes,
+          ...(Array.isArray(row.file_urls) ? row.file_urls : [])
+        )
+      );
+
+      qaProfiles.forEach((row) => add("profiles", row, "QA-tagged profile data"));
+      qaCourses.forEach((row) => add("courses", row, "QA-tagged course data"));
+      qaAssignments.forEach((row) =>
+        add("assignments", row, "QA-tagged assignment data")
+      );
+      qaSchools.forEach((row) =>
+        add("marketer_schools", row, "QA-tagged marketer school data")
+      );
+      qaClaims.forEach((row) =>
+        add("marketer_claims", row, "QA-tagged marketer claim data")
+      );
+      qaSubmissions.forEach((row) =>
+        add("assignment_submissions", row, "QA-tagged submission data")
+      );
+
+      const profileIds = new Set(
+        [
+          refs.studentId,
+          refs.adminId,
+          refs.trainerId,
+          refs.marketerId,
+          refs.staffId,
+          ...qaProfiles.map((row) => row.id),
+        ].filter(Boolean)
+      );
+      const courseIds = new Set(qaCourses.map((row) => row.id));
+      const assignmentIds = new Set(qaAssignments.map((row) => row.id));
+      const schoolIds = new Set(qaSchools.map((row) => row.id));
+
+      tables.enrollments
+        .filter(
+          (row) => profileIds.has(row.student_id) || courseIds.has(row.course_id)
+        )
+        .forEach((row) =>
+          add(
+            "enrollments",
+            row,
+            "Enrollment tied to a QA live user or QA course"
+          )
+        );
+
+      tables.payments
+        .filter(
+          (row) => profileIds.has(row.student_id) || courseIds.has(row.course_id)
+        )
+        .forEach((row) =>
+          add(
+            "payments",
+            row,
+            "Payment tied to a QA live user or QA course"
+          )
+        );
+
+      tables.course_progress
+        .filter(
+          (row) => profileIds.has(row.student_id) || courseIds.has(row.course_id)
+        )
+        .forEach((row) =>
+          add(
+            "course_progress",
+            row,
+            "Course progress tied to a QA live user or QA course"
+          )
+        );
+
+      tables.assignment_submissions
+        .filter(
+          (row) =>
+            profileIds.has(row.student_id) || assignmentIds.has(row.assignment_id)
+        )
+        .forEach((row) =>
+          add(
+            "assignment_submissions",
+            row,
+            "Submission tied to a QA live user or QA assignment"
+          )
+        );
+
+      if (schoolIds.size > 0) {
+        tables.marketer_claims
+          .filter((row) => schoolIds.has(row.school_id))
+          .forEach((row) =>
+            add(
+              "marketer_claims",
+              row,
+              "Claim tied to a QA live school"
+            )
+          );
+      }
+
+      return leftovers;
+    },
+    { sinceIso, referenceIds }
+  );
+}
+
 async function insertRow(page, table, payload, select = "id") {
   return page.evaluate(
     async ({ tableName, row, selectClause }) => {
@@ -253,6 +439,7 @@ function expectRlsDenied(result, context) {
 module.exports = {
   assertLiveEnv,
   cleanupLiveData,
+  findLiveQaLeftovers,
   dashboardRoutes,
   deleteRow,
   ensureCleanupQueue,

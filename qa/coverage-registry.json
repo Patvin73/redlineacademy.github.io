@@ -242,6 +242,20 @@
           "gap": "Local guard coverage now verifies expired sessions, forged tokens, and forced logout recovery against the real route logic."
         },
         {
+          "name": "Post-suite live cleanup audit",
+          "risk": "high",
+          "coverage": "covered",
+          "tier": "live",
+          "tests": [
+            "tests/zz-live-cleanup-audit.spec.js"
+          ],
+          "tags": [
+            "@cleanup-audit",
+            "@supabase"
+          ],
+          "gap": "Confirms the live QA run leaves no orphan QA-tagged rows behind in Supabase."
+        },
+        {
           "name": "RLS enforcement and role escalation prevention",
           "risk": "critical",
           "coverage": "covered",
