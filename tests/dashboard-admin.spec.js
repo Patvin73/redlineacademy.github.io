@@ -331,7 +331,10 @@ async function installSupabaseStub(page, role) {
   });
 }
 
-test("dashboard admin renders core sections", async ({ page }) => {
+test.describe("Admin and trainer dashboard", {
+  tag: ["@lms", "@rbac"]
+}, () => {
+test("dashboard admin renders core sections", { tag: "@critical" }, async ({ page }) => {
   await installSupabaseStub(page, "admin");
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
 
@@ -345,7 +348,7 @@ test("dashboard admin renders core sections", async ({ page }) => {
   await expect(page.locator("#kpiCompletionRate")).toBeVisible();
 });
 
-test("admin can open Users section and toggle active", async ({ page }) => {
+test("admin can open Users section and toggle active", { tag: "@critical" }, async ({ page }) => {
   await installSupabaseStub(page, "admin");
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
 
@@ -374,7 +377,7 @@ test("admin sees enrollments totals", async ({ page }) => {
   await expect(page.locator("#payRevenue")).toHaveText("$120.00");
 });
 
-test("trainer hides admin-only sections", async ({ page }) => {
+test("trainer hides admin-only sections", { tag: "@critical" }, async ({ page }) => {
   await installSupabaseStub(page, "trainer");
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
 
@@ -736,5 +739,7 @@ test("admin enrollments table renders status tags", async ({ page }) => {
   await expect(page.locator("#enrollmentTableBody")).toContainText("$120.00");
   await expect(page.locator("#enrollmentTableBody")).toContainText("$50.00");
   await expect(page.locator("#enrollmentTableBody")).toContainText("$75.00");
+});
+
 });
 

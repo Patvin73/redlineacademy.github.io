@@ -155,27 +155,29 @@ async function installSupabaseStub(page, role = "admin") {
   });
 }
 
-test("blog and legal pages have no missing i18n keys", async ({ page }) => {
-  const warnings = collectTranslationWarnings(page);
+test.describe("Public content i18n", { tag: "@public" }, () => {
+  test("blog and legal pages have no missing i18n keys", async ({ page }) => {
+    const warnings = collectTranslationWarnings(page);
 
-  await page.goto("/pages/blog.html");
-  await page.waitForLoadState("domcontentloaded");
-  await page.waitForTimeout(200);
-  await expect(warnings, "No translation warnings on blog page").toHaveLength(0);
+    await page.goto("/pages/blog.html");
+    await page.waitForLoadState("domcontentloaded");
+    await page.waitForTimeout(200);
+    await expect(warnings, "No translation warnings on blog page").toHaveLength(0);
 
-  await page.goto("/pages/legal.html");
-  await page.waitForLoadState("domcontentloaded");
-  await page.waitForTimeout(200);
-  await expect(warnings, "No translation warnings on legal page").toHaveLength(0);
-});
+    await page.goto("/pages/legal.html");
+    await page.waitForLoadState("domcontentloaded");
+    await page.waitForTimeout(200);
+    await expect(warnings, "No translation warnings on legal page").toHaveLength(0);
+  });
 
-test("dashboard admin has no missing i18n keys", async ({ page }) => {
-  await installSupabaseStub(page, "admin");
-  const warnings = collectTranslationWarnings(page);
+  test("dashboard admin has no missing i18n keys", async ({ page }) => {
+    await installSupabaseStub(page, "admin");
+    const warnings = collectTranslationWarnings(page);
 
-  await page.goto("/pages/dashboard-admin.html");
-  await page.waitForLoadState("domcontentloaded");
-  await page.waitForTimeout(400);
+    await page.goto("/pages/dashboard-admin.html");
+    await page.waitForLoadState("domcontentloaded");
+    await page.waitForTimeout(400);
 
-  await expect(warnings, "No translation warnings on dashboard admin").toHaveLength(0);
+    await expect(warnings, "No translation warnings on dashboard admin").toHaveLength(0);
+  });
 });

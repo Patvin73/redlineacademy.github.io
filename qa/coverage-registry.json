@@ -1,0 +1,234 @@
+{
+  "generatedOn": "2026-03-20",
+  "groups": [
+    {
+      "name": "Public site",
+      "features": [
+        {
+          "name": "Blog/legal translation integrity",
+          "risk": "medium",
+          "coverage": "covered",
+          "tier": "smoke",
+          "tests": [
+            "tests/public-i18n.spec.js"
+          ],
+          "tags": [
+            "@public"
+          ],
+          "gap": "No visual/layout assertions for every public page; this only checks translation warnings."
+        },
+        {
+          "name": "Homepage, programs, contact, and blog form flows",
+          "risk": "medium",
+          "coverage": "partial",
+          "tier": "manual",
+          "tests": [
+            "Manual QA notes",
+            "tools/static-server.js for browser-driven checks"
+          ],
+          "tags": [
+            "@public"
+          ],
+          "gap": "No dedicated automated submission, validation, or responsive-layout suite exists yet."
+        }
+      ]
+    },
+    {
+      "name": "LMS dashboard",
+      "features": [
+        {
+          "name": "Admin dashboard shell and KPI rails",
+          "risk": "high",
+          "coverage": "covered",
+          "tier": "smoke",
+          "tests": [
+            "tests/dashboard-admin.spec.js"
+          ],
+          "tags": [
+            "@lms",
+            "@rbac",
+            "@critical"
+          ],
+          "gap": "Local stub coverage is strong, but this still does not exercise the live Supabase backend."
+        },
+        {
+          "name": "Admin management workflows (users, enrollments, announcements, reports, settings, courses)",
+          "risk": "high",
+          "coverage": "covered",
+          "tier": "regression",
+          "tests": [
+            "tests/dashboard-admin.spec.js"
+          ],
+          "tags": [
+            "@lms",
+            "@rbac"
+          ],
+          "gap": "No live-backend assertions for these admin mutations yet."
+        },
+        {
+          "name": "Trainer workflows (grading, schedules, messages, course builder)",
+          "risk": "high",
+          "coverage": "covered",
+          "tier": "regression",
+          "tests": [
+            "tests/dashboard-admin.spec.js"
+          ],
+          "tags": [
+            "@lms",
+            "@rbac"
+          ],
+          "gap": "Coverage is stub-based; it does not prove live RLS behavior or persisted writes."
+        },
+        {
+          "name": "Student dashboard access and learning flows",
+          "risk": "high",
+          "coverage": "partial",
+          "tier": "regression",
+          "tests": [
+            "tests/recommended-e2e.spec.js",
+            "tests/live-auth.spec.js"
+          ],
+          "tags": [
+            "@auth",
+            "@lms",
+            "@critical"
+          ],
+          "gap": "Student flow is represented, but real end-to-end state transitions against production-like data are still limited."
+        }
+      ]
+    },
+    {
+      "name": "Marketer portal",
+      "features": [
+        {
+          "name": "Marketer/staff portal access control",
+          "risk": "high",
+          "coverage": "covered",
+          "tier": "smoke",
+          "tests": [
+            "tests/recommended-e2e.spec.js",
+            "tests/live-auth.spec.js"
+          ],
+          "tags": [
+            "@auth",
+            "@marketer",
+            "@critical"
+          ],
+          "gap": "Portal access is covered, but live claim creation is not yet validated end to end."
+        },
+        {
+          "name": "Claim submission and review flows",
+          "risk": "high",
+          "coverage": "partial",
+          "tier": "regression",
+          "tests": [
+            "tests/recommended-e2e.spec.js"
+          ],
+          "tags": [
+            "@marketer"
+          ],
+          "gap": "Current coverage is stubbed; it does not prove live duplicate detection, rejection handling, or persistence."
+        }
+      ]
+    },
+    {
+      "name": "Backend (Supabase)",
+      "features": [
+        {
+          "name": "Live auth/session bootstrap and role routing",
+          "risk": "critical",
+          "coverage": "covered",
+          "tier": "live",
+          "tests": [
+            "tests/live-auth.spec.js"
+          ],
+          "tags": [
+            "@auth",
+            "@critical",
+            "@supabase"
+          ],
+          "gap": "Live login is covered, but password-reset, session expiry, and MFA-style edge cases are not covered."
+        },
+        {
+          "name": "Protected routes and unauthorized redirects",
+          "risk": "critical",
+          "coverage": "covered",
+          "tier": "live",
+          "tests": [
+            "tests/live-auth.spec.js"
+          ],
+          "tags": [
+            "@auth",
+            "@rbac",
+            "@supabase"
+          ],
+          "gap": "Routes are covered, but the full matrix of direct URL access and stale-session behavior is still limited."
+        },
+        {
+          "name": "RLS enforcement and role escalation prevention",
+          "risk": "critical",
+          "coverage": "partial",
+          "tier": "live",
+          "tests": [
+            "tests/live-auth.spec.js"
+          ],
+          "tags": [
+            "@rbac",
+            "@supabase"
+          ],
+          "gap": "Current live coverage exercises profiles only; it does not yet prove write-policy coverage across all protected tables."
+        }
+      ]
+    }
+  ],
+  "recommendedTags": [
+    {
+      "tag": "@critical",
+      "meaning": "Release-blocking flows that must pass in smoke and live security checks."
+    },
+    {
+      "tag": "@auth",
+      "meaning": "Sign-in, sign-out, session bootstrap, and route-guard behavior."
+    },
+    {
+      "tag": "@rbac",
+      "meaning": "Role routing, access control, and role-escalation resistance."
+    },
+    {
+      "tag": "@lms",
+      "meaning": "Student, trainer, and admin dashboard flows for the LMS."
+    },
+    {
+      "tag": "@marketer",
+      "meaning": "Marketer and staff portal flows, including claims and portal access."
+    },
+    {
+      "tag": "@supabase",
+      "meaning": "Tests that exercise the live Supabase backend, RLS, and auth state."
+    },
+    {
+      "tag": "@public",
+      "meaning": "Public marketing, blog, legal, and brochure-style pages."
+    }
+  ],
+  "tiers": [
+    {
+      "name": "Smoke",
+      "command": "npm run test:smoke",
+      "scope": "Playwright local suite filtered to @critical",
+      "config": "playwright.config.js"
+    },
+    {
+      "name": "Full regression",
+      "command": "npm test",
+      "scope": "All local Playwright tests except live Supabase specs",
+      "config": "playwright.config.js"
+    },
+    {
+      "name": "Live staging",
+      "command": "npm run test:live",
+      "scope": "Live Supabase auth and RBAC suite only",
+      "config": "playwright.live.config.js"
+    }
+  ]
+}

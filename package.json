@@ -5,10 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
+    "test:smoke": "playwright test --config=playwright.config.js --grep \"@critical\"",
+    "test:regression": "playwright test --config=playwright.config.js",
     "lint": "eslint .",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --config=playwright.config.js",
     "test:live": "playwright test --config=playwright.live.config.js",
     "test:unit": "jest --passWithNoTests",
+    "qa:report": "node tools/qa-observability.js report",
     "format": "prettier --write ."
   },
   "keywords": [],

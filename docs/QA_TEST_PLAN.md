@@ -1,14 +1,16 @@
 # QA Test Plan - Redline Academy Website
 
-Last updated: 2026-03-15 (Asia/Jakarta)
+Last updated: 2026-03-20 (Asia/Jakarta)
 
 Payment testing is intentionally excluded and will be handled separately.
 
 ## How To Run
-- Primary QA gate: `npm run lint && npm test`
-- Browser QA (Playwright): `npm test`
+- Smoke gate: `npm run test:smoke`
+- Full local regression: `npm test`
 - Live Supabase QA: `npm run test:live`
 - Optional unit tests (Jest): `npm run test:unit`
+- QA observability report: `npm run qa:report`
+- Tag filters: `npm test -- --grep "@auth"` or `npm test -- --grep "@rbac"`
 - Live Supabase auth QA: set `PLAYWRIGHT_LIVE_SUPABASE_URL`, `PLAYWRIGHT_LIVE_SUPABASE_ANON_KEY`, and seeded user credentials, then run `npm run test:live`
 
 ## Automated E2E (Implemented)

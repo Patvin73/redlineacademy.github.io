@@ -382,150 +382,158 @@ function makeMarketerStub(role = "marketer") {
   };
 }
 
-test("student auth/guard allows student and blocks admin", async ({ page }) => {
-  const studentStub = makeStudentStub("student");
-  await installSupabaseStub(page, studentStub);
+test.describe("Student and marketer flows", {
+  tag: ["@auth", "@lms", "@marketer"]
+}, () => {
+  test("student auth/guard allows student and blocks admin", {
+    tag: "@critical"
+  }, async ({ page }) => {
+    const studentStub = makeStudentStub("student");
+    await installSupabaseStub(page, studentStub);
 
-  await page.goto("/pages/dashboard-student.html");
-  await expect(page).toHaveURL(/dashboard-student\.html/);
-  await expect(page.locator("#section-home")).toBeVisible();
+    await page.goto("/pages/dashboard-student.html");
+    await expect(page).toHaveURL(/dashboard-student\.html/);
+    await expect(page.locator("#section-home")).toBeVisible();
 
-  const adminStub = makeStudentStub("admin");
-  await installSupabaseStub(page, adminStub);
-  await page.goto("/pages/dashboard-student.html");
-  await page.waitForURL("**/pages/dashboard-admin.html");
-});
-
-test("student profile renders and logout works", async ({ page }) => {
-  const stub = makeStudentStub("student");
-  await installSupabaseStub(page, stub);
-
-  await page.goto("/pages/dashboard-student.html");
-  await expect(page.locator("#profileCardName")).toHaveText("Alpha Student");
-  await expect(page.locator("#profileCardId")).toContainText("STUDENT");
-  await expect(page.locator("#profileCardEmail")).toHaveText("alpha@example.com");
-
-  await page.locator("#logoutBtn").click();
-  await page.waitForURL("**/pages/login.html");
-});
-
-test("student data renders with progress and courses", async ({ page }) => {
-  const stub = makeStudentStub("student");
-  await installSupabaseStub(page, stub);
-
-  await page.goto("/pages/dashboard-student.html");
-  await expect(page.locator("#statCoursesEnrolled")).toHaveText("2");
-  await expect(page.locator(".sd-progress__pct")).toContainText("65%");
-  await expect(page.locator("#courseGrid .sd-course-card")).toHaveCount(2);
-  await expect(page.locator("#courseGrid .sd-course-card[data-status='completed']")).toHaveCount(1);
-});
-
-test("student navigation opens sections without console errors", async ({ page }) => {
-  const stub = makeStudentStub("student");
-  await installSupabaseStub(page, stub);
-  const consoleErrors = collectConsoleErrors(page);
-
-  await page.goto("/pages/dashboard-student.html");
-
-  const sections = [
-    "home",
-    "courses",
-    "assignments",
-    "schedule",
-    "certificates",
-    "messages",
-    "resources",
-    "profile"
-  ];
-
-  for (const section of sections) {
-    const navBtn = page.locator(`.sd-nav__item[data-section='${section}']`);
-    await navBtn.click();
-    await expect(page.locator(`#section-${section}`)).toHaveClass(/active/);
-  }
-
-  expect(consoleErrors, "No unexpected console errors").toHaveLength(0);
-});
-
-test("student assignment submit updates UI and DB state", async ({ page }) => {
-  const stub = makeStudentStub("student");
-  await installSupabaseStub(page, stub);
-
-  await page.goto("/pages/dashboard-student.html");
-  await page.locator(".sd-nav__item[data-section='assignments']").click();
-
-  const pendingItem = page.locator(".sd-assignment-item[data-status='pending']");
-  await expect(pendingItem).toHaveCount(1);
-  await pendingItem.locator("button[data-action='submit']").click();
-
-  await page.locator(".sd-filter-tab[data-filter='submitted']").click();
-  await expect(page.locator(".sd-assignment-item[data-status='submitted']")).toHaveCount(1);
-
-  const submissions = await page.evaluate(async () => {
-    const { data } = await window.lmsSupabase
-      .from("assignment_submissions")
-      .select("*")
-      .eq("student_id", "student-1");
-    return data || [];
+    const adminStub = makeStudentStub("admin");
+    await installSupabaseStub(page, adminStub);
+    await page.goto("/pages/dashboard-student.html");
+    await page.waitForURL("**/pages/dashboard-admin.html");
   });
 
-  expect(submissions.some((s) => s.assignment_id === "assign-1")).toBeTruthy();
-});
+  test("student profile renders and logout works", async ({ page }) => {
+    const stub = makeStudentStub("student");
+    await installSupabaseStub(page, stub);
 
-test("marketer auth/guard allows marketer and blocks student", async ({ page }) => {
-  const marketerStub = makeMarketerStub("marketer");
-  await installSupabaseStub(page, marketerStub);
+    await page.goto("/pages/dashboard-student.html");
+    await expect(page.locator("#profileCardName")).toHaveText("Alpha Student");
+    await expect(page.locator("#profileCardId")).toContainText("STUDENT");
+    await expect(page.locator("#profileCardEmail")).toHaveText("alpha@example.com");
 
-  await page.goto("/pages/dashboard-marketer.html");
-  await expect(page.locator("#marketerRole")).toHaveText("Marketer");
+    await page.locator("#logoutBtn").click();
+    await page.waitForURL("**/pages/login.html");
+  });
 
-  const studentStub = makeMarketerStub("student");
-  await installSupabaseStub(page, studentStub);
-  await page.goto("/pages/dashboard-marketer.html");
-  await page.waitForURL("**/pages/dashboard-student.html");
-});
+  test("student data renders with progress and courses", async ({ page }) => {
+    const stub = makeStudentStub("student");
+    await installSupabaseStub(page, stub);
 
-test("marketer claim form validation and submit success", async ({ page }) => {
-  const stub = makeMarketerStub("marketer");
-  await installSupabaseStub(page, stub);
+    await page.goto("/pages/dashboard-student.html");
+    await expect(page.locator("#statCoursesEnrolled")).toHaveText("2");
+    await expect(page.locator(".sd-progress__pct")).toContainText("65%");
+    await expect(page.locator("#courseGrid .sd-course-card")).toHaveCount(2);
+    await expect(page.locator("#courseGrid .sd-course-card[data-status='completed']")).toHaveCount(1);
+  });
 
-  await page.goto("/pages/dashboard-marketer.html");
-  await page.locator(".mk-nav-tab[data-tab='claim']").click();
-  await expect(page.locator("#claimForm")).toBeVisible();
+  test("student navigation opens sections without console errors", async ({ page }) => {
+    const stub = makeStudentStub("student");
+    await installSupabaseStub(page, stub);
+    const consoleErrors = collectConsoleErrors(page);
 
-  await page.locator("#claimForm button[type='submit']").click();
-  await expect(page.locator("#claimFormMsg")).toHaveText("Pilih sekolah dan tanggal presentasi.");
+    await page.goto("/pages/dashboard-student.html");
 
-  await page.selectOption("#claimSchool", "school-1");
-  await page.fill("#claimPresDate", "2026-03-10");
-  await page.locator("#claimForm button[type='submit']").click();
-  await expect(page.locator("#claimFormMsg")).toHaveText("Isi jumlah siswa yang hadir.");
+    const sections = [
+      "home",
+      "courses",
+      "assignments",
+      "schedule",
+      "certificates",
+      "messages",
+      "resources",
+      "profile"
+    ];
 
-  await page.fill("#claimStudentsPresent", "30");
-  await page.fill("#claimStudentsEnrolled", "12");
-  await page.fill("#claimProgramFee", "5000000");
-  await page.check("#claimConsent");
+    for (const section of sections) {
+      const navBtn = page.locator(`.sd-nav__item[data-section='${section}']`);
+      await navBtn.click();
+      await expect(page.locator(`#section-${section}`)).toHaveClass(/active/);
+    }
 
-  await page.locator("#claimForm button[type='submit']").click();
-  await expect(page.locator("#claimFormMsg")).toHaveText(
-    "Klaim berhasil diajukan! Menunggu verifikasi admin."
-  );
-  await expect(page.locator("#claimFormMsg")).toHaveClass(/success/);
-});
+    expect(consoleErrors, "No unexpected console errors").toHaveLength(0);
+  });
 
-test("marketer edge cases and staff role label", async ({ page }) => {
-  const marketerStub = makeMarketerStub("marketer");
-  await installSupabaseStub(page, marketerStub);
+  test("student assignment submit updates UI and DB state", async ({ page }) => {
+    const stub = makeStudentStub("student");
+    await installSupabaseStub(page, stub);
 
-  await page.goto("/pages/dashboard-marketer.html");
-  await page.locator(".mk-nav-tab[data-tab='reports']").click();
+    await page.goto("/pages/dashboard-student.html");
+    await page.locator(".sd-nav__item[data-section='assignments']").click();
 
-  const dupRefs = page.locator("#reportTableBody code", { hasText: "DUP-001" });
-  await expect(dupRefs).toHaveCount(2);
-  await expect(page.locator("#reportTableBody")).toContainText("Ditolak");
+    const pendingItem = page.locator(".sd-assignment-item[data-status='pending']");
+    await expect(pendingItem).toHaveCount(1);
+    await pendingItem.locator("button[data-action='submit']").click();
 
-  const staffStub = makeMarketerStub("staff");
-  await installSupabaseStub(page, staffStub);
-  await page.goto("/pages/dashboard-marketer.html");
-  await expect(page.locator("#marketerRole")).toHaveText("Staff");
+    await page.locator(".sd-filter-tab[data-filter='submitted']").click();
+    await expect(page.locator(".sd-assignment-item[data-status='submitted']")).toHaveCount(1);
+
+    const submissions = await page.evaluate(async () => {
+      const { data } = await window.lmsSupabase
+        .from("assignment_submissions")
+        .select("*")
+        .eq("student_id", "student-1");
+      return data || [];
+    });
+
+    expect(submissions.some((s) => s.assignment_id === "assign-1")).toBeTruthy();
+  });
+
+  test("marketer auth/guard allows marketer and blocks student", {
+    tag: "@critical"
+  }, async ({ page }) => {
+    const marketerStub = makeMarketerStub("marketer");
+    await installSupabaseStub(page, marketerStub);
+
+    await page.goto("/pages/dashboard-marketer.html");
+    await expect(page.locator("#marketerRole")).toHaveText("Marketer");
+
+    const studentStub = makeMarketerStub("student");
+    await installSupabaseStub(page, studentStub);
+    await page.goto("/pages/dashboard-marketer.html");
+    await page.waitForURL("**/pages/dashboard-student.html");
+  });
+
+  test("marketer claim form validation and submit success", async ({ page }) => {
+    const stub = makeMarketerStub("marketer");
+    await installSupabaseStub(page, stub);
+
+    await page.goto("/pages/dashboard-marketer.html");
+    await page.locator(".mk-nav-tab[data-tab='claim']").click();
+    await expect(page.locator("#claimForm")).toBeVisible();
+
+    await page.locator("#claimForm button[type='submit']").click();
+    await expect(page.locator("#claimFormMsg")).toHaveText("Pilih sekolah dan tanggal presentasi.");
+
+    await page.selectOption("#claimSchool", "school-1");
+    await page.fill("#claimPresDate", "2026-03-10");
+    await page.locator("#claimForm button[type='submit']").click();
+    await expect(page.locator("#claimFormMsg")).toHaveText("Isi jumlah siswa yang hadir.");
+
+    await page.fill("#claimStudentsPresent", "30");
+    await page.fill("#claimStudentsEnrolled", "12");
+    await page.fill("#claimProgramFee", "5000000");
+    await page.check("#claimConsent");
+
+    await page.locator("#claimForm button[type='submit']").click();
+    await expect(page.locator("#claimFormMsg")).toHaveText(
+      "Klaim berhasil diajukan! Menunggu verifikasi admin."
+    );
+    await expect(page.locator("#claimFormMsg")).toHaveClass(/success/);
+  });
+
+  test("marketer edge cases and staff role label", async ({ page }) => {
+    const marketerStub = makeMarketerStub("marketer");
+    await installSupabaseStub(page, marketerStub);
+
+    await page.goto("/pages/dashboard-marketer.html");
+    await page.locator(".mk-nav-tab[data-tab='reports']").click();
+
+    const dupRefs = page.locator("#reportTableBody code", { hasText: "DUP-001" });
+    await expect(dupRefs).toHaveCount(2);
+    await expect(page.locator("#reportTableBody")).toContainText("Ditolak");
+
+    const staffStub = makeMarketerStub("staff");
+    await installSupabaseStub(page, staffStub);
+    await page.goto("/pages/dashboard-marketer.html");
+    await expect(page.locator("#marketerRole")).toHaveText("Staff");
+  });
 });

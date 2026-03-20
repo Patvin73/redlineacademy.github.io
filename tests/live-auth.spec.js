@@ -99,7 +99,9 @@ async function openProtectedRouteWithoutAuth(page, route) {
   await page.waitForURL("**/pages/login.html");
 }
 
-test.describe("Live Supabase auth and RBAC", () => {
+test.describe("Live Supabase auth and RBAC", {
+  tag: ["@critical", "@auth", "@rbac", "@supabase"]
+}, () => {
   test("student can log in, see profile data, and log out", async ({ page }) => {
     await installLiveSupabaseConfig(page);
     await signIn(page, "student");
