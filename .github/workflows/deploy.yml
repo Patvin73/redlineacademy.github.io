@@ -28,6 +28,9 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Generate QA report
+        run: node tools/qa-observability.js report > docs/QA_REPORT.md
+
       - name: Lint
         run: npm run lint
 
@@ -37,6 +40,15 @@ jobs:
           mkdir -p .qa
           npx playwright test --config=playwright.config.js --grep "@critical" --reporter=json > .qa/playwright-smoke.json
           node tools/verify-playwright-results.js .qa/playwright-smoke.json
+
+      - name: Upload QA report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-report
+          path: docs/QA_REPORT.md
+          if-no-files-found: error
+          retention-days: 14
 
   verify-regression:
     needs: verify-smoke

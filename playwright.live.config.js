@@ -27,6 +27,7 @@ if (missingEnvVars.length > 0) {
 module.exports = defineConfig({
   testDir: "tests",
   testMatch: ["**/live-*.spec.js"],
+  workers: 1,
   timeout: 30 * 1000,
   expect: {
     timeout: 5 * 1000,

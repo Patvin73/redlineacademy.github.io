@@ -11,7 +11,7 @@ Payment testing is intentionally excluded and will be handled separately.
 - Optional unit tests (Jest): `npm run test:unit`
 - QA observability report: `npm run qa:report`
 - Tag filters: `npm test -- --grep "@auth"` or `npm test -- --grep "@rbac"`
-- Live Supabase auth QA: set `PLAYWRIGHT_LIVE_SUPABASE_URL`, `PLAYWRIGHT_LIVE_SUPABASE_ANON_KEY`, and seeded user credentials, then run `npm run test:live`
+- Live Supabase auth + write QA: set `PLAYWRIGHT_LIVE_SUPABASE_URL`, `PLAYWRIGHT_LIVE_SUPABASE_ANON_KEY`, and seeded user credentials, then run `npm run test:live`
 
 ## Automated E2E (Implemented)
 Source suite: `tests/dashboard-admin.spec.js`

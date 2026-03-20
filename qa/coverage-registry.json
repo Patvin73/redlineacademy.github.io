@@ -94,6 +94,51 @@
             "@critical"
           ],
           "gap": "Student flow is represented, but real end-to-end state transitions against production-like data are still limited."
+        },
+        {
+          "name": "Live enrollment, payment, and progress persistence",
+          "risk": "critical",
+          "coverage": "covered",
+          "tier": "live",
+          "tests": [
+            "tests/live-write.spec.js"
+          ],
+          "tags": [
+            "@critical",
+            "@lms",
+            "@supabase"
+          ],
+          "gap": "Covers isolated live inserts and the admin payment workflow that creates enrollment and course_progress rows."
+        },
+        {
+          "name": "Student submission writes and progress-write denial",
+          "risk": "critical",
+          "coverage": "covered",
+          "tier": "live",
+          "tests": [
+            "tests/live-write.spec.js"
+          ],
+          "tags": [
+            "@auth",
+            "@rbac",
+            "@supabase"
+          ],
+          "gap": "Student-owned assignment submissions persist successfully; course_progress write attempts fail explicitly by RLS."
+        },
+        {
+          "name": "Trainer course create/update/delete persistence",
+          "risk": "high",
+          "coverage": "covered",
+          "tier": "live",
+          "tests": [
+            "tests/live-write.spec.js"
+          ],
+          "tags": [
+            "@lms",
+            "@rbac",
+            "@supabase"
+          ],
+          "gap": "Validates live course CRUD for trainer-owned records with isolated slugs and delete cleanup."
         }
       ]
     },
@@ -119,15 +164,17 @@
         {
           "name": "Claim submission and review flows",
           "risk": "high",
-          "coverage": "partial",
-          "tier": "regression",
+          "coverage": "covered",
+          "tier": "live",
           "tests": [
-            "tests/recommended-e2e.spec.js"
+            "tests/recommended-e2e.spec.js",
+            "tests/live-write.spec.js"
           ],
           "tags": [
-            "@marketer"
+            "@marketer",
+            "@supabase"
           ],
-          "gap": "Current coverage is stubbed; it does not prove live duplicate detection, rejection handling, or persistence."
+          "gap": "Live inserts now prove marketer/staff claim persistence and admin-only status escalation."
         }
       ]
     },
@@ -167,16 +214,17 @@
         {
           "name": "RLS enforcement and role escalation prevention",
           "risk": "critical",
-          "coverage": "partial",
+          "coverage": "covered",
           "tier": "live",
           "tests": [
-            "tests/live-auth.spec.js"
+            "tests/live-auth.spec.js",
+            "tests/live-write.spec.js"
           ],
           "tags": [
             "@rbac",
             "@supabase"
           ],
-          "gap": "Current live coverage exercises profiles only; it does not yet prove write-policy coverage across all protected tables."
+          "gap": "Now covers insert/update/delete restrictions across core LMS and marketer tables, plus explicit failure assertions."
         }
       ]
     }
