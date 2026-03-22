@@ -330,7 +330,8 @@ CREATE POLICY "marketer_claims_update_admin"
 -- ============================================================
 -- ADMIN VIEW: all marketer claims with profile info
 -- ============================================================
-CREATE OR REPLACE VIEW admin_marketer_claims AS
+CREATE OR REPLACE VIEW public.admin_marketer_claims
+WITH (security_invoker = true) AS
   SELECT
     mc.*,
     p.full_name     AS marketer_name,
