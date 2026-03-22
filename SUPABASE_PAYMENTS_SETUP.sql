@@ -199,6 +199,9 @@ create table if not exists public.payment_events (
 create index if not exists payment_events_invoice_idx on public.payment_events(invoice_number);
 create index if not exists payment_events_created_at_idx on public.payment_events(created_at);
 
+alter table public.registrations enable row level security;
+alter table public.payment_events enable row level security;
+
 -- auto-update updated_at on registrations
 create or replace function public.update_updated_at_column()
 returns trigger as $$
@@ -206,7 +209,20 @@ begin
   new.updated_at = now();
   return new;
 end;
-$$ language plpgsql;
+$$ language plpgsql
+set search_path = public;
+
+drop policy if exists "payments_select_staff_registrations" on public.registrations;
+create policy "payments_select_staff_registrations"
+  on public.registrations for select
+  to authenticated
+  using (public.is_admin(auth.uid()) or public.is_staff(auth.uid()));
+
+drop policy if exists "payments_select_staff_payment_events" on public.payment_events;
+create policy "payments_select_staff_payment_events"
+  on public.payment_events for select
+  to authenticated
+  using (public.is_admin(auth.uid()) or public.is_staff(auth.uid()));
 
 drop trigger if exists trg_registrations_updated on public.registrations;
 create trigger trg_registrations_updated

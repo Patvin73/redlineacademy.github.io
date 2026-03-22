@@ -757,6 +757,40 @@ drop policy if exists "lms_insert_own_or_staff_activity_logs" on public.activity
 create policy "lms_select_all_activity_logs" on public.activity_logs for select to authenticated using (true);
 create policy "lms_insert_own_or_staff_activity_logs" on public.activity_logs for insert to authenticated with check (user_id = auth.uid() or public.is_staff(auth.uid()));
 
+drop policy if exists "lms_select_all_lessons" on public.lessons;
+drop policy if exists "lms_write_staff_lessons" on public.lessons;
+create policy "lms_select_all_lessons" on public.lessons for select to authenticated using (true);
+create policy "lms_write_staff_lessons" on public.lessons for all to authenticated using (public.is_staff(auth.uid())) with check (public.is_staff(auth.uid()));
+
+drop policy if exists "lms_select_own_progress" on public.progress;
+drop policy if exists "lms_write_own_progress" on public.progress;
+create policy "lms_select_own_progress" on public.progress for select to authenticated using (student_id = auth.uid() or public.is_staff(auth.uid()));
+create policy "lms_write_own_progress" on public.progress for all to authenticated using (student_id = auth.uid() or public.is_staff(auth.uid())) with check (student_id = auth.uid() or public.is_staff(auth.uid()));
+
+drop policy if exists "lms_select_own_marketers" on public.marketers;
+drop policy if exists "lms_write_staff_marketers" on public.marketers;
+create policy "lms_select_own_marketers" on public.marketers for select to authenticated using (user_id = auth.uid() or public.is_admin(auth.uid()) or public.is_staff(auth.uid()));
+create policy "lms_write_staff_marketers" on public.marketers for all to authenticated using (public.is_admin(auth.uid()) or public.is_staff(auth.uid())) with check (public.is_admin(auth.uid()) or public.is_staff(auth.uid()));
+
+drop policy if exists "lms_select_own_referrals" on public.referrals;
+drop policy if exists "lms_write_staff_referrals" on public.referrals;
+create policy "lms_select_own_referrals" on public.referrals for select to authenticated using (
+  public.is_admin(auth.uid())
+  or public.is_staff(auth.uid())
+  or exists (
+    select 1
+    from public.marketers m
+    where m.id = marketer_id
+      and m.user_id = auth.uid()
+  )
+);
+create policy "lms_write_staff_referrals" on public.referrals for all to authenticated using (public.is_admin(auth.uid()) or public.is_staff(auth.uid())) with check (public.is_admin(auth.uid()) or public.is_staff(auth.uid()));
+
+drop policy if exists "lms_select_staff_audit_logs" on public.audit_logs;
+drop policy if exists "lms_write_staff_audit_logs" on public.audit_logs;
+create policy "lms_select_staff_audit_logs" on public.audit_logs for select to authenticated using (public.is_admin(auth.uid()) or public.is_staff(auth.uid()));
+create policy "lms_write_staff_audit_logs" on public.audit_logs for insert to authenticated with check (public.is_admin(auth.uid()) or public.is_staff(auth.uid()));
+
 -- ==========================================================
 -- GRANTS
 -- ==========================================================
