@@ -43,8 +43,8 @@ Trainer coverage:
 - [x] Course builder: multi-tab navigation, add module, save as draft, verify course appears
 - [x] Course builder: edit flow opens builder panel with "Edit Course" title
 
-## Recommended E2E (Staging / Live Supabase)
-These should run against a staging environment with a real Supabase project and seeded test users. The repo now includes an opt-in live auth suite in `tests/live-auth.spec.js`; keep using the stubbed suites for deterministic local smoke coverage.
+## Recommended E2E (Live Supabase)
+These should run against the live Supabase project with seeded test users. The repo now includes an opt-in live auth suite in `tests/live-auth.spec.js`; keep using the stubbed suites for deterministic local smoke coverage.
 
 ### Student Dashboard (LMS)
 - [x] Auth/guard: student can access; other roles cannot
@@ -74,7 +74,7 @@ Run on desktop and mobile, and on both Indonesian and English.
 - [ ] `pages/about.html`, `pages/legal.html`: layout/i18n sanity check
 - [ ] `pages/payment_success.html`, `pages/payment_failed.html`: layout only (logic tested separately)
 
-## Database Flow Tests (Staging Supabase)
+## Database Flow Tests (Live Supabase)
 Goal: verify DB schema, RLS, and dashboard queries are correct for all roles.
 
 Setup:
@@ -158,7 +158,7 @@ Optional assignment submit flow now covered in `tests/recommended-e2e.spec.js`.
 
 ## Notes
 - Admin/Trainer automated tests use a Supabase CDN stub to bypass login guard and provide deterministic data.
-- Live Supabase auth tests are opt-in via environment variables and target the staging project when credentials are present.
+- Live Supabase auth tests are opt-in via environment variables and target the live project when credentials are present.
 - CI validates skipped-test count from JSON Playwright output and fails on any unexpected skip.
 - Local webServer is started via `tools/static-server.js` as configured in `playwright.config.js`.
 - Playwright CLI desktop checks ran in a sandbox without internet. External font/CDN failures are expected:

@@ -9,15 +9,15 @@
     <link rel="stylesheet" href="../css/lms.css" />
 
     <!--
-      Inline i18n patch: keys baru untuk tab login dan staff portal.
+      Inline i18n patch: keys baru untuk tab login dan marketer portal.
       Di-merge ke window.translations setelah script.js dimuat.
     -->
     <script>
       window.__loginI18nPatch = {
         id: {
           loginTabLMS:               "Login LMS",
-          loginTabStaff:             "Staff / Marketer",
-          staffLoginTitle:           "Staff / Marketer",
+          loginTabStaff:             "Marketer Portal",
+          staffLoginTitle:           "Marketer Portal",
           staffLoginBadge:           "Portal",
           staffLoginSubtitle:        "Masuk ke portal komisi & manajemen pemasaran.",
           staffLoginButton:          "Masuk ke Portal",
@@ -26,8 +26,8 @@
         },
         en: {
           loginTabLMS:               "LMS Login",
-          loginTabStaff:             "Staff / Marketer",
-          staffLoginTitle:           "Staff / Marketer",
+          loginTabStaff:             "Marketer Portal",
+          staffLoginTitle:           "Marketer Portal",
           staffLoginBadge:           "Portal",
           staffLoginSubtitle:        "Sign in to the commission & marketing management portal.",
           staffLoginButton:          "Sign In to Portal",
@@ -76,7 +76,7 @@
             data-tab="staff"
           >
             <span class="login-tab-dot" aria-hidden="true"></span>
-            <span id="tabLabelStaff">Staff / Marketer</span>
+            <span id="tabLabelStaff">Marketer Portal</span>
           </button>
         </div>
 
@@ -115,11 +115,11 @@
         </div>
 
         <!-- ══════════════════════════════
-             PANEL 2 — STAFF / MARKETER
+             PANEL 2 — MARKETER PORTAL
         ══════════════════════════════ -->
         <div class="login-panel" id="panel-staff" role="tabpanel" aria-labelledby="tab-staff">
           <h1>
-            <span id="staffPanelTitle">Staff / Marketer</span>
+            <span id="staffPanelTitle">Marketer Portal</span>
             <span class="login-role-badge" id="staffPanelBadge">Portal</span>
           </h1>
           <p id="staffPanelSubtitle">Masuk ke portal komisi &amp; manajemen pemasaran.</p>
@@ -160,7 +160,14 @@
     </main>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      document.write(
+        '<script src="' +
+          (window.__SUPABASE_SDK_SRC__ ||
+            "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2") +
+          '"><\\/script>'
+      );
+    </script>
     <script src="../js/script.js"></script>
     <script src="../js/supabase-client.js"></script>
     <script src="../js/auth.js"></script>
@@ -187,8 +194,8 @@
         function applyStaffLabels() {
           var map = {
             tabLabelLMS:      ["loginTabLMS",      "Login LMS"],
-            tabLabelStaff:    ["loginTabStaff",    "Staff / Marketer"],
-            staffPanelTitle:  ["staffLoginTitle",  "Staff / Marketer"],
+            tabLabelStaff:    ["loginTabStaff",    "Marketer Portal"],
+            staffPanelTitle:  ["staffLoginTitle",  "Marketer Portal"],
             staffPanelBadge:  ["staffLoginBadge",  "Portal"],
             staffPanelSubtitle:["staffLoginSubtitle","Masuk ke portal komisi & manajemen pemasaran."],
             staffLoginBtn:    ["staffLoginButton", "Masuk ke Portal"],
@@ -250,7 +257,7 @@
           window.location.replace(result.redirectTo);
         });
 
-        // 7. Staff / Marketer login
+        // 7. Marketer portal login
         document.getElementById("loginFormStaff").addEventListener("submit", async function (e) {
           e.preventDefault();
           var email    = document.getElementById("staff-email").value.trim();

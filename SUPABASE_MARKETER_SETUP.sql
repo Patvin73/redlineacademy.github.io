@@ -249,7 +249,7 @@ ALTER TABLE marketer_claims  ENABLE ROW LEVEL SECURITY;
 
 -- ── marketer_schools policies ──
 
--- Marketer & Staff can view only their own schools
+-- Marketer can view only their own schools
 CREATE POLICY "marketer_schools_select_own"
   ON marketer_schools FOR SELECT
   USING (
@@ -260,7 +260,7 @@ CREATE POLICY "marketer_schools_select_own"
     )
   );
 
--- Marketer & Staff can insert their own schools
+-- Marketer / staging staff alias can insert their own schools
 CREATE POLICY "marketer_schools_insert_own"
   ON marketer_schools FOR INSERT
   WITH CHECK (
@@ -271,7 +271,7 @@ CREATE POLICY "marketer_schools_insert_own"
     )
   );
 
--- Marketer & Staff can update their own schools
+-- Marketer / staging staff alias can update their own schools
 CREATE POLICY "marketer_schools_update_own"
   ON marketer_schools FOR UPDATE
   USING (
@@ -294,7 +294,7 @@ CREATE POLICY "marketer_schools_update_admin"
 
 -- ── marketer_claims policies ──
 
--- Marketer/Staff can view only their own claims
+-- Marketer can view only their own claims
 CREATE POLICY "marketer_claims_select_own"
   ON marketer_claims FOR SELECT
   USING (
@@ -305,7 +305,7 @@ CREATE POLICY "marketer_claims_select_own"
     )
   );
 
--- Marketer/Staff can insert their own claims (pending only)
+-- Marketer / staging staff alias can insert their own claims (pending only)
 CREATE POLICY "marketer_claims_insert_own"
   ON marketer_claims FOR INSERT
   WITH CHECK (

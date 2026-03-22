@@ -9,8 +9,9 @@
     "test:regression": "playwright test --config=playwright.config.js",
     "lint": "eslint .",
     "test:e2e": "playwright test --config=playwright.config.js",
-    "test:live": "playwright test --config=playwright.live.config.js --grep-invert \"@cleanup-audit\" && playwright test tests/zz-live-cleanup-audit.spec.js --config=playwright.live.config.js",
-    "test:live:audit": "playwright test tests/zz-live-cleanup-audit.spec.js --config=playwright.live.config.js",
+    "test:live:core": "node tools/run-live-project.js live-core",
+    "test:live:audit": "node tools/run-live-project.js live-audit",
+    "test:live": "npm run test:live:core && npm run test:live:audit",
     "test:unit": "jest --passWithNoTests",
     "qa:report": "node tools/qa-observability.js report",
     "format": "prettier --write ."
@@ -22,9 +23,13 @@
     "node": ">=20.19.0"
   },
   "devDependencies": {
-    "jest": "^30.2.0",
+    "@playwright/test": "^1.58.0",
     "eslint": "^10.0.3",
-    "prettier": "^3.7.4",
-    "@playwright/test": "^1.58.0"
+    "jest": "^30.2.0",
+    "prettier": "^3.7.4"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.99.3",
+    "dotenv": "^17.3.1"
   }
 }

@@ -2,7 +2,8 @@
 -- Redline Academy - Supabase Smoke Test (Marketer Flow)
 --
 -- Purpose:
--- - Validate role assignment path for marketer/staff users.
+-- - Validate role assignment path for marketer users.
+-- - Staff is treated as a staging-only marketer alias in live QA.
 -- - Validate marketer_schools + marketer_claims inserts.
 -- - Leave database unchanged by rolling back at the end.
 --

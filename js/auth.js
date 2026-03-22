@@ -1,7 +1,8 @@
 (function () {
   /* ============================================================
      REDLINE ACADEMY — AUTH MODULE
-     Mendukung role: student | admin | trainer | marketer | staff
+     Mendukung role: student | admin | trainer | marketer
+     Staff adalah alias staging-only untuk marketer.
 
      CATATAN: getProfile() hanya memilih kolom yang ada di schema
      default. Kolom opsional (marketer_id, dll.) hanya tersedia
@@ -107,21 +108,43 @@
   async function signIn(email, password, allowedRoles) {
     try {
       const supabase = getClient();
+      const supabaseUrl = window.lmsConfig?.supabaseUrl;
+      const supabaseAnonKey = window.lmsConfig?.supabaseAnonKey;
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      if (!supabaseUrl || !supabaseAnonKey) {
+        return {
+          ok: false,
+          error: tt("lmsErrLoginFailed", "Login gagal."),
+        };
+      }
+
+      const response = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: supabaseAnonKey,
+          Authorization: `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       });
 
-      if (error) {
+      const tokenData = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
         return {
           ok: false,
           error:
-            error.message ||
+            tokenData.error_description ||
+            tokenData.msg ||
+            tokenData.message ||
             tt("lmsErrInvalidCredentials", "Email atau password tidak valid."),
         };
       }
-      if (!data.user) {
+
+      if (!tokenData.user?.id || !tokenData.access_token || !tokenData.refresh_token) {
         return {
           ok: false,
           error: tt(
@@ -131,7 +154,19 @@
         };
       }
 
-      const profileRes = await getProfile(data.user.id);
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: tokenData.access_token,
+        refresh_token: tokenData.refresh_token,
+      });
+
+      if (sessionError) {
+        return {
+          ok: false,
+          error: sessionError.message || tt("lmsErrLoginFailed", "Login gagal."),
+        };
+      }
+
+      const profileRes = await getProfile(tokenData.user.id);
       if (!profileRes.ok) {
         return {
           ok: false,

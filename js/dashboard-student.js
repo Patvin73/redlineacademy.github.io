@@ -644,6 +644,7 @@
     const emailEls = [$("topbarName"), $("profileCardEmail")];
     // topbarName is name not email, handle separately below
     if ($("profileCardEmail")) $("profileCardEmail").textContent = profile.email || "—";
+    if ($("studentEmail")) $("studentEmail").textContent = profile.email || "—";
 
     // IDs
     if ($("profileCardId")) {
@@ -688,6 +689,7 @@
       $("sidebarName"), $("topbarName"), $("welcomeName"), $("profileCardName"),
     ];
     nameEls.forEach((el) => { if (el) el.textContent = name; });
+    if ($("studentName")) $("studentName").textContent = name;
   }
 
   /* ── Dashboard Stats ────────────────────────────────────────────── */
@@ -819,7 +821,7 @@
     try {
       const { data: enrollments, error: enrollErr } = await window.lmsSupabase
         .from("enrollments")
-        .select("course_id, status, progress_percent")
+        .select("course_id, status")
         .eq("student_id", userId);
 
       if (enrollErr) throw enrollErr;
@@ -836,9 +838,22 @@
         return;
       }
 
+      const { data: progressRows, error: progressErr } = await window.lmsSupabase
+        .from("course_progress")
+        .select("course_id, completion_percent")
+        .eq("student_id", userId)
+        .in("course_id", courseIds);
+
+      if (progressErr) throw progressErr;
+      const progressMap = new Map(
+        (progressRows || [])
+          .filter((row) => row.course_id)
+          .map((row) => [row.course_id, row.completion_percent || 0])
+      );
+
       const { data: courses, error: courseErr } = await window.lmsSupabase
         .from("courses")
-        .select("id, title, thumbnail_url, category, trainer_name")
+        .select("id, title, thumbnail_url, category_id, trainer_id")
         .in("id", courseIds);
 
       if (courseErr) throw courseErr;
@@ -857,11 +872,11 @@
         const badgeClass = status === "completed"
           ? "sd-status-badge--completed"
           : "sd-status-badge--active";
-        const progress = Math.round(enroll.progress_percent || 0);
+        const progress = Math.round(progressMap.get(enroll.course_id) || 0);
         const progressLabel = typeof t === "function" ? t("lmsProgress") : "Progress";
         const thumbSrc = course.thumbnail_url || "";
-        const category = course.category || "Course";
-        const trainer = course.trainer_name || "Redline Academy";
+        const category = course.category_id || "Course";
+        const trainer = "Redline Academy";
 
         return `
           <div class="sd-course-card" data-status="${status}">

@@ -100,4 +100,4 @@ Di bawah ini "wajib" dimaknai: wajib agar fitur yang sudah ada (registrasi + pem
 2. Standarisasi migrasi Supabase
    - Gunakan `supabase` CLI + folder migrations agar perubahan skema tidak hanya "copy-paste SQL".
 3. Staging environment
-   - Domain staging + Supabase project staging + DOKU sandbox untuk uji end-to-end sebelum production.
+  - Domain test/live QA + Supabase live project + DOKU sandbox untuk uji end-to-end sebelum production.

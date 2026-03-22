@@ -2,7 +2,8 @@
   /* ============================================================
      REDLINE ACADEMY — GUARD MODULE
      Melindungi halaman dashboard dari akses tidak sah.
-     Mendukung role: student | admin | trainer | marketer | staff
+     Mendukung role: student | admin | trainer | marketer
+     Staff adalah alias staging-only untuk marketer.
   ============================================================ */
 
   const tt = (key, fallback) =>
@@ -25,6 +26,9 @@
       .split(",")
       .map((r) => r.trim())
       .filter(Boolean);
+    const staffEnabled =
+      window.lmsConfig?.enableStaff === true ||
+      window.__LMS_ENABLE_STAFF__ === true;
 
     const user = await window.lmsAuth.getSessionUser();
     if (!user) {
@@ -39,8 +43,13 @@
     }
 
     const profile = profileRes.profile;
+    window.__LMS_CURRENT_ROLE__ = profile.role;
+    window.__LMS_ALLOW_PROFILE_PRIVILEGED_WRITE__ = profile.role === "admin";
 
-    if (!allowedRoles.includes(profile.role)) {
+    if (
+      !allowedRoles.includes(profile.role) &&
+      !(staffEnabled && profile.role === "staff" && allowedRoles.includes("marketer"))
+    ) {
       const target = window.lmsAuth.getDashboardRouteByRole(profile.role);
       const currentPage = window.location.pathname.split("/").pop() || "";
       if (target.endsWith(currentPage)) return;
@@ -58,8 +67,8 @@
     // ── STUDENT dashboard ──
     if (profile.role === "student") {
       const nameEl  = document.getElementById("studentName");
-      const idEl    = document.getElementById("studentId");
       const emailEl = document.getElementById("studentEmail");
+      const idEl    = document.getElementById("studentId");
 
       if (nameEl)  nameEl.textContent  = profile.full_name  || "-";
       if (idEl)    idEl.textContent    = profile.student_id || "-";
@@ -69,8 +78,8 @@
     // ── ADMIN / TRAINER dashboard ──
     if (profile.role === "admin" || profile.role === "trainer") {
       const nameEl  = document.getElementById("adminName");
-      const idEl    = document.getElementById("adminId");
       const emailEl = document.getElementById("adminEmail");
+      const idEl    = document.getElementById("adminId");
 
       if (nameEl)  nameEl.textContent  = profile.full_name || "-";
       if (idEl)    idEl.textContent    = profile.admin_id  || "-";

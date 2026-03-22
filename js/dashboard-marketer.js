@@ -150,7 +150,11 @@
       nameEl.textContent = esc(marketerProfile.full_name || user.email || "-");
     if (roleEl)
       roleEl.textContent =
-        marketerProfile.role === "staff" ? "Staff" : "Marketer";
+        marketerProfile.role === "staff" &&
+        (window.lmsConfig?.enableStaff === true ||
+          window.__LMS_ENABLE_STAFF__ === true)
+          ? "Staff"
+          : "Marketer";
     if (avatarEl)
       avatarEl.textContent = (marketerProfile.full_name ||
         user.email ||

@@ -1,5 +1,6 @@
 -- ==========================================================
 -- Redline LMS - User Role Assignment Templates
+-- Staff is staging-only and maps to the marketer portal in live QA.
 -- Use this in Supabase SQL Editor after auth user exists.
 -- ==========================================================
 
@@ -110,7 +111,7 @@ revoke all on function public.assign_user_role(text, text, text, text, text) fro
 --   null
 -- );
 
--- STAFF template
+-- STAFF template (staging only)
 -- select public.assign_user_role(
 --   'staff_email@domain.com',
 --   'staff',
@@ -133,17 +134,17 @@ revoke all on function public.assign_user_role(text, text, text, text, text) fro
 -- ----------------------------------------------------------
 
 select public.assign_user_role(
-  'xoxoejuz@gmail.com',
+  'student@example.com',
   'student',
-  'xoxoejuz',
+  'iamstudent',
   'STD-002',
   null
 );
 
 select public.assign_user_role(
-  'emptycanvasid@gmail.com',
+  'trainer@example.com',
   'trainer',
-  'emptycanvasid',
+  'iamtrainer',
   null,
   null
 );

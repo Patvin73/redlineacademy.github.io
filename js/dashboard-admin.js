@@ -541,6 +541,8 @@
     // Names
     [$("sidebarName"), $("topbarName"), $("welcomeName")]
       .forEach((el) => { if (el) el.textContent = name; });
+    if ($("adminName")) $("adminName").textContent = name;
+    if ($("adminEmail")) $("adminEmail").textContent = profile.email || "—";
 
     // Role badge
     const badge = $("sidebarRoleBadge");
@@ -1887,8 +1889,6 @@
 
     const openModal = async () => {
       if (!modal) return;
-      modal.hidden = false;
-      modal.setAttribute("aria-hidden", "false");
       setMessage("");
       form && form.reset();
       if (currencyEl) currencyEl.value = "IDR";
@@ -1905,7 +1905,11 @@
         nextDueField.hidden = !isInstallment;
       }
 
-      if (!window.lmsSupabase) return;
+      if (!window.lmsSupabase) {
+        modal.hidden = false;
+        modal.setAttribute("aria-hidden", "false");
+        return;
+      }
 
       try {
         const { data: students, error: studentErr } = await window.lmsSupabase
@@ -1982,8 +1986,13 @@
         if (!coursesCache.length) {
           setMessage(getText("adPaymentNoCourses", "No courses found"), "var(--sd-text-secondary)");
         }
+
+        modal.hidden = false;
+        modal.setAttribute("aria-hidden", "false");
       } catch (err) {
         setMessage("Error loading data: " + (err.message || "Failed"), "var(--sd-red)");
+        modal.hidden = false;
+        modal.setAttribute("aria-hidden", "false");
       }
     };
 

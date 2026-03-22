@@ -17,7 +17,6 @@ function buildReferenceEmails() {
     admin: liveUsers.admin.email,
     trainer: liveUsers.trainer.email,
     marketer: liveUsers.marketer.email,
-    staff: liveUsers.staff.email,
   };
 }
 

@@ -1,3 +1,7 @@
 # Local deploy configs
 .vscode/sftp.json
 uploads_private/
+.env.playwright.live
+node_modules/
+output/
+supabase/.temp/

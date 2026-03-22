@@ -1,0 +1,149 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - navigation "Admin navigation" [ref=e2]:
+    - link "Redline Academy Home" [ref=e4] [cursor=pointer]:
+      - /url: ../index.html
+      - img "Redline Academy Logo" [ref=e5]
+      - generic [ref=e6]:
+        - strong [ref=e7]: Redline
+        - text: Academy
+    - generic [ref=e8]:
+      - img [ref=e10]
+      - generic [ref=e13]:
+        - paragraph [ref=e14]: Admin Redline
+        - generic [ref=e15]: Admin
+    - list [ref=e16]:
+      - listitem [ref=e17]: Main
+      - listitem [ref=e18]:
+        - button "Dashboard" [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - generic [ref=e23]: Dashboard
+      - listitem [ref=e24]:
+        - button "My Students" [ref=e25] [cursor=pointer]:
+          - img [ref=e26]
+          - generic [ref=e31]: My Students
+      - listitem [ref=e32]:
+        - button "Course Management" [ref=e33] [cursor=pointer]:
+          - img [ref=e34]
+          - generic [ref=e37]: Course Management
+      - listitem [ref=e38]:
+        - button "Assignments & Grading" [ref=e39] [cursor=pointer]:
+          - img [ref=e40]
+          - generic [ref=e43]: Assignments & Grading
+      - listitem [ref=e44]:
+        - button "Schedule" [ref=e45] [cursor=pointer]:
+          - img [ref=e46]
+          - generic [ref=e48]: Schedule
+      - listitem [ref=e49]:
+        - button "Messages" [ref=e50] [cursor=pointer]:
+          - img [ref=e51]
+          - generic [ref=e53]: Messages
+      - listitem [ref=e54]:
+        - button "Reports & Analytics" [ref=e55] [cursor=pointer]:
+          - img [ref=e56]
+          - generic [ref=e57]: Reports & Analytics
+      - listitem [ref=e58]: Administration
+      - listitem [ref=e59]:
+        - button "User Management" [ref=e60] [cursor=pointer]:
+          - img [ref=e61]
+          - generic [ref=e64]: User Management
+      - listitem [ref=e65]:
+        - button "Enrollments & Payments" [ref=e66] [cursor=pointer]:
+          - img [ref=e67]
+          - generic [ref=e70]: Enrollments & Payments
+      - listitem [ref=e71]:
+        - button "Announcements" [ref=e72] [cursor=pointer]:
+          - img [ref=e73]
+          - generic [ref=e75]: Announcements
+      - listitem [ref=e76]:
+        - button "System Settings" [ref=e77] [cursor=pointer]:
+          - img [ref=e78]
+          - generic [ref=e81]: System Settings
+    - generic [ref=e82]:
+      - navigation "Language selector" [ref=e83]:
+        - button "Bahasa Indonesia" [ref=e84] [cursor=pointer]:
+          - img [ref=e85]
+          - generic [ref=e86]: ID
+        - button "English" [ref=e87] [cursor=pointer]:
+          - img [ref=e88]
+          - generic [ref=e89]: EN
+      - button "Log Out" [ref=e90] [cursor=pointer]:
+        - img [ref=e91]
+        - generic [ref=e94]: Log Out
+  - generic [ref=e95]:
+    - banner [ref=e96]:
+      - generic [ref=e98]: Dashboard
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - img [ref=e101]
+          - searchbox "Search" [ref=e104]
+        - button "Notifications" [ref=e105] [cursor=pointer]:
+          - img [ref=e106]
+        - button "Admin Redline" [ref=e109] [cursor=pointer]:
+          - img [ref=e111]
+          - generic [ref=e114]: Admin Redline
+          - img [ref=e115]
+    - main [ref=e117]:
+      - generic [ref=e118]:
+        - generic [ref=e119]:
+          - generic [ref=e120]:
+            - paragraph [ref=e121]: Welcome back,
+            - heading "Admin Redline" [level=1] [ref=e122]
+            - paragraph [ref=e123]: Admin · Redline Academy
+          - generic [ref=e124]:
+            - text: Sunday
+            - text: 22 March 2026
+        - list "KPI Overview" [ref=e125]:
+          - listitem [ref=e126]:
+            - img [ref=e128]
+            - generic [ref=e133]:
+              - paragraph [ref=e134]: "0"
+              - paragraph [ref=e135]: Total Students
+          - listitem [ref=e136]:
+            - img [ref=e138]
+            - generic [ref=e141]:
+              - paragraph [ref=e142]: "0"
+              - paragraph [ref=e143]: Active Courses
+          - listitem [ref=e144]:
+            - img [ref=e146]
+            - generic [ref=e149]:
+              - paragraph [ref=e150]: "0"
+              - paragraph [ref=e151]: Pending Grading
+          - listitem [ref=e152]:
+            - img [ref=e154]
+            - generic [ref=e156]:
+              - paragraph [ref=e157]: 0%
+              - paragraph [ref=e158]: Avg. Completion Rate
+        - generic [ref=e159]:
+          - generic [ref=e160]:
+            - generic [ref=e161]:
+              - heading "Activity Feed" [level=2] [ref=e162]
+              - generic "Live" [ref=e163]
+            - list [ref=e164]:
+              - listitem [ref=e165]:
+                - img [ref=e166]
+                - generic [ref=e168]: No recent activity
+          - generic [ref=e169]:
+            - generic [ref=e170]:
+              - heading "Pending Actions" [level=2] [ref=e171]
+              - generic [ref=e172]: "0"
+            - list [ref=e173]:
+              - listitem [ref=e174]: All caught up! 🎉
+        - generic [ref=e175]:
+          - generic [ref=e176]:
+            - heading "Students At Risk" [level=2] [ref=e177]
+            - generic [ref=e178]: Inactive 7+ days
+          - table "At-risk students" [ref=e180]:
+            - rowgroup [ref=e181]:
+              - row "Student Course Progress Last Active Action" [ref=e182]:
+                - columnheader "Student" [ref=e183]
+                - columnheader "Course" [ref=e184]
+                - columnheader "Progress" [ref=e185]
+                - columnheader "Last Active" [ref=e186]
+                - columnheader "Action" [ref=e187]
+            - rowgroup [ref=e188]:
+              - row "No at-risk students 🎉" [ref=e189]:
+                - cell "No at-risk students 🎉" [ref=e190]
+```

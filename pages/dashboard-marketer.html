@@ -14,8 +14,9 @@
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/lms-marketer.css" />
   </head>
-  <!-- data-lms-role tells guard.js which roles are allowed on this page -->
-  <body class="marketer-page" data-lms-role="marketer,staff">
+  <!-- data-lms-role tells guard.js which roles are allowed on this page.
+       Staff is enabled at runtime only for staging/test environments. -->
+  <body class="marketer-page" data-lms-role="marketer">
     <div class="mk-mobile-overlay" id="mkMobileOverlay" aria-hidden="true"></div>
 
     <!-- ========================================
@@ -916,7 +917,14 @@
     </main>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      document.write(
+        '<script src="' +
+          (window.__SUPABASE_SDK_SRC__ ||
+            "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2") +
+          '"><\\/script>'
+      );
+    </script>
     <script src="../js/script.js"></script>
     <script src="../js/script_translations_patch.js"></script>
     <script src="../js/supabase-client.js"></script>

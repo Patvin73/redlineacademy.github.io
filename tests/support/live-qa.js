@@ -22,10 +22,6 @@ const liveUsers = {
     email: process.env.PLAYWRIGHT_LIVE_MARKETER_EMAIL,
     password: process.env.PLAYWRIGHT_LIVE_MARKETER_PASSWORD,
   },
-  staff: {
-    email: process.env.PLAYWRIGHT_LIVE_STAFF_EMAIL,
-    password: process.env.PLAYWRIGHT_LIVE_STAFF_PASSWORD,
-  },
 };
 
 const dashboardRoutes = {
@@ -33,7 +29,6 @@ const dashboardRoutes = {
   admin: "/pages/dashboard-admin.html",
   trainer: "/pages/dashboard-admin.html",
   marketer: "/pages/dashboard-marketer.html",
-  staff: "/pages/dashboard-marketer.html",
 };
 
 const requiredEnvVars = [
@@ -47,8 +42,6 @@ const requiredEnvVars = [
   "PLAYWRIGHT_LIVE_TRAINER_PASSWORD",
   "PLAYWRIGHT_LIVE_MARKETER_EMAIL",
   "PLAYWRIGHT_LIVE_MARKETER_PASSWORD",
-  "PLAYWRIGHT_LIVE_STAFF_EMAIL",
-  "PLAYWRIGHT_LIVE_STAFF_PASSWORD",
 ];
 
 function assertLiveEnv() {
@@ -68,6 +61,116 @@ async function installLiveSupabaseConfig(page) {
   await page.addInitScript((config) => {
     window.__LMS_SUPABASE_CONFIG__ = config;
   }, liveConfig);
+  await page.addInitScript(() => {
+    window.__SUPABASE_SDK_SRC__ =
+      "/node_modules/@supabase/supabase-js/dist/umd/supabase.js";
+  });
+  await ensureStudentProvisioned(page);
+}
+
+async function ensureStudentProvisioned(page, student = liveUsers.student) {
+  const authResponse = await page.request.post(
+    `${liveConfig.supabaseUrl}/auth/v1/token?grant_type=password`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        apikey: liveConfig.supabaseAnonKey,
+        Authorization: `Bearer ${liveConfig.supabaseAnonKey}`,
+      },
+      data: {
+        email: liveUsers.admin.email,
+        password: liveUsers.admin.password,
+      },
+    }
+  );
+
+  const authBody = await authResponse.json().catch(() => ({}));
+  const accessToken = authBody?.access_token;
+  if (!authResponse.ok() || !accessToken) {
+    throw new Error(
+      `Unable to sign in as admin for provisioning: ${
+        authBody?.error_description ||
+        authBody?.message ||
+        authBody?.msg ||
+        `status ${authResponse.status()}`
+      }`
+    );
+  }
+
+  const createResponse = await page.request.post(
+    `${liveConfig.supabaseUrl}/functions/v1/admin-create-user`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+        apikey: liveConfig.supabaseAnonKey,
+      },
+      data: {
+        full_name: "Student",
+        email: student.email,
+        role: "student",
+        password: student.password,
+      },
+    }
+  );
+
+  const createBody = await createResponse.json().catch(() => ({}));
+  if (!(createResponse.ok() || createResponse.status() === 409)) {
+    throw new Error(
+      `Unable to provision live student account (${createResponse.status()}): ${
+        createBody.error || createBody.message || createBody.detail || "no response body"
+      }`
+    );
+  }
+
+  const profileResponse = await page.request.get(
+    `${liveConfig.supabaseUrl}/rest/v1/profiles?select=id,role,email,full_name&email=eq.${encodeURIComponent(
+      student.email
+    )}`,
+    {
+      headers: {
+        apikey: liveConfig.supabaseAnonKey,
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  const profileData = await profileResponse.json().catch(() => []);
+  const profile = Array.isArray(profileData) ? profileData[0] : null;
+
+  if (!profile) {
+    throw new Error(
+      `Student auth user exists but profile row was not found for ${student.email}`
+    );
+  }
+
+  if (profile.role !== "student") {
+    const updateResponse = await page.request.patch(
+      `${liveConfig.supabaseUrl}/rest/v1/profiles?id=eq.${profile.id}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          apikey: liveConfig.supabaseAnonKey,
+          Authorization: `Bearer ${accessToken}`,
+          Prefer: "return=representation",
+        },
+        data: {
+          role: "student",
+          full_name: "Student",
+          email: student.email,
+        },
+      }
+    );
+
+    if (!updateResponse.ok()) {
+      const updateBody = await updateResponse.json().catch(() => ({}));
+      throw new Error(
+        `Unable to normalize student profile role (${updateResponse.status()}): ${
+          updateBody.error || updateBody.message || updateBody.detail || "no response body"
+        }`
+      );
+    }
+  }
 }
 
 async function signIn(page, role, tabSelector = "#tab-lms") {
@@ -77,24 +180,15 @@ async function signIn(page, role, tabSelector = "#tab-lms") {
   }
 
   const expectedRoute = dashboardRoutes[role];
-  await page.goto("/pages/login.html");
-  await page.waitForLoadState("domcontentloaded");
+  await page.goto("/pages/login.html", { waitUntil: "domcontentloaded" });
 
   if (tabSelector !== "#tab-lms") {
     await page.locator(tabSelector).click();
   }
 
-  const isLmsRole =
-    role === "student" || role === "admin" || role === "trainer";
-  const emailField = isLmsRole
-    ? page.locator("#loginFormLMS #lms-email")
-    : page.locator("#loginFormStaff #staff-email");
-  const passwordField = isLmsRole
-    ? page.locator("#loginFormLMS #lms-password")
-    : page.locator("#loginFormStaff #staff-password");
-  const submitButton = isLmsRole
-    ? page.locator("#loginFormLMS button[type='submit']")
-    : page.locator("#loginFormStaff button[type='submit']");
+  const emailField = page.locator("#loginFormLMS #lms-email");
+  const passwordField = page.locator("#loginFormLMS #lms-password");
+  const submitButton = page.locator("#loginFormLMS button[type='submit']");
 
   await emailField.fill(user.email);
   await passwordField.fill(user.password);
@@ -292,8 +386,7 @@ async function findLiveQaLeftovers(page, { sinceIso, referenceIds = {} }) {
           refs.adminId,
           refs.trainerId,
           refs.marketerId,
-          refs.staffId,
-          ...qaProfiles.map((row) => row.id),
+      ...qaProfiles.map((row) => row.id),
         ].filter(Boolean)
       );
       const courseIds = new Set(qaCourses.map((row) => row.id));
@@ -440,6 +533,7 @@ module.exports = {
   assertLiveEnv,
   cleanupLiveData,
   findLiveQaLeftovers,
+  ensureStudentProvisioned,
   dashboardRoutes,
   deleteRow,
   ensureCleanupQueue,

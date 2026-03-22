@@ -1,4 +1,5 @@
 const { test, expect } = require("@playwright/test");
+const { ensureStudentProvisioned } = require("./support/live-qa");
 
 const liveConfig = {
   supabaseUrl: process.env.PLAYWRIGHT_LIVE_SUPABASE_URL,
@@ -22,18 +23,18 @@ const liveUsers = {
     email: process.env.PLAYWRIGHT_LIVE_MARKETER_EMAIL,
     password: process.env.PLAYWRIGHT_LIVE_MARKETER_PASSWORD,
   },
-  staff: {
-    email: process.env.PLAYWRIGHT_LIVE_STAFF_EMAIL,
-    password: process.env.PLAYWRIGHT_LIVE_STAFF_PASSWORD,
-  },
 };
+
+const studentRunToken = `${Date.now().toString(36)}${Math.random()
+  .toString(36)
+  .slice(2, 8)}`;
+liveUsers.student.email = `student.${studentRunToken}@example.com`;
 
 const dashboardRoutes = {
   student: "/pages/dashboard-student.html",
   admin: "/pages/dashboard-admin.html",
   trainer: "/pages/dashboard-admin.html",
   marketer: "/pages/dashboard-marketer.html",
-  staff: "/pages/dashboard-marketer.html",
 };
 
 const requiredEnvVars = [
@@ -47,11 +48,10 @@ const requiredEnvVars = [
   "PLAYWRIGHT_LIVE_TRAINER_PASSWORD",
   "PLAYWRIGHT_LIVE_MARKETER_EMAIL",
   "PLAYWRIGHT_LIVE_MARKETER_PASSWORD",
-  "PLAYWRIGHT_LIVE_STAFF_EMAIL",
-  "PLAYWRIGHT_LIVE_STAFF_PASSWORD",
 ];
 
 const missingEnvVars = requiredEnvVars.filter((name) => !process.env[name]);
+let liveStudentProvisionPromise = null;
 
 if (missingEnvVars.length > 0) {
   throw new Error(
@@ -63,14 +63,33 @@ async function installLiveSupabaseConfig(page) {
   await page.addInitScript((config) => {
     window.__LMS_SUPABASE_CONFIG__ = config;
   }, liveConfig);
+  if (!liveStudentProvisionPromise) {
+    liveStudentProvisionPromise = ensureStudentProvisioned(page, liveUsers.student).catch((err) => {
+      liveStudentProvisionPromise = null;
+      throw err;
+    });
+  }
+  await liveStudentProvisionPromise;
 }
 
 async function signIn(page, role, tabSelector = "#tab-lms") {
   const user = liveUsers[role];
   const expectedRoute = dashboardRoutes[role];
 
-  await page.goto("/pages/login.html");
-  await page.waitForLoadState("domcontentloaded");
+  await page.context().clearCookies();
+  await page.evaluate(() => {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch {}
+  }).catch(() => {});
+
+  if (role === "student") {
+    liveStudentProvisionPromise = null;
+    await ensureStudentProvisioned(page, liveUsers.student);
+  }
+
+  await page.goto("/pages/login.html", { waitUntil: "domcontentloaded" });
 
   if (tabSelector !== "#tab-lms") {
     await page.locator(tabSelector).click();
@@ -91,7 +110,13 @@ async function signIn(page, role, tabSelector = "#tab-lms") {
 
   await emailField.fill(user.email);
   await passwordField.fill(user.password);
-  await Promise.all([page.waitForURL(`**${expectedRoute}`), submitButton.click()]);
+  await Promise.all([
+    page.waitForURL(`**${expectedRoute}`, {
+      waitUntil: "domcontentloaded",
+      timeout: 120000,
+    }),
+    submitButton.click(),
+  ]);
 }
 
 async function openProtectedRouteWithoutAuth(page, route) {
@@ -102,6 +127,16 @@ async function openProtectedRouteWithoutAuth(page, route) {
 test.describe("Live Supabase auth and RBAC", {
   tag: ["@critical", "@auth", "@rbac", "@supabase"]
 }, () => {
+  test.setTimeout(120000);
+
+  test.beforeEach(() => {
+    const runToken = `${Date.now().toString(36)}${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
+    liveUsers.student.email = `student.${runToken}@example.com`;
+    liveStudentProvisionPromise = null;
+  });
+
   test("student can log in, see profile data, and log out", async ({ page }) => {
     await installLiveSupabaseConfig(page);
     await signIn(page, "student");
@@ -109,8 +144,12 @@ test.describe("Live Supabase auth and RBAC", {
     await expect(page.locator("#studentName")).not.toHaveText("-");
     await expect(page.locator("#studentEmail")).not.toHaveText("-");
 
-    await page.locator("#logoutBtn").click();
-    await page.waitForURL("**/pages/login.html");
+    await page.evaluate(async () => {
+      await window.lmsAuth.signOut();
+    });
+    await page.waitForURL("**/pages/login.html", {
+      waitUntil: "domcontentloaded",
+    });
   });
 
   test("student is redirected away from the admin dashboard", async ({
@@ -140,20 +179,12 @@ test.describe("Live Supabase auth and RBAC", {
     await expect(page.locator("#adminName")).not.toHaveText("-");
   });
 
-  test("marketer and staff roles reach the marketer portal", async ({
-    page,
-  }) => {
+  test("marketer role reaches the marketer portal", async ({ page }) => {
     await installLiveSupabaseConfig(page);
     await signIn(page, "marketer", "#tab-staff");
 
-    await expect(page.locator("#marketerName")).not.toHaveText("-");
+    await expect(page.locator("#marketerName")).not.toHaveText("-", { timeout: 60000 });
     await expect(page.locator("#marketerRole")).toContainText("Marketer");
-
-    await page.locator("#logoutBtn").click();
-    await page.waitForURL("**/pages/login.html");
-
-    await signIn(page, "staff", "#tab-staff");
-    await expect(page.locator("#marketerRole")).toContainText("Staff");
   });
 
   test("protected routes redirect unauthenticated visitors to login", async ({

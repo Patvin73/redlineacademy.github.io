@@ -161,7 +161,7 @@
       "name": "Marketer portal",
       "features": [
         {
-          "name": "Marketer/staff portal access control",
+          "name": "Marketer portal access control",
           "risk": "high",
           "coverage": "covered",
           "tier": "smoke",
@@ -189,7 +189,7 @@
             "@marketer",
             "@supabase"
           ],
-          "gap": "Live inserts now prove marketer/staff claim persistence and admin-only status escalation."
+          "gap": "Live inserts now prove marketer claim persistence plus admin-only status escalation."
         }
       ]
     },
@@ -292,7 +292,7 @@
     },
     {
       "tag": "@marketer",
-      "meaning": "Marketer and staff portal flows, including claims and portal access."
+      "meaning": "Marketer portal flows, including claims and role-gated access."
     },
     {
       "tag": "@supabase",
@@ -317,7 +317,7 @@
       "config": "playwright.config.js"
     },
     {
-      "name": "Live staging",
+      "name": "Live Supabase",
       "command": "npm run test:live",
       "scope": "Live Supabase auth and RBAC suite only",
       "config": "playwright.live.config.js"

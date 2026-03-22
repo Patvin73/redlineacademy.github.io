@@ -36,10 +36,10 @@ with checks as (
       from information_schema.columns
       where table_schema = 'public' and table_name = 'profiles' and column_name = 'marketer_id'
     ) then 'PASS' else 'FAIL' end,
-    'required for marketer/staff code mapping'
+    'required for marketer code mapping and staging staff aliasing'
   union all
   select
-    'profiles_role_check allows marketer/staff',
+    'profiles_role_check allows marketer plus staging staff alias',
     case when exists (
       select 1
       from pg_constraint c
@@ -49,7 +49,7 @@ with checks as (
         and pg_get_constraintdef(c.oid) ilike '%marketer%'
         and pg_get_constraintdef(c.oid) ilike '%staff%'
     ) then 'PASS' else 'FAIL' end,
-    'role check must include student/admin/trainer/marketer/staff'
+    'role check must include student/admin/trainer/marketer/staging staff alias'
   union all
   select
     'sequence student_code_seq exists',
@@ -103,7 +103,7 @@ with checks as (
     'required for auth trigger context'
   union all
   select
-    'function assign_user_role supports marketer/staff',
+    'function assign_user_role supports marketer plus staging staff alias',
     case when exists (
       select 1
       from pg_proc p

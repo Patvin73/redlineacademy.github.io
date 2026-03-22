@@ -1,4 +1,5 @@
 -- Supabase setup for Redline Academy LMS (student/admin/trainer)
+-- Staff is a staging-only alias that shares the marketer portal path.
 -- Safe to re-run in Supabase SQL Editor.
 
 create extension if not exists pgcrypto;

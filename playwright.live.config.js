@@ -1,4 +1,5 @@
 // @ts-check
+require("dotenv").config({ path: ".env.playwright.live" });
 const { defineConfig } = require("@playwright/test");
 
 const requiredEnvVars = [
@@ -12,8 +13,6 @@ const requiredEnvVars = [
   "PLAYWRIGHT_LIVE_TRAINER_PASSWORD",
   "PLAYWRIGHT_LIVE_MARKETER_EMAIL",
   "PLAYWRIGHT_LIVE_MARKETER_PASSWORD",
-  "PLAYWRIGHT_LIVE_STAFF_EMAIL",
-  "PLAYWRIGHT_LIVE_STAFF_PASSWORD",
 ];
 
 const missingEnvVars = requiredEnvVars.filter((name) => !process.env[name]);
@@ -26,7 +25,6 @@ if (missingEnvVars.length > 0) {
 
 module.exports = defineConfig({
   testDir: "tests",
-  testMatch: ["**/live-*.spec.js"],
   workers: 1,
   timeout: 30 * 1000,
   expect: {
@@ -37,10 +35,14 @@ module.exports = defineConfig({
     baseURL: "http://127.0.0.1:8000",
     trace: "on-first-retry",
   },
-  webServer: {
-    command: "node tools/static-server.js",
-    url: "http://127.0.0.1:8000",
-    reuseExistingServer: true,
-    timeout: 30 * 1000,
-  },
+  projects: [
+    {
+      name: "live-core",
+      testMatch: /live-(auth|write)\.spec\.js/,
+    },
+    {
+      name: "live-audit",
+      testMatch: /zz-live-cleanup-audit\.spec\.js/,
+    },
+  ],
 });

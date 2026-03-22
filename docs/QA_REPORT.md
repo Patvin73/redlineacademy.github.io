@@ -48,7 +48,7 @@ Covered: 12 | Partial: 2 | Missing: 0
 | --- | --- | --- | --- |
 | Smoke | `npm run test:smoke` | Playwright local suite filtered to `@critical` | `playwright.config.js` |
 | Full regression | `npm test` | All local Playwright tests except live Supabase specs | `playwright.config.js` |
-| Live staging | `npm run test:live` | Live Supabase auth and RBAC suite only | `playwright.live.config.js` |
+| Live Supabase | `npm run test:live` | Live Supabase auth and RBAC suite only | `playwright.live.config.js` |
 
 ## Tag Usage
 

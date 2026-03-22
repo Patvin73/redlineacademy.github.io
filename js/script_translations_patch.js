@@ -13,8 +13,8 @@ const newKeysID = {
 
   // Login tabs
   loginTabLMS:               "Login LMS",
-  loginTabStaff:             "Staff / Marketer",
-  staffLoginTitle:           "Staff / Marketer",
+  loginTabStaff:             "Marketer Portal",
+  staffLoginTitle:           "Marketer Portal",
   staffLoginBadge:           "Portal",
   staffLoginSubtitle:        "Masuk ke portal komisi & manajemen pemasaran.",
   staffLoginButton:          "Masuk ke Portal",
@@ -208,8 +208,8 @@ const newKeysEN = {
 
   // Login tabs
   loginTabLMS:               "LMS Login",
-  loginTabStaff:             "Staff / Marketer",
-  staffLoginTitle:           "Staff / Marketer",
+  loginTabStaff:             "Marketer Portal",
+  staffLoginTitle:           "Marketer Portal",
   staffLoginBadge:           "Portal",
   staffLoginSubtitle:        "Sign in to the commission & marketing management portal.",
   staffLoginButton:          "Sign In to Portal",
