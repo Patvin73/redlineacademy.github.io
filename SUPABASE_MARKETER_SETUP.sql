@@ -250,6 +250,7 @@ ALTER TABLE marketer_claims  ENABLE ROW LEVEL SECURITY;
 -- ── marketer_schools policies ──
 
 -- Marketer can view only their own schools
+DROP POLICY IF EXISTS "marketer_schools_select_own" ON marketer_schools;
 CREATE POLICY "marketer_schools_select_own"
   ON marketer_schools FOR SELECT
   USING (
@@ -261,6 +262,7 @@ CREATE POLICY "marketer_schools_select_own"
   );
 
 -- Marketer / staging staff alias can insert their own schools
+DROP POLICY IF EXISTS "marketer_schools_insert_own" ON marketer_schools;
 CREATE POLICY "marketer_schools_insert_own"
   ON marketer_schools FOR INSERT
   WITH CHECK (
@@ -272,6 +274,7 @@ CREATE POLICY "marketer_schools_insert_own"
   );
 
 -- Marketer / staging staff alias can update their own schools
+DROP POLICY IF EXISTS "marketer_schools_update_own" ON marketer_schools;
 CREATE POLICY "marketer_schools_update_own"
   ON marketer_schools FOR UPDATE
   USING (
@@ -283,6 +286,7 @@ CREATE POLICY "marketer_schools_update_own"
   );
 
 -- Admin can update any school
+DROP POLICY IF EXISTS "marketer_schools_update_admin" ON marketer_schools;
 CREATE POLICY "marketer_schools_update_admin"
   ON marketer_schools FOR UPDATE
   USING (
@@ -295,6 +299,7 @@ CREATE POLICY "marketer_schools_update_admin"
 -- ── marketer_claims policies ──
 
 -- Marketer can view only their own claims
+DROP POLICY IF EXISTS "marketer_claims_select_own" ON marketer_claims;
 CREATE POLICY "marketer_claims_select_own"
   ON marketer_claims FOR SELECT
   USING (
@@ -306,6 +311,7 @@ CREATE POLICY "marketer_claims_select_own"
   );
 
 -- Marketer / staging staff alias can insert their own claims (pending only)
+DROP POLICY IF EXISTS "marketer_claims_insert_own" ON marketer_claims;
 CREATE POLICY "marketer_claims_insert_own"
   ON marketer_claims FOR INSERT
   WITH CHECK (
@@ -318,6 +324,7 @@ CREATE POLICY "marketer_claims_insert_own"
   );
 
 -- Only admin can update claim status (verify/pay/reject)
+DROP POLICY IF EXISTS "marketer_claims_update_admin" ON marketer_claims;
 CREATE POLICY "marketer_claims_update_admin"
   ON marketer_claims FOR UPDATE
   USING (
