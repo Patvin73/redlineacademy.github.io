@@ -184,7 +184,8 @@ CREATE TABLE IF NOT EXISTS marketer_schools (
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN NEW.updated_at = NOW(); RETURN NEW; END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+SET search_path = public;
 
 DROP TRIGGER IF EXISTS trg_marketer_schools_updated ON marketer_schools;
 CREATE TRIGGER trg_marketer_schools_updated
