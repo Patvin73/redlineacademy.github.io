@@ -1,0 +1,13 @@
+{
+    "chat.mcp.serverSampling": {
+        "redlineacademy.github.io/.vscode/mcp.json: supabase": {
+            "allowedModels": [
+                "copilot/auto",
+                "copilotcli/claude-haiku-4.5",
+                "claude-code/claude-sonnet-4.6",
+                "copilot/gpt-4o",
+                "copilotcli/gpt-5-mini"
+            ]
+        }
+    }
+}
