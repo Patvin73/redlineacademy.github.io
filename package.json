@@ -14,7 +14,10 @@
     "test:live": "npm run test:live:core && npm run test:live:audit",
     "test:unit": "jest --passWithNoTests",
     "qa:report": "node tools/qa-observability.js report",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "seo:generate": "node tools/generate-seo-pages.js --input data/seo-keywords.sample.json --update-sitemap",
+    "seo:validate": "node scripts/validate-seo-structure.js",
+    "seo:build": "node tools/generate-seo-pages.js --input data/seo-keywords.sample.json --update-sitemap --overwrite && node scripts/validate-seo-structure.js"
   },
   "keywords": [],
   "author": "",

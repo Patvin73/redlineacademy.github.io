@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Test Language Switcher</title>
     <link rel="stylesheet" href="css/style.css" />
-  </head>
+    <link rel="canonical" href="https://redlineacademy.com.au/test-lang.html" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="description" content="Halaman utilitas internal Redline Academy." />
+</head>
   <body>
     <header>
       <div class="container">
@@ -14,7 +17,7 @@
             <img
               src="assets/images/redlinelogo.png"
               alt="Redline Academy Logo"
-            />
+            / loading="lazy" decoding="async">
           </div>
 
           <nav>
@@ -36,7 +39,7 @@
                   alt=""
                   class="flag"
                   aria-hidden="true"
-                />
+                / loading="lazy" decoding="async">
                 <span class="sr-only">Bahasa Indonesia</span>
               </button>
               <button class="lang-btn" data-lang="en" aria-label="English">
@@ -45,7 +48,7 @@
                   alt=""
                   class="flag"
                   aria-hidden="true"
-                />
+                / loading="lazy" decoding="async">
                 <span class="sr-only">English</span>
               </button>
             </div>
@@ -70,7 +73,7 @@
       console.log("Test page loaded");
       console.log("Window object exists:", typeof window);
     </script>
-    <script src="js/script.js"></script>
+    <script src="js/script.js" defer></script>
     <script>
       console.log("Script.js loaded");
       console.log("Translations available:", typeof translations);

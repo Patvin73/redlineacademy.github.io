@@ -13,7 +13,9 @@
     />
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/lms-marketer.css" />
-  </head>
+    <link rel="canonical" href="https://redlineacademy.com.au/pages/dashboard-marketer.html" />
+  <meta name="description" content="Halaman utilitas internal Redline Academy." />
+</head>
   <!-- data-lms-role tells guard.js which roles are allowed on this page.
        Staff is enabled at runtime only for staging/test environments. -->
   <body class="marketer-page" data-lms-role="marketer">
@@ -27,7 +29,7 @@
 
         <!-- Brand -->
         <a href="../index.html" class="mk-brand" aria-label="Redline Academy - Home">
-          <div class="mk-brand-mark" aria-hidden="true"><img src="../assets/images/dashboard-32x32.png" alt="" /></div>
+          <div class="mk-brand-mark" aria-hidden="true"><img src="../assets/images/dashboard-32x32.png" alt="" / loading="lazy" decoding="async"></div>
           <div class="mk-brand-text">
             <h1>Redline Academy</h1>
             <p data-i18n="staffPortalLabel">Marketing Portal</p>
@@ -96,7 +98,7 @@
                 alt=""
                 class="flag"
                 aria-hidden="true"
-              />
+              / loading="lazy" decoding="async">
               <span class="sr-only">Bahasa Indonesia</span>
             </button>
             <button class="lang-btn" data-lang="en" aria-label="English">
@@ -105,7 +107,7 @@
                 alt=""
                 class="flag"
                 aria-hidden="true"
-              />
+              / loading="lazy" decoding="async">
               <span class="sr-only">English</span>
             </button>
           </div>
@@ -925,12 +927,12 @@
           '"><\\/script>'
       );
     </script>
-    <script src="../js/script.js"></script>
-    <script src="../js/script_translations_patch.js"></script>
-    <script src="../js/supabase-client.js"></script>
-    <script src="../js/auth.js"></script>
-    <script src="../js/guard.js"></script>
-    <script src="../js/dashboard-marketer.js"></script>
+    <script src="../js/script.js" defer></script>
+    <script src="../js/script_translations_patch.js" defer></script>
+    <script src="../js/supabase-client.js" defer></script>
+    <script src="../js/auth.js" defer></script>
+    <script src="../js/guard.js" defer></script>
+    <script src="../js/dashboard-marketer.js" defer></script>
   </body>
 </html>
 

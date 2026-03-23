@@ -14,7 +14,9 @@
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/lms.css" />
     <link rel="stylesheet" href="../css/lms-student.css" />
-  </head>
+    <link rel="canonical" href="https://redlineacademy.com.au/pages/dashboard-student.html" />
+  <meta name="description" content="Halaman utilitas internal Redline Academy." />
+</head>
 
   <!-- ─── data-lms-role dipakai oleh guard.js untuk proteksi akses ─── -->
   <body class="lms-dashboard-page sd-body" data-lms-role="student">
@@ -39,7 +41,7 @@
             src="../assets/images/dashboard-32x32.png"
             alt="Redline Academy Logo"
             class="sd-logo-image"
-          />
+          / loading="lazy" decoding="async">
           <span class="sd-logo-text"><strong>Redline</strong> Academy</span>
         </a>
         <button
@@ -251,7 +253,7 @@
               alt=""
               class="flag"
               aria-hidden="true"
-            />
+            / loading="lazy" decoding="async">
             <span>ID</span>
           </button>
           <button
@@ -264,7 +266,7 @@
               alt=""
               class="flag"
               aria-hidden="true"
-            />
+            / loading="lazy" decoding="async">
             <span>EN</span>
           </button>
         </div>
@@ -1292,10 +1294,10 @@
           '"><\\/script>'
       );
     </script>
-    <script src="../js/script.js"></script>
-    <script src="../js/supabase-client.js"></script>
-    <script src="../js/auth.js"></script>
-    <script src="../js/guard.js"></script>
-    <script src="../js/dashboard-student.js"></script>
+    <script src="../js/script.js" defer></script>
+    <script src="../js/supabase-client.js" defer></script>
+    <script src="../js/auth.js" defer></script>
+    <script src="../js/guard.js" defer></script>
+    <script src="../js/dashboard-student.js" defer></script>
   </body>
 </html>

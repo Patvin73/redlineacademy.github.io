@@ -1,4 +1,11 @@
 User-agent: *
 Allow: /
+Disallow: /pages/login.html
+Disallow: /pages/dashboard-admin.html
+Disallow: /pages/dashboard-marketer.html
+Disallow: /pages/dashboard-student.html
+Disallow: /pages/payment_success.html
+Disallow: /pages/payment_failed.html
+Disallow: /test-lang.html
 
 Sitemap: https://redlineacademy.com.au/sitemap.xml
