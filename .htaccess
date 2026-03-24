@@ -1,9 +1,10 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # Force HTTPS
-  RewriteCond %{HTTPS} !=on
-  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  # Force the canonical HTTPS host for every request variant.
+  RewriteCond %{HTTPS} !=on [OR]
+  RewriteCond %{HTTP_HOST} !^redlineacademy\.com\.au$ [NC]
+  RewriteRule ^ https://redlineacademy.com.au%{REQUEST_URI} [L,R=301]
 </IfModule>
 
 <IfModule mod_headers.c>
