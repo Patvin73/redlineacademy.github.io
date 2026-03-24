@@ -10,7 +10,7 @@
       rgba(255, 245, 245, 0.5) 0%,
       rgba(255, 255, 255, 0.75) 100%
     ),
-    url("../assets/images/carer_in_the_park.png") center/cover no-repeat;
+    url("../assets/images/carer_in_the_park-optimized.jpg") center/cover no-repeat;
 }
 
 .lms-dashboard-page {

@@ -25,21 +25,21 @@ redlineacademy.github.io/
 |-- assets/
 |   |-- images/
 |   |   |-- apple-touch-icon.png
-|   |   |-- assistant_carer.png
-|   |   |-- barista.png
-|   |   |-- bartender.png
-|   |   |-- caregiver.jpg
-|   |   |-- carer_in_the_park.png
-|   |   |-- care_and_love.png
-|   |   |-- caring_hand.png
-|   |   |-- coding.jpg
-|   |   |-- cooking.png
+|   |   |-- assistant_carer-optimized.jpg
+|   |   |-- barista-optimized.jpg
+|   |   |-- bartender-optimized.jpg
+|   |   |-- care_and_love-optimized.jpg
+|   |   |-- caregiver-optimized.jpg
+|   |   |-- carer_in_the_park-optimized.jpg
+|   |   |-- caring_hand-optimized.jpg
+|   |   |-- coding-optimized.jpg
+|   |   |-- cooking-optimized.jpg
 |   |   |-- dashboard-32x32.png
-|   |   |-- elder_support.png
-|   |   |-- electrician.png
+|   |   |-- elder_support-optimized.jpg
+|   |   |-- electrician-optimized.jpg
 |   |   |-- favicon-16x16.png
 |   |   |-- favicon-32x32.png
-|   |   |-- hero_pict.png
+|   |   |-- hero_pict-optimized.jpg
 |   |   |-- redlinelogo.png
 |   |   |-- redlinewlogo.png
 |   |   |-- red_line.png
