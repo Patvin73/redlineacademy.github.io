@@ -912,11 +912,11 @@ Object.assign(translations.id, {
   articleHighlightsFocus: "Fokus",
   articleHighlightsIntent: "Intent",
   articleHighlightsLocation: "Lokasi",
-  articlesBlogSectionTitle: "Article & Blog",
+  articlesBlogSectionTitle: "Artikel & Blog",
   articlesBlogSectionDesc:
     "Jelajahi halaman blog utama dan kumpulan artikel caregiver dari Redline Academy. Setiap ringkasan di bawah ini bisa diklik untuk membuka halaman lengkapnya.",
   articlesBlogBadge: "Blog",
-  articlesArticleBadge: "Article",
+  articlesArticleBadge: "Artikel",
   articlesBlogMainTitle: "Blog Caregiver & Karier",
   articlesBlogMainDesc:
     "Baca kumpulan insight, edukasi caregiver, tips karier kesehatan, dan wawasan pelatihan vokasi untuk calon tenaga perawatan Indonesia.",
