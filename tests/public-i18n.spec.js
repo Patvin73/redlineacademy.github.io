@@ -156,6 +156,29 @@ async function installSupabaseStub(page, role = "admin") {
 }
 
 test.describe("Public content i18n", { tag: "@public" }, () => {
+  test("home and caregiver article pages have no missing i18n keys", async ({ page }) => {
+    const warnings = collectTranslationWarnings(page);
+    const routes = [
+      "/",
+      "/pages/pelatihan-caregiver-indonesia.html",
+      "/pages/biaya-pelatihan-caregiver-indonesia.html",
+      "/pages/cara-menjadi-caregiver-profesional-indonesia.html",
+      "/pages/kelas-caregiver-online-indonesia.html",
+      "/pages/kursus-caregiver-bersertifikat-indonesia.html",
+    ];
+
+    for (const route of routes) {
+      await page.goto(route);
+      await page.waitForLoadState("domcontentloaded");
+      await page.waitForTimeout(200);
+    }
+
+    await expect(
+      warnings,
+      "No translation warnings on home and caregiver article pages",
+    ).toHaveLength(0);
+  });
+
   test("blog and legal pages have no missing i18n keys", async ({ page }) => {
     const warnings = collectTranslationWarnings(page);
 
