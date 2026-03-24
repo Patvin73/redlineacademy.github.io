@@ -142,16 +142,26 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./ # folder yang mau di-upload (./  = semua file)
-          server-dir: /home/u838818830/domains/redlineacademy.com.au/public_html/ # folder tujuan di Hostinger
+          local-dir: ./ # deploy dari root repo, tetapi file non-runtime disaring lewat exclude
+          server-dir: /home/u838818830/domains/redlineacademy.com.au/public_html/ # web root aktif di Hostinger
           exclude: |
             **/.git*
             **/.github/**
             **/.vscode/**
             **/.venv/**
+            **/.agent/**
+            **/.agents/**
+            **/.claude/**
+            **/.trae/**
+            **/.windsurf/**
+            **/.npm-cache/**
+            **/.playwright-cli/**
             **/node_modules/**
             **/logs/**
             **/output/**
+            **/test-results/**
+            **/qa/**
+            **/tests/**
             **/tools/**
             **/docs/**
             **/*.md
@@ -160,3 +170,18 @@ jobs:
             **/test-lang.html
             **/uploads_private/**
             **/package*.json
+            **/jest.config.js
+            **/playwright*.js
+            **/eslint.config.js
+            **/.env*
+            **/tmp-*.txt
+            scripts/script.js
+            scripts/script_translations_patch.js
+            scripts/dashboard-admin.js
+            scripts/dashboard-marketer.js
+            scripts/dashboard-student.js
+            scripts/auth.js
+            scripts/guard.js
+            scripts/supabase-client.js
+            scripts/internal-links.js
+            scripts/validate-seo-structure.js
