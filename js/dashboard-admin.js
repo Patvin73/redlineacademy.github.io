@@ -1607,7 +1607,7 @@
             <div class="ad-avatar ad-avatar--sm">
               ${u.avatar_url ? `<img src="${escHtml(u.avatar_url)}" alt="" />` : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`}
             </div>
-            <p class="ad-table-user__name">${escHtml(u.full_name || "â€”")}</p>
+            <p class="ad-table-user__name">${escHtml(u.full_name || "-")}</p>
           </div>
         </td>
         <td style="color:var(--sd-text-muted);font-size:.82rem">${escHtml(u.email)}</td>

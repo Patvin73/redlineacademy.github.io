@@ -1,13 +1,13 @@
 ﻿<?php
 /**
  * submit_registration.php
- * Redline Academy â€” DOKU Checkout Integration
+ * Redline Academy - DOKU Checkout Integration
  *
  * Flow:
  *  1. Terima POST dari programs.html
  *  2. Validasi CSRF + input
  *  3. Hitung total di SERVER (tidak percaya nilai dari form)
- *  4. Panggil DOKU Checkout API â†’ dapat payment_url
+ *  4. Panggil DOKU Checkout API -> dapat payment_url
  *  5. Redirect user ke halaman pembayaran DOKU (hosted page)
  *
  * CHANGELOG (fixes):
@@ -15,24 +15,24 @@
  *  - [KRITIS] program_fee dihitung ulang di server (tidak dari POST)
  *  - [KRITIS] promo_discount divalidasi di server (tidak dari POST)
  *  - [KRITIS] line_items price disesuaikan dengan finalAmount (anti-reject DOKU)
- *  - [KRITIS] 'callback_url' â†’ 'notification_url' (field benar di DOKU v1)
+ *  - [KRITIS] 'callback_url' -> 'notification_url' (field benar di DOKU v1)
  *  - [PENTING] Tambah CSRF token protection
  *  - [PENTING] Tambah curl_error() handling
  *  - [PENTING] Tambah validasi format phone +62
  *  - [PENTING] Field payment_method dipass ke payload DOKU
- *  - [PENTING] Return type 'never' â†’ void + exit (kompatibel PHP 7.4+)
+ *  - [PENTING] Return type 'never' -> void + exit (kompatibel PHP 7.4+)
  *  - [INFO] Hapus field non-standar: auto_redirect, callback_url_key
  */
 
 require_once __DIR__ . '/db.php';
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-//  KONFIGURASI â€” ISI VIA ENVIRONMENT VARIABLE
+// -------------------------------------------------------------
+//  KONFIGURASI - ISI VIA ENVIRONMENT VARIABLE
 //  Jangan pernah hardcode kredensial di sini!
 //
 //  Di server (cPanel/VPS), set env var:
 //    DOKU_CLIENT_ID=BRN-xxxx-xxxx
 //    DOKU_SECRET_KEY=SK-xxxxxxxx
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -------------------------------------------------------------
 define('DOKU_CLIENT_ID',  getenv('DOKU_CLIENT_ID')  ?: '');
 define('DOKU_SECRET_KEY', getenv('DOKU_SECRET_KEY') ?: '');
 $envSandbox = getenv('DOKU_SANDBOX');
@@ -55,10 +55,10 @@ define('RATE_LIMIT_WINDOW_SEC', (int) (getenv('RATE_LIMIT_WINDOW_SEC') ?: 600));
 define('RATE_LIMIT_MAX', (int) (getenv('RATE_LIMIT_MAX') ?: 5));                 // default 5 request / window
 define('RATE_LIMIT_TRUST_PROXY', filter_var(getenv('RATE_LIMIT_TRUST_PROXY') ?? 'false', FILTER_VALIDATE_BOOLEAN));
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-//  HARGA & DISKON â€” SOURCE OF TRUTH DI SERVER
+// -------------------------------------------------------------
+//  HARGA & DISKON - SOURCE OF TRUTH DI SERVER
 //  Jangan pernah percaya nilai dari POST/form!
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -------------------------------------------------------------
 const PROGRAM_PRICES = [
     'assistant_carer' => 4_600_000,
     'bartender'       => 4_600_000,
@@ -90,9 +90,9 @@ const PROMO_CODES = [
 ];
 
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -------------------------------------------------------------
 //  HELPER FUNCTIONS
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -------------------------------------------------------------
 
 /** Redirect ke halaman gagal dengan pesan error */
 function redirectError(string $message): void
@@ -331,9 +331,9 @@ function dokuRequest(string $endpoint, array $payload): array
 }
 
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -------------------------------------------------------------
 //  MULAI PROSES REQUEST
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -------------------------------------------------------------
 
 // Pastikan server memiliki kredensial
 if (empty(DOKU_CLIENT_ID) || empty(DOKU_SECRET_KEY)) {
@@ -397,7 +397,7 @@ if (!preg_match('/^(\+62|62|0)[0-9]{8,13}$/', $phone)) {
     redirectError('Format nomor telepon tidak valid. Gunakan format: 08xx atau +628xx');
 }
 
-// 4. FIX: Hitung harga DI SERVER â€” tidak percaya nilai dari form
+// 4. FIX: Hitung harga DI SERVER - tidak percaya nilai dari form
 if (!array_key_exists($selectedProgram, PROGRAM_PRICES)) {
     redirectError('Program tidak valid.');
 }
@@ -410,7 +410,7 @@ $programLabel     = PROGRAM_NAMES[$selectedProgram];
 $planDiscountRate = PLAN_DISCOUNTS[$paymentPlan];
 $planDiscount     = (int) round($programFee * $planDiscountRate);
 
-// FIX: Validasi kode promo di server â€” tidak percaya nilai diskon dari form
+// FIX: Validasi kode promo di server - tidak percaya nilai diskon dari form
 $promoDiscount = 0;
 $promoRate     = 0.0;
 if (!empty($promoCode)) {
