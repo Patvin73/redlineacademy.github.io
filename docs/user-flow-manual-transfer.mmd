@@ -1,0 +1,57 @@
+flowchart TD
+    visitor([Visitor / Calon Peserta])
+    publicPages[Halaman Publik<br/>index / about / programs / contact / blog]
+    contactFlow[Form Kontak<br/>Formspree]
+    programs[Halaman Program<br/>Enroll Form]
+    paymentChoice[Pilih Program + Skema Bayar +<br/>Metode Manual Transfer]
+    enrollSubmit[Submit Form Pendaftaran]
+    enrollEdge[Supabase Edge Function<br/>public-enroll]
+    profileCreate[Buat / Update Profile<br/>role student]
+    paymentPending[Buat / Update Payment<br/>status pending]
+    adminLogin[Admin Login]
+    adminDashboard[Admin Dashboard<br/>Enrollments & Payments]
+    verifyPayment{Transfer valid?}
+    paymentCompleted[Update Payment<br/>status completed]
+    paymentStillPending[Status tetap pending<br/>atau minta klarifikasi]
+    studentLogin[Student Login]
+    studentDashboard[Student Dashboard]
+    marketerLogin[Marketer Login]
+    marketerDashboard[Marketer Portal]
+    marketerOps[Sekolah / Klaim Komisi / Laporan]
+
+    visitor --> publicPages
+    publicPages --> contactFlow
+    publicPages --> programs
+    publicPages --> studentLogin
+    publicPages --> marketerLogin
+
+    programs --> paymentChoice
+    paymentChoice --> enrollSubmit
+    enrollSubmit --> enrollEdge
+    enrollEdge --> profileCreate
+    enrollEdge --> paymentPending
+
+    adminLogin --> adminDashboard
+    paymentPending --> adminDashboard
+    adminDashboard --> verifyPayment
+    verifyPayment -->|Ya| paymentCompleted
+    verifyPayment -->|Belum| paymentStillPending
+    paymentStillPending --> adminDashboard
+
+    studentLogin --> studentDashboard
+    paymentCompleted -.aktivasi operasional.-> studentDashboard
+
+    marketerLogin --> marketerDashboard
+    marketerDashboard --> marketerOps
+
+    classDef public fill:#f5f1e8,stroke:#7a5c2e,color:#2e2416
+    classDef action fill:#fff8e1,stroke:#a36a00,color:#332100
+    classDef system fill:#e9f5ff,stroke:#2c6e9b,color:#17384d
+    classDef admin fill:#fdecec,stroke:#b84a4a,color:#4a1818
+    classDef user fill:#edf7ed,stroke:#4d8a57,color:#17351d
+
+    class visitor,publicPages,contactFlow public
+    class programs,paymentChoice,enrollSubmit action
+    class enrollEdge,profileCreate,paymentPending system
+    class adminLogin,adminDashboard,verifyPayment,paymentCompleted,paymentStillPending admin
+    class studentLogin,studentDashboard,marketerLogin,marketerDashboard,marketerOps user

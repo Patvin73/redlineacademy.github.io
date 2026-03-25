@@ -1,0 +1,68 @@
+flowchart LR
+    subgraph Public["Public Journey"]
+        v1([Visitor])
+        v2[Browse Home / About / Blog / Contact]
+        v3[Open Programs]
+        v4[Fill Enrollment Form]
+        v5[Choose Manual Transfer]
+        v6[Submit to public-enroll]
+        v7[Student profile created or updated]
+        v8[Payment record created as pending]
+
+        v1 --> v2 --> v3 --> v4 --> v5 --> v6 --> v7 --> v8
+    end
+
+    subgraph Student["Student Journey"]
+        s1[Login via LMS tab]
+        s2{Role = student?}
+        s3[Student Dashboard]
+        s4[Access courses, assignments,<br/>schedule, certificates]
+
+        s1 --> s2
+        s2 -->|Ya| s3 --> s4
+    end
+
+    subgraph Admin["Admin Journey"]
+        a1[Login via LMS tab]
+        a2{Role = admin or trainer?}
+        a3[Admin Dashboard]
+        a4[Open Enrollments & Payments]
+        a5[Review manual transfer]
+        a6{Proof and amount valid?}
+        a7[Keep pending / follow up]
+        a8[Mark payment completed]
+        a9[Continue admin operations:<br/>students, courses, reports]
+
+        a1 --> a2
+        a2 -->|Ya| a3 --> a4 --> a5 --> a6
+        a6 -->|Belum| a7 --> a4
+        a6 -->|Ya| a8 --> a9
+    end
+
+    subgraph Marketer["Marketer Journey"]
+        m1[Login via Marketer Portal tab]
+        m2{Role = marketer?}
+        m3[Marketer Dashboard]
+        m4[Manage schools]
+        m5[Submit commission claims]
+        m6[View commission reports]
+
+        m1 --> m2
+        m2 -->|Ya| m3
+        m3 --> m4
+        m3 --> m5
+        m3 --> m6
+    end
+
+    v8 --> a4
+    a8 -.verified payment enables operational onboarding.-> s3
+
+    classDef public fill:#f5f1e8,stroke:#7a5c2e,color:#2e2416
+    classDef student fill:#edf7ed,stroke:#4d8a57,color:#17351d
+    classDef admin fill:#fdecec,stroke:#b84a4a,color:#4a1818
+    classDef marketer fill:#e9f5ff,stroke:#2c6e9b,color:#17384d
+
+    class v1,v2,v3,v4,v5,v6,v7,v8 public
+    class s1,s2,s3,s4 student
+    class a1,a2,a3,a4,a5,a6,a7,a8,a9 admin
+    class m1,m2,m3,m4,m5,m6 marketer

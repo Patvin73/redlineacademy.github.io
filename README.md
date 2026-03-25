@@ -1,227 +1,56 @@
-# Redline Academy - Static Website
+# Redline Academy
 
-Website statis Redline Academy dengan dukungan 2 bahasa (`id` dan `en`), halaman publik, serta modul LMS sederhana (login + dashboard student/admin).  
-Redline Academy static website with 2-language support (`id` and `en`), public pages, and a simple LMS module (login + student/admin dashboards).
+Website Redline Academy dengan halaman publik bilingual (`id` dan `en`) serta modul LMS dan operasional yang terhubung ke Supabase.
 
-## Ringkasan | Overview
+## Overview
 
-- Tanpa build step (HTML, CSS, JavaScript vanilla).  
-  No build step required (HTML, CSS, vanilla JavaScript).
-- Multi-language via atribut `data-i18n` dan objek `translations` di `js/script.js`.  
-  Multi-language support via `data-i18n` attributes and the `translations` object in `js/script.js`.
-- Form registrasi publik diproses oleh `submit_registration.php`.  
-  Public registration form is handled by `submit_registration.php`.
-- Modul LMS frontend terhubung ke Supabase (`js/supabase-client.js`, `js/auth.js`, `js/guard.js`).  
-  LMS frontend is connected to Supabase (`js/supabase-client.js`, `js/auth.js`, `js/guard.js`).
+- Frontend publik menggunakan HTML, CSS, dan JavaScript vanilla.
+- Mendukung multi-language melalui `data-i18n` dan dictionary di `js/script.js`.
+- Login dan dashboard berbasis role tersedia untuk `student`, `admin`/`trainer`, dan `marketer`.
+- Pendaftaran publik saat ini dikirim ke Supabase Edge Function `public-enroll`.
+- Pembayaran sementara menggunakan manual transfer dan diverifikasi oleh admin.
 
-## Struktur Repository (Detail) | Repository Structure (Detailed)
+## Architecture
 
-```text
-redlineacademy.github.io/
-|-- .github/
-|   `-- copilot-instructions.md
-|-- .vscode/
-|   `-- sftp.json
-|-- assets/
-|   |-- images/
-|   |   |-- apple-touch-icon.png
-|   |   |-- assistant_carer-optimized.jpg
-|   |   |-- barista-optimized.jpg
-|   |   |-- bartender-optimized.jpg
-|   |   |-- care_and_love-optimized.jpg
-|   |   |-- caregiver-optimized.jpg
-|   |   |-- carer_in_the_park-optimized.jpg
-|   |   |-- caring_hand-optimized.jpg
-|   |   |-- coding-optimized.jpg
-|   |   |-- cooking-optimized.jpg
-|   |   |-- dashboard-32x32.png
-|   |   |-- elder_support-optimized.jpg
-|   |   |-- electrician-optimized.jpg
-|   |   |-- favicon-16x16.png
-|   |   |-- favicon-32x32.png
-|   |   |-- hero_pict-optimized.jpg
-|   |   |-- redlinelogo.png
-|   |   |-- redlinewlogo.png
-|   |   |-- red_line.png
-|   |   |-- user_registration.png
-|   |   `-- flags/
-|   |       |-- en.png
-|   |       `-- id.png
-|   `-- videos/
-|       |-- dengan_kakek.mp4
-|       `-- with_grandma.mp4
-|-- css/
-|   |-- lms-admin.css
-|   |-- lms-student.css
-|   |-- lms.css
-|   `-- style.css
-|-- js/
-|   |-- auth.js
-|   |-- dashboard-admin.js
-|   |-- dashboard-student.js
-|   |-- guard.js
-|   |-- script.js
-|   `-- supabase-client.js
-|-- pages/
-|   |-- about.html
-|   |-- blog.html
-|   |-- contact.html
-|   |-- dashboard-admin.html
-|   |-- dashboard-student.html
-|   |-- legal.html
-|   |-- login.html
-|   `-- programs.html
-|-- tools/
-|   `-- generate_favicons.py
-|-- CHANGELOG.md
-|-- favicon.ico
-|-- index.html
-|-- LMS_QUICKSTART.md
-|-- package-lock.json
-|-- package.json
-|-- README.md
-|-- robots.txt
-|-- serve_favicon.ps1
-|-- serve_one.ps1
-|-- sitemap.xml
-|-- submit_registration.php
-|-- SUPABASE_LMS_SETUP.sql
-|-- SUPABASE_USER_ROLE_TEMPLATE.sql
-`-- test-lang.html
-```
+Repo ini bersifat `hybrid`:
 
-Catatan: folder `node_modules/` ada di local environment dan tidak didokumentasikan rinci di atas.  
-Note: `node_modules/` exists in local environment and is intentionally not listed in detail above.
+- `Static frontend`: halaman publik di `index.html` dan folder `pages/`
+- `Dynamic app layer`: auth, session, role guard, dan dashboard berbasis Supabase
+- `Legacy backend`: beberapa file PHP lama masih ada di repo, tetapi bukan jalur utama untuk flow aktif saat ini
 
-## Bagan Struktur | Structure Diagram (Mermaid)
+## Main Pages
 
-```mermaid
-flowchart TD
-    ROOT[redlineacademy.github.io]
+- Public:
+  `/index.html`, `/pages/about.html`, `/pages/programs.html`, `/pages/contact.html`, `/pages/blog.html`
+- App:
+  `/pages/login.html`, `/pages/dashboard-student.html`, `/pages/dashboard-admin.html`, `/pages/dashboard-marketer.html`
 
-    ROOT --> A[assets/]
-    ROOT --> C[css/]
-    ROOT --> J[js/]
-    ROOT --> P[pages/]
-    ROOT --> T[tools/]
-    ROOT --> F1[index.html]
-    ROOT --> F2[submit_registration.php]
-    ROOT --> F3[sitemap.xml]
-    ROOT --> F4[robots.txt]
-    ROOT --> F5[LMS_QUICKSTART.md]
-    ROOT --> F6[SUPABASE_LMS_SETUP.sql]
-    ROOT --> F7[SUPABASE_USER_ROLE_TEMPLATE.sql]
+## Key Files
 
-    A --> A1[images/]
-    A --> A2[videos/]
-    A1 --> A1a[flags/]
-    A1a --> A1b[id.png]
-    A1a --> A1c[en.png]
+- `js/script.js`: i18n dan interaksi UI publik
+- `js/auth.js`: login, logout, dan redirect berbasis role
+- `js/guard.js`: proteksi akses dashboard
+- `scripts/dashboard-admin.js`: logika dashboard admin/trainer
+- `scripts/dashboard-marketer.js`: logika portal marketer
+- `supabase/functions/public-enroll/index.ts`: endpoint aktif untuk pendaftaran publik
 
-    C --> C1[style.css]
-    C --> C2[lms.css]
-    C --> C3[lms-admin.css]
-    C --> C4[lms-student.css]
+## User Flow
 
-    J --> J1[script.js (i18n + UI logic)]
-    J --> J2[supabase-client.js]
-    J --> J3[auth.js]
-    J --> J4[guard.js]
-    J --> J5[dashboard-admin.js]
-    J --> J6[dashboard-student.js]
+- Ringkas: `docs/user-flow-manual-transfer.mmd`
+- Per role: `docs/user-flow-by-role.mmd`
 
-    P --> P1[about.html]
-    P --> P2[programs.html]
-    P --> P3[contact.html]
-    P --> P4[blog.html]
-    P --> P5[legal.html]
-    P --> P6[login.html]
-    P --> P7[dashboard-admin.html]
-    P --> P8[dashboard-student.html]
-```
-
-## Peta Halaman | Page Map
-
-- Publik | Public:
-  - `/index.html`
-  - `/pages/about.html`
-  - `/pages/programs.html`
-  - `/pages/contact.html`
-  - `/pages/blog.html`
-  - `/pages/legal.html`
-- LMS:
-  - `/pages/login.html`
-  - `/pages/dashboard-student.html`
-  - `/pages/dashboard-admin.html`
-
-## Komponen Penting | Key Components
-
-- `js/script.js`: dictionary terjemahan + logika pergantian bahasa.  
-  `js/script.js`: translation dictionary + language switching logic.
-- `js/supabase-client.js`: inisialisasi Supabase client di frontend.  
-  `js/supabase-client.js`: Supabase client initialization on frontend.
-- `js/auth.js`: login/logout + redirect dashboard berbasis role.  
-  `js/auth.js`: login/logout + role-based dashboard redirect.
-- `js/guard.js`: proteksi/validasi akses halaman LMS.  
-  `js/guard.js`: LMS page access guard/validation.
-- `submit_registration.php`: endpoint server-side untuk submit registrasi.  
-  `submit_registration.php`: server-side endpoint for registration submission.
-- `SUPABASE_LMS_SETUP.sql` dan `SUPABASE_USER_ROLE_TEMPLATE.sql`: template setup database dan role.  
-  `SUPABASE_LMS_SETUP.sql` and `SUPABASE_USER_ROLE_TEMPLATE.sql`: database and role setup templates.
-
-## Menjalankan Secara Lokal | Run Locally
-
-1. Buka terminal di root project.  
-   Open terminal in the project root.
-2. Jalankan static server:  
-   Start the static server:
+## Run Locally
 
 ```bash
 python -m http.server 8000
 ```
 
-3. Buka `http://localhost:8000` di browser.  
-   Open `http://localhost:8000` in your browser.
+Lalu buka `http://localhost:8000`.
 
-Alternatif Windows | Windows helpers:
-
-- `serve_one.ps1` untuk skenario serve halaman tertentu.  
-  `serve_one.ps1` for single-page serve scenarios.
-- `serve_favicon.ps1` untuk validasi favicon route.  
-  `serve_favicon.ps1` for favicon route checks.
-
-## Workflow Multi-language | Internationalization Workflow
-
-1. Tambahkan `data-i18n="yourKey"` pada elemen HTML.  
-   Add `data-i18n="yourKey"` to HTML elements.
-2. Tambahkan `yourKey` pada `translations.id` dan `translations.en` di `js/script.js`.  
-   Add `yourKey` to both `translations.id` and `translations.en` in `js/script.js`.
-3. Pastikan konten yang harus diterjemahkan tidak hardcoded di luar alur i18n.  
-   Ensure translatable content is not hardcoded outside the i18n flow.
-
-## Deployment
-
-Target deployment yang cocok | Suitable deployment targets:
-
-- GitHub Pages
-- Netlify
-- Vercel (static mode)
-- Shared/static hosting lainnya | Other static/shared hosting
-
-Checklist sebelum deploy | Pre-deploy checklist:
-
-- Perbarui `sitemap.xml` jika URL berubah.  
-  Update `sitemap.xml` when URLs change.
-- Pastikan `robots.txt` sesuai environment target.  
-  Verify `robots.txt` for the target environment.
-- Cek ulang path aset relatif pada semua file di `pages/`.  
-  Recheck relative asset paths in all files under `pages/`.
-
-## Kontak Redline Academy | Redline Academy Contact
+## Contact
 
 - Email: `hello@redlineacademy.com.au`
-- Telepon | Phone: `+61 408 578 253` `+62 821-2017-1731`
+- Phone: `+61 408 578 253`
+- Indonesia: `+62 821-2017-1731`
 
----
-
-**Developed and maintained by Patrio Vincentio, Email: patvin73@gmail.com** Update: 2026-03-08
+Develop & Design by Patrio Vincentio, email patvin73@gmail.com
