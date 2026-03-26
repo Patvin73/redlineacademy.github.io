@@ -1686,9 +1686,13 @@
 
       let totalRevenue = 0;
       let pending = 0;
+      let revenueCurrency = "IDR";
 
       data.forEach((p) => {
-        if (p.status === "completed") totalRevenue += parseFloat(p.amount || 0);
+        if (p.status === "completed") {
+          totalRevenue += parseFloat(p.amount || 0);
+          revenueCurrency = p.currency || revenueCurrency;
+        }
         if (p.status === "pending")   pending++;
 
         const statusPaid = tSafe("lmsStatusPaid", "Paid");
@@ -1727,7 +1731,7 @@
 
       if ($("payTotal"))   $("payTotal").textContent   = data.length;
       if ($("payPending")) $("payPending").textContent = pending;
-      if ($("payRevenue")) $("payRevenue").textContent = formatCurrency(totalRevenue, "IDR");
+      if ($("payRevenue")) $("payRevenue").textContent = formatCurrency(totalRevenue, revenueCurrency);
 
     } catch { if (empty) empty.style.display = "table-row"; }
   }

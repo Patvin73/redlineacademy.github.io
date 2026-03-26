@@ -1509,6 +1509,8 @@ function setLanguage(lang) {
   }
 }
 
+window.setLanguage = setLanguage;
+
 function t(key) {
   // Prefer current language, fall back to Indonesian, then English, then key
   if (translations[currentLanguage] && translations[currentLanguage][key]) {
@@ -1522,6 +1524,8 @@ function t(key) {
   }
   return key;
 }
+
+window.t = t;
 
 function getArticleSeoConfig() {
   const path = window.location.pathname;
@@ -1663,6 +1667,8 @@ function updatePageLanguage() {
   updatePageTitle();
   updateSeoMetadata();
 }
+
+window.updatePageLanguage = updatePageLanguage;
 
 function updatePageTitle() {
   const path = window.location.pathname;

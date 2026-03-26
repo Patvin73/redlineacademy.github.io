@@ -48,8 +48,7 @@
   let schools = []; // from Supabase
   let claims = []; // from Supabase
 
-  /* Section */
-     1.  TAB NAVIGATION
+  /* 1. TAB NAVIGATION */
 
   function initTabs() {
     const tabs = $$(".mk-nav-tab");
@@ -128,8 +127,7 @@
     });
   }
 
-  /* Section */
-     2.  LOAD PROFILE (from guard.js via Supabase)
+  /* 2. LOAD PROFILE (from guard.js via Supabase) */
 
   async function loadProfile() {
     if (!window.lmsAuth) return;
@@ -161,8 +159,7 @@
         "M")[0].toUpperCase();
   }
 
-  /* Section */
-     3.  SCHOOLS (Supabase table: marketer_schools)
+  /* 3. SCHOOLS (Supabase table: marketer_schools) */
 
   async function loadSchools() {
     if (!window.lmsSupabase || !marketerProfile) return;
@@ -353,8 +350,7 @@
     document.getElementById("schoolNotes").value = school.notes || "";
   }
 
-  /* Section */
-     4.  COMMISSION CALCULATOR (live)
+  /* 4. COMMISSION CALCULATOR (live) */
 
   function initCalculator() {
     const studentsPresent = document.getElementById("claimStudentsPresent");
@@ -423,8 +419,7 @@
     }
   }
 
-  /* Section */
-     5.  CLAIM FORM SUBMIT
+  /* 5. CLAIM FORM SUBMIT */
 
   function initClaimForm() {
     initCalculator();
@@ -533,8 +528,7 @@
     }
   }
 
-  /* Section */
-     6.  CLAIMS / REPORTS (Supabase table: marketer_claims)
+  /* 6. CLAIMS / REPORTS (Supabase table: marketer_claims) */
 
   async function loadClaims() {
     if (!window.lmsSupabase || !marketerProfile) return;
@@ -776,8 +770,7 @@
     if (backBtn) backBtn.addEventListener("click", showReportsList);
   }
 
-  /* 7. Init */
-     7.  INIT
+  /* 7. INIT */
 
   async function init() {
     initTabs();

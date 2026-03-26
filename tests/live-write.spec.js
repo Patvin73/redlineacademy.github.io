@@ -209,62 +209,60 @@ async function deleteRow(page, table, filters, select = "id") {
 }
 
 async function cleanupLiveData(page) {
-  while (cleanupQueue.length > 0) {
-    const { tableName, filters } = cleanupQueue.pop();
-    const authResponse = await fetch(
-      `${liveConfig.supabaseUrl}/auth/v1/token?grant_type=password`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: liveConfig.supabaseAnonKey,
-          Authorization: `Bearer ${liveConfig.supabaseAnonKey}`,
-        },
-        body: JSON.stringify({
-          email: liveUsers.admin.email,
-          password: liveUsers.admin.password,
-        }),
-      }
+  if (cleanupQueue.length === 0) return;
+
+  const authResponse = await page.request.post(
+    `${liveConfig.supabaseUrl}/auth/v1/token?grant_type=password`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        apikey: liveConfig.supabaseAnonKey,
+        Authorization: `Bearer ${liveConfig.supabaseAnonKey}`,
+      },
+      data: {
+        email: liveUsers.admin.email,
+        password: liveUsers.admin.password,
+      },
+    }
+  );
+
+  const authBody = await authResponse.json().catch(() => ({}));
+  const accessToken = authBody?.access_token;
+  if (!authResponse.ok() || !accessToken) {
+    throw new Error(
+      `Unable to sign in as admin for live cleanup: ${
+        authBody?.error_description ||
+        authBody?.message ||
+        authBody?.msg ||
+        `status ${authResponse.status()}`
+      }`
     );
+  }
 
-    const authBody = await authResponse.json().catch(() => ({}));
-    const accessToken = authBody?.access_token;
-    if (!authResponse.ok || !accessToken) {
-      throw new Error(
-        `Unable to sign in as admin for live cleanup: ${
-          authBody?.error_description ||
-          authBody?.message ||
-          authBody?.msg ||
-          `status ${authResponse.status()}`
-        }`
-      );
+  const cleanupResponse = await page.request.post(
+    `${liveConfig.supabaseUrl}/functions/v1/admin-live-cleanup`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+        apikey: liveConfig.supabaseAnonKey,
+      },
+      data: {
+        entries: cleanupQueue.splice(0).reverse().map(({ tableName, filters }) => ({
+          table: tableName,
+          filters,
+        })),
+      },
     }
+  );
 
-    const params = new URLSearchParams();
-    for (const [column, value] of Object.entries(filters)) {
-      params.set(column, `eq.${value}`);
-    }
-
-    const deleteResponse = await fetch(
-      `${liveConfig.supabaseUrl}/rest/v1/${tableName}?${params.toString()}`,
-      {
-        method: "DELETE",
-        headers: {
-          apikey: liveConfig.supabaseAnonKey,
-          Authorization: `Bearer ${accessToken}`,
-          Prefer: "return=representation",
-        },
-      }
+  const cleanupBody = await cleanupResponse.json().catch(() => ({}));
+  if (!cleanupResponse.ok()) {
+    throw new Error(
+      `Unable to cleanup live QA data (${cleanupResponse.status()}): ${
+        cleanupBody.error || cleanupBody.detail || cleanupBody.message || "no response body"
+      }`
     );
-
-    if (!deleteResponse.ok) {
-      const deleteBody = await deleteResponse.json().catch(() => ({}));
-      throw new Error(
-        `Unable to cleanup ${tableName}: ${
-          deleteBody.error || deleteBody.message || deleteBody.detail || `status ${deleteResponse.status()}`
-        }`
-      );
-    }
   }
 }
 
@@ -702,7 +700,7 @@ test.describe.serial("Live Supabase write workflows", {
         presentation_date: new Date().toISOString().slice(0, 10),
         students_present: 24,
         students_enrolled: 11,
-        program_fee: 8900000,
+        program_fee: 4600000,
         access_fee: 1000000,
         enrollment_comm: 1200000,
         bonus: 500000,

@@ -261,17 +261,57 @@ async function cleanupLiveData(page) {
     return items;
   });
 
-  for (const item of queue.reverse()) {
-    await page.evaluate(async ({ tableName, where }) => {
-      if (!window.lmsSupabase) return;
+  if (queue.length === 0) return;
 
-      let query = window.lmsSupabase.from(tableName).delete();
-      for (const [column, value] of Object.entries(where)) {
-        query = query.eq(column, value);
-      }
+  const authResponse = await page.request.post(
+    `${liveConfig.supabaseUrl}/auth/v1/token?grant_type=password`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        apikey: liveConfig.supabaseAnonKey,
+        Authorization: `Bearer ${liveConfig.supabaseAnonKey}`,
+      },
+      data: {
+        email: liveUsers.admin.email,
+        password: liveUsers.admin.password,
+      },
+    }
+  );
 
-      await query;
-    }, { tableName: item.table, where: item.filters });
+  const authBody = await authResponse.json().catch(() => ({}));
+  const accessToken = authBody?.access_token;
+  if (!authResponse.ok() || !accessToken) {
+    throw new Error(
+      `Unable to sign in as admin for live cleanup: ${
+        authBody?.error_description ||
+        authBody?.message ||
+        authBody?.msg ||
+        `status ${authResponse.status()}`
+      }`
+    );
+  }
+
+  const cleanupResponse = await page.request.post(
+    `${liveConfig.supabaseUrl}/functions/v1/admin-live-cleanup`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+        apikey: liveConfig.supabaseAnonKey,
+      },
+      data: {
+        entries: queue.slice().reverse(),
+      },
+    }
+  );
+
+  const cleanupBody = await cleanupResponse.json().catch(() => ({}));
+  if (!cleanupResponse.ok()) {
+    throw new Error(
+      `Unable to cleanup live QA data (${cleanupResponse.status()}): ${
+        cleanupBody.error || cleanupBody.detail || cleanupBody.message || "no response body"
+      }`
+    );
   }
 }
 

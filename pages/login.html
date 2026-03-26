@@ -97,6 +97,7 @@
               type="email"
               required
               autocomplete="email"
+              data-i18n="emailPlaceholder"
               placeholder="email@example.com"
             />
 
@@ -107,6 +108,7 @@
               type="password"
               required
               autocomplete="current-password"
+              data-i18n="lmsPasswordPlaceholder"
               placeholder="Password"
             />
 
@@ -134,6 +136,7 @@
               type="email"
               required
               autocomplete="email"
+              data-i18n="emailPlaceholder"
               placeholder="email@example.com"
             />
 
@@ -144,6 +147,7 @@
               type="password"
               required
               autocomplete="current-password"
+              data-i18n="lmsPasswordPlaceholder"
               placeholder="Password"
             />
 
@@ -177,43 +181,187 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
 
-        // 1. Merge i18n patch ke window.translations
-        if (window.translations && window.__loginI18nPatch) {
+        // 1. Merge i18n patch ke store i18n global yang tersedia
+        var loginFallbackTranslations = {
+          id: {
+            email: "Email",
+            emailPlaceholder: "Email Anda",
+            password: "Password",
+            lmsPasswordPlaceholder: "Masukkan password Anda",
+            lmsLoginTitle: "Login LMS",
+            lmsLoginSubtitle: "Masuk dengan akun resmi Redline Academy.",
+            lmsLoginButton: "Masuk",
+            lmsBackToSite: "Kembali ke website utama",
+          },
+          en: {
+            email: "Email",
+            emailPlaceholder: "Your Email",
+            password: "Password",
+            lmsPasswordPlaceholder: "Enter your password",
+            lmsLoginTitle: "LMS Login",
+            lmsLoginSubtitle: "Sign in with your official Redline Academy account.",
+            lmsLoginButton: "Sign In",
+            lmsBackToSite: "Back to main website",
+          },
+        };
+        var translationStore =
+          window.translations ||
+          (typeof translations !== "undefined" ? translations : null) ||
+          loginFallbackTranslations;
+
+        if (!window.translations) {
+          window.translations = translationStore;
+        }
+
+        if (translationStore && window.__loginI18nPatch) {
           Object.keys(window.__loginI18nPatch).forEach(function (lang) {
-            if (window.translations[lang]) {
-              Object.assign(window.translations[lang], window.__loginI18nPatch[lang]);
+            if (translationStore[lang]) {
+              Object.assign(translationStore[lang], window.__loginI18nPatch[lang]);
             }
           });
-          if (typeof updatePageLanguage === "function") updatePageLanguage();
+          if (typeof window.updatePageLanguage === "function") {
+            window.updatePageLanguage();
+          } else if (typeof updatePageLanguage === "function") {
+            updatePageLanguage();
+          }
         }
 
         // 2. Helper
         function tSafe(key, fallback) {
+          if (typeof window.t === "function") return window.t(key);
           return typeof t === "function" ? t(key) : fallback;
         }
 
-        // 3. Terapkan label yang tidak pakai data-i18n
-        function applyStaffLabels() {
-          var map = {
-            tabLabelLMS:      ["loginTabLMS",      "Login LMS"],
-            tabLabelStaff:    ["loginTabStaff",    "Marketer Portal"],
-            staffPanelTitle:  ["staffLoginTitle",  "Marketer Portal"],
-            staffPanelBadge:  ["staffLoginBadge",  "Portal"],
-            staffPanelSubtitle:["staffLoginSubtitle","Masuk ke portal komisi & manajemen pemasaran."],
-            staffLoginBtn:    ["staffLoginButton", "Masuk ke Portal"],
+        function translateLogin(key, fallback, lang) {
+          if (
+            translationStore &&
+            translationStore[lang] &&
+            Object.prototype.hasOwnProperty.call(translationStore[lang], key)
+          ) {
+            return translationStore[lang][key];
+          }
+          return tSafe(key, fallback);
+        }
+
+        if (typeof window.t !== "function") {
+          window.t = function (key) {
+            var activeLang = document.documentElement.lang === "en" ? "en" : "id";
+            return translateLogin(key, key, activeLang);
           };
-          Object.keys(map).forEach(function (id) {
-            var el = document.getElementById(id);
-            if (el) el.textContent = tSafe(map[id][0], map[id][1]);
+        }
+
+        function updateLoginLanguageElements(lang) {
+          document.documentElement.lang = lang;
+
+          document.querySelectorAll("[data-i18n]").forEach(function (element) {
+            var key = element.getAttribute("data-i18n");
+            var fallback =
+              element.tagName === "INPUT" || element.tagName === "TEXTAREA"
+                ? element.getAttribute("placeholder") || key
+                : element.textContent || key;
+            var text = translateLogin(key, fallback, lang);
+
+            if (element.tagName === "INPUT" || element.tagName === "TEXTAREA") {
+              element.placeholder = text;
+            } else if (typeof text === "string" && text.indexOf("<") !== -1) {
+              element.innerHTML = text;
+            } else {
+              element.textContent = text;
+            }
           });
         }
 
-        applyStaffLabels();
+        // 3. Terapkan label dan placeholder login yang kritikal
+        function applyLoginLabels(lang) {
+          var textMap = {
+            tabLabelLMS: ["loginTabLMS", "Login LMS"],
+            tabLabelStaff: ["loginTabStaff", "Marketer Portal"],
+            staffPanelTitle: ["staffLoginTitle", "Marketer Portal"],
+            staffPanelBadge: ["staffLoginBadge", "Portal"],
+            staffPanelSubtitle: [
+              "staffLoginSubtitle",
+              "Masuk ke portal komisi & manajemen pemasaran."
+            ],
+            staffLoginBtn: ["staffLoginButton", "Masuk ke Portal"],
+          };
+
+          Object.keys(textMap).forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) el.textContent = translateLogin(textMap[id][0], textMap[id][1], lang);
+          });
+
+          var placeholderMap = {
+            "lms-email": ["emailPlaceholder", "Email Anda"],
+            "staff-email": ["emailPlaceholder", "Email Anda"],
+            "lms-password": ["lmsPasswordPlaceholder", "Masukkan password Anda"],
+            "staff-password": ["lmsPasswordPlaceholder", "Masukkan password Anda"],
+          };
+
+          Object.keys(placeholderMap).forEach(function (id) {
+            var input = document.getElementById(id);
+            if (input) {
+              input.placeholder = translateLogin(
+                placeholderMap[id][0],
+                placeholderMap[id][1],
+                lang
+              );
+            }
+          });
+        }
+
+        function applyLoginLanguage(lang) {
+          var nextLang = lang === "en" ? "en" : "id";
+
+          try {
+            localStorage.setItem("language", nextLang);
+          } catch (err) {
+            // Ignore storage restrictions and still update the DOM.
+          }
+
+          updateLoginLanguageElements(nextLang);
+          applyLoginLabels(nextLang);
+
+          document.querySelectorAll(".lang-btn").forEach(function (button) {
+            button.classList.toggle("active", button.getAttribute("data-lang") === nextLang);
+          });
+        }
+
+        if (typeof window.updatePageLanguage !== "function") {
+          window.updatePageLanguage = function () {
+            var activeLang = document.documentElement.lang === "en" ? "en" : "id";
+            applyLoginLanguage(activeLang);
+          };
+        }
+
+        if (typeof window.setLanguage !== "function") {
+          window.setLanguage = function (lang) {
+            applyLoginLanguage(lang);
+          };
+        }
+
+        var initialLanguage = "id";
+        try {
+          initialLanguage = localStorage.getItem("language") || document.documentElement.lang || "id";
+        } catch (err) {
+          initialLanguage = document.documentElement.lang || "id";
+        }
+        applyLoginLanguage(initialLanguage);
 
         // Re-apply saat bahasa diganti
         document.querySelectorAll(".lang-btn").forEach(function (btn) {
-          btn.addEventListener("click", function () {
-            setTimeout(applyStaffLabels, 30);
+          btn.addEventListener("click", function (event) {
+            var lang = btn.getAttribute("data-lang");
+            event.preventDefault();
+
+            if (typeof window.setLanguage === "function") {
+              window.setLanguage(lang);
+            } else if (typeof setLanguage === "function") {
+              setLanguage(lang);
+            }
+
+            setTimeout(function () {
+              applyLoginLanguage(lang);
+            }, 30);
           });
         });
 

@@ -374,7 +374,7 @@ test("admin sees enrollments totals", async ({ page }) => {
 
   await expect(page.locator("#payTotal")).toHaveText("3");
   await expect(page.locator("#payPending")).toHaveText("1");
-  await expect(page.locator("#payRevenue")).toHaveText("$120.00");
+  await expect(page.locator("#payRevenue")).toHaveText("AU$120,00");
 });
 
 test("trainer hides admin-only sections", { tag: "@critical" }, async ({ page }) => {
@@ -736,9 +736,9 @@ test("admin enrollments table renders status tags", async ({ page }) => {
   await expect(page.locator(".ad-tag", { hasText: "Failed" })).toHaveCount(1);
 
   await expect(page.locator("#enrollmentTableBody tr.ad-enroll-row")).toHaveCount(3);
-  await expect(page.locator("#enrollmentTableBody")).toContainText("$120.00");
-  await expect(page.locator("#enrollmentTableBody")).toContainText("$50.00");
-  await expect(page.locator("#enrollmentTableBody")).toContainText("$75.00");
+  await expect(page.locator("#enrollmentTableBody")).toContainText("AU$120,00");
+  await expect(page.locator("#enrollmentTableBody")).toContainText("AU$50,00");
+  await expect(page.locator("#enrollmentTableBody")).toContainText("AU$75,00");
 });
 
 });

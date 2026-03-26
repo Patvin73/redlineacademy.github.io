@@ -342,7 +342,7 @@ function makeMarketerStub(role = "marketer") {
       presentation_date: "2026-03-01",
       students_present: 12,
       students_enrolled: 5,
-      program_fee: 5000000,
+      program_fee: 4600000,
       access_fee: 0,
       enrollment_comm: 2500000,
       bonus: 500000,
@@ -359,7 +359,7 @@ function makeMarketerStub(role = "marketer") {
       presentation_date: "2026-03-05",
       students_present: 8,
       students_enrolled: 3,
-      program_fee: 4000000,
+      program_fee: 4600000,
       access_fee: 0,
       enrollment_comm: 1200000,
       bonus: 0,
@@ -510,7 +510,7 @@ test.describe("Student and marketer flows", {
 
     await page.fill("#claimStudentsPresent", "30");
     await page.fill("#claimStudentsEnrolled", "12");
-    await page.fill("#claimProgramFee", "5000000");
+    await page.fill("#claimProgramFee", "4600000");
     await page.check("#claimConsent");
 
     await page.locator("#claimForm button[type='submit']").click();
@@ -532,6 +532,9 @@ test.describe("Student and marketer flows", {
     await expect(page.locator("#reportTableBody")).toContainText("Ditolak");
 
     const staffStub = makeMarketerStub("staff");
+    await page.addInitScript(() => {
+      window.__LMS_ENABLE_STAFF__ = true;
+    });
     await installSupabaseStub(page, staffStub);
     await page.goto("/pages/dashboard-marketer.html");
     await expect(page.locator("#marketerRole")).toHaveText("Staff");

@@ -24,6 +24,32 @@ const playwrightCli = path.join(
 );
 const staticServerScript = path.join(rootDir, "tools", "static-server.js");
 const liveServerUrl = "http://127.0.0.1:8000";
+const runTargets = {
+  "local-regression": {
+    config: "playwright.local.config.js",
+    args: []
+  },
+  "local-smoke": {
+    config: "playwright.local.config.js",
+    args: ["--grep", "@critical"]
+  },
+  "live-core": {
+    config: "playwright.live.config.js",
+    args: ["--project", "live-core"]
+  },
+  "live-audit": {
+    config: "playwright.live.config.js",
+    args: ["--project", "live-audit"]
+  }
+};
+
+if (!runTargets[project]) {
+  // eslint-disable-next-line no-console
+  console.error(
+    `Unknown Playwright target "${project}". Expected one of: ${Object.keys(runTargets).join(", ")}`
+  );
+  process.exit(1);
+}
 
 function log(message) {
   // eslint-disable-next-line no-console
@@ -46,6 +72,7 @@ function isServerReachable() {
 }
 
 function runPlaywright() {
+  const target = runTargets[project];
   log(`running Playwright project "${project}"`);
   const result = spawnSync(
     process.execPath,
@@ -53,9 +80,8 @@ function runPlaywright() {
       playwrightCli,
       "test",
       ...extraArgs,
-      "--config=playwright.live.config.js",
-      "--project",
-      project,
+      `--config=${target.config}`,
+      ...target.args,
     ],
     {
       cwd: rootDir,
