@@ -58,11 +58,30 @@
   function injectFigure(section, figureConfig, lang) {
     if (!section || !figureConfig || section.querySelector(".article-figure")) return;
     const figure = document.createElement("figure");
-    figure.className = "article-figure";
+    figure.className = "article-figure article-media-block";
     figure.innerHTML =
       `<img src="${figureConfig.src}" alt="${figureConfig.alt}" loading="lazy" decoding="async">` +
       `<figcaption>${lang === "id" ? figureConfig.captionId : figureConfig.captionEn}</figcaption>`;
     section.appendChild(figure);
+  }
+
+  function decorateSectionMedia(section, mediaIndex) {
+    if (!section) return mediaIndex;
+
+    const mediaNodes = Array.from(
+      section.querySelectorAll(":scope > .article-inline-media, :scope > .article-figure"),
+    );
+
+    if (!mediaNodes.length) return mediaIndex;
+
+    mediaNodes.forEach((mediaNode) => {
+      mediaNode.classList.add("article-media-block");
+      mediaNode.classList.add("article-media-block--full", "article-image--full");
+
+      mediaIndex += 1;
+    });
+
+    return mediaIndex;
   }
 
   function injectStatCards(section, lang) {
@@ -186,6 +205,8 @@
     const sidebar = buildSidebar(lang);
     const toc = sidebar.querySelector(".article-toc");
 
+    let mediaIndex = 0;
+
     sections.forEach((section, index) => {
       const title = section.querySelector(".article-section-card__title");
       if (title && !section.id) {
@@ -211,6 +232,7 @@
       if (!section.querySelector("img") && config.figures && config.figures[index]) {
         injectFigure(section, config.figures[index], lang);
       }
+      mediaIndex = decorateSectionMedia(section, mediaIndex);
 
       if (title) {
         const link = document.createElement("a");
