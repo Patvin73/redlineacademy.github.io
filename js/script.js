@@ -907,36 +907,44 @@ const translations = {
 // Language management
 // Expose translations globally so other modules can inject new keys
 window.translations = translations;
+if (window.pageTranslations && typeof window.pageTranslations === "object") {
+  Object.entries(window.pageTranslations).forEach(([lang, values]) => {
+    if (!translations[lang]) {
+      translations[lang] = {};
+    }
+
+    Object.assign(translations[lang], values);
+  });
+}
+
 Object.assign(translations.id, {
   articleEyebrow: "Artikel Pilihan",
   articleHighlightsFocus: "Fokus",
   articleHighlightsIntent: "Intent",
   articleHighlightsLocation: "Lokasi",
+  articleHighlightsCluster: "Cluster",
   articlesBlogSectionTitle: "Artikel & Blog",
   articlesBlogSectionDesc:
-    "Jelajahi halaman blog utama dan kumpulan artikel caregiver dari Redline Academy. Setiap ringkasan di bawah ini bisa diklik untuk membuka halaman lengkapnya.",
+    "Telusuri cluster artikel caregiver Redline Academy dari tahap discovery, riset credential, perbandingan lembaga, sampai siap daftar.",
   articlesBlogBadge: "Blog",
   articlesArticleBadge: "Artikel",
   articlesBlogMainTitle: "Blog Caregiver & Karier",
   articlesBlogMainDesc:
-    "Baca kumpulan insight, edukasi caregiver, tips karier kesehatan, dan wawasan pelatihan vokasi untuk calon tenaga perawatan Indonesia.",
+    "Baca empat artikel utama caregiver yang saling terhubung untuk membantu Anda memahami program, credential, lembaga, dan langkah pendaftaran.",
   articlesOpenPage: "Buka Halaman",
   articlesReadMore: "Baca Artikel",
   articlesPelatihanTitle: "Pelatihan Caregiver Indonesia",
   articlesPelatihanDesc:
-    "Gambaran umum program pelatihan caregiver di Indonesia, termasuk manfaat program, praktik langsung, panduan karier, dan FAQ dasar.",
-  articlesKursusTitle: "Kursus Caregiver Bersertifikat Indonesia",
+    "Kenali alasan mengapa standar Australia mengubah nilai sebuah pelatihan caregiver dan membuka pintu pengakuan internasional.",
+  articlesKursusTitle: "Kursus Caregiver Bersertifikat",
   articlesKursusDesc:
-    "Ringkasan tentang kursus caregiver bersertifikat, fokus kompetensi, manfaat sertifikasi, dan kesiapan kerja setelah lulus.",
-  articlesKelasTitle: "Kelas Caregiver Online Indonesia",
-  articlesKelasDesc:
-    "Penjelasan format belajar online, fleksibilitas kelas, struktur materi, dan cara memulai jalur belajar caregiver dari rumah.",
-  articlesCaraTitle: "Cara Menjadi Caregiver Profesional Indonesia",
-  articlesCaraDesc:
-    "Langkah-langkah menjadi caregiver profesional, mulai dari keterampilan inti, pilihan pelatihan, hingga kesiapan masuk dunia kerja.",
-  articlesBiayaTitle: "Biaya Pelatihan Caregiver Indonesia",
-  articlesBiayaDesc:
-    "Ringkasan faktor biaya pelatihan, struktur program, dan hal-hal yang perlu dipertimbangkan sebelum memilih program caregiver.",
+    "Pahami perbedaan credential AUS NMF dengan sertifikat biasa, recognition gap, dan apa yang benar-benar dibaca employer global.",
+  articlesLembagaTitle: "Lembaga Pelatihan Caregiver",
+  articlesLembagaDesc:
+    "Bandingkan lembaga secara cerdas lewat 7 pemeriksaan penting sebelum mendaftar, dari verifikasi credential sampai dukungan karier.",
+  articlesDaftarTitle: "Daftar Menjadi Caregiver Profesional",
+  articlesDaftarDesc:
+    "Ikuti panduan langkah demi langkah untuk memilih jalur, mengecek syarat masuk, memilih format belajar, dan memulai pendaftaran.",
   articleCtaTitle: "Siap Mulai Karier Caregiver?",
   articleCtaBody:
     "Hubungi tim Redline Academy untuk konsultasi program dan jalur belajar yang sesuai kebutuhan Anda.",
@@ -984,58 +992,86 @@ Object.assign(translations.id, {
   pelatihanFaqA3:
     "Ada. Peserta mendapatkan panduan penyusunan CV, simulasi wawancara, serta arahan jalur kerja di fasilitas layanan perawatan.",
   pelatihanRelatedTitle: "Halaman Terkait",
-  pelatihanRelatedLink1: "Biaya Pelatihan Caregiver Indonesia di Indonesia",
+  pelatihanRelatedLink1:
+    "Pelatihan Caregiver Indonesia: Standar Global dengan Hati Indonesia",
   pelatihanRelatedLink2:
     "Kursus Caregiver Bersertifikat Indonesia di Indonesia",
   pelatihanRelatedLink3: "Kelas Caregiver Online Indonesia di Indonesia",
-  biayaArticleTitle: "Biaya Pelatihan Caregiver Indonesia di Indonesia",
+  biayaArticleEyebrow: "Artikel Pilihan",
+  biayaArticleTitle:
+    "Pelatihan Caregiver Indonesia: Standar Global dengan Hati Indonesia",
   biayaArticleIntro:
-    "Halaman ini membahas biaya pelatihan caregiver indonesia untuk kebutuhan transactional di Indonesia. Konten disusun agar calon peserta memahami materi, biaya, jalur belajar, dan langkah pendaftaran.",
+    "Indonesia sedang menuju perubahan demografi besar. Pada 2050, populasi lansia diproyeksikan melebihi 72 juta orang, sehingga kebutuhan pelatihan caregiver yang profesional, manusiawi, dan relevan dengan konteks lokal menjadi semakin mendesak.",
   biayaArticleMeta:
-    'Fokus kata kunci: <strong>biaya pelatihan caregiver indonesia</strong> | Intent: <strong>transactional</strong> | Lokasi: <strong>Indonesia</strong>',
-  biayaWhyTitle: "Mengapa biaya pelatihan caregiver indonesia penting?",
+    'Fokus kata kunci: <strong>pelatihan caregiver indonesia</strong> | Intent: <strong>informational</strong> | Sudut pandang: <strong>global standards, local values</strong>',
+  biayaHighlightFocus: "pelatihan caregiver indonesia",
+  biayaHighlightIntent: "informational",
+  biayaHighlightCluster: "sertifikasi, standar global, demensia, karier",
+  biayaWhyTitle: "Perubahan paradigma: dari ketergantungan menuju pemberdayaan",
   biayaWhyBody1:
-    "Permintaan tenaga caregiver terus tumbuh di Indonesia. Memahami biaya pelatihan caregiver indonesia membantu Anda memilih program yang relevan dengan kebutuhan industri.",
+    "Selama ini, lansia sering dipandang hanya sebagai pihak yang sepenuhnya bergantung pada bantuan orang lain. Pendekatan seperti ini berfokus pada kebutuhan fisik semata dan belum cukup untuk menjawab tantangan kualitas hidup di masa depan.",
   biayaWhyBody2:
-    "Fokus pembelajaran tidak hanya teori, tetapi juga komunikasi empatik, keselamatan pasien, dan standar layanan yang konsisten.",
-  biayaCoreTitle: "Kompetensi inti yang dipelajari",
-  biayaCoreItem1: "Pendampingan aktivitas harian dan personal care",
-  biayaCoreItem2: "Komunikasi efektif dengan keluarga dan tim medis",
-  biayaCoreItem3: "Pencegahan risiko serta prosedur keselamatan dasar",
-  biayaStructureTitle: "Struktur program yang direkomendasikan",
-  biayaStructureBody:
-    "Kurikulum terbaik memadukan pembelajaran online, praktik terarah, dan asesmen berbasis kasus nyata.",
-  biayaComponentsTitle: "Komponen belajar",
-  biayaComponentsItem1: "Modul teori terstruktur per topik layanan",
-  biayaComponentsItem2: "Praktik lapangan dengan supervisi",
-  biayaComponentsItem3: "Evaluasi kompetensi untuk kesiapan kerja",
-  biayaStartTitle: "Langkah memulai pendaftaran",
-  biayaStartBody:
-    "Siapkan dokumen identitas, pilih jadwal belajar, dan konsultasikan target karier Anda agar rencana belajar lebih tepat sasaran.",
-  biayaChecklistTitle: "Checklist sebelum mendaftar",
+    "Pelatihan caregiver modern perlu mengusung empowered paradigm, yaitu pendekatan yang melatih caregiver untuk mendukung kemandirian lansia, menghormati hak individu, dan melihat perawatan sebagai proses yang holistik, bukan sekadar rutinitas teknis.",
+  biayaWhyBody3:
+    'Untuk membandingkan jalur belajar yang lebih spesifik, Anda juga bisa membaca <a href="kursus-caregiver-bersertifikat.html">kursus caregiver bersertifikat</a> dan <a href="lembaga-pelatihan-caregiver.html">panduan memilih lembaga pelatihan caregiver</a>.',
+  biayaImageCaption1:
+    "Program caregiver yang kuat tidak berhenti pada tugas teknis, tetapi membentuk standar profesional, etika, dan kesiapan menghadapi kebutuhan lansia modern.",
+  biayaFactorsTitle: "Dua dunia, satu standar: inti kurikulum caregiver modern",
+  biayaFactorsBody:
+    "Materi baru Redline menegaskan bahwa pelatihan caregiver yang relevan di Indonesia harus mampu memadukan standar klinis internasional dengan nilai budaya lokal. Inilah fondasi yang membuat lulusan tidak hanya kompeten secara teknis, tetapi juga sensitif secara sosial dan budaya.",
+  biayaFactorsItem1:
+    "<strong>Standar global:</strong> patient safety, etika klinis, legalitas, dan presisi praktik menjadi dasar penting dalam sistem caregiver profesional.",
+  biayaFactorsItem2:
+    "<strong>Nilai Indonesia:</strong> bakti kepada orang tua, gotong royong, sopan santun, dan musyawarah membuat pendekatan perawatan lebih dekat dengan realitas keluarga Indonesia.",
+  biayaFactorsItem3:
+    "<strong>Adaptasi lapangan:</strong> caregiver perlu siap bekerja di lingkungan dengan sumber daya berbeda-beda, termasuk konteks komunitas dan layanan kesehatan lokal.",
+  biayaFactorsItem4:
+    "<strong>Kualitas hidup sebagai tujuan:</strong> hasil akhir pelatihan bukan hanya kemampuan merawat, tetapi kemampuan meningkatkan martabat dan kualitas hidup lansia.",
+  biayaClusterTitle: "Empat pilar pelatihan caregiver profesional di Indonesia",
+  biayaClusterBody:
+    "Agar siap menghadapi kebutuhan dunia kerja, pelatihan caregiver tidak cukup hanya mengajarkan perawatan dasar. Program yang baik perlu dibangun di atas empat pilar kompetensi utama berikut.",
+  biayaClusterItem1:
+    "<strong>Praktik profesional dan dasar perawatan:</strong> memahami etika, batas hukum, dan kolaborasi dengan keluarga maupun fasilitas kesehatan.",
+  biayaClusterItem2:
+    "<strong>Dukungan berbasis pemberdayaan:</strong> caregiver dilatih menjadi fasilitator yang mendorong autonomi lansia, bukan sekadar pelaksana bantuan.",
+  biayaClusterItem3:
+    "<strong>Pencegahan infeksi dan keselamatan:</strong> fokus pada kebersihan, keselamatan, dan adaptasi standar internasional dalam konteks lokal.",
+  biayaClusterItem4:
+    "<strong>Dukungan spesialis:</strong> materi demensia, disabilitas, serta pendekatan emosional dan sosial untuk kasus yang lebih kompleks.",
+  biayaChecklistTitle: "Mengapa pelatihan ini penting untuk masa depan caregiver Indonesia?",
+  biayaChecklistBody:
+    "Ketika kebutuhan layanan lansia terus meningkat, pelatihan caregiver yang kuat menjadi investasi penting bagi peserta, keluarga, dan sistem perawatan Indonesia secara keseluruhan.",
   biayaChecklistItem1:
-    "Pastikan tujuan karier dan minat spesialisasi caregiver",
+    "Membuka peluang kerja di dalam dan luar negeri melalui kompetensi yang lebih terstandar.",
   biayaChecklistItem2:
-    "Bandingkan kurikulum, durasi, serta model pembelajaran",
+    "Membangun global mindset tanpa kehilangan empati budaya Indonesia.",
   biayaChecklistItem3:
-    "Konfirmasi skema biaya dan dukungan pasca-lulus",
-  biayaFaqTitle: "FAQ biaya pelatihan caregiver indonesia",
+    "Membekali peserta menghadapi kasus kompleks seperti demensia, disabilitas, dan kebutuhan emosional lansia.",
+  biayaChecklistItem4:
+    "Menyiapkan lulusan yang tidak hanya terampil, tetapi juga mampu menjaga martabat dan kualitas hidup pasien.",
+  biayaChecklistNote:
+    'Jika Anda ingin melihat bagaimana jalur belajar ini terhubung ke sertifikasi, perbandingan lembaga, dan rencana karier, lanjutkan ke <a href="kursus-caregiver-bersertifikat.html">kursus caregiver bersertifikat</a>, <a href="lembaga-pelatihan-caregiver.html">panduan memilih lembaga</a>, atau <a href="daftar-menjadi-caregiver-profesional.html">panduan menjadi caregiver profesional</a>.',
+  biayaImageCaption2:
+    "Caregiver masa depan membutuhkan perpaduan antara standar global, kepekaan emosional, dan pemahaman budaya Indonesia.",
+  biayaFaqTitle: "FAQ pelatihan caregiver Indonesia",
   biayaFaqQ1:
-    "Apakah biaya pelatihan caregiver indonesia cocok untuk pemula?",
+    "Apa itu pelatihan caregiver Indonesia?",
   biayaFaqA1:
-    "Ya. Program dirancang bertahap dari dasar hingga praktik, termasuk pendampingan untuk peserta tanpa pengalaman kerja di bidang perawatan.",
-  biayaFaqQ2:
-    "Berapa lama durasi biaya pelatihan caregiver indonesia di Indonesia?",
+    "Pelatihan caregiver Indonesia adalah program pendidikan untuk membekali keterampilan merawat lansia secara profesional, mencakup aspek medis dasar, etika, dan komunikasi.",
+  biayaFaqQ2: "Apakah pelatihan caregiver memiliki sertifikasi?",
   biayaFaqA2:
-    "Durasi bergantung paket belajar, namun umumnya mencakup teori, praktik terstruktur, dan asesmen akhir sebelum sertifikasi diterbitkan.",
-  biayaFaqQ3: "Apakah ada dukungan setelah lulus?",
+    "Ya, pelatihan caregiver profesional biasanya menyediakan sertifikasi yang dapat digunakan untuk bekerja di dalam maupun luar negeri.",
+  biayaFaqQ3: "Apa saja yang dipelajari dalam pelatihan caregiver?",
   biayaFaqA3:
-    "Ada. Peserta mendapatkan panduan penyusunan CV, simulasi wawancara, serta arahan jalur kerja di fasilitas layanan perawatan.",
+    "Materi meliputi perawatan lansia, pencegahan infeksi, keselamatan pasien, komunikasi, serta penanganan demensia dan disabilitas.",
+  biayaFaqQ4: "Apakah peluang kerja caregiver di Indonesia tinggi?",
+  biayaFaqA4:
+    "Ya, kebutuhan caregiver di Indonesia terus meningkat seiring bertambahnya populasi lansia.",
   biayaRelatedTitle: "Halaman Terkait",
-  biayaRelatedLink1: "Pelatihan Caregiver Indonesia di Indonesia",
-  biayaRelatedLink2:
-    "Kursus Caregiver Bersertifikat Indonesia di Indonesia",
-  biayaRelatedLink3: "Kelas Caregiver Online Indonesia di Indonesia",
+  biayaRelatedLink1: "Pelatihan Caregiver Indonesia",
+  biayaRelatedLink2: "Kursus Caregiver Bersertifikat Indonesia",
+  biayaRelatedLink3: "Kelas Caregiver Online Indonesia",
+  biayaRelatedLink4: "Cara Menjadi Caregiver Profesional Indonesia",
 });
 Object.assign(translations.id, {
   caraArticleTitle:
@@ -1087,7 +1123,8 @@ Object.assign(translations.id, {
   caraRelatedLink1: "Pelatihan Caregiver Indonesia di Indonesia",
   caraRelatedLink2:
     "Kursus Caregiver Bersertifikat Indonesia di Indonesia",
-  caraRelatedLink3: "Biaya Pelatihan Caregiver Indonesia di Indonesia",
+  caraRelatedLink3:
+    "Pelatihan Caregiver Indonesia: Standar Global dengan Hati Indonesia",
   kelasArticleTitle: "Kelas Caregiver Online Indonesia di Indonesia",
   kelasArticleIntro:
     "Halaman ini membahas kelas caregiver online indonesia untuk kebutuhan commercial investigation di Indonesia. Konten disusun agar calon peserta memahami materi, biaya, jalur belajar, dan langkah pendaftaran.",
@@ -1134,7 +1171,8 @@ Object.assign(translations.id, {
   kelasRelatedLink1: "Pelatihan Caregiver Indonesia di Indonesia",
   kelasRelatedLink2:
     "Kursus Caregiver Bersertifikat Indonesia di Indonesia",
-  kelasRelatedLink3: "Biaya Pelatihan Caregiver Indonesia di Indonesia",
+  kelasRelatedLink3:
+    "Pelatihan Caregiver Indonesia: Standar Global dengan Hati Indonesia",
   kursusArticleTitle:
     "Kursus Caregiver Bersertifikat Indonesia di Indonesia",
   kursusArticleIntro:
@@ -1182,7 +1220,8 @@ Object.assign(translations.id, {
     "Ada. Peserta mendapatkan panduan penyusunan CV, simulasi wawancara, serta arahan jalur kerja di fasilitas layanan perawatan.",
   kursusRelatedTitle: "Halaman Terkait",
   kursusRelatedLink1: "Pelatihan Caregiver Indonesia di Indonesia",
-  kursusRelatedLink2: "Biaya Pelatihan Caregiver Indonesia di Indonesia",
+  kursusRelatedLink2:
+    "Pelatihan Caregiver Indonesia: Standar Global dengan Hati Indonesia",
   kursusRelatedLink3: "Kelas Caregiver Online Indonesia di Indonesia",
 });
 Object.assign(translations.en, {
@@ -1190,31 +1229,29 @@ Object.assign(translations.en, {
   articleHighlightsFocus: "Focus",
   articleHighlightsIntent: "Intent",
   articleHighlightsLocation: "Location",
+  articleHighlightsCluster: "Cluster",
   articlesBlogSectionTitle: "Article & Blog",
   articlesBlogSectionDesc:
-    "Explore the main blog page and Redline Academy's caregiver article collection. Each summary below can be clicked to open the full page.",
+    "Explore Redline Academy's caregiver article cluster from discovery and credential research to institution comparison and ready-to-enrol guidance.",
   articlesBlogBadge: "Blog",
   articlesArticleBadge: "Article",
   articlesBlogMainTitle: "Caregiver & Career Blog",
   articlesBlogMainDesc:
-    "Read insights, caregiver education, health career tips, and vocational training updates for aspiring care professionals in Indonesia.",
+    "Read four connected caregiver articles designed to help you understand the program, credential value, institution quality, and enrolment steps.",
   articlesOpenPage: "Open Page",
   articlesReadMore: "Read Article",
   articlesPelatihanTitle: "Caregiver Training in Indonesia",
   articlesPelatihanDesc:
-    "An overview of caregiver training in Indonesia, including program benefits, hands-on practice, career guidance, and essential FAQs.",
-  articlesKursusTitle: "Certified Caregiver Course Indonesia",
+    "See why Australian standards change the value of caregiver training and help Indonesian talent earn international recognition.",
+  articlesKursusTitle: "Certified Caregiver Course",
   articlesKursusDesc:
-    "A summary of certified caregiver courses, competency focus, certification benefits, and job readiness after graduation.",
-  articlesKelasTitle: "Online Caregiver Class Indonesia",
-  articlesKelasDesc:
-    "An explanation of online study format, learning flexibility, course structure, and how to start your caregiver journey from home.",
-  articlesCaraTitle: "How to Become a Professional Caregiver in Indonesia",
-  articlesCaraDesc:
-    "The key steps to become a professional caregiver, from core skills and training choices to job readiness.",
-  articlesBiayaTitle: "Caregiver Training Costs in Indonesia",
-  articlesBiayaDesc:
-    "A summary of cost factors, program structure, and what to consider before choosing a caregiver training program.",
+    "Understand the difference between an AUS NMF credential and a regular certificate, including what global employers actually evaluate.",
+  articlesLembagaTitle: "Caregiver Training Institution",
+  articlesLembagaDesc:
+    "Compare institutions with seven essential checks before you enrol, from credential verification to post-study career support.",
+  articlesDaftarTitle: "Apply to Become a Professional Caregiver",
+  articlesDaftarDesc:
+    "Follow a step-by-step guide to choose a pathway, check the requirements, select a study format, and start your enrolment.",
   articleCtaTitle: "Ready to Start Your Caregiver Career?",
   articleCtaBody:
     "Contact the Redline Academy team for program advice and a learning path that suits your goals.",
@@ -1262,55 +1299,86 @@ Object.assign(translations.en, {
   pelatihanFaqA3:
     "Yes. Participants receive CV guidance, interview simulation, and direction for career pathways in care service facilities.",
   pelatihanRelatedTitle: "Related Pages",
-  pelatihanRelatedLink1: "Caregiver Training Costs in Indonesia",
+  pelatihanRelatedLink1:
+    "Caregiver Training in Indonesia: Global Standards with Indonesian Values",
   pelatihanRelatedLink2: "Certified Caregiver Course Indonesia",
   pelatihanRelatedLink3: "Online Caregiver Class Indonesia",
-  biayaArticleTitle: "Caregiver Training Costs in Indonesia",
+  biayaArticleEyebrow: "Featured Article",
+  biayaArticleTitle:
+    "Caregiver Training in Indonesia: Global Standards with Indonesian Values",
   biayaArticleIntro:
-    "This page discusses caregiver training costs in Indonesia for transactional intent. The content is designed to help prospective participants understand the curriculum, pricing considerations, learning pathway, and enrollment steps.",
+    "Indonesia is entering a major demographic transition. By 2050, the elderly population is projected to exceed 72 million people, making professional and culturally grounded caregiver training more important than ever.",
   biayaArticleMeta:
-    'Keyword focus: <strong>biaya pelatihan caregiver indonesia</strong> | Intent: <strong>transactional</strong> | Location: <strong>Indonesia</strong>',
-  biayaWhyTitle: "Why are caregiver training costs in Indonesia important?",
+    'Keyword focus: <strong>pelatihan caregiver indonesia</strong> | Intent: <strong>informational</strong> | Angle: <strong>global standards, local values</strong>',
+  biayaHighlightFocus: "caregiver training in Indonesia",
+  biayaHighlightIntent: "informational",
+  biayaHighlightCluster:
+    "certification, global standards, dementia care, careers",
+  biayaWhyTitle: "A paradigm shift: from dependency to empowerment",
   biayaWhyBody1:
-    "Demand for caregivers continues to grow in Indonesia. Understanding caregiver training costs helps you choose a program that fits your needs and budget.",
+    "Older adults have often been treated only as dependent recipients of care. That view focuses narrowly on physical support and does not fully answer the future need for dignity, autonomy, and quality of life.",
   biayaWhyBody2:
-    "The learning focus goes beyond theory and includes empathetic communication, patient safety, and consistent service standards.",
-  biayaCoreTitle: "Core competencies you will learn",
-  biayaCoreItem1: "Daily activity assistance and personal care",
-  biayaCoreItem2: "Effective communication with families and medical teams",
-  biayaCoreItem3: "Risk prevention and basic safety procedures",
-  biayaStructureTitle: "Recommended program structure",
-  biayaStructureBody:
-    "A strong curriculum combines online learning, guided practice, and competency assessment based on real cases.",
-  biayaComponentsTitle: "Learning components",
-  biayaComponentsItem1: "Structured theory modules by care topic",
-  biayaComponentsItem2: "Field practice with supervision",
-  biayaComponentsItem3: "Competency evaluation for work readiness",
-  biayaStartTitle: "How to begin enrollment",
-  biayaStartBody:
-    "Prepare your identification documents, choose a study schedule, and discuss your career goals so your learning plan is more targeted.",
-  biayaChecklistTitle: "Checklist before enrolling",
+    "Modern caregiver training should adopt an empowered paradigm, where caregivers learn to support independence, respect individual rights, and provide holistic care rather than routine assistance alone.",
+  biayaWhyBody3:
+    'To compare more specific learning paths, you can also explore the <a href="kursus-caregiver-bersertifikat.html">certified caregiver course</a> and the <a href="lembaga-pelatihan-caregiver.html">caregiver training institution guide</a>.',
+  biayaImageCaption1:
+    "A strong caregiver program goes beyond basic tasks and develops professional standards, ethics, and readiness for modern elderly care.",
+  biayaFactorsTitle: "Two worlds, one standard: the core of modern caregiver training",
+  biayaFactorsBody:
+    "Redline's updated material shows that relevant caregiver training in Indonesia must combine international clinical standards with local cultural values. This is what makes graduates technically competent and socially aware.",
+  biayaFactorsItem1:
+    "<strong>Global standards:</strong> patient safety, clinical ethics, legal awareness, and precise care practices form the professional foundation.",
+  biayaFactorsItem2:
+    "<strong>Indonesian values:</strong> filial piety, mutual cooperation, respect, and shared decision-making keep care aligned with local family realities.",
+  biayaFactorsItem3:
+    "<strong>Field adaptability:</strong> caregivers should be ready for different environments, including community settings and limited-resource care contexts.",
+  biayaFactorsItem4:
+    "<strong>Quality of life as the goal:</strong> training should not stop at completing tasks, but aim to improve dignity and overall well-being.",
+  biayaClusterTitle: "The four pillars of professional caregiver training in Indonesia",
+  biayaClusterBody:
+    "To meet real workforce needs, caregiver training must go beyond basic care routines. A strong program should be built on these four core pillars.",
+  biayaClusterItem1:
+    "<strong>Professional practice and care foundations:</strong> ethics, legal boundaries, and collaboration with families and care facilities.",
+  biayaClusterItem2:
+    "<strong>Empowerment-based support:</strong> caregivers learn to act as facilitators who promote autonomy, not only as task providers.",
+  biayaClusterItem3:
+    "<strong>Infection prevention and safety:</strong> hygiene, safety, and local adaptation of international standards remain essential.",
+  biayaClusterItem4:
+    "<strong>Specialist support:</strong> dementia, disability, and emotional-social care prepare learners for more complex cases.",
+  biayaChecklistTitle:
+    "Why this training matters for the future of caregiving in Indonesia",
   biayaChecklistItem1:
-    "Clarify your career goals and caregiver specialization interests",
+    "It opens local and international career opportunities through stronger professional standards.",
   biayaChecklistItem2:
-    "Compare curriculum, duration, and learning model",
+    "It builds a global mindset without losing Indonesian cultural empathy.",
   biayaChecklistItem3:
-    "Confirm cost scheme and post-graduation support",
-  biayaFaqTitle: "Caregiver training cost FAQ",
-  biayaFaqQ1: "Are caregiver training costs suitable for beginners?",
+    "It prepares learners for complex cases such as dementia, disability, and emotional support needs.",
+  biayaChecklistItem4:
+    "It helps graduates protect dignity and quality of life, not just complete daily tasks.",
+  biayaChecklistBody:
+    "As elderly care demand continues to rise, strong caregiver training becomes an important investment for learners, families, and Indonesia's wider care system.",
+  biayaChecklistNote:
+    'To see how this learning path connects with certification, institution comparison, and career planning, continue to the <a href="kursus-caregiver-bersertifikat.html">certified caregiver course</a>, the <a href="lembaga-pelatihan-caregiver.html">institution comparison guide</a>, or the <a href="daftar-menjadi-caregiver-profesional.html">professional caregiver enrolment guide</a>.',
+  biayaImageCaption2:
+    "Future caregivers need a balance of global standards, emotional sensitivity, and Indonesian cultural understanding.",
+  biayaFaqTitle: "Caregiver training FAQ",
+  biayaFaqQ1: "What is caregiver training in Indonesia?",
   biayaFaqA1:
-    "Yes. The program is designed progressively from fundamentals to practice, including support for learners with no prior caregiving experience.",
-  biayaFaqQ2:
-    "How long does caregiver training related to this cost plan usually take?",
+    "Caregiver training in Indonesia is a professional program designed to teach elderly care skills, including basic medical support, ethics, and communication.",
+  biayaFaqQ2: "Is caregiver training certified?",
   biayaFaqA2:
-    "The duration depends on the package, but it generally includes theory, structured practice, and final assessment before certification is issued.",
-  biayaFaqQ3: "Is there support after graduation?",
+    "Yes. Most professional caregiver training programs provide certification that can support local and international job opportunities.",
+  biayaFaqQ3: "What do you learn in caregiver training?",
   biayaFaqA3:
-    "Yes. Participants receive CV guidance, interview simulation, and direction for career pathways in care service facilities.",
+    "Topics include elderly care, infection control, patient safety, communication skills, and dementia and disability support.",
+  biayaFaqQ4: "Is there high demand for caregivers in Indonesia?",
+  biayaFaqA4:
+    "Yes. Demand continues to grow as Indonesia's elderly population increases.",
   biayaRelatedTitle: "Related Pages",
   biayaRelatedLink1: "Caregiver Training in Indonesia",
   biayaRelatedLink2: "Certified Caregiver Course Indonesia",
   biayaRelatedLink3: "Online Caregiver Class Indonesia",
+  biayaRelatedLink4: "How to Become a Professional Caregiver in Indonesia",
 });
 Object.assign(translations.en, {
   caraArticleTitle: "How to Become a Professional Caregiver in Indonesia",
@@ -1358,7 +1426,8 @@ Object.assign(translations.en, {
   caraRelatedTitle: "Related Pages",
   caraRelatedLink1: "Caregiver Training in Indonesia",
   caraRelatedLink2: "Certified Caregiver Course Indonesia",
-  caraRelatedLink3: "Caregiver Training Costs in Indonesia",
+  caraRelatedLink3:
+    "Caregiver Training in Indonesia: Global Standards with Indonesian Values",
   kelasArticleTitle: "Online Caregiver Class Indonesia",
   kelasArticleIntro:
     "This page discusses online caregiver classes in Indonesia for commercial investigation intent. The content is designed to help prospective participants understand the curriculum, value, learning pathway, and enrollment steps.",
@@ -1404,7 +1473,8 @@ Object.assign(translations.en, {
   kelasRelatedTitle: "Related Pages",
   kelasRelatedLink1: "Caregiver Training in Indonesia",
   kelasRelatedLink2: "Certified Caregiver Course Indonesia",
-  kelasRelatedLink3: "Caregiver Training Costs in Indonesia",
+  kelasRelatedLink3:
+    "Caregiver Training in Indonesia: Global Standards with Indonesian Values",
   kursusArticleTitle: "Certified Caregiver Course Indonesia",
   kursusArticleIntro:
     "This page discusses certified caregiver courses in Indonesia for commercial investigation intent. The content is designed to help prospective participants understand the curriculum, value, learning pathway, and enrollment steps.",
@@ -1449,7 +1519,8 @@ Object.assign(translations.en, {
     "Yes. Participants receive CV guidance, interview simulation, and direction for career pathways in care service facilities.",
   kursusRelatedTitle: "Related Pages",
   kursusRelatedLink1: "Caregiver Training in Indonesia",
-  kursusRelatedLink2: "Caregiver Training Costs in Indonesia",
+  kursusRelatedLink2:
+    "Caregiver Training in Indonesia: Global Standards with Indonesian Values",
   kursusRelatedLink3: "Online Caregiver Class Indonesia",
 });
 Object.assign(translations.id, {
@@ -1463,6 +1534,19 @@ Object.assign(translations.en, {
     "Caregiver education articles, healthcare career tips, and vocational training insights from Redline Academy for aspiring care professionals in Indonesia.",
 });
 let currentLanguage;
+
+function getOptionalTranslation(key) {
+  if (translations[currentLanguage] && translations[currentLanguage][key]) {
+    return translations[currentLanguage][key];
+  }
+  if (translations.id && translations.id[key]) {
+    return translations.id[key];
+  }
+  if (translations.en && translations.en[key]) {
+    return translations.en[key];
+  }
+  return null;
+}
 
 // Try to get language from localStorage, with fallback
 try {
@@ -1528,10 +1612,18 @@ function t(key) {
 window.t = t;
 
 function getArticleSeoConfig() {
+  const bodyPrefix = document.body?.dataset?.articlePrefix;
+  if (bodyPrefix) {
+    return { prefix: bodyPrefix };
+  }
+
   const path = window.location.pathname;
   const configs = [
+    { match: "pelatihan-caregiver-indonesia-standar-global", prefix: "biaya" },
     { match: "pelatihan-caregiver-indonesia", prefix: "pelatihan" },
-    { match: "biaya-pelatihan-caregiver-indonesia", prefix: "biaya" },
+    { match: "lembaga-pelatihan-caregiver", prefix: "lembaga" },
+    { match: "daftar-menjadi-caregiver-profesional", prefix: "daftar" },
+    { match: "kursus-caregiver-bersertifikat.html", prefix: "kursus" },
     { match: "cara-menjadi-caregiver-profesional-indonesia", prefix: "cara" },
     { match: "kelas-caregiver-online-indonesia", prefix: "kelas" },
     { match: "kursus-caregiver-bersertifikat-indonesia", prefix: "kursus" },
@@ -1541,6 +1633,16 @@ function getArticleSeoConfig() {
 }
 
 function updateStructuredDataForArticle(prefix, pageTitle, pageDescription) {
+  if (
+    window.location.pathname.includes(
+      "pelatihan-caregiver-indonesia-standar-global",
+    ) &&
+    typeof window.applyPageSeo === "function"
+  ) {
+    window.applyPageSeo(currentLanguage);
+    return;
+  }
+
   const scripts = document.querySelectorAll('script[type="application/ld+json"]');
   if (!scripts.length) return;
 
@@ -1548,7 +1650,7 @@ function updateStructuredDataForArticle(prefix, pageTitle, pageDescription) {
     try {
       const data = JSON.parse(script.textContent);
       if (data["@type"] === "Article") {
-        data.headline = pageTitle;
+        data.headline = getOptionalTranslation(`${prefix}ArticleTitle`) || pageTitle;
         data.description = pageDescription;
         data.inLanguage = currentLanguage;
         script.textContent = JSON.stringify(data, null, 2);
@@ -1559,7 +1661,16 @@ function updateStructuredDataForArticle(prefix, pageTitle, pageDescription) {
         data.availableLanguage = ["id", "en"];
         script.textContent = JSON.stringify(data, null, 2);
       } else if (data["@type"] === "FAQPage" && Array.isArray(data.mainEntity)) {
-        data.mainEntity = [1, 2, 3].map((index) => ({
+        const faqKeys = [];
+        for (let index = 1; index <= 10; index += 1) {
+          const question = t(`${prefix}FaqQ${index}`);
+          const answer = t(`${prefix}FaqA${index}`);
+          if (question !== `${prefix}FaqQ${index}` && answer !== `${prefix}FaqA${index}`) {
+            faqKeys.push(index);
+          }
+        }
+
+        data.mainEntity = faqKeys.map((index) => ({
           "@type": "Question",
           name: t(`${prefix}FaqQ${index}`),
           acceptedAnswer: {
@@ -1577,6 +1688,16 @@ function updateStructuredDataForArticle(prefix, pageTitle, pageDescription) {
 
 function updateSeoMetadata() {
   document.documentElement.lang = currentLanguage;
+
+  if (
+    window.location.pathname.includes(
+      "pelatihan-caregiver-indonesia-standar-global",
+    ) &&
+    typeof window.applyPageSeo === "function"
+  ) {
+    window.applyPageSeo(currentLanguage);
+    return;
+  }
 
   if (window.location.pathname.includes("blog")) {
     const blogTitle = `${t("blogPageTitle")} | Redline Academy`;
@@ -1614,8 +1735,12 @@ function updateSeoMetadata() {
 
   const titleKey = `${articleConfig.prefix}ArticleTitle`;
   const introKey = `${articleConfig.prefix}ArticleIntro`;
-  const pageTitle = `${t(titleKey)} | Redline Academy`;
-  const pageDescription = t(introKey);
+  const metaTitleKey = `${articleConfig.prefix}MetaTitle`;
+  const metaDescriptionKey = `${articleConfig.prefix}MetaDescription`;
+  const pageTitle =
+    getOptionalTranslation(metaTitleKey) || `${t(titleKey)} | Redline Academy`;
+  const pageDescription =
+    getOptionalTranslation(metaDescriptionKey) || t(introKey);
 
   const descriptionMeta = document.querySelector('meta[name="description"]');
   const ogTitleMeta = document.querySelector('meta[property="og:title"]');
@@ -1671,6 +1796,14 @@ function updatePageLanguage() {
 window.updatePageLanguage = updatePageLanguage;
 
 function updatePageTitle() {
+  const articleConfig = getArticleSeoConfig();
+  if (articleConfig) {
+    document.title =
+      getOptionalTranslation(`${articleConfig.prefix}MetaTitle`) ||
+      `${t(`${articleConfig.prefix}ArticleTitle`)} | Redline Academy`;
+    return;
+  }
+
   const path = window.location.pathname;
   if (path.includes("about")) {
     document.title = `${t("aboutUs")} - Redline Academy`;
@@ -1688,16 +1821,6 @@ function updatePageTitle() {
     document.title = `${t("lmsStudentDashboardTitle")} - Redline Academy`;
   } else if (path.includes("dashboard-admin")) {
     document.title = `${t("lmsAdminDashboardTitle")} - Redline Academy`;
-  } else if (path.includes("pelatihan-caregiver-indonesia")) {
-    document.title = `${t("pelatihanArticleTitle")} - Redline Academy`;
-  } else if (path.includes("biaya-pelatihan-caregiver-indonesia")) {
-    document.title = `${t("biayaArticleTitle")} - Redline Academy`;
-  } else if (path.includes("cara-menjadi-caregiver-profesional-indonesia")) {
-    document.title = `${t("caraArticleTitle")} - Redline Academy`;
-  } else if (path.includes("kelas-caregiver-online-indonesia")) {
-    document.title = `${t("kelasArticleTitle")} - Redline Academy`;
-  } else if (path.includes("kursus-caregiver-bersertifikat-indonesia")) {
-    document.title = `${t("kursusArticleTitle")} - Redline Academy`;
   } else {
     document.title = "Redline Academy";
   }

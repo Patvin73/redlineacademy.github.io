@@ -1,6 +1,12 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
+  RewriteRule ^pages/biaya-pelatihan-caregiver-indonesia\.html$ /pages/pelatihan-caregiver-indonesia.html [L,R=301]
+  RewriteRule ^pages/pelatihan-caregiver-indonesia-standar-global\.html$ /pages/pelatihan-caregiver-indonesia.html [L,R=301]
+  RewriteRule ^pages/kursus-caregiver-bersertifikat-indonesia\.html$ /pages/kursus-caregiver-bersertifikat.html [L,R=301]
+  RewriteRule ^pages/kelas-caregiver-online-indonesia\.html$ /pages/lembaga-pelatihan-caregiver.html [L,R=301]
+  RewriteRule ^pages/cara-menjadi-caregiver-profesional-indonesia\.html$ /pages/daftar-menjadi-caregiver-profesional.html [L,R=301]
+
   # Force the canonical HTTPS host for every request variant.
   RewriteCond %{HTTPS} !=on [OR]
   RewriteCond %{HTTP_HOST} !^redlineacademy\.com\.au$ [NC]

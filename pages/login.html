@@ -347,6 +347,34 @@
         }
         applyLoginLanguage(initialLanguage);
 
+        function getAuthModule() {
+          if (window.lmsAuth && typeof window.lmsAuth.signIn === "function") {
+            return window.lmsAuth;
+          }
+          return null;
+        }
+
+        function waitForAuthModule(timeoutMs) {
+          var startedAt = Date.now();
+
+          return new Promise(function (resolve, reject) {
+            (function check() {
+              var auth = getAuthModule();
+              if (auth) {
+                resolve(auth);
+                return;
+              }
+
+              if (Date.now() - startedAt >= timeoutMs) {
+                reject(new Error("Modul login belum siap."));
+                return;
+              }
+
+              setTimeout(check, 50);
+            })();
+          });
+        }
+
         // Re-apply saat bahasa diganti
         document.querySelectorAll(".lang-btn").forEach(function (btn) {
           btn.addEventListener("click", function (event) {
@@ -365,10 +393,7 @@
           });
         });
 
-        // 4. Redirect jika sudah login
-        window.lmsAuth.redirectIfLoggedIn();
-
-        // 5. Tab switching
+        // 4. Tab switching
         var tabBtns = document.querySelectorAll(".login-tab-btn");
         var panels  = document.querySelectorAll(".login-panel");
 
@@ -389,7 +414,7 @@
           });
         });
 
-        // 6. LMS login
+        // 5. LMS login
         document.getElementById("loginFormLMS").addEventListener("submit", async function (e) {
           e.preventDefault();
           var email    = document.getElementById("lms-email").value.trim();
@@ -400,14 +425,21 @@
           msg.textContent = tSafe("lmsLoggingIn", "Memproses login...");
           msg.classList.remove("error");
 
-          var result = await window.lmsAuth.signIn(email, password, ["student","admin","trainer"]);
+          var auth = await waitForAuthModule(8000).catch(function (error) {
+            msg.textContent = error.message || "Modul login belum siap.";
+            msg.classList.add("error");
+            return null;
+          });
+          if (!auth) return;
+
+          var result = await auth.signIn(email, password, ["student","admin","trainer"]);
           if (!result.ok) { msg.textContent = result.error; msg.classList.add("error"); return; }
 
           msg.textContent = tSafe("lmsLoginSuccessRedirect", "Login berhasil. Mengarahkan dashboard...");
           window.location.replace(result.redirectTo);
         });
 
-        // 7. Marketer portal login
+        // 6. Marketer portal login
         document.getElementById("loginFormStaff").addEventListener("submit", async function (e) {
           e.preventDefault();
           var email    = document.getElementById("staff-email").value.trim();
@@ -418,12 +450,28 @@
           msg.textContent = tSafe("lmsLoggingIn", "Memproses login...");
           msg.classList.remove("error");
 
-          var result = await window.lmsAuth.signIn(email, password, ["marketer","staff"]);
+          var auth = await waitForAuthModule(8000).catch(function (error) {
+            msg.textContent = error.message || "Modul login belum siap.";
+            msg.classList.add("error");
+            return null;
+          });
+          if (!auth) return;
+
+          var result = await auth.signIn(email, password, ["marketer","staff"]);
           if (!result.ok) { msg.textContent = result.error; msg.classList.add("error"); return; }
 
           msg.textContent = tSafe("staffLoginSuccessRedirect", "Login berhasil. Mengarahkan ke portal...");
           window.location.replace(result.redirectTo);
         });
+
+        // 7. Redirect jika sudah login
+        waitForAuthModule(8000)
+          .then(function (auth) {
+            return auth.redirectIfLoggedIn();
+          })
+          .catch(function () {
+            // Keep the login form usable even if auth bootstrap is delayed.
+          });
 
       });
     </script>

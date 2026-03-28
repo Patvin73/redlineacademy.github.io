@@ -161,10 +161,9 @@ test.describe("Public content i18n", { tag: "@public" }, () => {
     const routes = [
       "/",
       "/pages/pelatihan-caregiver-indonesia.html",
-      "/pages/biaya-pelatihan-caregiver-indonesia.html",
-      "/pages/cara-menjadi-caregiver-profesional-indonesia.html",
-      "/pages/kelas-caregiver-online-indonesia.html",
-      "/pages/kursus-caregiver-bersertifikat-indonesia.html",
+      "/pages/kursus-caregiver-bersertifikat.html",
+      "/pages/lembaga-pelatihan-caregiver.html",
+      "/pages/daftar-menjadi-caregiver-profesional.html",
     ];
 
     for (const route of routes) {
