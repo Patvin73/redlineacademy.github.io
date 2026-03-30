@@ -12,20 +12,46 @@
 .article-hero {
   position: relative;
   overflow: hidden;
-  border-radius: 28px;
+  border-radius: 32px;
   background:
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.16), transparent 36%),
-    linear-gradient(135deg, #7f1d1d 0%, #991b1b 45%, #111827 100%);
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.16), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.08), transparent 28%),
+    linear-gradient(135deg, #7a0918 0%, #d7001e 58%, #151515 100%);
   color: #fff;
-  box-shadow: 0 30px 70px rgba(17, 24, 39, 0.18);
+  box-shadow: 0 34px 74px rgba(17, 24, 39, 0.18);
+}
+
+.article-hero::before,
+.article-hero::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+}
+
+.article-hero::before {
+  top: -68px;
+  right: -34px;
+  width: 220px;
+  height: 220px;
+}
+
+.article-hero::after {
+  bottom: -56px;
+  right: 140px;
+  width: 140px;
+  height: 140px;
 }
 
 .article-hero__inner {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
-  gap: 2rem;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+  gap: 2.25rem;
   align-items: center;
-  padding: 2.5rem;
+  padding: 2.75rem;
+  position: relative;
+  z-index: 1;
 }
 
 .article-hero__eyebrow {
@@ -33,9 +59,9 @@
   align-items: center;
   gap: 0.55rem;
   padding: 0.5rem 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -43,16 +69,16 @@
 }
 
 .article-hero__title {
-  margin: 1rem 0 0.9rem;
+  margin: 1rem 0 0.85rem;
   font-size: clamp(2rem, 4vw, 3.6rem);
-  line-height: 1.05;
+  line-height: 1.02;
   color: #fff;
 }
 
 .article-hero__intro {
   max-width: 62ch;
-  margin: 0 0 1.25rem;
-  color: rgba(255, 255, 255, 0.88);
+  margin: 0 0 1.15rem;
+  color: rgba(255, 255, 255, 0.84);
   font-size: 1rem;
 }
 
@@ -93,10 +119,11 @@
 .article-hero__image-wrap {
   position: relative;
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 26px;
   aspect-ratio: 4 / 5;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 24px 44px rgba(0, 0, 0, 0.2);
 }
 
 .article-hero__image-wrap::after {
@@ -104,7 +131,7 @@
   position: absolute;
   inset: auto 0 0;
   height: 45%;
-  background: linear-gradient(to top, rgba(17, 24, 39, 0.5), transparent);
+  background: linear-gradient(to top, rgba(17, 24, 39, 0.58), transparent);
 }
 
 .article-hero__image {
