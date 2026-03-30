@@ -432,9 +432,10 @@
 .article-page .article-prose ol li,
 .article-page .article-section-card > ol li {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
   align-self: stretch;
   width: 100%;
   height: 100%;
@@ -450,38 +451,81 @@
   color: rgba(255, 255, 255, 0.9) !important;
   line-height: 1.65;
   overflow: hidden;
+  text-align: left;
 }
 
 .article-page .article-list li::before,
 .article-page .article-prose ul:not(.article-related-links) li::before,
 .article-page .article-section-card > ul:not(.article-related-links) li::before {
-  counter-increment: article-unordered-card;
-  content: counter(article-unordered-card);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  content: none;
+}
+
+.article-page .article-prose ol li::before,
+.article-page .article-section-card > ol li::before {
+  content: none;
+}
+
+.article-page .article-card-index {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto;
   width: 44px;
   height: 44px;
-  margin: 0 0 0.8rem;
+  margin: 0 0 0.8rem 0 !important;
   border-radius: 50%;
   background: #ffffff;
   color: #111111;
   font-size: 0.95rem;
   font-weight: 800;
   line-height: 1;
+  align-self: flex-start !important;
+}
+
+.article-page .article-check-card .article-card-index,
+.article-page .article-stage-card .article-card-index {
+  display: none !important;
+}
+
+.article-page .article-prose ol .article-card-index,
+.article-page .article-section-card > ol .article-card-index {
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 0.82rem;
+}
+
+.article-page .article-list li::before,
+.article-page .article-prose ul:not(.article-related-links) li::before,
+.article-page .article-section-card > ul:not(.article-related-links) li::before {
+  counter-increment: article-unordered-card;
+  content: none;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  margin: 0 0 0.8rem 0 !important;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #111111;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1;
+  align-self: flex-start !important;
 }
 
 .article-page .article-prose ol li::before,
 .article-page .article-section-card > ol li::before {
   counter-increment: article-ordered-card;
-  content: counter(article-ordered-card, decimal-leading-zero);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  content: none;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto;
   min-width: 44px;
   width: 44px;
   height: 44px;
-  margin: 0 0 0.8rem;
+  margin: 0 0 0.8rem 0 !important;
   padding: 0;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.9);
@@ -489,6 +533,7 @@
   font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0;
+  align-self: flex-start !important;
 }
 
 .article-page .article-list li strong,
@@ -496,10 +541,31 @@
 .article-page .article-section-card > ul:not(.article-related-links) li strong,
 .article-page .article-prose ol li strong,
 .article-page .article-section-card > ol li strong {
-  display: block;
-  width: 100%;
-  margin-bottom: 0.2rem;
+  display: block !important;
+  width: 100% !important;
+  margin-top: 0;
+  margin-bottom: 0.35rem !important;
   color: #ffffff;
+  text-align: left !important;
+  align-self: stretch !important;
+}
+
+.article-page .article-card-body {
+  width: 100%;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.92);
+  text-align: left;
+  line-height: 1.6;
+}
+
+.article-page .article-list li > p,
+.article-page .article-prose ul:not(.article-related-links) li > p,
+.article-page .article-section-card > ul:not(.article-related-links) li > p,
+.article-page .article-prose ol li > p,
+.article-page .article-section-card > ol li > p {
+  width: 100%;
+  margin: 0 !important;
+  text-align: left !important;
 }
 
 .article-page .article-list li > *:last-child,
@@ -626,6 +692,7 @@
 .article-page .article-stage-card {
   display: grid;
   align-content: start;
+  justify-items: start;
   height: 100%;
   padding: 1.2rem;
   border-radius: var(--article-radius-md);
@@ -634,6 +701,7 @@
     linear-gradient(135deg, #7a0918 0%, #d7001e 55%, #181818 100%);
   border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow: 0 22px 42px rgba(17, 17, 17, 0.16);
+  text-align: left;
 }
 
 .article-page .article-stage-card strong {
@@ -641,6 +709,31 @@
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.74);
   margin-bottom: 0.3rem;
+}
+
+.article-page .article-stage-card.has-leading-number strong,
+.article-page .article-check-card.has-leading-number strong {
+  color: #ffffff !important;
+}
+
+.article-page .article-check-card.has-leading-number p,
+.article-page .article-check-card.has-leading-number li,
+.article-page .article-check-card.has-leading-number span,
+.article-page .article-check-card.has-leading-number a,
+.article-page .article-stage-card.has-leading-number p,
+.article-page .article-stage-card.has-leading-number li,
+.article-page .article-stage-card.has-leading-number span,
+.article-page .article-stage-card.has-leading-number a,
+.article-page .article-list li strong,
+.article-page .article-list li p,
+.article-page .article-list li a,
+.article-page .article-prose ol li strong,
+.article-page .article-prose ol li p,
+.article-page .article-prose ol li a,
+.article-page .article-section-card > ol li strong,
+.article-page .article-section-card > ol li p,
+.article-page .article-section-card > ol li a {
+  color: #ffffff !important;
 }
 
 .article-page .article-stage-card span,
@@ -666,7 +759,7 @@
   border-radius: var(--article-radius-md);
   background: var(--article-accent-soft);
   border: 1px solid rgba(180, 35, 24, 0.14);
-  text-align: center;
+  text-align: left;
 }
 
 .article-page .article-stat-card strong {
@@ -724,12 +817,14 @@
 .article-page .article-faq-card {
   display: grid;
   align-content: start;
+  justify-items: start;
   height: 100%;
   padding: 1.2rem 1.25rem;
   border-radius: var(--article-radius-md);
   background: #fff;
   border: 1px solid var(--article-line);
   box-shadow: var(--article-shadow-sm);
+  text-align: left;
 }
 
 .article-page .article-check-card strong {

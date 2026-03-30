@@ -335,6 +335,7 @@
   border-radius: 20px;
   background: linear-gradient(180deg, #fff, #fef2f2);
   border: 1px solid rgba(220, 38, 38, 0.12);
+  text-align: left;
 }
 
 .article-stage-card strong {
@@ -414,6 +415,7 @@
   background: #fff;
   border: 1px solid rgba(148, 163, 184, 0.16);
   box-shadow: 0 16px 36px rgba(15, 23, 42, 0.05);
+  text-align: left;
 }
 
 .article-check-card strong {
