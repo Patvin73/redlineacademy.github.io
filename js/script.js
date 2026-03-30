@@ -1578,6 +1578,11 @@ function setLanguage(lang) {
   }
 
   updatePageLanguage();
+  document.dispatchEvent(
+    new CustomEvent("languagechange", {
+      detail: { lang: currentLanguage },
+    }),
+  );
 
   // Update active button
   document.querySelectorAll(".lang-btn").forEach((btn) => {
@@ -1610,6 +1615,24 @@ function t(key) {
 }
 
 window.t = t;
+
+function mergePageTranslations() {
+  if (!window.pageTranslations || typeof window.pageTranslations !== "object") {
+    return;
+  }
+
+  Object.entries(window.pageTranslations).forEach(([lang, values]) => {
+    if (!translations[lang]) {
+      translations[lang] = {};
+    }
+
+    if (values && typeof values === "object") {
+      Object.assign(translations[lang], values);
+    }
+  });
+}
+
+mergePageTranslations();
 
 function getArticleSeoConfig() {
   const bodyPrefix = document.body?.dataset?.articlePrefix;
@@ -1730,6 +1753,26 @@ function updateSeoMetadata() {
     return;
   }
 
+  const explicitMetaTitle = getOptionalTranslation("pageMetaTitle");
+  const explicitMetaDescription = getOptionalTranslation("pageMetaDescription");
+  if (explicitMetaTitle || explicitMetaDescription) {
+    const pageTitle = explicitMetaTitle || document.title;
+    const pageDescription =
+      explicitMetaDescription || document.querySelector('meta[name="description"]')?.content || "";
+    const descriptionMeta = document.querySelector('meta[name="description"]');
+    const ogTitleMeta = document.querySelector('meta[property="og:title"]');
+    const ogDescriptionMeta = document.querySelector('meta[property="og:description"]');
+    const twitterTitleMeta = document.querySelector('meta[name="twitter:title"]');
+    const twitterDescriptionMeta = document.querySelector('meta[name="twitter:description"]');
+
+    if (descriptionMeta) descriptionMeta.setAttribute("content", pageDescription);
+    if (ogTitleMeta) ogTitleMeta.setAttribute("content", pageTitle);
+    if (ogDescriptionMeta) ogDescriptionMeta.setAttribute("content", pageDescription);
+    if (twitterTitleMeta) twitterTitleMeta.setAttribute("content", pageTitle);
+    if (twitterDescriptionMeta) twitterDescriptionMeta.setAttribute("content", pageDescription);
+    return;
+  }
+
   const articleConfig = getArticleSeoConfig();
   if (!articleConfig) return;
 
@@ -1786,6 +1829,25 @@ function updatePageLanguage() {
     }
   });
 
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+    const key = element.getAttribute("data-i18n-placeholder");
+    element.setAttribute("placeholder", t(key));
+  });
+
+  document.querySelectorAll("[data-i18n-aria-label]").forEach((element) => {
+    const key = element.getAttribute("data-i18n-aria-label");
+    element.setAttribute("aria-label", t(key));
+  });
+
+  document.querySelectorAll("[data-i18n-title]").forEach((element) => {
+    const key = element.getAttribute("data-i18n-title");
+    element.setAttribute("title", t(key));
+  });
+
+  document.querySelectorAll("[data-lang-block]").forEach((block) => {
+    block.hidden = block.getAttribute("data-lang-block") !== currentLanguage;
+  });
+
   console.log("Page language updated to:", currentLanguage);
 
   // Update page title and meta
@@ -1796,6 +1858,12 @@ function updatePageLanguage() {
 window.updatePageLanguage = updatePageLanguage;
 
 function updatePageTitle() {
+  const explicitPageTitle = getOptionalTranslation("pageMetaTitle");
+  if (explicitPageTitle) {
+    document.title = explicitPageTitle;
+    return;
+  }
+
   const articleConfig = getArticleSeoConfig();
   if (articleConfig) {
     document.title =
@@ -1846,6 +1914,11 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   updatePageLanguage();
+  document.dispatchEvent(
+    new CustomEvent("languagechange", {
+      detail: { lang: currentLanguage },
+    }),
+  );
 
   // Set up language switcher
   const langButtons = document.querySelectorAll(".lang-btn");

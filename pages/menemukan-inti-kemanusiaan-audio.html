@@ -48,14 +48,87 @@
     <script>
       window.pageTranslations = {
         id: {
-          blogPageTitle: "Audio Redline Academy",
-          blogMetaDescription:
+          pageMetaTitle: "Menemukan Inti Kemanusiaan | Audio Redline Academy",
+          pageMetaDescription:
             "Audio Redline Academy tentang pemberdayaan, person-centred care, martabat, dan dokumentasi objektif.",
+          audioHeroPill: "Audio Brief",
+          audioHeroTitle:
+            "Menemukan Inti Kemanusiaan dalam Seni Perawatan yang Memberdayakan",
+          audioHeroLead:
+            "Sebuah refleksi audio tentang person-centred care, martabat, komunikasi yang memulihkan, dan tanggung jawab etis dalam praktik perawatan sehari-hari.",
+          audioMetaFormatLabel: "Format",
+          audioMetaFormatValue: "Audio + transkrip",
+          audioMetaThemeLabel: "Tema",
+          audioMetaThemeValue: "Empowerment & dignity",
+          audioMetaLevelLabel: "Level",
+          audioMetaLevelValue: "Menengah",
+          audioQuote:
+            '"Dukungan sejati itu bukan tentang apa yang kita lakukan untuk seseorang, tapi apa yang kita lakukan bersama mereka."',
+          audioQuoteSource: "Redline Academy Audio Series",
+          audioPlayerEpisode: "Episode 01",
+          audioPlayerTitle:
+            "Memanusiakan manusia melalui perawatan yang memberdayakan",
+          audioPlayerBody:
+            "Audio ini membahas bagaimana caregiver menjaga martabat, otonomi, dan kepercayaan melalui tindakan yang tampak kecil tetapi berdampak besar.",
+          audioDownloadLabel: "Unduh audio",
+          audioSeekLabel: "Progress audio",
+          audioBackwardLabel: "-10 detik",
+          audioPlayLabel: "Putar",
+          audioPauseLabel: "Jeda",
+          audioForwardLabel: "+15 detik",
+          audioSummaryTitle: "Ringkasan materi",
+          audioLearningTitle: "Poin pembelajaran",
+          audioTranscriptTitle: "Transkrip interaktif",
+          audioTranscriptIntro:
+            "Klik bagian yang ingin ditinjau untuk melompat ke momen paling relevan di audio.",
+          audioTopicsTitle: "Topik utama",
+          audioRelatedTitle: "Artikel terkait",
+          audioResourcesTitle: "Materi pendukung",
+          audioReflectionTitle: "Refleksi singkat",
+          audioReflectionBody:
+            "Dalam setiap hubungan bantuan yang kita jalani, apakah kita sedang membangun jembatan menuju kemandirian, atau justru tanpa sadar meruntuhkan martabat dengan dalih membantu?",
         },
         en: {
-          blogPageTitle: "Redline Academy Audio",
-          blogMetaDescription:
+          pageMetaTitle:
+            "Finding the Human Core | Redline Academy Audio",
+          pageMetaDescription:
             "Redline Academy audio on empowerment, person-centred care, dignity, and objective documentation.",
+          audioHeroPill: "Audio Brief",
+          audioHeroTitle:
+            "Finding the Human Core in Empowering Care Practice",
+          audioHeroLead:
+            "An audio reflection on person-centred care, dignity, restorative communication, and ethical responsibility in everyday caregiving.",
+          audioMetaFormatLabel: "Format",
+          audioMetaFormatValue: "Audio + transcript",
+          audioMetaThemeLabel: "Theme",
+          audioMetaThemeValue: "Autonomy & dignity",
+          audioMetaLevelLabel: "Level",
+          audioMetaLevelValue: "Intermediate",
+          audioQuote:
+            '"Real support is not only what we do for someone, but what we choose to do with them."',
+          audioQuoteSource: "Redline Academy Audio Series",
+          audioPlayerEpisode: "Episode 01",
+          audioPlayerTitle:
+            "Autonomy over efficiency in professional caregiving",
+          audioPlayerBody:
+            "This episode explores how caregivers protect dignity, autonomy, and trust through choices that may look small, yet shape the whole care experience.",
+          audioDownloadLabel: "Download Audio",
+          audioSeekLabel: "Audio progress",
+          audioBackwardLabel: "-10s",
+          audioPlayLabel: "Play",
+          audioPauseLabel: "Pause",
+          audioForwardLabel: "+15s",
+          audioSummaryTitle: "Episode summary",
+          audioLearningTitle: "Learning points",
+          audioTranscriptTitle: "Interactive transcript",
+          audioTranscriptIntro:
+            "Select a section to jump straight to the most relevant moment in the audio.",
+          audioTopicsTitle: "Key topics",
+          audioRelatedTitle: "Related reading",
+          audioResourcesTitle: "Support material",
+          audioReflectionTitle: "Short reflection",
+          audioReflectionBody:
+            "In every helping relationship, are we building a bridge toward autonomy, or quietly reducing dignity in the name of being helpful?",
         },
       };
     </script>
@@ -125,35 +198,37 @@
       <section class="audio-article-hero section-padding">
         <div class="container audio-article-hero__grid">
           <div class="audio-article-hero__copy">
-            <span class="audio-article-pill">Audio Brief</span>
-            <h1>Menemukan Inti Kemanusiaan dalam Seni Perawatan yang Memberdayakan</h1>
-            <p class="audio-article-hero__lead">
+            <span class="audio-article-pill" data-i18n="audioHeroPill">Audio Brief</span>
+            <h1 data-i18n="audioHeroTitle">
+              Menemukan Inti Kemanusiaan dalam Seni Perawatan yang Memberdayakan
+            </h1>
+            <p class="audio-article-hero__lead" data-i18n="audioHeroLead">
               Sebuah refleksi audio tentang person-centred care, martabat,
               komunikasi yang memulihkan, dan tanggung jawab etis dalam praktik
               perawatan sehari-hari.
             </p>
             <div class="audio-article-meta">
               <div>
-                <span>Format</span>
-                <strong>Audio + transkrip</strong>
+                <span data-i18n="audioMetaFormatLabel">Format</span>
+                <strong data-i18n="audioMetaFormatValue">Audio + transkrip</strong>
               </div>
               <div>
-                <span>Tema</span>
-                <strong>Empowerment & dignity</strong>
+                <span data-i18n="audioMetaThemeLabel">Tema</span>
+                <strong data-i18n="audioMetaThemeValue">Empowerment & dignity</strong>
               </div>
               <div>
-                <span>Level</span>
-                <strong>Menengah</strong>
+                <span data-i18n="audioMetaLevelLabel">Level</span>
+                <strong data-i18n="audioMetaLevelValue">Menengah</strong>
               </div>
             </div>
           </div>
 
           <aside class="audio-article-hero__quote">
-            <p>
+            <p data-i18n="audioQuote">
               "Dukungan sejati itu bukan tentang apa yang kita lakukan untuk
               seseorang, tapi apa yang kita lakukan bersama mereka."
             </p>
-            <span>Redline Academy Audio Series</span>
+            <span data-i18n="audioQuoteSource">Redline Academy Audio Series</span>
           </aside>
         </div>
       </section>
@@ -173,9 +248,9 @@
           <div class="audio-article-player__body">
             <div class="audio-article-player__header">
               <div>
-                <span class="audio-article-pill audio-article-pill--soft">Episode 01</span>
-                <h2>Memanusiakan manusia melalui perawatan yang memberdayakan</h2>
-                <p>
+                <span class="audio-article-pill audio-article-pill--soft" data-i18n="audioPlayerEpisode">Episode 01</span>
+                <h2 data-i18n="audioPlayerTitle">Memanusiakan manusia melalui perawatan yang memberdayakan</h2>
+                <p data-i18n="audioPlayerBody">
                   Audio ini membahas bagaimana caregiver menjaga martabat,
                   otonomi, dan kepercayaan melalui tindakan yang tampak kecil
                   tetapi berdampak besar.
@@ -184,13 +259,20 @@
               <a
                 class="btn btn-secondary"
                 href="../assets/audio/Seni_Memanusiakan_Manusia_dalam_Perawatan.m4a"
+                data-audio-download
+                data-i18n="audioDownloadLabel"
                 download
               >
                 Download Audio
               </a>
             </div>
 
-            <audio id="episodeAudio" preload="metadata">
+            <audio
+              id="episodeAudio"
+              preload="metadata"
+              data-src-id="../assets/audio/Seni_Memanusiakan_Manusia_dalam_Perawatan.m4a"
+              data-src-en="../assets/audio/Autonomy_Over_Efficiency_in_Professional_Caregiving.m4a"
+            >
               <source
                 src="../assets/audio/Seni_Memanusiakan_Manusia_dalam_Perawatan.m4a"
                 type="audio/mp4"
@@ -211,18 +293,19 @@
                 value="0"
                 step="0.1"
                 aria-label="Audio progress"
+                data-i18n-aria-label="audioSeekLabel"
               />
             </div>
 
             <div class="audio-article-player__controls">
-              <button type="button" class="audio-article-control" data-action="backward">
-                -10s
+              <button type="button" class="audio-article-control" data-action="backward" data-i18n="audioBackwardLabel">
+                -10 detik
               </button>
-              <button type="button" class="audio-article-control audio-article-control--primary" data-action="play">
-                Play
+              <button type="button" class="audio-article-control audio-article-control--primary" data-action="play" data-i18n="audioPlayLabel">
+                Putar
               </button>
-              <button type="button" class="audio-article-control" data-action="forward">
-                +15s
+              <button type="button" class="audio-article-control" data-action="forward" data-i18n="audioForwardLabel">
+                +15 detik
               </button>
 
               <div class="audio-article-speed">
@@ -244,21 +327,32 @@
       <section class="section-padding">
         <div class="container audio-article-summary-grid">
           <article class="audio-article-panel">
-            <h3>Ringkasan materi</h3>
-            <p>
+            <h3 data-i18n="audioSummaryTitle">Ringkasan materi</h3>
+            <p data-lang-block="id">
               Episode ini mengajak pendengar melihat kembali esensi perawatan:
               bukan mengambil alih hidup seseorang, tetapi membantu mereka tetap
               memegang kendali atas hidupnya sendiri.
             </p>
+            <p data-lang-block="en" hidden>
+              This episode invites listeners to return to the essence of care:
+              not taking over someone's life, but helping them keep hold of
+              their own choices and identity.
+            </p>
           </article>
 
           <article class="audio-article-panel">
-            <h3>Poin pembelajaran</h3>
-            <ul class="audio-article-list">
+            <h3 data-i18n="audioLearningTitle">Poin pembelajaran</h3>
+            <ul class="audio-article-list" data-lang-block="id">
               <li>Pemberdayaan adalah inti dari perawatan yang bermartabat.</li>
               <li>Rencana individual harus lahir dari kolaborasi, bukan keputusan sepihak.</li>
               <li>Mendengarkan aktif sering lebih kuat daripada instruksi yang memaksa.</li>
               <li>Dokumentasi objektif melindungi hak pasien dan integritas profesional.</li>
+            </ul>
+            <ul class="audio-article-list" data-lang-block="en" hidden>
+              <li>Empowerment is at the heart of dignified care.</li>
+              <li>Individual plans must come from collaboration, not one-sided control.</li>
+              <li>Active listening is often stronger than forceful direction.</li>
+              <li>Objective documentation protects rights and professional integrity.</li>
             </ul>
           </article>
         </div>
@@ -268,13 +362,13 @@
         <div class="container audio-article-layout">
           <div class="audio-article-main">
             <article class="audio-article-panel">
-              <h2>Transkrip interaktif</h2>
-              <p class="audio-article-panel__intro">
+              <h2 data-i18n="audioTranscriptTitle">Transkrip interaktif</h2>
+              <p class="audio-article-panel__intro" data-i18n="audioTranscriptIntro">
                 Klik salah satu bagian untuk langsung melompat ke titik yang
                 relevan di audio.
               </p>
 
-              <div class="audio-article-transcript">
+              <div class="audio-article-transcript" data-transcript-lang="id">
                 <button class="audio-article-transcript__item" type="button" data-time="0">
                   <span>00:00</span>
                   <div>
@@ -359,33 +453,124 @@
                   </div>
                 </button>
               </div>
+
+              <div class="audio-article-transcript" data-transcript-lang="en" hidden>
+                <button class="audio-article-transcript__item" type="button" data-time="0">
+                  <span>00:00</span>
+                  <div>
+                    <strong>Opening: what separates routine care from human-centred care</strong>
+                    <p>
+                      In systems obsessed with efficiency, care can easily shrink into a
+                      checklist. This episode reopens the question of what makes care
+                      genuinely humane.
+                    </p>
+                  </div>
+                </button>
+
+                <button class="audio-article-transcript__item" type="button" data-time="180">
+                  <span>03:00</span>
+                  <div>
+                    <strong>The philosophy of doing care "with" someone</strong>
+                    <p>
+                      Person-centred practice begins when caregivers stop doing
+                      everything for a person and start doing meaningful things with
+                      them.
+                    </p>
+                  </div>
+                </button>
+
+                <button class="audio-article-transcript__item" type="button" data-time="366">
+                  <span>06:06</span>
+                  <div>
+                    <strong>Individual planning as a shared compass</strong>
+                    <p>
+                      A care plan is more than paperwork. It becomes useful when it
+                      reflects open dialogue, lived preference, and realistic daily
+                      partnership.
+                    </p>
+                  </div>
+                </button>
+
+                <button class="audio-article-transcript__item" type="button" data-time="575">
+                  <span>09:35</span>
+                  <div>
+                    <strong>Listening as a clinical and relational skill</strong>
+                    <p>
+                      Great communication begins with the ear, not the mouth.
+                      Approaches that recognize feeling and consent build far more
+                      trust than command-driven interaction.
+                    </p>
+                  </div>
+                </button>
+
+                <button class="audio-article-transcript__item" type="button" data-time="805">
+                  <span>13:25</span>
+                  <div>
+                    <strong>Dignity in privacy, pace, and assistive choices</strong>
+                    <p>
+                      Closing a door, creating space, and choosing assistive tools
+                      together are practical expressions of respect, not decorative
+                      extras.
+                    </p>
+                  </div>
+                </button>
+
+                <button class="audio-article-transcript__item" type="button" data-time="1047">
+                  <span>17:27</span>
+                  <div>
+                    <strong>Documentation ethics and risk awareness</strong>
+                    <p>
+                      Factual documentation supports sound judgement. Strong care also
+                      depends on noticing internal and external risks before they grow.
+                    </p>
+                  </div>
+                </button>
+
+                <button class="audio-article-transcript__item" type="button" data-time="1293">
+                  <span>21:33</span>
+                  <div>
+                    <strong>Closing reflection</strong>
+                    <p>
+                      High-quality caregiving means making enough room for another
+                      person to remain the central character in their own life.
+                    </p>
+                  </div>
+                </button>
+              </div>
             </article>
           </div>
 
           <aside class="audio-article-sidebar">
             <article class="audio-article-panel">
-              <h3>Topik utama</h3>
+              <h3 data-i18n="audioTopicsTitle">Topik utama</h3>
               <div class="audio-article-tags">
                 <span>Person-centred care</span>
-                <span>Pemberdayaan</span>
-                <span>Martabat</span>
-                <span>Komunikasi</span>
-                <span>Dokumentasi</span>
+                <span data-lang-block="id">Pemberdayaan</span>
+                <span data-lang-block="en" hidden">Empowerment</span>
+                <span data-lang-block="id">Martabat</span>
+                <span data-lang-block="en" hidden">Dignity</span>
+                <span data-lang-block="id">Komunikasi</span>
+                <span data-lang-block="en" hidden">Communication</span>
+                <span data-lang-block="id">Dokumentasi</span>
+                <span data-lang-block="en" hidden">Documentation</span>
               </div>
             </article>
 
             <article class="audio-article-panel">
-              <h3>Setelah mendengarkan ini</h3>
+              <h3 data-i18n="audioRelatedTitle">Setelah mendengarkan ini</h3>
               <div class="audio-article-related">
-                <a href="pelatihan-caregiver-indonesia.html">Pelatihan Caregiver Indonesia</a>
-                <a href="kursus-caregiver-bersertifikat.html">Kursus Caregiver Bersertifikat</a>
-                <a href="blog.html">Kembali ke Content Library</a>
+                <a href="pelatihan-caregiver-indonesia.html" data-lang-block="id">Pelatihan Caregiver Indonesia</a>
+                <a href="pelatihan-caregiver-indonesia.html" data-lang-block="en" hidden">Caregiver Training in Indonesia</a>
+                <a href="kursus-caregiver-bersertifikat.html" data-lang-block="id">Kursus Caregiver Bersertifikat</a>
+                <a href="kursus-caregiver-bersertifikat.html" data-lang-block="en" hidden">Certified Caregiver Course</a>
+                <a href="blog.html" data-lang-block="id">Kembali ke Pustaka Konten</a>
+                <a href="blog.html" data-lang-block="en" hidden">Back to the Content Library</a>
               </div>
             </article>
 
             <article class="audio-article-panel">
-              <h3>Refleksi singkat</h3>
-              <p>
+              <h3 data-i18n="audioReflectionTitle">Refleksi singkat</h3>
+              <p data-i18n="audioReflectionBody">
                 Dalam setiap hubungan bantuan yang kita jalani, apakah kita sedang
                 membangun jembatan menuju kemandirian, atau justru tanpa sadar
                 meruntuhkan martabat dengan dalih membantu?

@@ -141,21 +141,32 @@
       const anchor = document.createElement("a");
       anchor.className = "article-related-item";
       anchor.href = item.href;
-      anchor.innerHTML = `<img src="${item.image}" alt="${item.title}" loading="lazy" decoding="async"><strong>${item.title}</strong>`;
+      const currentLang =
+        document.documentElement.lang === "en" ? "en" : "id";
+      const itemTitle =
+        currentLang === "id"
+          ? item.titleId || item.titleEn || item.title
+          : item.titleEn || item.titleId || item.title;
+      anchor.innerHTML = `<img src="${item.image}" alt="${itemTitle}" loading="lazy" decoding="async"><strong>${itemTitle}</strong>`;
       related.appendChild(anchor);
     });
 
     const copyButton = sidebar.querySelector(".article-copy-link");
     if (copyButton) {
       copyButton.addEventListener("click", async () => {
+        const currentLang =
+          document.documentElement.lang === "en" ? "en" : "id";
         try {
           await navigator.clipboard.writeText(window.location.href);
-          copyButton.textContent = "Copied";
+          copyButton.textContent =
+            currentLang === "id" ? "Tersalin" : "Copied";
           setTimeout(() => {
-            copyButton.textContent = "Copy Link";
+            copyButton.textContent =
+              currentLang === "id" ? "Salin Link" : "Copy Link";
           }, 1200);
         } catch (error) {
-          copyButton.textContent = "Copy failed";
+          copyButton.textContent =
+            currentLang === "id" ? "Gagal menyalin" : "Copy failed";
         }
       });
     }
@@ -175,9 +186,9 @@
           <h3>${config.author.name}</h3>
           <p>${lang === "id" ? config.author.bioId : config.author.bioEn}</p>
           <div class="article-bio-links">
-            <a href="https://redlineacademy.com.au" target="_blank" rel="noreferrer">Website</a>
-            <a href="contact.html">Contact</a>
-            <a href="blog.html">Blog</a>
+            <a href="https://redlineacademy.com.au" target="_blank" rel="noreferrer">${lang === "id" ? "Website" : "Website"}</a>
+            <a href="contact.html">${lang === "id" ? "Kontak" : "Contact"}</a>
+            <a href="blog.html">${lang === "id" ? "Blog" : "Blog"}</a>
           </div>
         </div>
       </section>

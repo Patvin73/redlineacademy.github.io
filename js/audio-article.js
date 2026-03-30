@@ -3,6 +3,8 @@
     const audio = document.getElementById("episodeAudio");
     if (!audio) return;
 
+    const sourceNode = audio.querySelector("source");
+    const downloadLink = document.querySelector("[data-audio-download]");
     const playButton = document.querySelector('[data-action="play"]');
     const backButton = document.querySelector('[data-action="backward"]');
     const forwardButton = document.querySelector('[data-action="forward"]');
@@ -12,9 +14,17 @@
     const speedButtons = Array.from(
       document.querySelectorAll(".audio-article-speed__btn"),
     );
-    const transcriptButtons = Array.from(
-      document.querySelectorAll(".audio-article-transcript__item"),
+    const transcriptGroups = Array.from(
+      document.querySelectorAll("[data-transcript-lang]"),
     );
+
+    function getTranscriptButtons() {
+      return Array.from(
+        document.querySelectorAll(
+          '[data-transcript-lang]:not([hidden]) .audio-article-transcript__item',
+        ),
+      );
+    }
 
     function formatTime(value) {
       if (!Number.isFinite(value)) return "--:--";
@@ -33,19 +43,65 @@
       }
 
       let activeButton = null;
-      transcriptButtons.forEach((button) => {
+      getTranscriptButtons().forEach((button) => {
         const time = Number(button.dataset.time || 0);
         if (audio.currentTime >= time) activeButton = button;
       });
 
-      transcriptButtons.forEach((button) =>
+      getTranscriptButtons().forEach((button) =>
         button.classList.toggle("is-active", button === activeButton),
       );
     }
 
     function updatePlayButton() {
       if (!playButton) return;
-      playButton.textContent = audio.paused ? "Play" : "Pause";
+      const playLabel =
+        typeof window.t === "function" ? window.t("audioPlayLabel") : "Play";
+      const pauseLabel =
+        typeof window.t === "function" ? window.t("audioPauseLabel") : "Pause";
+      playButton.textContent = audio.paused ? playLabel : pauseLabel;
+    }
+
+    function applyLanguageVariant(lang, options = {}) {
+      const normalizedLang = lang === "en" ? "en" : "id";
+      const nextSrc =
+        normalizedLang === "en" && audio.dataset.srcEn
+          ? audio.dataset.srcEn
+          : audio.dataset.srcId;
+
+      transcriptGroups.forEach((group) => {
+        group.hidden = group.dataset.transcriptLang !== normalizedLang;
+      });
+
+      if (downloadLink && nextSrc) {
+        downloadLink.setAttribute("href", nextSrc);
+      }
+
+      if (audio.dataset.activeSrc === nextSrc || !nextSrc) {
+        updateTimeline();
+        updatePlayButton();
+        return;
+      }
+
+      audio.pause();
+      audio.dataset.activeSrc = nextSrc;
+
+      if (sourceNode) {
+        sourceNode.src = nextSrc;
+        audio.load();
+      } else {
+        audio.src = nextSrc;
+      }
+
+      if (options.resetTime !== false) {
+        audio.currentTime = 0;
+      }
+
+      seek.value = "0";
+      currentTimeNode.textContent = "00:00";
+      durationNode.textContent = "--:--";
+      updateTimeline();
+      updatePlayButton();
     }
 
     if (playButton) {
@@ -89,8 +145,11 @@
       });
     });
 
-    transcriptButtons.forEach((button) => {
-      button.addEventListener("click", async () => {
+    transcriptGroups.forEach((group) => {
+      group.addEventListener("click", async (event) => {
+        const button = event.target.closest(".audio-article-transcript__item");
+        if (!button) return;
+
         audio.currentTime = Number(button.dataset.time || 0);
         updateTimeline();
 
@@ -101,6 +160,7 @@
             console.warn("Audio playback failed:", error);
           }
         }
+
         updatePlayButton();
       });
     });
@@ -109,6 +169,13 @@
     audio.addEventListener("timeupdate", updateTimeline);
     audio.addEventListener("play", updatePlayButton);
     audio.addEventListener("pause", updatePlayButton);
+
+    applyLanguageVariant(localStorage.getItem("language") || "id", {
+      resetTime: false,
+    });
+    document.addEventListener("languagechange", (event) => {
+      applyLanguageVariant(event.detail?.lang || "id");
+    });
 
     updateTimeline();
     updatePlayButton();
