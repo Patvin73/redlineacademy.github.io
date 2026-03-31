@@ -28,7 +28,7 @@
     />
     <meta
       property="og:image"
-      content="https://redlineacademy.com.au/assets/images/assistant_carer-optimized.jpg"
+      content="https://redlineacademy.com.au/assets/images/podcast-caregiver.jpg"
     />
     <meta name="twitter:card" content="summary_large_image" />
     <meta
@@ -41,7 +41,7 @@
     />
     <meta
       name="twitter:image"
-      content="https://redlineacademy.com.au/assets/images/assistant_carer-optimized.jpg"
+      content="https://redlineacademy.com.au/assets/images/podcast-caregiver.jpg"
     />
     <script type="application/ld+json">
       {
@@ -51,7 +51,7 @@
         "description": "Dengarkan audio person-centred care Redline Academy tentang martabat, pemberdayaan, komunikasi, dan dokumentasi objektif untuk caregiver profesional.",
         "inLanguage": "id-ID",
         "mainEntityOfPage": "https://redlineacademy.com.au/pages/menemukan-inti-kemanusiaan-audio.html",
-        "image": ["https://redlineacademy.com.au/assets/images/assistant_carer-optimized.jpg"],
+        "image": ["https://redlineacademy.com.au/assets/images/podcast-caregiver.jpg"],
         "datePublished": "2026-03-31",
         "dateModified": "2026-03-31",
         "author": { "@type": "Organization", "name": "Redline Academy" },
@@ -283,6 +283,14 @@
           </div>
 
           <aside class="audio-article-hero__quote">
+            <div class="audio-article-hero__quote-logo" aria-hidden="true">
+              <img
+                src="../assets/images/redlinelogo.png"
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
             <p data-i18n="audioQuote">
               "Dukungan sejati itu bukan tentang apa yang kita lakukan untuk
               seseorang, tapi apa yang kita lakukan bersama mereka."
@@ -296,7 +304,7 @@
         <div class="container audio-article-player">
           <div class="audio-article-player__cover">
             <img
-              src="../assets/images/assistant_carer-optimized.jpg"
+              src="../assets/images/podcast-caregiver.jpg"
               alt="Ilustrasi audio perawatan yang memberdayakan"
               loading="eager"
               fetchpriority="high"
@@ -317,13 +325,26 @@
                 </p>
               </div>
               <a
-                class="btn btn-secondary"
+                class="audio-download-button"
                 href="../assets/audio/Seni_Memanusiakan_Manusia_dalam_Perawatan.m4a"
                 data-audio-download
-                data-i18n="audioDownloadLabel"
                 download
+                aria-label="Unduh audio"
+                data-i18n-aria-label="audioDownloadLabel"
               >
-                Download Audio
+                <span class="audio-download-button__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" role="img" focusable="false">
+                    <path
+                      d="M12 3v10.25m0 0 4-4m-4 4-4-4M5 15.75V17a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1.25"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.9"
+                    />
+                  </svg>
+                </span>
+                <span data-i18n="audioDownloadLabel">Unduh audio</span>
               </a>
             </div>
 
