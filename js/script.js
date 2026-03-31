@@ -83,7 +83,7 @@ const translations = {
 
     // Homepage
     heroWelcome: "Selamat datang",
-    heroTitle: "Redline bukan sekadar akademi",
+    heroTitle: "Redline bukan sekedar akademi",
     heroSubtitle:
       "— ini adalah tempat untuk membuka potensi, menembus batas, dan mengambil kendali atas masa depanmu. Berani mengubah masa depanmu?",
     applyNow: "Daftar Sekarang",
