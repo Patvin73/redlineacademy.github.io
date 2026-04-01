@@ -1287,12 +1287,52 @@
          Order matters: supabase SDK → config → auth → guard → dashboard
     ══════════════════════════════════════════ -->
     <script>
-      document.write(
-        '<script src="' +
-          (window.__SUPABASE_SDK_SRC__ ||
-            "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2") +
-          '"><\\/script>'
-      );
+      (function () {
+        if (window.__LMS_SUPABASE_BOOTSTRAP__) return;
+
+        var primarySrc =
+          window.__SUPABASE_SDK_SRC__ ||
+          "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        var fallbackSrc =
+          window.__SUPABASE_SDK_FALLBACK_SRC__ ||
+          "https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js";
+
+        function loadScript(src, timeoutMs) {
+          return new Promise(function (resolve, reject) {
+            var script = document.createElement("script");
+            var settled = false;
+            var timerId = window.setTimeout(function () {
+              if (settled) return;
+              settled = true;
+              script.remove();
+              reject(new Error("Supabase SDK load timeout: " + src));
+            }, timeoutMs);
+
+            script.src = src;
+            script.async = true;
+            script.onload = function () {
+              if (settled) return;
+              settled = true;
+              window.clearTimeout(timerId);
+              resolve(src);
+            };
+            script.onerror = function () {
+              if (settled) return;
+              settled = true;
+              window.clearTimeout(timerId);
+              script.remove();
+              reject(new Error("Supabase SDK failed to load: " + src));
+            };
+
+            document.head.appendChild(script);
+          });
+        }
+
+        window.__LMS_SUPABASE_BOOTSTRAP__ = loadScript(primarySrc, 6000)
+          .catch(function () {
+            return loadScript(fallbackSrc, 6000);
+          });
+      })();
     </script>
     <script src="../js/script.js" defer></script>
     <script src="../js/supabase-client.js" defer></script>

@@ -17,18 +17,42 @@
     marketer: "./dashboard-marketer.html",
     staff:    "./dashboard-marketer.html",
   };
+  const AUTH_REQUEST_TIMEOUT_MS = 15000;
 
   const tt = (key, fallback) => (typeof t === "function" ? t(key) : fallback);
 
-  function getClient() {
-    if (!window.lmsSupabase) {
+  async function waitForSupabaseClient(timeoutMs = 12000) {
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < timeoutMs) {
+      if (window.lmsSupabase) {
+        return window.lmsSupabase;
+      }
+
+      if (window.__lmsSupabaseInitError__) {
+        throw window.__lmsSupabaseInitError__;
+      }
+
+      if (window.__lmsSupabaseReady__) {
+        return window.__lmsSupabaseReady__;
+      }
+
+      await new Promise((resolve) => window.setTimeout(resolve, 100));
+    }
+
+    throw new Error("Client Supabase tidak tersedia.");
+  }
+
+  async function getClient() {
+    const client = await waitForSupabaseClient();
+    if (!client) {
       throw new Error("Client Supabase tidak tersedia.");
     }
-    return window.lmsSupabase;
+    return client;
   }
 
   async function getSessionUser() {
-    const supabase = getClient();
+    const supabase = await getClient();
     const { data, error } = await supabase.auth.getSession();
     if (error || !data?.session) return null;
 
@@ -59,7 +83,7 @@
    * Hanya kolom yang sudah ada di schema default yang di-select.
    */
   async function getProfile(userId) {
-    const supabase = getClient();
+    const supabase = await getClient();
     const { data, error } = await supabase
       .from("profiles")
       .select("id, full_name, role, student_id, admin_id, email")
@@ -97,6 +121,35 @@
     }
   }
 
+  function createTimeoutPromise(timeoutMs, message) {
+    let timerId = null;
+    const promise = new Promise((_, reject) => {
+      timerId = window.setTimeout(() => {
+        reject(new Error(message));
+      }, timeoutMs);
+    });
+
+    return {
+      promise,
+      clear() {
+        if (timerId !== null) {
+          window.clearTimeout(timerId);
+          timerId = null;
+        }
+      },
+    };
+  }
+
+  async function runWithTimeout(taskFactory, timeoutMs, timeoutMessage) {
+    const timeout = createTimeoutPromise(timeoutMs, timeoutMessage);
+
+    try {
+      return await Promise.race([Promise.resolve().then(taskFactory), timeout.promise]);
+    } finally {
+      timeout.clear();
+    }
+  }
+
   /**
    * signIn — masuk dengan email + password.
    * @param {string}        email
@@ -107,7 +160,8 @@
    */
   async function signIn(email, password, allowedRoles) {
     try {
-      const supabase = getClient();
+      console.log("[SIGNIN] start", { email, allowedRoles });
+      const supabase = await getClient();
       const supabaseUrl = window.lmsConfig?.supabaseUrl;
       const supabaseAnonKey = window.lmsConfig?.supabaseAnonKey;
 
@@ -118,20 +172,49 @@
         };
       }
 
-      const response = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: supabaseAnonKey,
-          Authorization: `Bearer ${supabaseAnonKey}`,
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+      const fetchController = typeof AbortController === "function" ? new AbortController() : null;
+      const fetchTimeout = window.setTimeout(() => {
+        if (fetchController) {
+          fetchController.abort();
+        }
+      }, AUTH_REQUEST_TIMEOUT_MS);
+
+      let response;
+      try {
+        response = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: supabaseAnonKey,
+            Authorization: `Bearer ${supabaseAnonKey}`,
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+          signal: fetchController ? fetchController.signal : undefined,
+        });
+      } catch (error) {
+        if (error && error.name === "AbortError") {
+          return {
+            ok: false,
+            error: tt("lmsErrLoginFailed", "Login gagal.") + " Request timed out.",
+          };
+        }
+        throw error;
+      } finally {
+        window.clearTimeout(fetchTimeout);
+      }
 
       const tokenData = await response.json().catch(() => ({}));
+      console.log("[SIGNIN] token response", {
+        ok: response.ok,
+        status: response.status,
+        hasUserId: !!tokenData.user?.id,
+        hasAccessToken: !!tokenData.access_token,
+        hasRefreshToken: !!tokenData.refresh_token,
+        error: tokenData.error_description || tokenData.msg || tokenData.message || null,
+      });
 
       if (!response.ok) {
         return {
@@ -154,9 +237,18 @@
         };
       }
 
-      const { error: sessionError } = await supabase.auth.setSession({
-        access_token: tokenData.access_token,
-        refresh_token: tokenData.refresh_token,
+      const { error: sessionError } = await runWithTimeout(
+        () =>
+          supabase.auth.setSession({
+            access_token: tokenData.access_token,
+            refresh_token: tokenData.refresh_token,
+          }),
+        AUTH_REQUEST_TIMEOUT_MS,
+        "Pengaturan sesi login melebihi batas waktu."
+      );
+      console.log("[SIGNIN] setSession result", {
+        ok: !sessionError,
+        error: sessionError ? sessionError.message : null,
       });
 
       if (sessionError) {
@@ -166,7 +258,12 @@
         };
       }
 
-      const profileRes = await getProfile(tokenData.user.id);
+      const profileRes = await runWithTimeout(
+        () => getProfile(tokenData.user.id),
+        AUTH_REQUEST_TIMEOUT_MS,
+        "Pengambilan profil melebihi batas waktu."
+      );
+      console.log("[SIGNIN] profile fetch", profileRes);
       if (!profileRes.ok) {
         return {
           ok: false,
@@ -193,11 +290,15 @@
         }
       }
 
-      return {
+      const result = {
         ok: true,
+        role,
         redirectTo: getDashboardRouteByRole(role),
       };
+      console.log("[SIGNIN] return", result);
+      return result;
     } catch (err) {
+      console.error("[SIGNIN] unexpected error", err);
       return {
         ok: false,
         error: err.message || tt("lmsErrLoginFailed", "Login gagal."),
@@ -206,7 +307,7 @@
   }
 
   async function signOut() {
-    const supabase = getClient();
+    const supabase = await getClient();
     await supabase.auth.signOut();
     window.location.replace("./login.html");
   }

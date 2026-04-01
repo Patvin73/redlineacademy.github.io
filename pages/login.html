@@ -167,12 +167,61 @@
 
     <!-- Scripts -->
     <script>
-      document.write(
-        '<script src="' +
-          (window.__SUPABASE_SDK_SRC__ ||
-            "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2") +
-          '"><\\/script>'
-      );
+      (function () {
+        if (window.__LMS_SUPABASE_BOOTSTRAP__) return;
+
+        var primarySrc =
+          window.__SUPABASE_SDK_SRC__ ||
+          "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        var fallbackSrc =
+          window.__SUPABASE_SDK_FALLBACK_SRC__ ||
+          "https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js";
+
+        function loadScript(src, timeoutMs) {
+          return new Promise(function (resolve, reject) {
+            var script = document.createElement("script");
+            var settled = false;
+            var timerId = window.setTimeout(function () {
+              if (settled) return;
+              settled = true;
+              script.remove();
+              reject(new Error("Supabase SDK load timeout: " + src));
+            }, timeoutMs);
+
+            script.src = src;
+            script.async = true;
+            script.onload = function () {
+              if (settled) return;
+              settled = true;
+              window.clearTimeout(timerId);
+              resolve(src);
+            };
+            script.onerror = function () {
+              if (settled) return;
+              settled = true;
+              window.clearTimeout(timerId);
+              script.remove();
+              reject(new Error("Supabase SDK failed to load: " + src));
+            };
+
+            document.head.appendChild(script);
+          });
+        }
+
+        window.__LMS_SUPABASE_BOOTSTRAP__ = loadScript(primarySrc, 6000)
+          .catch(function (error) {
+            console.warn("[SUPABASE] primary SDK load failed", error);
+            return loadScript(fallbackSrc, 6000);
+          })
+          .then(function (src) {
+            console.log("[SUPABASE] SDK loaded", src);
+            return src;
+          })
+          .catch(function (error) {
+            console.error("[SUPABASE] SDK bootstrap failed", error);
+            throw error;
+          });
+      })();
     </script>
     <script src="../js/script.js" defer></script>
     <script src="../js/supabase-client.js" defer></script>
@@ -366,13 +415,135 @@
               }
 
               if (Date.now() - startedAt >= timeoutMs) {
-                reject(new Error("Modul login belum siap."));
+                reject(new Error("Modul login belum siap. Pastikan Supabase SDK dan auth.js berhasil dimuat."));
                 return;
               }
 
               setTimeout(check, 50);
             })();
           });
+        }
+
+        function withTimeout(promise, timeoutMs, timeoutMessage) {
+          return new Promise(function (resolve, reject) {
+            var settled = false;
+            var timerId = setTimeout(function () {
+              if (settled) return;
+              settled = true;
+              reject(new Error(timeoutMessage));
+            }, timeoutMs);
+
+            Promise.resolve(promise)
+              .then(function (value) {
+                if (settled) return;
+                settled = true;
+                clearTimeout(timerId);
+                resolve(value);
+              })
+              .catch(function (error) {
+                if (settled) return;
+                settled = true;
+                clearTimeout(timerId);
+                reject(error);
+              });
+          });
+        }
+
+        function setFormLoadingState(form, isLoading) {
+          if (!form) return;
+
+          var submitButton = form.querySelector('button[type="submit"]');
+          if (submitButton) {
+            submitButton.disabled = !!isLoading;
+            submitButton.setAttribute("aria-disabled", isLoading ? "true" : "false");
+          }
+        }
+
+        function getFallbackRedirect(auth, result, allowedRoles) {
+          if (result && typeof result.redirectTo === "string" && result.redirectTo.trim()) {
+            return result.redirectTo;
+          }
+
+          var role = result && result.role;
+          if (!role && Array.isArray(allowedRoles)) {
+            if (allowedRoles.indexOf("marketer") !== -1 || allowedRoles.indexOf("staff") !== -1) {
+              role = "marketer";
+            } else if (allowedRoles.indexOf("admin") !== -1) {
+              role = "admin";
+            } else if (allowedRoles.indexOf("trainer") !== -1) {
+              role = "trainer";
+            } else if (allowedRoles.indexOf("student") !== -1) {
+              role = "student";
+            }
+          }
+
+          if (role && auth && typeof auth.getDashboardRouteByRole === "function") {
+            return auth.getDashboardRouteByRole(role);
+          }
+
+          return null;
+        }
+
+        async function handleLoginSubmit(options) {
+          var form = options.form;
+          var emailInput = options.emailInput;
+          var passwordInput = options.passwordInput;
+          var messageEl = options.messageEl;
+          var allowedRoles = options.allowedRoles;
+          var successKey = options.successKey;
+          var successFallback = options.successFallback;
+
+          var email = emailInput.value.trim();
+          var password = passwordInput.value;
+          if (!email || !password) return;
+
+          setFormLoadingState(form, true);
+          messageEl.textContent = tSafe("lmsLoggingIn", "Memproses login...");
+          messageEl.classList.remove("error");
+
+          try {
+            var auth = await waitForAuthModule(8000);
+            console.log("[LOGIN] Attempt", {
+              email: email,
+              role: allowedRoles.join(",")
+            });
+
+            var result = await withTimeout(
+              auth.signIn(email, password, allowedRoles),
+              20000,
+              "Login melebihi batas waktu. Silakan coba lagi."
+            );
+
+            console.log("[LOGIN RESULT]", result);
+
+            if (!result || typeof result !== "object") {
+              throw new Error("Respons login tidak valid.");
+            }
+
+            if (!result.ok) {
+              throw new Error(result.error || "Login gagal.");
+            }
+
+            var redirectTarget = getFallbackRedirect(auth, result, allowedRoles);
+            if (!redirectTarget) {
+              throw new Error("Redirect login tidak tersedia.");
+            }
+
+            messageEl.textContent = tSafe(successKey, successFallback);
+            console.log("[REDIRECT]", redirectTarget);
+
+            window.location.replace(redirectTarget);
+            setTimeout(function () {
+              if (window.location.href !== redirectTarget) {
+                window.location.href = redirectTarget;
+              }
+            }, 120);
+          } catch (error) {
+            console.error("[LOGIN] unexpected error", error);
+            messageEl.textContent = error && error.message ? error.message : "Login gagal.";
+            messageEl.classList.add("error");
+            setFormLoadingState(form, false);
+          }
         }
 
         // Re-apply saat bahasa diganti
@@ -417,51 +588,29 @@
         // 5. LMS login
         document.getElementById("loginFormLMS").addEventListener("submit", async function (e) {
           e.preventDefault();
-          var email    = document.getElementById("lms-email").value.trim();
-          var password = document.getElementById("lms-password").value;
-          var msg      = document.getElementById("loginMessageLMS");
-          if (!email || !password) return;
-
-          msg.textContent = tSafe("lmsLoggingIn", "Memproses login...");
-          msg.classList.remove("error");
-
-          var auth = await waitForAuthModule(8000).catch(function (error) {
-            msg.textContent = error.message || "Modul login belum siap.";
-            msg.classList.add("error");
-            return null;
+          await handleLoginSubmit({
+            form: document.getElementById("loginFormLMS"),
+            emailInput: document.getElementById("lms-email"),
+            passwordInput: document.getElementById("lms-password"),
+            messageEl: document.getElementById("loginMessageLMS"),
+            allowedRoles: ["student","admin","trainer"],
+            successKey: "lmsLoginSuccessRedirect",
+            successFallback: "Login berhasil. Mengarahkan dashboard..."
           });
-          if (!auth) return;
-
-          var result = await auth.signIn(email, password, ["student","admin","trainer"]);
-          if (!result.ok) { msg.textContent = result.error; msg.classList.add("error"); return; }
-
-          msg.textContent = tSafe("lmsLoginSuccessRedirect", "Login berhasil. Mengarahkan dashboard...");
-          window.location.replace(result.redirectTo);
         });
 
         // 6. Marketer portal login
         document.getElementById("loginFormStaff").addEventListener("submit", async function (e) {
           e.preventDefault();
-          var email    = document.getElementById("staff-email").value.trim();
-          var password = document.getElementById("staff-password").value;
-          var msg      = document.getElementById("loginMessageStaff");
-          if (!email || !password) return;
-
-          msg.textContent = tSafe("lmsLoggingIn", "Memproses login...");
-          msg.classList.remove("error");
-
-          var auth = await waitForAuthModule(8000).catch(function (error) {
-            msg.textContent = error.message || "Modul login belum siap.";
-            msg.classList.add("error");
-            return null;
+          await handleLoginSubmit({
+            form: document.getElementById("loginFormStaff"),
+            emailInput: document.getElementById("staff-email"),
+            passwordInput: document.getElementById("staff-password"),
+            messageEl: document.getElementById("loginMessageStaff"),
+            allowedRoles: ["marketer","staff"],
+            successKey: "staffLoginSuccessRedirect",
+            successFallback: "Login berhasil. Mengarahkan ke portal..."
           });
-          if (!auth) return;
-
-          var result = await auth.signIn(email, password, ["marketer","staff"]);
-          if (!result.ok) { msg.textContent = result.error; msg.classList.add("error"); return; }
-
-          msg.textContent = tSafe("staffLoginSuccessRedirect", "Login berhasil. Mengarahkan ke portal...");
-          window.location.replace(result.redirectTo);
         });
 
         // 7. Redirect jika sudah login

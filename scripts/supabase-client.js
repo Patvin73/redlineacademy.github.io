@@ -7,7 +7,7 @@ window.lmsConfig.supabaseAnonKey =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzeHZvampxbXJ5am5jZ3JpbGt1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MTIyMjQsImV4cCI6MjA4ODE4ODIyNH0.SayRUStP0bdnOjSZvg4xKmQNoRQ0cYxeLoe7rYp8L5s";
 window.lmsConfig.enableStaff = window.lmsConfig.enableStaff === true;
 
-window.lmsSupabase = (() => {
+function createSupabaseClient() {
   if (!window.supabase || !window.supabase.createClient) {
     throw new Error("Supabase SDK gagal dimuat.");
   }
@@ -116,4 +116,25 @@ window.lmsSupabase = (() => {
   };
 
   return client;
+}
+
+window.__lmsSupabaseInitError__ = null;
+window.__lmsSupabaseReady__ = (async () => {
+  try {
+    if (window.lmsSupabase) {
+      return window.lmsSupabase;
+    }
+
+    if (window.__LMS_SUPABASE_BOOTSTRAP__) {
+      await window.__LMS_SUPABASE_BOOTSTRAP__;
+    }
+
+    window.lmsSupabase = createSupabaseClient();
+    console.log("[SUPABASE] client ready");
+    return window.lmsSupabase;
+  } catch (error) {
+    window.__lmsSupabaseInitError__ = error;
+    console.error("[SUPABASE] init failed", error);
+    throw error;
+  }
 })();
