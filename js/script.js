@@ -1,4 +1,4 @@
-/* ============================================
+﻿/* ============================================
    REDLINE ACADEMY - MAIN JAVASCRIPT
    ============================================ */
 
@@ -14,7 +14,7 @@ const translations = {
     // legal: "Legal",
     assistantCarer: "Asisten Perawat",
     brandName: "Redline Academy",
-    footerCopyright: "© 2025 Redline Academy.",
+    footerCopyright: "Â© 2025 Redline Academy.",
     allRightsReserved: "Semua Hak Dilindungi",
     legalTitle: "Legal",
     termsTitle: "Syarat & Ketentuan",
@@ -83,10 +83,12 @@ const translations = {
 
     // Homepage
     heroWelcome: "Selamat datang",
-    heroTitle: "Redline bukan sekedar akademi",
+    missionBadge: "Act Locally. Grow Locally. Think Globally.",
+    heroTitle: "Standar Dunia, Akses Indonesia",
     heroSubtitle:
-      "— ini adalah tempat untuk membuka potensi, menembus batas, dan mengambil kendali atas masa depanmu. Berani mengubah masa depanmu?",
-    applyNow: "Daftar Sekarang",
+      "Mulai dari merawat orang yang kamu cintai. Bangun karir lokal dengan credential yang diakui. Buka pintu global ketika kamu siap.",
+    applyNow: "Mulai Perjalananmu →",
+    heroSecondaryCta: "Lihat Potensi Karir Global ↓",
 
     // Programs Section
     ourPrograms: "Program Kami",
@@ -127,7 +129,7 @@ const translations = {
 
     cooking: "Memasak (Chef)",
     cookingDesc:
-      "Kembangkan keahlian kuliner — mulai dari teknik dapur hingga perencanaan menu — dan ubah passion terhadap makanan menjadi karier profesional.",
+      "Kembangkan keahlian kuliner â€” mulai dari teknik dapur hingga perencanaan menu â€” dan ubah passion terhadap makanan menjadi karier profesional.",
 
     barista: "Barista",
     baristaDesc:
@@ -159,7 +161,7 @@ const translations = {
 
     commitmentExcellence: "Komitmen terhadap Keunggulan",
     commitmentExcellenceDesc:
-      "Di RedLine Academy, keunggulan bukan sekadar tujuan — ini adalah budaya kami. Kami berfokus pada pengembangan berpikir kritis dan pemecahan masalah, mendorong siswa melampaui sekadar menghafal. Dengan dukungan pengajar yang kompeten dan standar tinggi, kami menciptakan lingkungan di mana pembelajar dapat tumbuh percaya diri dan meraih kesuksesan yang berkelanjutan.",
+      "Di RedLine Academy, keunggulan bukan sekadar tujuan â€” ini adalah budaya kami. Kami berfokus pada pengembangan berpikir kritis dan pemecahan masalah, mendorong siswa melampaui sekadar menghafal. Dengan dukungan pengajar yang kompeten dan standar tinggi, kami menciptakan lingkungan di mana pembelajar dapat tumbuh percaya diri dan meraih kesuksesan yang berkelanjutan.",
 
     innovativeLearning: "Lingkungan Belajar Inovatif",
     innovativeLearningDesc:
@@ -177,7 +179,7 @@ const translations = {
     whatAlumniSay: "Apa Kata Alumni Kami?",
 
     testimonial1:
-      '"RedLine Academy memberi saya lebih dari sekadar kualifikasi — akademi ini memberi saya kepercayaan diri untuk terjun ke lingkungan kerja kesehatan yang menantang dan berkembang di dalamnya. Pelatihannya sangat praktis, berbasis pengalaman nyata, dan benar-benar sesuai dengan ekspektasi dunia kerja. Kini, saya dengan bangga merawat pasien dengan keyakinan bahwa saya telah dilatih dengan standar tertinggi."',
+      '"RedLine Academy memberi saya lebih dari sekadar kualifikasi â€” akademi ini memberi saya kepercayaan diri untuk terjun ke lingkungan kerja kesehatan yang menantang dan berkembang di dalamnya. Pelatihannya sangat praktis, berbasis pengalaman nyata, dan benar-benar sesuai dengan ekspektasi dunia kerja. Kini, saya dengan bangga merawat pasien dengan keyakinan bahwa saya telah dilatih dengan standar tertinggi."',
     testimonial1Author: "Sarah Mitchell, Perawat Terdaftar",
 
     testimonial2:
@@ -185,7 +187,7 @@ const translations = {
     testimonial2Author: "Daniel Roberts, Supervisor Teknik Listrik",
 
     testimonial3:
-      '"Belajar di RedLine Academy adalah pengalaman yang mengubah hidup. Lebih dari sekadar pelatihan, saya belajar bagaimana menghadapi tantangan dan tumbuh sebagai seorang pemimpin. Akademi ini benar-benar menepati janjinya — membantu saya berani berubah dan membentuk masa depan yang lebih baik."',
+      '"Belajar di RedLine Academy adalah pengalaman yang mengubah hidup. Lebih dari sekadar pelatihan, saya belajar bagaimana menghadapi tantangan dan tumbuh sebagai seorang pemimpin. Akademi ini benar-benar menepati janjinya â€” membantu saya berani berubah dan membentuk masa depan yang lebih baik."',
     testimonial3Author: "Maria Gonzalez, Supervisor Perhotelan",
 
     // Contact Section - Homepage
@@ -269,7 +271,7 @@ const translations = {
 
     missionTitle: "Misi Kami",
     missionContent:
-      "Memberdayakan setiap individu di setiap tahap perjalanan mereka — baik saat memulai karier maupun berpindah dari bidang lain — melalui pelatihan berkualitas tinggi yang berfokus pada kebutuhan industri. Kami berdedikasi untuk membekali siswa dengan keterampilan praktis, kepercayaan diri, dan pola pikir yang tangguh untuk berkembang di pasar kerja global yang kompetitif.",
+      "Memberdayakan setiap individu di setiap tahap perjalanan mereka â€” baik saat memulai karier maupun berpindah dari bidang lain â€” melalui pelatihan berkualitas tinggi yang berfokus pada kebutuhan industri. Kami berdedikasi untuk membekali siswa dengan keterampilan praktis, kepercayaan diri, dan pola pikir yang tangguh untuk berkembang di pasar kerja global yang kompetitif.",
 
     ourValues: "Nilai-Nilai Kami",
     empowerment: "Pemberdayaan",
@@ -294,7 +296,7 @@ const translations = {
 
     courage: "Keberanian",
     courageDesc:
-      "Kami menginspirasi siswa untuk keluar dari zona nyaman, berani mengambil risiko, dan beradaptasi dengan perubahan — membantu mereka mengubah tantangan menjadi peluang.",
+      "Kami menginspirasi siswa untuk keluar dari zona nyaman, berani mengambil risiko, dan beradaptasi dengan perubahan â€” membantu mereka mengubah tantangan menjadi peluang.",
 
     // Team Section
     ourTeam: "Tim Kami",
@@ -335,7 +337,7 @@ const translations = {
     certificationInternational: "Sertifikasi: Internasional",
     whyChooseOurProgram: "Mengapa Memilih Program Kami?",
     programsIntro:
-      "Pendampingan Perawatan (Unit Pelatihan Terakreditasi Australia).\n\nKita mungkin tidak bisa mengubah seluruh dunia, namun jika Anda memiliki rasa kasih sayang, Anda dapat mengubah kehidupan orang-orang di sekitar Anda yang membutuhkan bantuan.\n\nApakah Anda baru saja akan menyelesaikan pendidikan dan bingung memilih jalur karier? Atau mungkin pekerjaan Anda saat ini terasa membosankan dan tidak memberikan kepuasan batin yang nyata?\n\nHanya dalam enam belas minggu pelatihan berkualitas standar Australia yang diakui secara internasional, Anda dapat mengubah segalanya. Pelatihan yang kami tawarkan dirancang untuk membuka pintu peluang nyata menuju karier yang bermakna, di mana Anda dapat memberikan dampak yang nyata.\n\nKursus ini terdiri dari dua belas minggu pelatihan daring (online) ditambah 3 ½ minggu praktik kerja lapangan untuk mendapatkan pengalaman langsung.\n\nDengan bekal pelatihan ini, Anda siap untuk mengubah dunia Anda.",
+      "Pendampingan Perawatan (Unit Pelatihan Terakreditasi Australia).\n\nKita mungkin tidak bisa mengubah seluruh dunia, namun jika Anda memiliki rasa kasih sayang, Anda dapat mengubah kehidupan orang-orang di sekitar Anda yang membutuhkan bantuan.\n\nApakah Anda baru saja akan menyelesaikan pendidikan dan bingung memilih jalur karier? Atau mungkin pekerjaan Anda saat ini terasa membosankan dan tidak memberikan kepuasan batin yang nyata?\n\nHanya dalam enam belas minggu pelatihan berkualitas standar Australia yang diakui secara internasional, Anda dapat mengubah segalanya. Pelatihan yang kami tawarkan dirancang untuk membuka pintu peluang nyata menuju karier yang bermakna, di mana Anda dapat memberikan dampak yang nyata.\n\nKursus ini terdiri dari dua belas minggu pelatihan daring (online) ditambah 3 Â½ minggu praktik kerja lapangan untuk mendapatkan pengalaman langsung.\n\nDengan bekal pelatihan ini, Anda siap untuk mengubah dunia Anda.",
 
     // Enrollment / Enroll form translations (ID)
     enrollTitle: "Formulir Pendaftaran Program",
@@ -470,7 +472,7 @@ const translations = {
     // legal: "Legal",
     assistantCarer: "Assistant Carer",
     brandName: "Redline Academy",
-    footerCopyright: "© 2025 Redline Academy.",
+    footerCopyright: "Â© 2025 Redline Academy.",
     allRightsReserved: "All Rights Reserved",
     legalTitle: "Legal",
     termsTitle: "Terms & Conditions",
@@ -539,10 +541,12 @@ const translations = {
 
     // Homepage
     heroWelcome: "Welcome",
-    heroTitle: "Redline is more than an academy",
+    missionBadge: "Act Locally. Grow Locally. Think Globally.",
+    heroTitle: "World Standards, Indonesia Access",
     heroSubtitle:
-      "— it's a place to unlock potential, break boundaries and take control of what comes next. Dare to change your future?",
-    applyNow: "Apply Now",
+      "Start by caring for the people you love. Build a local career with a recognised credential. Open global doors when you are ready.",
+    applyNow: "Start Your Journey →",
+    heroSecondaryCta: "See Global Career Potential ↓",
 
     // Programs Section
     ourPrograms: "Our Programs",
@@ -586,7 +590,7 @@ const translations = {
 
     barista: "Barista",
     baristaDesc:
-      "Master coffee craft, brewing techniques, and service skills for a thriving career in cafés and specialty coffee shops.",
+      "Master coffee craft, brewing techniques, and service skills for a thriving career in cafÃ©s and specialty coffee shops.",
 
     coding: "Coding (IT)",
     codingDesc:
@@ -602,7 +606,7 @@ const translations = {
     caregiverExcellence:
       "Care Giver Excellence: Empowering Lives with a Person-Centred Care Approach",
     caregiverExcellenceIntro:
-      "Bridge your potential with a curriculum that aligns practical competence and person-centred care. This program equips you with the skills to excel in hospitals, aged care and community settings while honoring each person's dignity and choices. Join us to provide support that goes beyond service — a genuine commitment to improving quality of life. Start your journey to make meaningful change through compassionate care.",
+      "Bridge your potential with a curriculum that aligns practical competence and person-centred care. This program equips you with the skills to excel in hospitals, aged care and community settings while honoring each person's dignity and choices. Join us to provide support that goes beyond service â€” a genuine commitment to improving quality of life. Start your journey to make meaningful change through compassionate care.",
 
     dedicatedEducator: "Dedicated Educator",
     dedicatedEducatorDesc:
@@ -614,7 +618,7 @@ const translations = {
 
     commitmentExcellence: "Commitment to Excellence",
     commitmentExcellenceDesc:
-      "At RedLine Academy, excellence is more than a goal—it's our culture. We focus on developing critical thinking and problem-solving, encouraging students to go beyond memorization. With supportive educators and high standards, we create an environment where learners can grow with confidence and achieve lasting success.",
+      "At RedLine Academy, excellence is more than a goalâ€”it's our culture. We focus on developing critical thinking and problem-solving, encouraging students to go beyond memorization. With supportive educators and high standards, we create an environment where learners can grow with confidence and achieve lasting success.",
 
     innovativeLearning: "Innovative Learning Environment",
     innovativeLearningDesc:
@@ -632,7 +636,7 @@ const translations = {
     whatAlumniSay: "What Our Alumni Say?",
 
     testimonial1:
-      '"RedLine Academy gave me more than just qualifications—it gave me the confidence to step into a demanding healthcare environment and thrive. The training was hands-on, practical, and aligned perfectly with what employers expect. Today, I proudly care for patients knowing I was trained to the highest standard."',
+      '"RedLine Academy gave me more than just qualificationsâ€”it gave me the confidence to step into a demanding healthcare environment and thrive. The training was hands-on, practical, and aligned perfectly with what employers expect. Today, I proudly care for patients knowing I was trained to the highest standard."',
     testimonial1Author: "Sarah Mitchell, Registered Nurse",
 
     testimonial2:
@@ -640,7 +644,7 @@ const translations = {
     testimonial2Author: "Daniel Roberts, Electrician Supervisor",
 
     testimonial3:
-      '"Studying at RedLine Academy was a life-changing experience. Beyond the training, I learned how to embrace challenges and grow as a leader. The academy truly lived up to its promise—helping me dare to change and shape a better future."',
+      '"Studying at RedLine Academy was a life-changing experience. Beyond the training, I learned how to embrace challenges and grow as a leader. The academy truly lived up to its promiseâ€”helping me dare to change and shape a better future."',
     testimonial3Author: "Maria Gonzalez, Hospitality Supervisor",
 
     // Contact Section - Homepage
@@ -725,7 +729,7 @@ const translations = {
 
     missionTitle: "Our Mission",
     missionContent:
-      "To empower individuals at every stage of their journey—whether starting a career or transitioning from another field through high-quality, industry-focused training. We are dedicated to equipping our students with practical skills, confidence, and the mindset to thrive in a competitive global workforce.",
+      "To empower individuals at every stage of their journeyâ€”whether starting a career or transitioning from another field through high-quality, industry-focused training. We are dedicated to equipping our students with practical skills, confidence, and the mindset to thrive in a competitive global workforce.",
 
     ourValues: "Our Values",
     empowerment: "Empowerment",
@@ -791,7 +795,7 @@ const translations = {
     certificationInternational: "Certification: International",
     whyChooseOurProgram: "Why Choose Our Program?",
     programsIntro:
-      "Care Support (Australian Accredited Training Units).\n\nWe may not be able to change the whole world, but if you have compassion, you can change the lives of those around you who need support.\n\nAre you about to complete your studies and feeling uncertain about your career path? Or perhaps your current job feels unfulfilling and lacks genuine purpose?\n\nIn just sixteen weeks of high-quality, Australian-standard training that is internationally recognized, you can transform your future. The training we offer is designed to open real opportunities for a meaningful career—one where you can make a tangible and lasting impact.\n\nThis course consists of twelve weeks of online training followed by 3½ weeks of workplace practicum, providing hands-on, real-world experience.\n\nWith this training, you will be equipped and ready to change your world.",
+      "Care Support (Australian Accredited Training Units).\n\nWe may not be able to change the whole world, but if you have compassion, you can change the lives of those around you who need support.\n\nAre you about to complete your studies and feeling uncertain about your career path? Or perhaps your current job feels unfulfilling and lacks genuine purpose?\n\nIn just sixteen weeks of high-quality, Australian-standard training that is internationally recognized, you can transform your future. The training we offer is designed to open real opportunities for a meaningful careerâ€”one where you can make a tangible and lasting impact.\n\nThis course consists of twelve weeks of online training followed by 3Â½ weeks of workplace practicum, providing hands-on, real-world experience.\n\nWith this training, you will be equipped and ready to change your world.",
 
     // Enrollment / Enroll form translations (EN)
     enrollTitle: "Program Enrollment Form",
@@ -2047,8 +2051,8 @@ document.addEventListener("DOMContentLoaded", function () {
           // success
           alert(
             currentLanguage === "id"
-              ? "Terima kasih — pesan Anda telah terkirim."
-              : "Thank you — your message has been sent.",
+              ? "Terima kasih â€” pesan Anda telah terkirim."
+              : "Thank you â€” your message has been sent.",
           );
           form.reset();
           if (submitBtn) submitBtn.disabled = false;
