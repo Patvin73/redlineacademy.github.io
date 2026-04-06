@@ -266,6 +266,24 @@ const translations = {
     rlTrustRatingLabel: "Rating program",
     rlTrustFrameworkShort: "AU",
     rlTrustFrameworkLabel: "Micro-credentials framework",
+    rlJourneyKicker: "Satu sertifikat. Satu perjalanan.",
+    rlJourneyTitle: "Dimulai dari rumah. Sampai ke mana pun kamu ingin pergi.",
+    rlJourneyDesc:
+      "Sertifikat Redline bekerja di setiap tahap — bukan hanya untuk yang ingin ke luar negeri.",
+    rlJourneyStage1Label: "Rawat Keluarga",
+    rlJourneyStage1Tag: "Hari pertama setelah lulus",
+    rlJourneyStage2Label: "Kerja Lokal",
+    rlJourneyStage2Tag: "Masuk fasilitas kesehatan Indonesia",
+    rlJourneyStage3Label: "Bangun Rekam Jejak",
+    rlJourneyStage3Tag: "Credential AU + work history = profil global",
+    rlJourneyStage4Label: "Buka Global",
+    rlJourneyStage4Tag: "Ketika kamu siap — AU · UK · CA · SG",
+    rlJourneyDetail1Title:
+      "Rawat orang yang kamu cintai — hari pertama setelah lulus",
+    rlJourneyDetail1Desc:
+      "Sertifikat Redline langsung bisa kamu gunakan. Merawat orang tua, anggota keluarga, atau tetangga yang membutuhkan bantuan. Bukan sekadar merawat — tapi merawat dengan standar, martabat, dan pendekatan yang benar.",
+    rlJourneyCta: "Mulai Perjalananmu — Daftar Sekarang →",
+    rlJourneyCtaSub: "Mulai dari Rp 500rb/bulan · Sertifikat AU · 15 minggu",
     ourLocation: "Lokasi Kami",
     mapsPlaceholder: "Google Maps akan ditampilkan di sini",
 
@@ -733,6 +751,24 @@ const translations = {
     rlTrustRatingLabel: "Program rating",
     rlTrustFrameworkShort: "AU",
     rlTrustFrameworkLabel: "Micro-credentials framework",
+    rlJourneyKicker: "One credential. One journey.",
+    rlJourneyTitle: "It starts at home. It can take you anywhere.",
+    rlJourneyDesc:
+      "Redline certification works at every stage — not only for those planning to go abroad.",
+    rlJourneyStage1Label: "Care for Family",
+    rlJourneyStage1Tag: "Your first day after graduating",
+    rlJourneyStage2Label: "Work Locally",
+    rlJourneyStage2Tag: "Enter Indonesian healthcare facilities",
+    rlJourneyStage3Label: "Build Your Track Record",
+    rlJourneyStage3Tag: "AU credential + work history = global profile",
+    rlJourneyStage4Label: "Open Global Doors",
+    rlJourneyStage4Tag: "When you are ready — AU · UK · CA · SG",
+    rlJourneyDetail1Title:
+      "Care for the people you love — from day one after graduation",
+    rlJourneyDetail1Desc:
+      "You can use your Redline certificate immediately. Care for parents, family members, or neighbours who need support. Not just care — but care with standards, dignity, and the right approach.",
+    rlJourneyCta: "Start Your Journey — Apply Now →",
+    rlJourneyCtaSub: "Starting from Rp 500rb/month · AU Certificate · 15 weeks",
     ourLocation: "Our Location",
     mapsPlaceholder: "Google Maps will be displayed here",
 
@@ -2183,4 +2219,108 @@ document.addEventListener("DOMContentLoaded", function () {
       s();
     }).observe(el);
   });
+});
+
+const JOURNEY_DATA = {
+  id: {
+    1: {
+      icon: "🏠",
+      title: "Rawat orang yang kamu cintai — hari pertama setelah lulus",
+      desc: "Sertifikat Redline langsung bisa kamu gunakan. Merawat orang tua, anggota keluarga, atau tetangga yang membutuhkan bantuan. Bukan sekadar merawat — tapi merawat dengan standar, martabat, dan pendekatan yang benar.",
+      certs: ["✓ Person-centred care", "✓ Infection control", "✓ Safety management"],
+      color: "#d7001e",
+      stageClass: "stage1",
+    },
+    2: {
+      icon: "💼",
+      title: "Jadilah caregiver yang dicari fasilitas kesehatan di kotamu",
+      desc: "Credential AU membedakanmu dari pelamar tanpa sertifikasi. Buka peluang di rumah sakit, panti jompo, home care, dan klinik lansia Indonesia. Penghasilan stabil. Pengakuan profesional. Kontribusi nyata.",
+      certs: ["✓ Diakui RS & panti jompo", "✓ Home care providers", "✓ Klinik lansia lokal"],
+      color: "#d7001e",
+      stageClass: "stage2",
+    },
+    3: {
+      icon: "📋",
+      title: "Setiap bulan kerja kamu membangun profil yang diakui employer global",
+      desc: "Credential AU + rekam jejak kerja Indonesia = kombinasi yang dibaca employer internasional. Mereka melihat: standar yang mereka percaya (AU credential) + pengalaman nyata (work history). Profil ini tidak bisa dibangun tanpa keduanya.",
+      certs: ["✓ AU credential", "✓ Indonesia work history", "✓ Internationally readable CV"],
+      color: "#d7001e",
+      stageClass: "stage3",
+    },
+    4: {
+      icon: "🌏",
+      title: "Ketika kamu siap — pintunya sudah terbuka, Redline yang membuatnya",
+      desc: "Bukan soal harus pergi. Tapi soal punya pilihan. Credential Redline diakui employer di Australia, UK, Kanada, dan Singapura. Dengan rekam jejak lokal yang solid, kamu melamar bukan sebagai pemula — tapi sebagai profesional berpengalaman.",
+      certs: ["✓ 🇦🇺 Australia", "✓ 🇬🇧 United Kingdom", "✓ 🇨🇦 Canada", "✓ 🇸🇬 Singapore"],
+      color: "#d7001e",
+      stageClass: "stage4",
+    },
+  },
+  en: {
+    1: {
+      icon: "🏠",
+      title: "Care for the people you love — from day one after graduation",
+      desc: "You can use your Redline certificate immediately. Care for parents, family members, or neighbours who need support. Not just care — but care with standards, dignity, and the right approach.",
+      certs: ["✓ Person-centred care", "✓ Infection control", "✓ Safety management"],
+      color: "#d7001e",
+      stageClass: "stage1",
+    },
+    2: {
+      icon: "💼",
+      title: "Become the caregiver local health facilities are looking for",
+      desc: "An AU credential sets you apart from applicants without certification. Open opportunities in hospitals, nursing homes, home care, and elder clinics across Indonesia. Stable income. Professional recognition. Real contribution.",
+      certs: ["✓ Recognised by hospitals & care homes", "✓ Home care providers", "✓ Local elder clinics"],
+      color: "#d7001e",
+      stageClass: "stage2",
+    },
+    3: {
+      icon: "📋",
+      title: "Every month of work builds a profile global employers can read",
+      desc: "An AU credential plus Indonesian work history is a combination international employers understand. They see standards they trust and real-world experience. You cannot build that profile without both.",
+      certs: ["✓ AU credential", "✓ Indonesia work history", "✓ Internationally readable CV"],
+      color: "#d7001e",
+      stageClass: "stage3",
+    },
+    4: {
+      icon: "🌏",
+      title: "When you are ready — the door is already open, and Redline helps unlock it",
+      desc: "It is not about having to leave. It is about having options. Redline credentials are recognised by employers in Australia, the UK, Canada, and Singapore. With a strong local track record, you apply not as a beginner, but as an experienced professional.",
+      certs: ["✓ 🇦🇺 Australia", "✓ 🇬🇧 United Kingdom", "✓ 🇨🇦 Canada", "✓ 🇸🇬 Singapore"],
+      color: "#d7001e",
+      stageClass: "stage4",
+    },
+  },
+};
+
+function rlJourneySelect(stage) {
+  const lang = typeof currentLanguage === "string" && JOURNEY_DATA[currentLanguage]
+    ? currentLanguage
+    : "id";
+  const d = JOURNEY_DATA[lang][stage] || JOURNEY_DATA.id[stage];
+  if (!d) return;
+  document.querySelectorAll(".rl-jstage").forEach((el) => {
+    el.classList.toggle("active", +el.dataset.stage === stage);
+  });
+  const panel = document.getElementById("rlJDetail");
+  if (!panel) return;
+  panel.className = `rl-jdetail ${d.stageClass}`;
+  panel.style.borderLeftColor = d.color;
+  document.getElementById("rlJIcon").textContent = d.icon;
+  document.getElementById("rlJTitle").textContent = d.title;
+  document.getElementById("rlJDesc").textContent = d.desc;
+  const certsEl = document.getElementById("rlJCerts");
+  certsEl.innerHTML = d.certs.map((c) => `<span>${c}</span>`).join("");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (document.getElementById("journey")) rlJourneySelect(1);
+});
+
+document.addEventListener("click", function (e) {
+  if (e.target.closest(".lang-btn") && document.getElementById("journey")) {
+    setTimeout(() => {
+      const activeStage = document.querySelector(".rl-jstage.active");
+      rlJourneySelect(activeStage ? +activeStage.dataset.stage : 1);
+    }, 0);
+  }
 });
