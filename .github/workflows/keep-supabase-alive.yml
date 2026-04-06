@@ -1,0 +1,39 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Berjalan pada tanggal 1, 6, 11, 16, 21, 26, 31 setiap bulan (jam 8 pagi WIB = 01:00 UTC)
+    - cron: '0 1 */5 * *'
+  workflow_dispatch: # Bisa dijalankan manual dari GitHub Actions tab
+
+jobs:
+  ping-supabase:
+    name: Ping Supabase Project
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          echo "Pinging Supabase to prevent auto-pause..."
+
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            --connect-timeout 10 \
+            --max-time 30 \
+            --retry 3 \
+            --retry-delay 5 \
+            "${{ secrets.SUPABASE_URL }}/auth/v1/health" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+
+          echo "Response status: $RESPONSE"
+
+          if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 400 ]; then
+            echo "Supabase is active and responding!"
+          else
+            echo "Unexpected response: $RESPONSE"
+            exit 1
+          fi
+
+      - name: Log ping time
+        run: |
+          echo "Last ping: $(TZ='Asia/Jakarta' date '+%Y-%m-%d %H:%M:%S WIB')"
