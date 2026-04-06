@@ -257,6 +257,15 @@ const translations = {
     glocalBarPrice: "Sertifikat AU · Mulai dari",
     glocalBarPriceStrong: "Rp 500rb/bulan",
     glocalBarCta: "Mulai Perjalananmu",
+    rlTrustBadge:
+      "🇦🇺 Diakui Australia · Act Locally. Grow Locally. Think Globally.",
+    rlTrustGraduatesLabel: "Lulusan terlatih",
+    rlTrustDurationUnit: "mgg",
+    rlTrustDurationLabel: "Selesai belajar",
+    rlTrustRatingUnit: "/5",
+    rlTrustRatingLabel: "Rating program",
+    rlTrustFrameworkShort: "AU",
+    rlTrustFrameworkLabel: "Micro-credentials framework",
     ourLocation: "Lokasi Kami",
     mapsPlaceholder: "Google Maps akan ditampilkan di sini",
 
@@ -715,6 +724,15 @@ const translations = {
     glocalBarPrice: "AU Certificate · Starting from",
     glocalBarPriceStrong: "Rp 500rb/month",
     glocalBarCta: "Start Your Journey",
+    rlTrustBadge:
+      "🇦🇺 Australia Recognised · Act Locally. Grow Locally. Think Globally.",
+    rlTrustGraduatesLabel: "Trained graduates",
+    rlTrustDurationUnit: "wks",
+    rlTrustDurationLabel: "To complete",
+    rlTrustRatingUnit: "/5",
+    rlTrustRatingLabel: "Program rating",
+    rlTrustFrameworkShort: "AU",
+    rlTrustFrameworkLabel: "Micro-credentials framework",
     ourLocation: "Our Location",
     mapsPlaceholder: "Google Maps will be displayed here",
 
@@ -2150,3 +2168,19 @@ document.addEventListener("click", function (e) {
     });
   });
 })();
+
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".rl-count[data-target]").forEach((el) => {
+    const t = +el.dataset.target;
+    let n = 0;
+    new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      const s = () => {
+        n = Math.min(n + Math.ceil(t / 40), t);
+        el.textContent = n;
+        if (n < t) requestAnimationFrame(s);
+      };
+      s();
+    }).observe(el);
+  });
+});

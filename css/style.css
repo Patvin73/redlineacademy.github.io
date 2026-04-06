@@ -1,3 +1,9 @@
 @import url('../styles/style.css');
 
 .mission-badge{display:inline-block;border:2px solid #FFCD00;color:#FFCD00;padding:5px 15px;font-weight:800;font-size:.8rem;letter-spacing:2px;margin-bottom:20px;border-radius:4px;text-transform:uppercase;}
+.rl-trust-strip{background:#F8F9FA;border-top:1px solid #E5E7EB;border-bottom:1px solid #E5E7EB;padding:1.25rem 1.5rem;text-align:center;}
+.rl-trust-badge{display:inline-block;border:1.5px solid #FFCD00;color:#A08C00;padding:3px 14px;border-radius:4px;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem;background:#FFFAE6;}
+.rl-trust-stats{display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;}
+.rl-tstat{text-align:center;}
+.rl-tstat-num{display:block;font-size:2rem;font-weight:900;color:#C0392B;line-height:1;}
+.rl-tstat-label{font-size:.72rem;color:#6B7280;margin-top:3px;}
