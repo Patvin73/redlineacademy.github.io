@@ -284,6 +284,24 @@ const translations = {
       "Sertifikat Redline langsung bisa kamu gunakan. Merawat orang tua, anggota keluarga, atau tetangga yang membutuhkan bantuan. Bukan sekadar merawat — tapi merawat dengan standar, martabat, dan pendekatan yang benar.",
     rlJourneyCta: "Mulai Perjalananmu — Daftar Sekarang →",
     rlJourneyCtaSub: "Mulai dari Rp 500rb/bulan · Sertifikat AU · 15 minggu",
+    glocalCalcTitle: "Visualisasi Potensi Karir Anda",
+    glocalCalcDesc:
+      "Sertifikat yang sama membuka pintu berbeda di setiap tahap perjalananmu.",
+    glocalCalcLocalTag: "🏠 Act Locally (Tahap 1–3)",
+    glocalCalcLocalLabel: "Gaji caregiver profesional lokal / bulan",
+    glocalCalcGlobalTag: "🌏 Think Globally (Tahap 4)",
+    glocalCalcSelectLabel: "Pilih Destinasi Global (ketika kamu siap):",
+    glocalCalcOptionAu: "🇦🇺 Australia",
+    glocalCalcOptionUk: "🇬🇧 United Kingdom",
+    glocalCalcOptionCa: "🇨🇦 Canada",
+    glocalCalcOptionSg: "🇸🇬 Singapore",
+    glocalCalcDestAu: "Destinasi: Australia 🇦🇺 / bulan",
+    glocalCalcDestUk: "Destinasi: United Kingdom 🇬🇧 / bulan",
+    glocalCalcDestCa: "Destinasi: Canada 🇨🇦 / bulan",
+    glocalCalcDestSg: "Destinasi: Singapore 🇸🇬 / bulan",
+    glocalCalcNote:
+      "Sertifikat Redline + rekam jejak kerja lokal = profil yang dibaca employer di semua destinasi di atas.",
+    glocalCalcCta: "Mulai Perjalananmu →",
     ourLocation: "Lokasi Kami",
     mapsPlaceholder: "Google Maps akan ditampilkan di sini",
 
@@ -633,7 +651,7 @@ const translations = {
     caregiverExcellence:
       "Care Giver Excellence: Empowering Lives with a Person-Centred Care Approach",
     caregiverExcellenceIntro:
-      "Bridge your potential with a curriculum that aligns practical competence and person-centred care. This program equips you with the skills to excel in hospitals, aged care and community settings while honoring each person's dignity and choices. Join us to provide support that goes beyond service â€” a genuine commitment to improving quality of life. Start your journey to make meaningful change through compassionate care.",
+      "Bridge your potential with a curriculum that aligns practical competence and person-centred care. This program equips you with the skills to excel in hospitals, aged care and community settings while honoring each person's dignity and choices. Join us to provide support that goes beyond service - a genuine commitment to improving quality of life. Start your journey to make meaningful change through compassionate care.",
 
     dedicatedEducator: "Dedicated Educator",
     dedicatedEducatorDesc:
@@ -769,6 +787,24 @@ const translations = {
       "You can use your Redline certificate immediately. Care for parents, family members, or neighbours who need support. Not just care — but care with standards, dignity, and the right approach.",
     rlJourneyCta: "Start Your Journey — Apply Now →",
     rlJourneyCtaSub: "Starting from Rp 500rb/month · AU Certificate · 15 weeks",
+    glocalCalcTitle: "Visualise Your Career Potential",
+    glocalCalcDesc:
+      "The same certificate opens different doors at every stage of your journey.",
+    glocalCalcLocalTag: "🏠 Act Locally (Stage 1–3)",
+    glocalCalcLocalLabel: "Professional local caregiver salary / month",
+    glocalCalcGlobalTag: "🌏 Think Globally (Stage 4)",
+    glocalCalcSelectLabel: "Choose Your Global Destination (when you are ready):",
+    glocalCalcOptionAu: "🇦🇺 Australia",
+    glocalCalcOptionUk: "🇬🇧 United Kingdom",
+    glocalCalcOptionCa: "🇨🇦 Canada",
+    glocalCalcOptionSg: "🇸🇬 Singapore",
+    glocalCalcDestAu: "Destination: Australia 🇦🇺 / month",
+    glocalCalcDestUk: "Destination: United Kingdom 🇬🇧 / month",
+    glocalCalcDestCa: "Destination: Canada 🇨🇦 / month",
+    glocalCalcDestSg: "Destination: Singapore 🇸🇬 / month",
+    glocalCalcNote:
+      "Redline certification + local work track record = a profile employers across all destinations above can read.",
+    glocalCalcCta: "Start Your Journey →",
     ourLocation: "Our Location",
     mapsPlaceholder: "Google Maps will be displayed here",
 

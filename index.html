@@ -264,6 +264,63 @@
       </div>
     </section>
 
+    <section class="glocal-calculator" id="glocal-calc">
+      <div class="calc-card">
+        <h3 data-i18n="glocalCalcTitle">Visualisasi Potensi Karir Anda</h3>
+        <p data-i18n="glocalCalcDesc">Sertifikat yang sama membuka pintu berbeda di setiap tahap perjalananmu.</p>
+        <div class="calc-grid">
+          <div class="calc-local">
+            <span class="calc-tag local" data-i18n="glocalCalcLocalTag">🏠 Act Locally (Tahap 1–3)</span>
+            <div class="amount local-amt">Rp 4.500.000</div>
+            <span class="calc-lbl" data-i18n="glocalCalcLocalLabel">Gaji caregiver profesional lokal / bulan</span>
+          </div>
+          <div class="calc-arrow">→</div>
+          <div class="calc-global">
+            <span class="calc-tag global" data-i18n="glocalCalcGlobalTag">🌏 Think Globally (Tahap 4)</span>
+            <div id="salaryValue" class="amount global-amt">Rp 48.500.000</div>
+            <span id="salaryLabel" class="calc-lbl" data-i18n="glocalCalcDestAu">Destinasi: Australia 🇦🇺 / bulan</span>
+          </div>
+        </div>
+        <div class="calc-select-wrap">
+          <label for="countrySelect" data-i18n="glocalCalcSelectLabel">Pilih Destinasi Global (ketika kamu siap):</label>
+          <select id="countrySelect" onchange="updateGlocalView()">
+            <option value="au" data-i18n="glocalCalcOptionAu">🇦🇺 Australia</option>
+            <option value="uk" data-i18n="glocalCalcOptionUk">🇬🇧 United Kingdom</option>
+            <option value="ca" data-i18n="glocalCalcOptionCa">🇨🇦 Canada</option>
+            <option value="sg" data-i18n="glocalCalcOptionSg">🇸🇬 Singapore</option>
+          </select>
+        </div>
+        <p class="calc-note" data-i18n="glocalCalcNote">
+          Sertifikat Redline + rekam jejak kerja lokal = profil yang dibaca employer di semua destinasi di atas.
+        </p>
+        <a href="/pages/programs.html#enroll-form" class="btn-cta" data-i18n="glocalCalcCta">Mulai Perjalananmu →</a>
+      </div>
+    </section>
+    <script>
+      const glocalData = {
+        id: {
+          au: { val: 48500000, label: "Destinasi: Australia 🇦🇺 / bulan", key: "glocalCalcDestAu" },
+          uk: { val: 42000000, label: "Destinasi: United Kingdom 🇬🇧 / bulan", key: "glocalCalcDestUk" },
+          ca: { val: 44000000, label: "Destinasi: Canada 🇨🇦 / bulan", key: "glocalCalcDestCa" },
+          sg: { val: 22000000, label: "Destinasi: Singapore 🇸🇬 / bulan", key: "glocalCalcDestSg" }
+        },
+        en: {
+          au: { val: 48500000, label: "Destination: Australia 🇦🇺 / month", key: "glocalCalcDestAu" },
+          uk: { val: 42000000, label: "Destination: United Kingdom 🇬🇧 / month", key: "glocalCalcDestUk" },
+          ca: { val: 44000000, label: "Destination: Canada 🇨🇦 / month", key: "glocalCalcDestCa" },
+          sg: { val: 22000000, label: "Destination: Singapore 🇸🇬 / month", key: "glocalCalcDestSg" }
+        }
+      };
+      function updateGlocalView() {
+        const lang = typeof currentLanguage === 'string' && glocalData[currentLanguage] ? currentLanguage : 'id';
+        const d = glocalData[lang][document.getElementById('countrySelect').value];
+        document.getElementById('salaryValue').innerText = `Rp ${d.val.toLocaleString('id-ID')}`;
+        document.getElementById('salaryLabel').setAttribute('data-i18n', d.key);
+        document.getElementById('salaryLabel').innerText = d.label;
+      }
+      document.addEventListener('languagechange', updateGlocalView);
+    </script>
+
     <!-- Care Giver Excellence -->
     <section class="section-padding">
       <div class="container">

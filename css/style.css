@@ -38,3 +38,24 @@
 .rl-jcta-sub{font-size:.78rem;color:#6B7280;margin-top:.6rem;}
 @media(min-width:641px){.rl-journey-header h2{white-space:nowrap;}}
 @media(max-width:640px){.rl-trust-stats{justify-content:center;}.rl-tstat{flex:0 1 auto;}.rl-journey-track{grid-template-columns:1fr 1fr;gap:1.25rem;}.rl-jtrack-line{display:none;}.rl-jdetail{flex-direction:column;}}
+.glocal-calculator{padding:3rem 1.5rem;background:var(--primary-gradient);}
+.calc-card{max-width:1200px;margin:0 auto;background:#F8F9FA;border:1px solid #E5E7EB;border-radius:16px;padding:2rem;box-sizing:border-box;text-align:center;}
+.calc-card h3{font-size:1.55rem;font-weight:800;color:#1A1A2E;margin:0 0 .5rem;}
+.calc-card>p{font-size:.95rem;color:#6B7280;margin:0 0 1.5rem;}
+.calc-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:1.25rem;align-items:center;margin-bottom:1.5rem;}
+.calc-local,.calc-global{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:1.5rem;box-sizing:border-box;}
+.calc-tag{display:inline-block;padding:.35rem .75rem;border-radius:999px;font-size:.78rem;font-weight:800;margin-bottom:.85rem;}
+.calc-tag.local{background:#FDECEA;color:#a50017;}
+.calc-tag.global{background:#EEF2FF;color:#1D4ED8;}
+.amount{font-size:2rem;font-weight:900;line-height:1.1;margin-bottom:.35rem;}
+.local-amt{color:#C0392B;}
+.global-amt{color:#1A1A2E;}
+.calc-lbl{display:block;font-size:.85rem;color:#6B7280;line-height:1.5;}
+.calc-arrow{font-size:2rem;font-weight:900;color:#C0392B;}
+.calc-select-wrap{margin-bottom:1rem;}
+.calc-select-wrap label{display:block;font-size:.9rem;font-weight:700;color:#1A1A2E;margin-bottom:.5rem;}
+.calc-select-wrap select{width:100%;max-width:360px;padding:.8rem 1rem;border:1px solid #D1D5DB;border-radius:10px;background:#fff;color:#1A1A2E;font-size:.95rem;}
+.calc-note{font-size:.85rem;color:#6B7280;line-height:1.6;margin:0 0 1.5rem;}
+.btn-cta{display:inline-block;background:var(--primary-gradient);color:#fff;text-decoration:none;padding:.85rem 2rem;border-radius:8px;font-weight:800;font-size:1rem;transition:background .2s,transform .2s;}
+.btn-cta:hover{background:linear-gradient(135deg, #f0001f 0%, #c2001a 100%);transform:translateY(-2px);}
+@media(max-width:640px){.glocal-calculator{padding:2rem 1rem;}.calc-card{padding:1.5rem;}.calc-grid{grid-template-columns:1fr;}.calc-arrow{transform:rotate(90deg);}.amount{font-size:1.65rem;}}
