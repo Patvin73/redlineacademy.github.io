@@ -1051,10 +1051,12 @@ Object.assign(translations.id, {
   articlesDaftarTitle: "Daftar Menjadi Caregiver Profesional",
   articlesDaftarDesc:
     "Ikuti panduan langkah demi langkah untuk memilih jalur, mengecek syarat masuk, memilih format belajar, dan memulai pendaftaran.",
-  articleCtaTitle: "Siap Mulai Karier Caregiver?",
+  articleCtaBadge: "🏠 Rawat Lokal · 💼 Tumbuh Lokal · 🌏 Buka Global",
+  articleCtaTitle: "Siap memulai perjalananmu sebagai caregiver profesional?",
   articleCtaBody:
-    "Hubungi tim Redline Academy untuk konsultasi program dan jalur belajar yang sesuai kebutuhan Anda.",
-  articleCtaButton: "Konsultasi Sekarang",
+    "Rawat keluarga hari ini. Bangun karir lokal dengan credential yang diakui. Buka pintu global ketika kamu siap - dengan sertifikat yang sama. Mulai dari Rp 500rb/bulan.",
+  articleCtaButton: "Mulai Perjalananmu →",
+  articleCtaWhatsapp: "💬 Tanya via WhatsApp",
   pelatihanArticleTitle: "Pelatihan Caregiver Indonesia di Indonesia",
   pelatihanArticleIntro:
     "Halaman ini membahas pelatihan caregiver indonesia untuk kebutuhan informational di Indonesia. Konten disusun agar calon peserta memahami materi, biaya, jalur belajar, dan langkah pendaftaran.",
@@ -1358,10 +1360,12 @@ Object.assign(translations.en, {
   articlesDaftarTitle: "Apply to Become a Professional Caregiver",
   articlesDaftarDesc:
     "Follow a step-by-step guide to choose a pathway, check the requirements, select a study format, and start your enrolment.",
-  articleCtaTitle: "Ready to Start Your Caregiver Career?",
+  articleCtaBadge: "🏠 Care Locally · 💼 Grow Locally · 🌏 Open Global Doors",
+  articleCtaTitle: "Ready to start your journey as a professional caregiver?",
   articleCtaBody:
-    "Contact the Redline Academy team for program advice and a learning path that suits your goals.",
-  articleCtaButton: "Consult Now",
+    "Care for your family today. Build a local career with a recognised credential. Open global doors when you are ready - with the same certificate. Starting from Rp 500rb/month.",
+  articleCtaButton: "Start Your Journey →",
+  articleCtaWhatsapp: "💬 Ask via WhatsApp",
   pelatihanArticleTitle: "Caregiver Training in Indonesia",
   pelatihanArticleIntro:
     "This page discusses caregiver training in Indonesia for informational intent. The content is designed to help prospective participants understand the curriculum, cost factors, learning pathway, and enrollment steps.",
