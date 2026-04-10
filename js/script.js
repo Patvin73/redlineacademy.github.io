@@ -2364,3 +2364,32 @@ document.addEventListener("click", function (e) {
     }, 0);
   }
 });
+
+const WA = {
+  num: "6282120171731",
+  msgs: {
+    global: "Halo, saya ingin tahu lebih lanjut tentang program Care Giver Redline Academy.",
+    blog: "Halo, saya tertarik memulai perjalanan caregiver saya setelah membaca blog Redline.",
+    article: "Halo, saya tertarik mendaftar setelah membaca artikel Redline Academy.",
+    conv: "Halo, saya sudah baca panduan pendaftaran dan siap memulai perjalanan caregiver saya.",
+    path: "Halo, saya sudah selesaikan learning path dan siap memulai perjalanan bersama Redline.",
+    enrol: "Halo, saya ingin mendaftar program Asisten Perawat Redline Academy.",
+  },
+  ctx() {
+    const p = location.pathname;
+    if (p.includes("daftar-menjadi")) return "conv";
+    if (p.includes("programs")) return "enrol";
+    if (p.includes("blog")) return "blog";
+    if (p.includes("pages/")) return "article";
+    return "global";
+  },
+  url(key) {
+    return `https://wa.me/${this.num}?text=${encodeURIComponent(this.msgs[key || this.ctx()])}`;
+  },
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll('[data-wa],a[href*="wa.me"]').forEach((el) => {
+    el.href = WA.url(el.dataset.wa);
+  });
+});
