@@ -1057,6 +1057,28 @@ Object.assign(translations.id, {
     "Rawat keluarga hari ini. Bangun karir lokal dengan credential yang diakui. Buka pintu global ketika kamu siap - dengan sertifikat yang sama. Mulai dari Rp 500rb/bulan.",
   articleCtaButton: "Mulai Perjalananmu →",
   articleCtaWhatsapp: "💬 Tanya via WhatsApp",
+  faqJourneyTitle: "Pertanyaan yang Sering Diajukan",
+  faqJourneyQ1: "Apakah sertifikat ini langsung bisa saya pakai di Indonesia?",
+  faqJourneyA1:
+    "Ya. Sertifikat ini bisa langsung dipakai untuk konteks lokal seperti perawatan keluarga, pendampingan lansia di rumah, dan membangun rekam jejak awal saat Anda mulai mengambil peran care di Indonesia.",
+  faqJourneyQ2:
+    "Bisa merawat anggota keluarga sendiri dengan sertifikat ini?",
+  faqJourneyA2:
+    "Bisa. Ini justru tahap pertama yang paling nyata. Pembelajaran yang Anda dapatkan bisa langsung diterapkan untuk merawat orang tua, pasangan, atau anggota keluarga lain dengan cara yang lebih aman, terstruktur, dan bermartabat.",
+  faqJourneyQ3:
+    "Rumah sakit atau panti jompo mana yang menerima sertifikat ini?",
+  faqJourneyA3:
+    "Penerimaan selalu bergantung pada kebutuhan dan kebijakan masing-masing pemberi kerja. Secara umum, sertifikat ini paling relevan untuk pemberi layanan home care, panti wreda, komunitas lansia, layanan pendampingan, dan organisasi care lokal yang menilai kesiapan praktik dan sikap profesional.",
+  faqJourneyQ4:
+    "Berapa lama pengalaman lokal yang saya butuhkan sebelum melamar ke luar negeri?",
+  faqJourneyA4:
+    "Tidak ada satu angka yang berlaku untuk semua negara atau jalur. Namun, secara jujur, rekam jejak lokal yang konsisten biasanya membuat aplikasi jauh lebih kuat. Fokus utamanya adalah membangun pengalaman nyata, referensi kerja, dan bukti praktik yang rapi sebelum mengejar peluang global.",
+  faqJourneyQ5: "Apakah saya wajib ke luar negeri setelah lulus?",
+  faqJourneyA5:
+    "Tidak. Opsi global adalah pilihan, bukan kewajiban. Anda bisa memakai sertifikat ini untuk mulai dari rumah, tumbuh di pasar kerja lokal, lalu membuka peluang internasional ketika benar-benar siap.",
+  faqJourneyQ6: "Bagaimana jika saya perlu membatalkan pendaftaran?",
+  faqJourneyA6:
+    "Kebijakan pembatalan dan pengembalian dana mengikuti ketentuan pendaftaran yang berlaku pada saat Anda mendaftar. Jika ada perubahan rencana, sebaiknya hubungi tim Redline Academy secepat mungkin agar opsi yang tersedia bisa dijelaskan dengan jelas.",
   pelatihanArticleTitle: "Pelatihan Caregiver Indonesia di Indonesia",
   pelatihanArticleIntro:
     "Halaman ini membahas pelatihan caregiver indonesia untuk kebutuhan informational di Indonesia. Konten disusun agar calon peserta memahami materi, biaya, jalur belajar, dan langkah pendaftaran.",
@@ -1366,6 +1388,28 @@ Object.assign(translations.en, {
     "Care for your family today. Build a local career with a recognised credential. Open global doors when you are ready - with the same certificate. Starting from Rp 500rb/month.",
   articleCtaButton: "Start Your Journey →",
   articleCtaWhatsapp: "💬 Ask via WhatsApp",
+  faqJourneyTitle: "Frequently Asked Questions",
+  faqJourneyQ1: "Can I use this certificate in Indonesia right away?",
+  faqJourneyA1:
+    "Yes. This certificate can be used immediately in local contexts such as family care, home-based elderly support, and building an early track record as you begin taking on care roles in Indonesia.",
+  faqJourneyQ2:
+    "Can I use this certificate to care for my own family member?",
+  faqJourneyA2:
+    "Yes. This is often the most immediate first stage. What you learn can be applied directly to supporting parents, a spouse, or other family members in a safer, more structured, and more dignified way.",
+  faqJourneyQ3:
+    "Which hospitals or elderly care homes accept this certificate?",
+  faqJourneyA3:
+    "Acceptance always depends on each employer's needs and policies. In general, this certificate is most relevant for home care providers, elderly care homes, senior community services, companion care services, and local care organisations that value practical readiness and professional attitude.",
+  faqJourneyQ4:
+    "How much local experience do I usually need before applying overseas?",
+  faqJourneyA4:
+    "There is no single number that applies to every country or pathway. But honestly, a consistent local track record usually makes an overseas application much stronger. The main priority is building real experience, work references, and clear evidence of practice before pursuing global opportunities.",
+  faqJourneyQ5: "Am I required to go overseas after graduating?",
+  faqJourneyA5:
+    "No. The global option is a choice, not a requirement. You can use this certificate to start at home, grow in the local job market, and open international opportunities when you are truly ready.",
+  faqJourneyQ6: "What if I need to cancel my enrolment?",
+  faqJourneyA6:
+    "Cancellation and refund policy follow the enrolment terms that apply when you register. If your plans change, it is best to contact the Redline Academy team as early as possible so the available options can be explained clearly.",
   pelatihanArticleTitle: "Caregiver Training in Indonesia",
   pelatihanArticleIntro:
     "This page discusses caregiver training in Indonesia for informational intent. The content is designed to help prospective participants understand the curriculum, cost factors, learning pathway, and enrollment steps.",
