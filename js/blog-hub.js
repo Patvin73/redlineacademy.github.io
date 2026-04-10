@@ -14,6 +14,24 @@
       query: "",
     };
 
+    function updateFilterURL() {
+      const params = new URLSearchParams();
+
+      if (state.type !== "all") {
+        params.set("format", state.type);
+      }
+
+      if (state.difficulty !== "all") {
+        params.set("level", state.difficulty);
+      }
+
+      history.replaceState(
+        {},
+        "",
+        params.toString() ? `?${params}` : location.pathname
+      );
+    }
+
     function updateCards() {
       const query = state.query.trim().toLowerCase();
       let visibleCount = 0;
@@ -49,6 +67,7 @@
           .filter((item) => item.dataset.group === group)
           .forEach((item) => item.classList.toggle("is-active", item === button));
 
+        updateFilterURL();
         updateCards();
       });
     });
@@ -59,6 +78,17 @@
         updateCards();
       });
     }
+
+    const params = new URLSearchParams(location.search);
+    state.type = params.get("format") || "all";
+    state.difficulty = params.get("level") || "all";
+
+    filterButtons.forEach((button) => {
+      const { group, value } = button.dataset;
+      if (!group || !value) return;
+
+      button.classList.toggle("is-active", state[group] === value);
+    });
 
     updateCards();
   }
