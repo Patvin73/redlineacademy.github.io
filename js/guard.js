@@ -93,23 +93,13 @@
         const tableBody = document.getElementById("studentTableBody");
         if (tableBody) {
           if (error) {
-            tableBody.innerHTML = `<tr><td colspan="3">${tt(
+            tableBody.innerHTML = `<tr><td colspan="7">${tt(
               "lmsErrLoadStudents", "Gagal memuat data student."
             )}</td></tr>`;
           } else if (!data || data.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="3">${tt(
+            tableBody.innerHTML = `<tr><td colspan="7">${tt(
               "lmsNoStudents", "Belum ada student."
             )}</td></tr>`;
-          } else {
-            tableBody.innerHTML = data
-              .map((item) =>
-                `<tr>
-                  <td>${escapeHtml(item.full_name  || "-")}</td>
-                  <td>${escapeHtml(item.student_id || "-")}</td>
-                  <td>${escapeHtml(item.email      || "-")}</td>
-                </tr>`
-              )
-              .join("");
           }
         }
       }

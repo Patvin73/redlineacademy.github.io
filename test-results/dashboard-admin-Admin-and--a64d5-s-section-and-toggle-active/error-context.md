@@ -1,0 +1,166 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - navigation "Admin navigation" [ref=e2]:
+    - link "Redline Academy Home" [ref=e4] [cursor=pointer]:
+      - /url: ../index.html
+      - img "Redline Academy Logo" [ref=e5]
+      - generic [ref=e6]:
+        - strong [ref=e7]: Redline
+        - text: Academy
+    - generic [ref=e8]:
+      - img [ref=e10]
+      - generic [ref=e13]:
+        - paragraph [ref=e14]: —
+        - generic [ref=e15]: Admin
+    - list [ref=e16]:
+      - listitem [ref=e17]: Menu Utama
+      - listitem [ref=e18]:
+        - button "Dashboard" [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - generic [ref=e23]: Dashboard
+      - listitem [ref=e24]:
+        - button "Student Saya" [ref=e25] [cursor=pointer]:
+          - img [ref=e26]
+          - generic [ref=e31]: Student Saya
+      - listitem [ref=e32]:
+        - button "Manajemen Kursus" [ref=e33] [cursor=pointer]:
+          - img [ref=e34]
+          - generic [ref=e37]: Manajemen Kursus
+      - listitem [ref=e38]:
+        - button "Tugas & Penilaian" [ref=e39] [cursor=pointer]:
+          - img [ref=e40]
+          - generic [ref=e43]: Tugas & Penilaian
+      - listitem [ref=e44]:
+        - button "Jadwal" [ref=e45] [cursor=pointer]:
+          - img [ref=e46]
+          - generic [ref=e48]: Jadwal
+      - listitem [ref=e49]:
+        - button "Pesan" [ref=e50] [cursor=pointer]:
+          - img [ref=e51]
+          - generic [ref=e53]: Pesan
+      - listitem [ref=e54]:
+        - button "Laporan & Analitik" [ref=e55] [cursor=pointer]:
+          - img [ref=e56]
+          - generic [ref=e57]: Laporan & Analitik
+      - listitem [ref=e58]: Administrasi
+      - listitem [ref=e59]:
+        - button "Manajemen User" [ref=e60] [cursor=pointer]:
+          - img [ref=e61]
+          - generic [ref=e64]: Manajemen User
+      - listitem [ref=e65]:
+        - button "Pendaftaran & Pembayaran" [ref=e66] [cursor=pointer]:
+          - img [ref=e67]
+          - generic [ref=e70]: Pendaftaran & Pembayaran
+      - listitem [ref=e71]:
+        - button "Pengumuman" [ref=e72] [cursor=pointer]:
+          - img [ref=e73]
+          - generic [ref=e75]: Pengumuman
+      - listitem [ref=e76]:
+        - button "Pengaturan Sistem" [ref=e77] [cursor=pointer]:
+          - img [ref=e78]
+          - generic [ref=e81]: Pengaturan Sistem
+    - generic [ref=e82]:
+      - navigation "Language selector" [ref=e83]:
+        - button "Bahasa Indonesia" [ref=e84] [cursor=pointer]:
+          - img [ref=e85]
+          - generic [ref=e86]: ID
+        - button "English" [ref=e87] [cursor=pointer]:
+          - img [ref=e88]
+          - generic [ref=e89]: EN
+      - button "Keluar" [ref=e90] [cursor=pointer]:
+        - img [ref=e91]
+        - generic [ref=e94]: Keluar
+  - generic [ref=e95]:
+    - banner [ref=e96]:
+      - generic [ref=e98]: Manajemen User
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - img [ref=e101]
+          - searchbox "Search" [ref=e104]
+        - button "Notifications" [ref=e105] [cursor=pointer]:
+          - img [ref=e106]
+        - button "—" [ref=e109] [cursor=pointer]:
+          - img [ref=e111]
+          - generic [ref=e114]: —
+          - img [ref=e115]
+    - main [ref=e117]:
+      - generic [ref=e118]:
+        - generic [ref=e119]:
+          - heading "Manajemen User" [level=2] [ref=e120]
+          - generic [ref=e121]:
+            - generic [ref=e122]:
+              - img [ref=e123]
+              - searchbox "Cari user..." [ref=e126]
+            - tablist [ref=e127]:
+              - tab "Semua" [ref=e128] [cursor=pointer]
+              - tab "Student" [ref=e129] [cursor=pointer]
+              - tab "Trainer" [ref=e130] [cursor=pointer]
+              - tab "Admin" [ref=e131] [cursor=pointer]
+            - button "Tambah User" [ref=e132] [cursor=pointer]:
+              - img [ref=e133]
+              - generic [ref=e134]: Tambah User
+        - table "User management" [ref=e137]:
+          - rowgroup [ref=e138]:
+            - row "User Email Role Status Bergabung Aksi" [ref=e139]:
+              - columnheader "User" [ref=e140]
+              - columnheader "Email" [ref=e141]
+              - columnheader "Role" [ref=e142]
+              - columnheader "Status" [ref=e143]
+              - columnheader "Bergabung" [ref=e144]
+              - columnheader "Aksi" [ref=e145]
+          - rowgroup [ref=e146]:
+            - row "E2E Admin admin@example.com admin Aktif 1 Mar 2026 Aktifkan" [ref=e147]:
+              - cell "E2E Admin" [ref=e148]:
+                - generic [ref=e149]:
+                  - img [ref=e151]
+                  - paragraph [ref=e154]: E2E Admin
+              - cell "admin@example.com" [ref=e155]
+              - cell "admin" [ref=e156]:
+                - generic [ref=e157]: admin
+              - cell "Aktif" [ref=e158]:
+                - generic [ref=e159]: Aktif
+              - cell "1 Mar 2026" [ref=e160]
+              - cell "Aktifkan" [ref=e161]:
+                - button "Aktifkan" [active] [ref=e162] [cursor=pointer]
+            - row "E2E Trainer trainer@example.com trainer Nonaktif 2 Mar 2026 Activate" [ref=e163]:
+              - cell "E2E Trainer" [ref=e164]:
+                - generic [ref=e165]:
+                  - img [ref=e167]
+                  - paragraph [ref=e170]: E2E Trainer
+              - cell "trainer@example.com" [ref=e171]
+              - cell "trainer" [ref=e172]:
+                - generic [ref=e173]: trainer
+              - cell "Nonaktif" [ref=e174]:
+                - generic [ref=e175]: Nonaktif
+              - cell "2 Mar 2026" [ref=e176]
+              - cell "Activate" [ref=e177]:
+                - button "Activate" [ref=e178] [cursor=pointer]
+            - row "Alpha Student alpha@example.com student Aktif 3 Mar 2026 Suspend" [ref=e179]:
+              - cell "Alpha Student" [ref=e180]:
+                - generic [ref=e181]:
+                  - img [ref=e183]
+                  - paragraph [ref=e186]: Alpha Student
+              - cell "alpha@example.com" [ref=e187]
+              - cell "student" [ref=e188]:
+                - generic [ref=e189]: student
+              - cell "Aktif" [ref=e190]:
+                - generic [ref=e191]: Aktif
+              - cell "3 Mar 2026" [ref=e192]
+              - cell "Suspend" [ref=e193]:
+                - button "Suspend" [ref=e194] [cursor=pointer]
+            - row "Bravo Student bravo@example.com student Aktif 4 Mar 2026 Suspend" [ref=e195]:
+              - cell "Bravo Student" [ref=e196]:
+                - generic [ref=e197]:
+                  - img [ref=e199]
+                  - paragraph [ref=e202]: Bravo Student
+              - cell "bravo@example.com" [ref=e203]
+              - cell "student" [ref=e204]:
+                - generic [ref=e205]: student
+              - cell "Aktif" [ref=e206]:
+                - generic [ref=e207]: Aktif
+              - cell "4 Mar 2026" [ref=e208]
+              - cell "Suspend" [ref=e209]:
+                - button "Suspend" [ref=e210] [cursor=pointer]
+```

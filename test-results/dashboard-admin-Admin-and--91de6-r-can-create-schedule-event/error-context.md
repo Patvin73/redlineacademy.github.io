@@ -1,0 +1,123 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - navigation "Admin navigation" [ref=e2]:
+    - link "Redline Academy Home" [ref=e4] [cursor=pointer]:
+      - /url: ../index.html
+      - img "Redline Academy Logo" [ref=e5]
+      - generic [ref=e6]:
+        - strong [ref=e7]: Redline
+        - text: Academy
+    - generic [ref=e8]:
+      - img [ref=e10]
+      - generic [ref=e13]:
+        - paragraph [ref=e14]: —
+        - generic [ref=e15]: Admin
+    - list [ref=e16]:
+      - listitem [ref=e17]: Menu Utama
+      - listitem [ref=e18]:
+        - button "Dashboard" [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - generic [ref=e23]: Dashboard
+      - listitem [ref=e24]:
+        - button "Student Saya" [ref=e25] [cursor=pointer]:
+          - img [ref=e26]
+          - generic [ref=e31]: Student Saya
+      - listitem [ref=e32]:
+        - button "Manajemen Kursus" [ref=e33] [cursor=pointer]:
+          - img [ref=e34]
+          - generic [ref=e37]: Manajemen Kursus
+      - listitem [ref=e38]:
+        - button "Tugas & Penilaian" [ref=e39] [cursor=pointer]:
+          - img [ref=e40]
+          - generic [ref=e43]: Tugas & Penilaian
+      - listitem [ref=e44]:
+        - button "Jadwal" [ref=e45] [cursor=pointer]:
+          - img [ref=e46]
+          - generic [ref=e48]: Jadwal
+      - listitem [ref=e49]:
+        - button "Pesan" [ref=e50] [cursor=pointer]:
+          - img [ref=e51]
+          - generic [ref=e53]: Pesan
+      - listitem [ref=e54]:
+        - button "Laporan & Analitik" [ref=e55] [cursor=pointer]:
+          - img [ref=e56]
+          - generic [ref=e57]: Laporan & Analitik
+    - generic [ref=e58]:
+      - navigation "Language selector" [ref=e59]:
+        - button "Bahasa Indonesia" [ref=e60] [cursor=pointer]:
+          - img [ref=e61]
+          - generic [ref=e62]: ID
+        - button "English" [ref=e63] [cursor=pointer]:
+          - img [ref=e64]
+          - generic [ref=e65]: EN
+      - button "Keluar" [ref=e66] [cursor=pointer]:
+        - img [ref=e67]
+        - generic [ref=e70]: Keluar
+  - generic [ref=e71]:
+    - banner [ref=e72]:
+      - generic [ref=e74]: Jadwal
+      - generic [ref=e75]:
+        - generic [ref=e76]:
+          - img [ref=e77]
+          - searchbox "Search" [ref=e80]
+        - button "Notifications" [ref=e81] [cursor=pointer]:
+          - img [ref=e82]
+        - button "—" [ref=e85] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e90]: —
+          - img [ref=e91]
+    - main [ref=e93]:
+      - generic [ref=e94]:
+        - generic [ref=e95]:
+          - heading "Jadwal" [level=2] [ref=e96]
+          - button "Buat Event" [ref=e97] [cursor=pointer]:
+            - img [ref=e98]
+            - generic [ref=e99]: Buat Event
+        - generic [ref=e100]:
+          - heading "Buat Event" [level=3] [ref=e101]
+          - generic [ref=e102]:
+            - generic [ref=e103]:
+              - generic [ref=e104]: Judul Event
+              - textbox "Judul Event" [ref=e105]: E2E Trainer Event
+            - generic [ref=e106]:
+              - generic [ref=e107]: Tipe
+              - combobox "Tipe" [ref=e108] [cursor=pointer]:
+                - option "Live Session" [selected]
+                - option "Webinar"
+                - option "Exam"
+                - option "Orientation"
+                - option "Other"
+          - generic [ref=e109]:
+            - generic [ref=e110]:
+              - generic [ref=e111]: Tanggal & Waktu Mulai
+              - textbox "Tanggal & Waktu Mulai" [ref=e112]: 2026-04-16T10:00
+            - generic [ref=e113]:
+              - generic [ref=e114]: Tanggal & Waktu Selesai
+              - textbox "Tanggal & Waktu Selesai" [ref=e115]: 2026-04-16T11:00
+          - generic [ref=e116]:
+            - generic [ref=e117]: Link Meeting (Zoom / Teams)
+            - textbox "Link Meeting (Zoom / Teams)" [ref=e118]:
+              - /placeholder: https://zoom.us/j/...
+          - generic [ref=e119]:
+            - generic [ref=e120]:
+              - generic [ref=e121]: Kursus
+              - combobox "Kursus" [ref=e122] [cursor=pointer]:
+                - option "All Enrolled Students" [selected]
+            - generic [ref=e123]:
+              - generic [ref=e124]: Wajib Hadir
+              - combobox "Wajib Hadir" [ref=e125] [cursor=pointer]:
+                - option "No" [selected]
+                - option "Yes"
+          - generic [ref=e126]:
+            - paragraph [ref=e127]: "Error: Cannot read properties of null (reading 'id')"
+            - generic [ref=e128]:
+              - button "Batal" [ref=e129] [cursor=pointer]
+              - button "Simpan Event" [ref=e130] [cursor=pointer]
+        - generic [ref=e131]:
+          - heading "Event Mendatang" [level=2] [ref=e133]
+          - generic [ref=e135]:
+            - img [ref=e136]
+            - paragraph [ref=e138]: Tidak ada event mendatang
+```

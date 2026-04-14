@@ -388,11 +388,20 @@
   function setupNotificationPanel() {
     const markAllBtn = $("markAllRead");
     if (markAllBtn) {
-      markAllBtn.addEventListener("click", () => {
-        document.querySelectorAll(".sd-notif-list-item.unread").forEach((el) => {
+      markAllBtn.addEventListener("click", async () => {
+        const unreadItems = Array.from(document.querySelectorAll(".sd-notif-list-item.unread"));
+        unreadItems.forEach((el) => {
           el.classList.remove("unread");
         });
         updateNotifDot();
+        if (!window.lmsSupabase || unreadItems.length === 0) return;
+        const unreadIds = unreadItems.map((item) => item.dataset.id).filter(Boolean);
+        if (unreadIds.length === 0) return;
+        await window.lmsSupabase
+          .from("notifications")
+          .update({ is_read: true, read_at: new Date().toISOString() })
+          .in("id", unreadIds)
+          .catch(() => {});
       });
     }
   }

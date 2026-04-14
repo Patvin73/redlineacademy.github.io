@@ -617,6 +617,14 @@
       if (role === "trainer") badge.classList.add("ad-role-badge--trainer");
     }
 
+    const topbarProfileBtn = $("adTopbarProfileBtn");
+    if (topbarProfileBtn) {
+      const isAdmin = role === "admin";
+      topbarProfileBtn.hidden = !isAdmin;
+      topbarProfileBtn.setAttribute("aria-hidden", isAdmin ? "false" : "true");
+      topbarProfileBtn.tabIndex = isAdmin ? 0 : -1;
+    }
+
     // data-lms-role on body (for guard.js)
     document.body.setAttribute("data-lms-role", role);
 
@@ -1392,7 +1400,7 @@
       let query = window.lmsSupabase
         .from("assignment_submissions")
         .select(`
-          id, status, submitted_at, grade,
+          id, status, submitted_at, grade, notes, file_urls,
           profiles ( id, full_name ),
           assignments ( title, trainer_id, pass_mark )
         `)
@@ -2728,10 +2736,19 @@
       }
     });
 
-    markAllBtn && markAllBtn.addEventListener("click", () => {
-      document.querySelectorAll(".ad-notif-list-item.unread").forEach((el) => el.classList.remove("unread"));
+    markAllBtn && markAllBtn.addEventListener("click", async () => {
+      const unreadItems = Array.from(document.querySelectorAll(".ad-notif-list-item.unread"));
+      unreadItems.forEach((el) => el.classList.remove("unread"));
       const dot = $("adNotifDot");
       if (dot) dot.style.display = "none";
+      if (!window.lmsSupabase || unreadItems.length === 0) return;
+      const unreadIds = unreadItems.map((item) => item.dataset.id).filter(Boolean);
+      if (unreadIds.length === 0) return;
+      await window.lmsSupabase
+        .from("notifications")
+        .update({ is_read: true, read_at: new Date().toISOString() })
+        .in("id", unreadIds)
+        .catch(() => {});
     });
   }
 
