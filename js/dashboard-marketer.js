@@ -472,6 +472,22 @@
           msgEl.className = "mk-form-feedback error";
           return;
         }
+        if (enrolled < 1) {
+          msgEl.textContent = tt(
+            "mkClaimValidationEnrolled",
+            "Isi jumlah siswa yang mendaftar dan lunas.",
+          );
+          msgEl.className = "mk-form-feedback error";
+          return;
+        }
+        if (fee <= 0) {
+          msgEl.textContent = tt(
+            "mkClaimValidationFee",
+            "Isi biaya program per siswa.",
+          );
+          msgEl.className = "mk-form-feedback error";
+          return;
+        }
         if (!consent) {
           msgEl.textContent = tt(
             "mkClaimValidationConsent",

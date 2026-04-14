@@ -338,6 +338,7 @@
   let usersCache       = [];
   let activeUserRoleFilter = "all";
   let selectedSubmissionId = null;
+  let editingCourseId  = null;
 
   /* ================================================================
      HELPERS
@@ -483,7 +484,7 @@
     const exportPaymentsBtn = $("exportPaymentsBtn");
 
     const openSettings = () => {
-      if (window._adActivateSection) window._adActivateSection("settings");
+      if (currentRole === "admin" && window._adActivateSection) window._adActivateSection("settings");
     };
 
     profileBtn && profileBtn.addEventListener("click", openSettings);
@@ -497,8 +498,8 @@
     searchInput && searchInput.addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
       const query = searchInput.value.trim();
-      if (!query || typeof window.find !== "function") return;
-      window.find(query, false, false, true);
+      if (!query) return;
+      runAdminSearch(query);
     });
 
     newMsgBtn && newMsgBtn.addEventListener("click", () => {
@@ -578,6 +579,7 @@
       currentRole    = profile.role; // "trainer" or "admin"
 
       populateUI(profile);
+      await loadSystemSettings();
 
       await Promise.all([
         loadKPIs(),
@@ -645,12 +647,38 @@
   ================================================================ */
   async function loadKPIs() {
     try {
-      const view = currentRole === "admin" ? "v_trainer_dashboard" : "v_trainer_dashboard";
-      const { data } = await window.lmsSupabase
-        .from(view)
-        .select("*")
-        .eq("trainer_id", currentProfile.id)
-        .single();
+      let data = null;
+      if (currentRole === "admin") {
+        const [
+          { count: totalStudents },
+          { count: coursesCreated },
+          { count: pendingGrading },
+          { data: progressRows }
+        ] = await Promise.all([
+          window.lmsSupabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "student"),
+          window.lmsSupabase.from("courses").select("id", { count: "exact", head: true }),
+          window.lmsSupabase.from("assignment_submissions").select("id", { count: "exact", head: true }).eq("status", "submitted"),
+          window.lmsSupabase.from("course_progress").select("completion_percent")
+        ]);
+
+        const avgCompletion = (progressRows || []).length
+          ? Math.round(((progressRows || []).reduce((sum, row) => sum + parseFloat(row.completion_percent || 0), 0) / progressRows.length) * 10) / 10
+          : 0;
+
+        data = {
+          total_students: totalStudents || 0,
+          courses_created: coursesCreated || 0,
+          pending_grading: pendingGrading || 0,
+          avg_completion_percent: avgCompletion
+        };
+      } else {
+        const { data: trainerData } = await window.lmsSupabase
+          .from("v_trainer_dashboard")
+          .select("*")
+          .eq("trainer_id", currentProfile.id)
+          .single();
+        data = trainerData;
+      }
 
       if (data) {
         if ($("kpiTotalStudents"))   $("kpiTotalStudents").textContent   = data.total_students    || 0;
@@ -834,11 +862,47 @@
     if (!tbody) return;
 
     try {
-      const { data } = await window.lmsSupabase
-        .from("v_students_at_risk")
-        .select("*")
-        .order("inactive_duration", { ascending: false })
-        .limit(5);
+      let data = null;
+      if (currentRole === "admin") {
+        const result = await window.lmsSupabase
+          .from("v_students_at_risk")
+          .select("*")
+          .order("inactive_duration", { ascending: false })
+          .limit(5);
+        data = result.data;
+      } else {
+        const result = await window.lmsSupabase
+          .from("enrollments")
+          .select(`
+            student_id,
+            profiles ( full_name, email ),
+            courses!inner ( title, trainer_id ),
+            course_progress ( completion_percent, last_accessed_at )
+          `)
+          .eq("status", "active")
+          .eq("courses.trainer_id", currentProfile.id)
+          .order("enrolled_at", { ascending: false });
+
+        data = (result.data || []).map((row) => {
+          const progress = row.course_progress?.[0] || {};
+          const lastAccessed = progress.last_accessed_at || null;
+          const inactiveDuration = lastAccessed
+            ? Math.floor((Date.now() - new Date(lastAccessed).getTime()) / 86400000)
+            : 9999;
+          return {
+            student_id: row.student_id,
+            full_name: row.profiles?.full_name,
+            email: row.profiles?.email,
+            course_title: row.courses?.title,
+            completion_percent: progress.completion_percent || 0,
+            last_accessed_at: lastAccessed,
+            inactive_duration: inactiveDuration
+          };
+        })
+          .filter((row) => !row.last_accessed_at || row.inactive_duration >= 7)
+          .sort((a, b) => b.inactive_duration - a.inactive_duration)
+          .slice(0, 5);
+      }
 
       if (!data || data.length === 0) throw new Error("No at-risk");
 
@@ -1080,8 +1144,8 @@
         row.dataset.courseId = course.id;
         row.innerHTML = `
           <div class="ad-course-row__thumb">
-            ${course.thumbnail_url
-              ? `<img src="${escHtml(course.thumbnail_url)}" alt="${escHtml(course.title)}" style="width:100%;height:100%;object-fit:cover;border-radius:6px" />`
+            ${toSafeUiUrl(course.thumbnail_url)
+              ? `<img src="${escHtml(toSafeUiUrl(course.thumbnail_url))}" alt="${escHtml(course.title)}" style="width:100%;height:100%;object-fit:cover;border-radius:6px" />`
               : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>`
             }
           </div>
@@ -1113,11 +1177,26 @@
     const closeBtn     = $("closeCourseBuilder");
     const saveDraftBtn = $("saveDraftBtn");
     const saveBtn      = $("saveCourseBtn");
+    const requiredFields = ["cbTitle"];
 
-    createBtn  && createBtn.addEventListener("click",  () => { panel.hidden = false; panel.scrollIntoView({ behavior: "smooth" }); });
-    closeBtn   && closeBtn.addEventListener("click",   () => { panel.hidden = true; });
+    requiredFields.forEach((id) => { if ($(id)) $(id).required = true; });
+
+    createBtn  && createBtn.addEventListener("click",  () => {
+      resetCourseBuilderForm();
+      panel.hidden = false;
+      panel.scrollIntoView({ behavior: "smooth" });
+    });
+    closeBtn   && closeBtn.addEventListener("click",   () => {
+      resetCourseBuilderForm();
+      panel.hidden = true;
+    });
     saveDraftBtn && saveDraftBtn.addEventListener("click", () => saveCourse("draft"));
     saveBtn    && saveBtn.addEventListener("click",    () => saveCourse("published"));
+    panel && panel.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" || e.target.tagName === "TEXTAREA") return;
+      e.preventDefault();
+      saveBtn && saveBtn.click();
+    });
 
     // Add module button
     const addModuleBtn = $("addModuleBtn");
@@ -1175,6 +1254,7 @@
     const title    = $("cbTitle")?.value.trim();
     const category = $("cbCategory")?.value;
     const desc     = $("cbDesc")?.value.trim();
+    if ($("cbTitle") && !$("cbTitle").reportValidity()) return;
 
     if (!title) {
       if (msg) { msg.textContent = "Course title is required"; msg.style.color = "var(--sd-red)"; }
@@ -1187,7 +1267,6 @@
       const payload = {
         trainer_id:       currentProfile.id,
         title,
-        slug:             title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Date.now(),
         description:      desc,
         category_id:      category || null,
         level:            $("cbLevel")?.value || "beginner",
@@ -1200,12 +1279,24 @@
         status,
       };
 
-      const { error } = await window.lmsSupabase.from("courses").insert(payload);
+      let error = null;
+      if (editingCourseId) {
+        ({ error } = await window.lmsSupabase.from("courses").update(payload).eq("id", editingCourseId));
+      } else {
+        payload.slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Date.now();
+        ({ error } = await window.lmsSupabase.from("courses").insert(payload));
+      }
       if (error) throw error;
 
       if (msg) { msg.textContent = "✓ Course saved!"; msg.style.color = "var(--sd-green)"; }
 
-      setTimeout(() => { $("courseBuilderPanel").hidden = true; loadSectionData("courses"); loadedSections.delete("courses"); loadCoursesList(); }, 1200);
+      setTimeout(() => {
+        resetCourseBuilderForm();
+        $("courseBuilderPanel").hidden = true;
+        loadSectionData("courses");
+        loadedSections.delete("courses");
+        loadCoursesList();
+      }, 1200);
 
     } catch (err) {
       if (msg) { msg.textContent = "Error: " + (err.message || "Save failed"); msg.style.color = "var(--sd-red)"; }
@@ -1223,11 +1314,51 @@
     } catch (err) { alert("Delete failed: " + err.message); }
   }
 
-  function openEditCourse(courseId) {
-    $("courseBuilderPanel").hidden = false;
-    $("builderTitle").textContent  = "Edit Course";
-    // In a real implementation: fetch course by ID and populate the form fields
-    console.log("Edit course:", courseId);
+  function resetCourseBuilderForm() {
+    editingCourseId = null;
+    if ($("builderTitle")) $("builderTitle").textContent = "Create Course";
+    if ($("builderMsg")) $("builderMsg").textContent = "";
+    if ($("cbTitle")) $("cbTitle").value = "";
+    if ($("cbCategory")) $("cbCategory").value = "";
+    if ($("cbDesc")) $("cbDesc").value = "";
+    if ($("cbLevel")) $("cbLevel").value = "beginner";
+    if ($("cbDuration")) $("cbDuration").value = "";
+    if ($("cbPassMark")) $("cbPassMark").value = 70;
+    if ($("cbEnrollType")) $("cbEnrollType").value = "open";
+    if ($("cbMaxStudents")) $("cbMaxStudents").value = "";
+    if ($("cbPrice")) $("cbPrice").value = 0;
+    if ($("cbStatus")) $("cbStatus").value = "draft";
+    if ($("cbIsFeatured")) $("cbIsFeatured").value = "false";
+  }
+
+  async function openEditCourse(courseId) {
+    try {
+      const { data, error } = await window.lmsSupabase
+        .from("courses")
+        .select("id, title, category_id, description, level, duration_hours, pass_mark, enrollment_type, max_students, price, status, is_featured")
+        .eq("id", courseId)
+        .single();
+      if (error) throw error;
+
+      editingCourseId = data.id;
+      $("courseBuilderPanel").hidden = false;
+      $("builderTitle").textContent  = "Edit Course";
+      if ($("builderMsg")) $("builderMsg").textContent = "";
+      if ($("cbTitle")) $("cbTitle").value = data.title || "";
+      if ($("cbCategory")) $("cbCategory").value = data.category_id || "";
+      if ($("cbDesc")) $("cbDesc").value = data.description || "";
+      if ($("cbLevel")) $("cbLevel").value = data.level || "beginner";
+      if ($("cbDuration")) $("cbDuration").value = data.duration_hours ?? "";
+      if ($("cbPassMark")) $("cbPassMark").value = data.pass_mark ?? 70;
+      if ($("cbEnrollType")) $("cbEnrollType").value = data.enrollment_type || "open";
+      if ($("cbMaxStudents")) $("cbMaxStudents").value = data.max_students ?? "";
+      if ($("cbPrice")) $("cbPrice").value = data.price ?? 0;
+      if ($("cbStatus")) $("cbStatus").value = data.status || "draft";
+      if ($("cbIsFeatured")) $("cbIsFeatured").value = data.is_featured ? "true" : "false";
+      $("courseBuilderPanel").scrollIntoView({ behavior: "smooth" });
+    } catch (err) {
+      alert("Edit failed: " + err.message);
+    }
   }
 
   /* ================================================================
@@ -1330,7 +1461,9 @@
     if (fileList) {
       fileList.innerHTML = (sub.file_urls || []).map((url) => {
         const name = url.split("/").pop();
-        return `<a href="${escHtml(url)}" target="_blank" rel="noopener" class="ad-file-chip">
+        const safeUrl = toSafeUiUrl(url);
+        if (!safeUrl) return "";
+        return `<a href="${escHtml(safeUrl || "")}" target="_blank" rel="noopener" class="ad-file-chip">
           📄 ${escHtml(name)}
         </a>`;
       }).join("") || "<span style='color:var(--sd-text-muted);font-size:.82rem'>No files</span>";
@@ -1421,9 +1554,16 @@
     const cancelBtn = $("cancelEventBtn");
     const saveBtn   = $("saveEventBtn");
 
+    ["evTitle", "evStart", "evEnd"].forEach((id) => { if ($(id)) $(id).required = true; });
+
     createBtn && createBtn.addEventListener("click", () => { card.hidden = false; card.scrollIntoView({ behavior: "smooth" }); });
     cancelBtn && cancelBtn.addEventListener("click", () => { card.hidden = true; });
     saveBtn   && saveBtn.addEventListener("click",   saveEvent);
+    card && card.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" || e.target.tagName === "TEXTAREA") return;
+      e.preventDefault();
+      saveBtn && saveBtn.click();
+    });
   }
 
   async function saveEvent() {
@@ -1432,6 +1572,8 @@
     const title  = $("evTitle")?.value.trim();
     const start  = $("evStart")?.value;
     const end    = $("evEnd")?.value;
+    const eventFields = ["evTitle", "evStart", "evEnd", "evMeetingUrl"].map((id) => $(id)).filter(Boolean);
+    if (eventFields.some((field) => !field.reportValidity())) return;
 
     if (!title || !start || !end) {
       if (msg) { msg.textContent = "Title, start and end time are required"; msg.style.color = "var(--sd-red)"; }
@@ -1441,13 +1583,14 @@
     if (saveBtn) saveBtn.disabled = true;
 
     try {
+      const meetingUrl = toSafeUiUrl($("evMeetingUrl")?.value.trim() || "");
       const payload = {
         trainer_id:      currentProfile.id,
         title,
         event_type:      $("evType")?.value || "live_session",
         start_datetime:  new Date(start).toISOString(),
         end_datetime:    new Date(end).toISOString(),
-        meeting_url:     $("evMeetingUrl")?.value.trim() || null,
+        meeting_url:     meetingUrl || null,
         course_id:       $("evCourse")?.value || null,
         is_mandatory:    $("evMandatory")?.value === "true",
       };
@@ -1499,7 +1642,7 @@
             <p class="ad-event-row__meta">${escHtml(ev.courses?.title || "All students")} · ${new Date(ev.start_datetime).toLocaleTimeString("en-AU",{hour:"2-digit",minute:"2-digit"})}</p>
           </div>
           <span class="ad-tag ad-tag--${typeColors[ev.event_type] || "gray"}">${ev.event_type.replace("_", " ")}</span>
-          ${ev.meeting_url ? `<a href="${escHtml(ev.meeting_url)}" target="_blank" rel="noopener" class="ad-btn ad-btn--outline ad-btn--sm">Join</a>` : ""}
+          ${toSafeUiUrl(ev.meeting_url) ? `<a href="${escHtml(toSafeUiUrl(ev.meeting_url))}" target="_blank" rel="noopener" class="ad-btn ad-btn--outline ad-btn--sm">Join</a>` : ""}
           <button class="ad-icon-btn ad-icon-btn--danger" data-event-id="${ev.id}" aria-label="Delete event">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
           </button>`;
@@ -1521,6 +1664,8 @@
   async function loadMessages() {
     const inbox = $("adInboxList");
     const empty = $("adInboxEmpty");
+    const view = $("adMessageView");
+    const viewEmpty = $("adMsgViewEmpty");
     if (!inbox) return;
 
     try {
@@ -1552,6 +1697,19 @@
             <p class="ad-inbox-item__preview">${escHtml(msg.body?.substring(0, 60) || "—")}</p>
           </div>
           <span class="ad-inbox-item__time">${timeAgo(msg.created_at)}</span>`;
+        item.addEventListener("click", () => {
+          inbox.querySelectorAll(".ad-inbox-item").forEach((el) => el.classList.remove("active"));
+          item.classList.add("active");
+          if (viewEmpty) viewEmpty.hidden = true;
+          if (view) {
+            view.innerHTML = `
+              <div class="ad-message-view__detail">
+                <p class="ad-inbox-item__name">${escHtml(msg.subject || msg.profiles?.full_name || "Message")}</p>
+                <p class="ad-inbox-item__time">${timeAgo(msg.created_at)}</p>
+                <div style="margin-top:12px;white-space:pre-wrap;">${escHtml(msg.body || "—")}</div>
+              </div>`;
+          }
+        });
         inbox.insertBefore(item, empty);
       });
 
@@ -1564,10 +1722,11 @@
   async function loadReports() {
     try {
       // Course overview
-      const { data: overview } = await window.lmsSupabase
+      let overviewQuery = window.lmsSupabase
         .from("v_course_overview")
-        .select("*")
-        .eq("trainer_name", currentProfile.full_name);
+        .select("*");
+      if (currentRole !== "admin") overviewQuery = overviewQuery.eq("trainer_name", currentProfile.full_name);
+      const { data: overview } = await overviewQuery;
 
       const tbody = $("courseOverviewBody");
       const empty = $("courseOverviewEmpty");
@@ -1789,7 +1948,8 @@
           <td><strong>${formatCurrency(parseFloat(p.amount || 0), p.currency || "IDR")}</strong></td>
           <td>${statusTag}</td>
           <td style="color:var(--sd-text-muted);font-size:.82rem">${p.paid_at ? formatDT(p.paid_at) : "—"}</td>
-          <td><button class="ad-btn ad-btn--outline ad-btn--sm">Receipt</button></td>`;
+          <td><button class="ad-btn ad-btn--outline ad-btn--sm" data-payment-id="${p.id}">Receipt</button></td>`;
+        tr.querySelector("[data-payment-id]")?.addEventListener("click", () => openPaymentReceipt(p));
         tbody.appendChild(tr);
       });
 
@@ -1809,53 +1969,89 @@
     const cancelBtn = $("cancelAnnouncementBtn");
     const saveBtn   = $("saveAnnouncementBtn");
 
+    ["anTitle", "anBody"].forEach((id) => { if ($(id)) $(id).required = true; });
+
     createBtn && createBtn.addEventListener("click", () => { card.hidden = false; card.scrollIntoView({ behavior: "smooth" }); });
     cancelBtn && cancelBtn.addEventListener("click", () => { card.hidden = true; });
     saveBtn   && saveBtn.addEventListener("click",   saveAnnouncement);
+    card && card.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" || e.target.tagName === "TEXTAREA") return;
+      e.preventDefault();
+      saveBtn && saveBtn.click();
+    });
   }
 
-  function setupSystemSettings() {
-    const brandingBtn = $("saveBrandingBtn");
-    const emailBtn    = $("saveEmailSettingsBtn");
-    const brandingMsg = $("brandingMsg");
-    const BRANDING_KEY = "lms_admin_branding_settings";
-    const EMAIL_KEY    = "lms_admin_email_settings";
-
+  async function loadSystemSettings() {
+    if (!window.lmsSupabase || !currentProfile?.id) return;
     try {
-      const brandingSettings = JSON.parse(localStorage.getItem(BRANDING_KEY) || "{}");
+      const { data } = await window.lmsSupabase
+        .from("activity_logs")
+        .select("metadata")
+        .eq("user_id", currentProfile.id)
+        .eq("action", "admin_settings_saved")
+        .eq("entity_type", "system_settings")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const brandingSettings = data?.metadata?.brandingSettings || {};
       if (brandingSettings.platformName && $("settPlatformName")) $("settPlatformName").value = brandingSettings.platformName;
       if (brandingSettings.timezone && $("settDefaultTimezone")) $("settDefaultTimezone").value = brandingSettings.timezone;
       if (brandingSettings.language && $("settDefaultLang")) $("settDefaultLang").value = brandingSettings.language;
 
-      const emailSettings = JSON.parse(localStorage.getItem(EMAIL_KEY) || "{}");
+      const emailSettings = data?.metadata?.emailSettings || {};
       if (typeof emailSettings.newEnroll === "boolean" && $("emailNewEnroll")) $("emailNewEnroll").checked = emailSettings.newEnroll;
       if (typeof emailSettings.submission === "boolean" && $("emailSubmission")) $("emailSubmission").checked = emailSettings.submission;
       if (typeof emailSettings.graded === "boolean" && $("emailGraded")) $("emailGraded").checked = emailSettings.graded;
       if (typeof emailSettings.certificate === "boolean" && $("emailCertificate")) $("emailCertificate").checked = emailSettings.certificate;
       if (typeof emailSettings.reminder === "boolean" && $("emailReminder")) $("emailReminder").checked = emailSettings.reminder;
     } catch {}
+  }
 
-    brandingBtn && brandingBtn.addEventListener("click", () => {
-      localStorage.setItem(BRANDING_KEY, JSON.stringify({
-        platformName: $("settPlatformName")?.value.trim() || "",
-        timezone: $("settDefaultTimezone")?.value || "",
-        language: $("settDefaultLang")?.value || ""
-      }));
-      if (brandingMsg) {
-        brandingMsg.textContent = "Settings saved.";
-        brandingMsg.style.color = "var(--sd-green)";
+  function setupSystemSettings() {
+    const brandingBtn = $("saveBrandingBtn");
+    const emailBtn    = $("saveEmailSettingsBtn");
+    const brandingMsg = $("brandingMsg");
+
+    const saveSettings = async () => {
+      if (!window.lmsSupabase || !currentProfile?.id) return;
+      try {
+        const { error } = await window.lmsSupabase
+          .from("activity_logs")
+          .insert({
+            user_id: currentProfile.id,
+            action: "admin_settings_saved",
+            entity_type: "system_settings",
+            metadata: {
+              brandingSettings: {
+                platformName: $("settPlatformName")?.value.trim() || "",
+                timezone: $("settDefaultTimezone")?.value || "",
+                language: $("settDefaultLang")?.value || ""
+              },
+              emailSettings: {
+                newEnroll: $("emailNewEnroll")?.checked || false,
+                submission: $("emailSubmission")?.checked || false,
+                graded: $("emailGraded")?.checked || false,
+                certificate: $("emailCertificate")?.checked || false,
+                reminder: $("emailReminder")?.checked || false
+              }
+            }
+          });
+        if (error) throw error;
+        if (brandingMsg) {
+          brandingMsg.textContent = "Settings saved.";
+          brandingMsg.style.color = "var(--sd-green)";
+        }
+      } catch (err) {
+        if (brandingMsg) {
+          brandingMsg.textContent = "Error: " + (err.message || "Save failed");
+          brandingMsg.style.color = "var(--sd-red)";
+        }
       }
-    });
+    };
 
-    emailBtn && emailBtn.addEventListener("click", () => {
-      localStorage.setItem(EMAIL_KEY, JSON.stringify({
-        newEnroll: $("emailNewEnroll")?.checked || false,
-        submission: $("emailSubmission")?.checked || false,
-        graded: $("emailGraded")?.checked || false,
-        certificate: $("emailCertificate")?.checked || false,
-        reminder: $("emailReminder")?.checked || false
-      }));
-    });
+    brandingBtn && brandingBtn.addEventListener("click", saveSettings);
+    emailBtn && emailBtn.addEventListener("click", saveSettings);
   }
 
   function setupUserManagement() {
@@ -2292,6 +2488,8 @@
     const saveBtn = $("saveAnnouncementBtn");
     const title   = $("anTitle")?.value.trim();
     const body    = $("anBody")?.value.trim();
+    const annFields = ["anTitle", "anBody"].map((id) => $(id)).filter(Boolean);
+    if (annFields.some((field) => !field.reportValidity())) return;
 
     if (!title || !body) {
       if (msg) { msg.textContent = "Title and content are required"; msg.style.color = "var(--sd-red)"; }
@@ -2376,6 +2574,47 @@
     } catch (err) { console.warn("Announcements load error:", err.message); }
   }
 
+  function openPaymentReceipt(payment) {
+    if (!payment) return;
+    const receiptWin = window.open("", "_blank", "width=720,height=820");
+    if (!receiptWin) return;
+    const amount = formatCurrency(parseFloat(payment.amount || 0), payment.currency || "IDR");
+    const paidAt = payment.paid_at ? formatDT(payment.paid_at) : "—";
+    const status = payment.payment_plan === "installment"
+      ? `Installment ${parseInt(payment.installment_paid || 0, 10)}/${parseInt(payment.installment_total || 0, 10)}`
+      : (payment.status || "—");
+    receiptWin.document.write(`<!DOCTYPE html>
+<html><head><title>Receipt</title></head><body style="font-family:Arial,sans-serif;padding:32px;color:#111;">
+  <h1 style="margin:0 0 24px;">Payment Receipt</h1>
+  <p><strong>Receipt ID:</strong> ${escHtml(payment.id || "—")}</p>
+  <p><strong>Student:</strong> ${escHtml(payment.profiles?.full_name || "—")}</p>
+  <p><strong>Course:</strong> ${escHtml(payment.courses?.title || "—")}</p>
+  <p><strong>Method:</strong> ${escHtml(payment.payment_method || "Manual")}</p>
+  <p><strong>Amount:</strong> ${escHtml(amount)}</p>
+  <p><strong>Status:</strong> ${escHtml(status)}</p>
+  <p><strong>Paid At:</strong> ${escHtml(paidAt)}</p>
+</body></html>`);
+    receiptWin.document.close();
+    receiptWin.focus();
+    receiptWin.print();
+  }
+
+  async function openStudentMessage(studentId) {
+    if (!studentId) return;
+    try {
+      const { data, error } = await window.lmsSupabase
+        .from("profiles")
+        .select("email")
+        .eq("id", studentId)
+        .single();
+      if (error) throw error;
+      if (!data?.email) throw new Error("Student email not found");
+      window.location.href = "mailto:" + data.email;
+    } catch (err) {
+      alert("Message failed: " + err.message);
+    }
+  }
+
   /* ================================================================
      NOTIFICATIONS
   ================================================================ */
@@ -2440,6 +2679,36 @@
       .subscribe();
   }
 
+  function runAdminSearch(query) {
+    const needle = String(query || "").trim().toLowerCase();
+    if (!needle) return;
+
+    const sections = Array.from(document.querySelectorAll(".ad-section"));
+    const matchSection = sections.find((section) => (section.textContent || "").toLowerCase().includes(needle));
+    if (!matchSection) return;
+
+    const sectionId = matchSection.id.replace(/^section-/, "");
+    if (window._adActivateSection) window._adActivateSection(sectionId);
+
+    requestAnimationFrame(() => {
+      const targetSection = document.getElementById("section-" + sectionId);
+      if (!targetSection) return;
+      const candidates = targetSection.querySelectorAll("h1,h2,h3,p,button,a,label,td,th,div");
+      const matchEl = Array.from(candidates).find((el) => (el.textContent || "").toLowerCase().includes(needle));
+      if (matchEl) matchEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }
+
+  function toSafeUiUrl(value) {
+    if (!value) return "";
+    try {
+      const parsed = new URL(value, window.location.origin);
+      return parsed.protocol === "http:" || parsed.protocol === "https:" ? parsed.href : "";
+    } catch {
+      return "";
+    }
+  }
+
   /* ================================================================
      TOPBAR NOTIFICATIONS
   ================================================================ */
@@ -2479,6 +2748,12 @@
       });
     });
   }
+
+  document.addEventListener("click", (e) => {
+    const msgBtn = e.target.closest("[data-student-id]");
+    if (!msgBtn) return;
+    openStudentMessage(msgBtn.dataset.studentId);
+  });
 
 })();
 

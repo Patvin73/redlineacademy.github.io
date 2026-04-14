@@ -68,7 +68,7 @@
     if (profile.role === "student") {
       const nameEl  = document.getElementById("studentName");
       const emailEl = document.getElementById("studentEmail");
-      const idEl    = document.getElementById("studentId");
+      const idEl    = document.getElementById("profileCardId");
 
       if (nameEl)  nameEl.textContent  = profile.full_name  || "-";
       if (idEl)    idEl.textContent    = profile.student_id || "-";
@@ -79,10 +79,8 @@
     if (profile.role === "admin" || profile.role === "trainer") {
       const nameEl  = document.getElementById("adminName");
       const emailEl = document.getElementById("adminEmail");
-      const idEl    = document.getElementById("adminId");
 
       if (nameEl)  nameEl.textContent  = profile.full_name || "-";
-      if (idEl)    idEl.textContent    = profile.admin_id  || "-";
       if (emailEl) emailEl.textContent = profile.email || user.email || "-";
 
       if (profile.role === "admin") {

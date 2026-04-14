@@ -144,6 +144,7 @@
   /* ── State ──────────────────────────────────────────────────────── */
   let currentStudentProfile = null;
   let currentSection = "home";
+  let fullScheduleCache = [];
 
   /* ── DOM refs ───────────────────────────────────────────────────── */
   const $ = (id) => document.getElementById(id);
@@ -302,8 +303,8 @@
     searchInput && searchInput.addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
       const query = searchInput.value.trim();
-      if (!query || typeof window.find !== "function") return;
-      window.find(query, false, false, true);
+      if (!query) return;
+      runDashboardSearch(query);
     });
 
     const openProfile = () => {
@@ -318,8 +319,35 @@
       }
     });
 
-    newMessageBtn && newMessageBtn.addEventListener("click", () => {
-      window.location.href = "mailto:";
+    newMessageBtn && newMessageBtn.addEventListener("click", async () => {
+      if (!currentStudentProfile?.id || !window.lmsSupabase) return;
+      const subject = window.prompt("Subject");
+      if (subject === null) return;
+      const body = window.prompt("Message");
+      if (body === null) return;
+      if (!subject.trim() || !body.trim()) return;
+
+      const { data: enrollments } = await window.lmsSupabase
+        .from("enrollments")
+        .select("courses!inner(trainer_id)")
+        .eq("student_id", currentStudentProfile.id)
+        .eq("status", "active")
+        .limit(1);
+
+      const recipientId = enrollments?.[0]?.courses?.trainer_id;
+      if (!recipientId) return;
+
+      const { error } = await window.lmsSupabase
+        .from("messages")
+        .insert({
+          sender_id: currentStudentProfile.id,
+          recipient_id: recipientId,
+          subject: subject.trim(),
+          body: body.trim()
+        });
+      if (error) return;
+      if (window._sdActivateSection) window._sdActivateSection("messages");
+      await loadMessages(currentStudentProfile.id);
     });
 
     resourceSearch && resourceSearch.addEventListener("input", () => {
@@ -348,6 +376,7 @@
           btn.classList.add("active");
           const container = group.closest(".sd-schedule-full");
           if (container) container.dataset.view = btn.dataset.view || "";
+          renderFullSchedule();
         });
       });
     });
@@ -533,8 +562,15 @@
   function setupProfileForm() {
     const saveBtn = $("saveProfileBtn");
     const msgEl   = $("profileMsg");
+    const formWrap = document.querySelector(".sd-profile-form");
 
     if (!saveBtn) return;
+
+    formWrap && formWrap.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" || e.target.tagName === "TEXTAREA") return;
+      e.preventDefault();
+      saveBtn.click();
+    });
 
     saveBtn.addEventListener("click", async () => {
       if (!currentStudentProfile || !window.lmsSupabase) return;
@@ -828,7 +864,7 @@
 
       const course  = data.courses;
       const pct     = Math.round(data.completion_percent || 0);
-      const thumbSrc = course.thumbnail_url || "";
+      const thumbSrc = toSafeUiUrl(course.thumbnail_url) || "";
 
       container.innerHTML = `
         <div class="sd-continue-item">
@@ -953,7 +989,7 @@
           : "sd-status-badge--active";
         const progress = Math.round(progressMap.get(enroll.course_id) || 0);
         const progressLabel = typeof t === "function" ? t("lmsProgress") : "Progress";
-        const thumbSrc = course.thumbnail_url || "";
+        const thumbSrc = toSafeUiUrl(course.thumbnail_url) || "";
         const category = course.category_id || "Course";
         const trainer = "Redline Academy";
 
@@ -1178,8 +1214,8 @@
             <p class="sd-schedule-item__title">${escHtml(event.title)}</p>
             <p class="sd-schedule-item__time">${formatDateTime(event.start_datetime)}</p>
           </div>
-          ${event.meeting_url
-            ? `<a href="${escHtml(event.meeting_url)}" target="_blank" rel="noopener" class="sd-btn sd-btn--outline sd-btn--sm">Join</a>`
+          ${toSafeUiUrl(event.meeting_url)
+            ? `<a href="${escHtml(toSafeUiUrl(event.meeting_url))}" target="_blank" rel="noopener" class="sd-btn sd-btn--outline sd-btn--sm">Join</a>`
             : ""}
         `;
         list.insertBefore(li, empty);
@@ -1214,33 +1250,108 @@
       if (error) throw error;
       if (!data || data.length === 0) throw new Error("No schedule");
 
-      if (empty) empty.style.display = "none";
-      list.querySelectorAll(".sd-schedule-item").forEach((el) => el.remove());
-
-      data.forEach((event) => {
-        const typeClass = {
-          live_session: "sd-schedule-item--live",
-          exam: "sd-schedule-item--exam",
-          orientation: "sd-schedule-item--live",
-        }[event.event_type] || "sd-schedule-item--deadline";
-
-        const item = document.createElement("div");
-        item.className = `sd-schedule-item ${typeClass}`;
-        item.innerHTML = `
-          <span class="sd-schedule-item__dot"></span>
-          <div class="sd-schedule-item__info">
-            <p class="sd-schedule-item__title">${escHtml(event.title || "Event")}</p>
-            <p class="sd-schedule-item__time">${formatDateTime(event.start_datetime)}${event.end_datetime ? ` - ${formatDateTime(event.end_datetime)}` : ""}</p>
-          </div>
-          ${event.meeting_url
-            ? `<a href="${escHtml(event.meeting_url)}" target="_blank" rel="noopener" class="sd-btn sd-btn--outline sd-btn--sm">Join</a>`
-            : ""}
-        `;
-        list.insertBefore(item, empty);
-      });
+      fullScheduleCache = data;
+      renderFullSchedule();
     } catch {
+      fullScheduleCache = [];
       if (empty) empty.style.display = "flex";
     }
+  }
+
+  function renderFullSchedule() {
+    const container = $("scheduleFullContent");
+    const list = $("scheduleFullList");
+    const empty = $("scheduleFullEmpty");
+    if (!list) return;
+
+    list.querySelectorAll("[data-schedule-render='true']").forEach((el) => el.remove());
+
+    if (!fullScheduleCache.length) {
+      if (empty) empty.style.display = "flex";
+      return;
+    }
+
+    if (empty) empty.style.display = "none";
+
+    if ((container?.dataset.view || "list") === "calendar") {
+      const baseDate = new Date(fullScheduleCache[0]?.start_datetime || Date.now());
+      const monthStart = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+      const monthEnd = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0);
+      const startWeekday = (monthStart.getDay() + 6) % 7;
+      const totalCells = Math.ceil((startWeekday + monthEnd.getDate()) / 7) * 7;
+      const eventMap = new Map();
+
+      fullScheduleCache.forEach((event) => {
+        const key = new Date(event.start_datetime).toISOString().slice(0, 10);
+        if (!eventMap.has(key)) eventMap.set(key, []);
+        eventMap.get(key).push(event);
+      });
+
+      const calendar = document.createElement("div");
+      calendar.dataset.scheduleRender = "true";
+      calendar.style.display = "grid";
+      calendar.style.gridTemplateColumns = "repeat(7, minmax(0, 1fr))";
+      calendar.style.gap = ".75rem";
+
+      for (let cellIndex = 0; cellIndex < totalCells; cellIndex++) {
+        const dayNumber = cellIndex - startWeekday + 1;
+        const cell = document.createElement("div");
+        cell.dataset.scheduleRender = "true";
+        cell.style.border = "1px solid var(--sd-border)";
+        cell.style.borderRadius = "var(--sd-radius-md)";
+        cell.style.padding = ".6rem";
+        cell.style.minHeight = "120px";
+        cell.style.background = "#fff";
+
+        if (dayNumber < 1 || dayNumber > monthEnd.getDate()) {
+          cell.style.opacity = ".35";
+          calendar.appendChild(cell);
+          continue;
+        }
+
+        const date = new Date(baseDate.getFullYear(), baseDate.getMonth(), dayNumber);
+        const key = date.toISOString().slice(0, 10);
+        const dayEvents = eventMap.get(key) || [];
+
+        cell.innerHTML = `<div style="font-weight:700;margin-bottom:.5rem;">${dayNumber}</div>`;
+        dayEvents.forEach((event) => {
+          const item = document.createElement("div");
+          item.style.fontSize = ".78rem";
+          item.style.lineHeight = "1.35";
+          item.style.marginBottom = ".45rem";
+          item.innerHTML = `<strong>${escHtml(event.title || "Event")}</strong><br>${escHtml(formatDateTime(event.start_datetime))}`;
+          cell.appendChild(item);
+        });
+
+        calendar.appendChild(cell);
+      }
+
+      list.insertBefore(calendar, empty);
+      return;
+    }
+
+    fullScheduleCache.forEach((event) => {
+      const typeClass = {
+        live_session: "sd-schedule-item--live",
+        exam: "sd-schedule-item--exam",
+        orientation: "sd-schedule-item--live",
+      }[event.event_type] || "sd-schedule-item--deadline";
+
+      const item = document.createElement("div");
+      item.dataset.scheduleRender = "true";
+      item.className = `sd-schedule-item ${typeClass}`;
+      item.innerHTML = `
+        <span class="sd-schedule-item__dot"></span>
+        <div class="sd-schedule-item__info">
+          <p class="sd-schedule-item__title">${escHtml(event.title || "Event")}</p>
+          <p class="sd-schedule-item__time">${formatDateTime(event.start_datetime)}${event.end_datetime ? ` - ${formatDateTime(event.end_datetime)}` : ""}</p>
+        </div>
+        ${toSafeUiUrl(event.meeting_url)
+          ? `<a href="${escHtml(toSafeUiUrl(event.meeting_url))}" target="_blank" rel="noopener" class="sd-btn sd-btn--outline sd-btn--sm">Join</a>`
+          : ""}
+      `;
+      list.insertBefore(item, empty);
+    });
   }
 
   async function loadCertificates(userId) {
@@ -1274,7 +1385,7 @@
             <h3 class="sd-course-card__title">${escHtml(cert.courses?.title || "Course Certificate")}</h3>
             <p class="sd-course-card__trainer">${escHtml(formatDateTime(cert.issued_at))}</p>
             <div class="sd-course-card__footer">
-              ${cert.file_url ? `<a href="${escHtml(cert.file_url)}" target="_blank" rel="noopener" class="sd-btn sd-btn--outline sd-btn--sm">Open</a>` : ""}
+              ${toSafeUiUrl(cert.file_url) ? `<a href="${escHtml(toSafeUiUrl(cert.file_url))}" target="_blank" rel="noopener" class="sd-btn sd-btn--outline sd-btn--sm">Open</a>` : ""}
             </div>
           </div>`;
         grid.appendChild(card);
@@ -1389,7 +1500,7 @@
 
       const { data, error } = await window.lmsSupabase
         .from("courses")
-        .select("id, title, thumbnail_url, category_id")
+        .select("id, title, thumbnail_url, category_id, categories(id, name)")
         .in("id", courseIds)
         .order("title", { ascending: true });
 
@@ -1402,16 +1513,16 @@
       data.forEach((course) => {
         const card = document.createElement("div");
         card.setAttribute("data-resource-card", "true");
-        card.dataset.category = (course.category_id || "all").toLowerCase();
+        card.dataset.category = String(course.categories?.id || course.category_id || "all").toLowerCase();
         card.className = "sd-course-card";
         card.innerHTML = `
           <div class="sd-course-card__thumb">
-            ${course.thumbnail_url
-              ? `<img src="${escHtml(course.thumbnail_url)}" alt="${escHtml(course.title || "Resource")}" loading="lazy" />`
+            ${toSafeUiUrl(course.thumbnail_url)
+              ? `<img src="${escHtml(toSafeUiUrl(course.thumbnail_url))}" alt="${escHtml(course.title || "Resource")}" loading="lazy" />`
               : `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>`}
           </div>
           <div class="sd-course-card__body">
-            <p class="sd-course-card__category">${escHtml(course.category_id || "Course")}</p>
+            <p class="sd-course-card__category">${escHtml(course.categories?.name || course.category_id || "Course")}</p>
             <h3 class="sd-course-card__title">${escHtml(course.title || "Resource")}</h3>
             <p class="sd-course-card__trainer">Redline Academy</p>
           </div>`;
@@ -1556,6 +1667,36 @@
       hour:    "2-digit",
       minute:  "2-digit",
     });
+  }
+
+  function runDashboardSearch(query) {
+    const needle = String(query || "").trim().toLowerCase();
+    if (!needle) return;
+
+    const sections = Array.from(document.querySelectorAll(".sd-section"));
+    const matchSection = sections.find((section) => (section.textContent || "").toLowerCase().includes(needle));
+    if (!matchSection) return;
+
+    const sectionId = matchSection.id.replace(/^section-/, "");
+    if (window._sdActivateSection) window._sdActivateSection(sectionId);
+
+    requestAnimationFrame(() => {
+      const targetSection = document.getElementById("section-" + sectionId);
+      if (!targetSection) return;
+      const candidates = targetSection.querySelectorAll("h1,h2,h3,p,button,a,label,td,th,div");
+      const matchEl = Array.from(candidates).find((el) => (el.textContent || "").toLowerCase().includes(needle));
+      if (matchEl) matchEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }
+
+  function toSafeUiUrl(value) {
+    if (!value) return "";
+    try {
+      const parsed = new URL(value, window.location.origin);
+      return parsed.protocol === "http:" || parsed.protocol === "https:" ? parsed.href : "";
+    } catch {
+      return "";
+    }
   }
 
 })();
