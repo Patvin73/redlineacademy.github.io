@@ -155,6 +155,7 @@
     setupSidebar();
     setupNavigation();
     setupTopbar();
+    setupInteractiveControls();
     setupNotificationPanel();
     setupAccordion();
     setupAvatarUpload();
@@ -289,6 +290,66 @@
         e.preventDefault();
         notifBtn.click();
       }
+    });
+  }
+
+  function setupInteractiveControls() {
+    const searchInput = $("sdSearchInput");
+    const profileBtn = $("topbarProfileBtn");
+    const newMessageBtn = $("newMessageBtn");
+    const resourceSearch = $("resourceSearch");
+
+    searchInput && searchInput.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      const query = searchInput.value.trim();
+      if (!query || typeof window.find !== "function") return;
+      window.find(query, false, false, true);
+    });
+
+    const openProfile = () => {
+      if (window._sdActivateSection) window._sdActivateSection("profile");
+    };
+
+    profileBtn && profileBtn.addEventListener("click", openProfile);
+    profileBtn && profileBtn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openProfile();
+      }
+    });
+
+    newMessageBtn && newMessageBtn.addEventListener("click", () => {
+      window.location.href = "mailto:";
+    });
+
+    resourceSearch && resourceSearch.addEventListener("input", () => {
+      const query = resourceSearch.value.trim().toLowerCase();
+      const grid = $("resourceGrid");
+      const empty = $("resourceEmpty");
+      if (!grid) return;
+
+      let visible = 0;
+      Array.from(grid.children).forEach((item) => {
+        if (item.id === "resourceEmpty") return;
+        const match = !query || (item.textContent || "").toLowerCase().includes(query);
+        item.style.display = match ? "" : "none";
+        if (match) visible++;
+      });
+
+      if (empty && grid.children.length > 1) {
+        empty.style.display = visible ? "none" : "flex";
+      }
+    });
+
+    document.querySelectorAll(".sd-view-toggle").forEach((group) => {
+      group.querySelectorAll(".sd-view-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          group.querySelectorAll(".sd-view-btn").forEach((item) => item.classList.remove("active"));
+          btn.classList.add("active");
+          const container = group.closest(".sd-schedule-full");
+          if (container) container.dataset.view = btn.dataset.view || "";
+        });
+      });
     });
   }
 
@@ -533,6 +594,14 @@
       const newPw   = $("pfNewPw")?.value;
       const confirm = $("pfConfirmPw")?.value;
 
+      if (!current) {
+        if (pwMsgEl) {
+          pwMsgEl.textContent = "Current password is required";
+          pwMsgEl.className = "sd-profile-form__msg error";
+        }
+        return;
+      }
+
       if (!newPw || newPw !== confirm) {
         if (pwMsgEl) {
           pwMsgEl.textContent = "Passwords do not match";
@@ -552,6 +621,12 @@
       changePwBtn.disabled = true;
 
       try {
+        const { error: verifyError } = await window.lmsSupabase.auth.signInWithPassword({
+          email: currentStudentProfile?.email || "",
+          password: current,
+        });
+        if (verifyError) throw verifyError;
+
         const { error } = await window.lmsSupabase.auth.updateUser({ password: newPw });
         if (error) throw error;
 
@@ -619,6 +694,10 @@
         loadCourseGrid(user.id),
         loadAssignments(user.id),
         loadUpcomingSchedule(user.id),
+        loadFullSchedule(user.id),
+        loadCertificates(user.id),
+        loadMessages(user.id),
+        loadResources(user.id),
         loadActivityFeed(user.id),
         loadNotifications(user.id),
       ]);
@@ -1107,6 +1186,245 @@
       });
     } catch {
       if (empty) empty.style.display = "block";
+    }
+  }
+
+  async function loadFullSchedule(userId) {
+    const list  = $("scheduleFullList");
+    const empty = $("scheduleFullEmpty");
+    if (!list) return;
+
+    try {
+      const { data: enrollments } = await window.lmsSupabase
+        .from("enrollments")
+        .select("course_id")
+        .eq("student_id", userId)
+        .eq("status", "active");
+
+      const courseIds = (enrollments || []).map((e) => e.course_id).filter(Boolean);
+      if (courseIds.length === 0) throw new Error("No enrollments");
+
+      const { data, error } = await window.lmsSupabase
+        .from("schedules")
+        .select("id, title, event_type, start_datetime, end_datetime, meeting_url")
+        .in("course_id", courseIds)
+        .order("start_datetime", { ascending: true })
+        .limit(20);
+
+      if (error) throw error;
+      if (!data || data.length === 0) throw new Error("No schedule");
+
+      if (empty) empty.style.display = "none";
+      list.querySelectorAll(".sd-schedule-item").forEach((el) => el.remove());
+
+      data.forEach((event) => {
+        const typeClass = {
+          live_session: "sd-schedule-item--live",
+          exam: "sd-schedule-item--exam",
+          orientation: "sd-schedule-item--live",
+        }[event.event_type] || "sd-schedule-item--deadline";
+
+        const item = document.createElement("div");
+        item.className = `sd-schedule-item ${typeClass}`;
+        item.innerHTML = `
+          <span class="sd-schedule-item__dot"></span>
+          <div class="sd-schedule-item__info">
+            <p class="sd-schedule-item__title">${escHtml(event.title || "Event")}</p>
+            <p class="sd-schedule-item__time">${formatDateTime(event.start_datetime)}${event.end_datetime ? ` - ${formatDateTime(event.end_datetime)}` : ""}</p>
+          </div>
+          ${event.meeting_url
+            ? `<a href="${escHtml(event.meeting_url)}" target="_blank" rel="noopener" class="sd-btn sd-btn--outline sd-btn--sm">Join</a>`
+            : ""}
+        `;
+        list.insertBefore(item, empty);
+      });
+    } catch {
+      if (empty) empty.style.display = "flex";
+    }
+  }
+
+  async function loadCertificates(userId) {
+    const grid = $("certGrid");
+    const empty = $("certEmpty");
+    if (!grid) return;
+
+    try {
+      const { data, error } = await window.lmsSupabase
+        .from("certificates")
+        .select("id, certificate_no, issued_at, file_url, courses(title)")
+        .eq("student_id", userId)
+        .order("issued_at", { ascending: false });
+
+      if (error) throw error;
+      if (!data || data.length === 0) throw new Error("No certificates");
+
+      if (empty) empty.style.display = "none";
+      grid.querySelectorAll("[data-cert-card='true']").forEach((el) => el.remove());
+
+      data.forEach((cert) => {
+        const card = document.createElement("div");
+        card.setAttribute("data-cert-card", "true");
+        card.className = "sd-course-card";
+        card.innerHTML = `
+          <div class="sd-course-card__thumb">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="6" /><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" /></svg>
+          </div>
+          <div class="sd-course-card__body">
+            <p class="sd-course-card__category">${escHtml(cert.certificate_no || "Certificate")}</p>
+            <h3 class="sd-course-card__title">${escHtml(cert.courses?.title || "Course Certificate")}</h3>
+            <p class="sd-course-card__trainer">${escHtml(formatDateTime(cert.issued_at))}</p>
+            <div class="sd-course-card__footer">
+              ${cert.file_url ? `<a href="${escHtml(cert.file_url)}" target="_blank" rel="noopener" class="sd-btn sd-btn--outline sd-btn--sm">Open</a>` : ""}
+            </div>
+          </div>`;
+        grid.appendChild(card);
+      });
+    } catch {
+      if (empty) empty.style.display = "flex";
+    }
+  }
+
+  async function loadMessages(userId) {
+    const inbox = $("inboxList");
+    const inboxEmpty = $("inboxEmpty");
+    const view = $("messageView");
+    const viewEmpty = $("messageViewEmpty");
+    if (!inbox || !view) return;
+
+    const openMessage = async (msg) => {
+      if (viewEmpty) viewEmpty.style.display = "none";
+      view.innerHTML = `
+        <div class="sd-message-view__body">
+          <p class="sd-inbox-item__name">${escHtml(msg.profiles?.full_name || "System")}</p>
+          <p class="sd-inbox-item__time">${formatDateTime(msg.created_at)}</p>
+          <h3>${escHtml(msg.subject || "Message")}</h3>
+          <p>${escHtml(msg.body || "—").replace(/\n/g, "<br>")}</p>
+        </div>`;
+
+      if (!msg.is_read && msg.recipient_id === userId) {
+        await window.lmsSupabase
+          .from("messages")
+          .update({ is_read: true })
+          .eq("id", msg.id)
+          .catch(() => {});
+      }
+    };
+
+    try {
+      const { data, error } = await window.lmsSupabase
+        .from("messages")
+        .select("id, sender_id, recipient_id, subject, body, is_read, created_at, profiles!sender_id(full_name, avatar_url)")
+        .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+      if (!data || data.length === 0) throw new Error("No messages");
+
+      if (inboxEmpty) inboxEmpty.style.display = "none";
+      inbox.querySelectorAll(".sd-inbox-item").forEach((el) => el.remove());
+
+      data.forEach((msg) => {
+        const item = document.createElement("div");
+        item.className = `sd-inbox-item${msg.is_read ? "" : " unread"}`;
+        item.innerHTML = `
+          <div class="sd-avatar sd-avatar--sm">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          </div>
+          <div class="sd-inbox-item__body">
+            <p class="sd-inbox-item__name">${escHtml(msg.profiles?.full_name || "System")}</p>
+            <p class="sd-inbox-item__preview">${escHtml(msg.body?.substring(0, 60) || "—")}</p>
+          </div>
+          <span class="sd-inbox-item__time">${timeAgo(msg.created_at)}</span>`;
+        item.addEventListener("click", async () => {
+          inbox.querySelectorAll(".sd-inbox-item").forEach((el) => el.classList.remove("active"));
+          item.classList.add("active");
+          item.classList.remove("unread");
+          await openMessage(msg);
+        });
+        inbox.insertBefore(item, inboxEmpty);
+      });
+    } catch {
+      if (inboxEmpty) inboxEmpty.style.display = "flex";
+    }
+  }
+
+  async function loadResources(userId) {
+    const grid = $("resourceGrid");
+    const empty = $("resourceEmpty");
+    const tabs = $("resourceCategoryTabs");
+    if (!grid) return;
+
+    const applyResourceFilter = () => {
+      const query = ($("resourceSearch")?.value || "").trim().toLowerCase();
+      const activeTab = tabs?.querySelector(".sd-filter-tab.active");
+      const activeCategory = activeTab?.dataset.category || "all";
+      let visible = 0;
+
+      grid.querySelectorAll("[data-resource-card='true']").forEach((card) => {
+        const text = (card.textContent || "").toLowerCase();
+        const category = card.dataset.category || "";
+        const matchesQuery = !query || text.includes(query);
+        const matchesCategory = activeCategory === "all" || category === activeCategory;
+        const show = matchesQuery && matchesCategory;
+        card.style.display = show ? "" : "none";
+        if (show) visible++;
+      });
+
+      if (empty && grid.querySelectorAll("[data-resource-card='true']").length) {
+        empty.style.display = visible ? "none" : "flex";
+      }
+    };
+
+    try {
+      const { data: enrollments, error: enrollErr } = await window.lmsSupabase
+        .from("enrollments")
+        .select("course_id")
+        .eq("student_id", userId)
+        .eq("status", "active");
+
+      if (enrollErr) throw enrollErr;
+      const courseIds = (enrollments || []).map((e) => e.course_id).filter(Boolean);
+      if (courseIds.length === 0) throw new Error("No enrollments");
+
+      const { data, error } = await window.lmsSupabase
+        .from("courses")
+        .select("id, title, thumbnail_url, category_id")
+        .in("id", courseIds)
+        .order("title", { ascending: true });
+
+      if (error) throw error;
+      if (!data || data.length === 0) throw new Error("No resources");
+
+      if (empty) empty.style.display = "none";
+      grid.querySelectorAll("[data-resource-card='true']").forEach((el) => el.remove());
+
+      data.forEach((course) => {
+        const card = document.createElement("div");
+        card.setAttribute("data-resource-card", "true");
+        card.dataset.category = (course.category_id || "all").toLowerCase();
+        card.className = "sd-course-card";
+        card.innerHTML = `
+          <div class="sd-course-card__thumb">
+            ${course.thumbnail_url
+              ? `<img src="${escHtml(course.thumbnail_url)}" alt="${escHtml(course.title || "Resource")}" loading="lazy" />`
+              : `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>`}
+          </div>
+          <div class="sd-course-card__body">
+            <p class="sd-course-card__category">${escHtml(course.category_id || "Course")}</p>
+            <h3 class="sd-course-card__title">${escHtml(course.title || "Resource")}</h3>
+            <p class="sd-course-card__trainer">Redline Academy</p>
+          </div>`;
+        grid.appendChild(card);
+      });
+
+      if (tabs && !tabs.dataset.bound) {
+        tabs.dataset.bound = "true";
+        tabs.addEventListener("sd:filter-change", applyResourceFilter);
+      }
+      applyResourceFilter();
+    } catch {
+      if (empty) empty.style.display = "flex";
     }
   }
 

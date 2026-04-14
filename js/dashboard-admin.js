@@ -403,6 +403,7 @@
   document.addEventListener("DOMContentLoaded", async () => {
     setupSidebar();
     setupNavigation();
+    setupTopbarActions();
     setupTopbarNotifications();
     setupCourseBuilder();
     setupGradingPanel();
@@ -411,6 +412,7 @@
     setupManualPaymentForm();
     setupBuilderTabs();
     setupUserManagement();
+    setupSystemSettings();
     setupFilterTabs();
     setWelcomeDate();
 
@@ -471,6 +473,68 @@
     navItems.forEach((btn) => btn.addEventListener("click", () => activate(btn.dataset.section)));
 
     window._adActivateSection = activate;
+  }
+
+  function setupTopbarActions() {
+    const profileBtn = $("adTopbarProfileBtn");
+    const searchInput = $("adSearchInput");
+    const newMsgBtn = $("adNewMsgBtn");
+    const exportReportBtn = $("exportReportBtn");
+    const exportPaymentsBtn = $("exportPaymentsBtn");
+
+    const openSettings = () => {
+      if (window._adActivateSection) window._adActivateSection("settings");
+    };
+
+    profileBtn && profileBtn.addEventListener("click", openSettings);
+    profileBtn && profileBtn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openSettings();
+      }
+    });
+
+    searchInput && searchInput.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      const query = searchInput.value.trim();
+      if (!query || typeof window.find !== "function") return;
+      window.find(query, false, false, true);
+    });
+
+    newMsgBtn && newMsgBtn.addEventListener("click", () => {
+      window.location.href = "mailto:";
+    });
+
+    exportReportBtn && exportReportBtn.addEventListener("click", () => {
+      exportTableToCsv($("courseOverviewBody")?.closest("table"), "reports.csv");
+    });
+
+    exportPaymentsBtn && exportPaymentsBtn.addEventListener("click", () => {
+      exportTableToCsv($("enrollmentTableBody")?.closest("table"), "payments.csv");
+    });
+  }
+
+  function exportTableToCsv(table, filename) {
+    if (!table) return;
+
+    const rows = Array.from(table.querySelectorAll("tr"))
+      .filter((row) => row.style.display !== "none")
+      .map((row) => Array.from(row.querySelectorAll("th, td"))
+        .map((cell) => `"${(cell.textContent || "").replace(/\s+/g, " ").trim().replace(/"/g, '""')}"`)
+        .join(","))
+      .join("\n");
+
+    if (!rows) return;
+
+    const blob = new Blob([rows], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
   }
 
   /* ── Lazy load by section ────────────────────────────────────── */
@@ -1748,6 +1812,50 @@
     createBtn && createBtn.addEventListener("click", () => { card.hidden = false; card.scrollIntoView({ behavior: "smooth" }); });
     cancelBtn && cancelBtn.addEventListener("click", () => { card.hidden = true; });
     saveBtn   && saveBtn.addEventListener("click",   saveAnnouncement);
+  }
+
+  function setupSystemSettings() {
+    const brandingBtn = $("saveBrandingBtn");
+    const emailBtn    = $("saveEmailSettingsBtn");
+    const brandingMsg = $("brandingMsg");
+    const BRANDING_KEY = "lms_admin_branding_settings";
+    const EMAIL_KEY    = "lms_admin_email_settings";
+
+    try {
+      const brandingSettings = JSON.parse(localStorage.getItem(BRANDING_KEY) || "{}");
+      if (brandingSettings.platformName && $("settPlatformName")) $("settPlatformName").value = brandingSettings.platformName;
+      if (brandingSettings.timezone && $("settDefaultTimezone")) $("settDefaultTimezone").value = brandingSettings.timezone;
+      if (brandingSettings.language && $("settDefaultLang")) $("settDefaultLang").value = brandingSettings.language;
+
+      const emailSettings = JSON.parse(localStorage.getItem(EMAIL_KEY) || "{}");
+      if (typeof emailSettings.newEnroll === "boolean" && $("emailNewEnroll")) $("emailNewEnroll").checked = emailSettings.newEnroll;
+      if (typeof emailSettings.submission === "boolean" && $("emailSubmission")) $("emailSubmission").checked = emailSettings.submission;
+      if (typeof emailSettings.graded === "boolean" && $("emailGraded")) $("emailGraded").checked = emailSettings.graded;
+      if (typeof emailSettings.certificate === "boolean" && $("emailCertificate")) $("emailCertificate").checked = emailSettings.certificate;
+      if (typeof emailSettings.reminder === "boolean" && $("emailReminder")) $("emailReminder").checked = emailSettings.reminder;
+    } catch {}
+
+    brandingBtn && brandingBtn.addEventListener("click", () => {
+      localStorage.setItem(BRANDING_KEY, JSON.stringify({
+        platformName: $("settPlatformName")?.value.trim() || "",
+        timezone: $("settDefaultTimezone")?.value || "",
+        language: $("settDefaultLang")?.value || ""
+      }));
+      if (brandingMsg) {
+        brandingMsg.textContent = "Settings saved.";
+        brandingMsg.style.color = "var(--sd-green)";
+      }
+    });
+
+    emailBtn && emailBtn.addEventListener("click", () => {
+      localStorage.setItem(EMAIL_KEY, JSON.stringify({
+        newEnroll: $("emailNewEnroll")?.checked || false,
+        submission: $("emailSubmission")?.checked || false,
+        graded: $("emailGraded")?.checked || false,
+        certificate: $("emailCertificate")?.checked || false,
+        reminder: $("emailReminder")?.checked || false
+      }));
+    });
   }
 
   function setupUserManagement() {
