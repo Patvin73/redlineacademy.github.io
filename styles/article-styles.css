@@ -853,7 +853,7 @@ body.article-caregiver-page {
   display: grid;
   grid-template-columns: 1fr 420px;
   gap: 4rem;
-  align-items: center;
+  align-items: start;
   margin-bottom: 3rem;
 }
 
@@ -872,6 +872,16 @@ body.article-caregiver-page {
   font-weight: 800;
   letter-spacing: 0.18em;
   text-transform: uppercase;
+}
+
+.guide-page .guide-hero-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin-bottom: 1.5rem;
+  border-radius: 16px;
+  object-fit: cover;
+  box-shadow: 0 18px 44px rgba(10, 26, 61, 0.16);
 }
 
 .guide-page .hero-left h1,
