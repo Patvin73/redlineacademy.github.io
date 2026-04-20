@@ -1,0 +1,1125 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JBME1NN8CD"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-JBME1NN8CD');
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Buat Artikel - Redline Academy Admin</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Nunito:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/lms.css" />
+    <link rel="stylesheet" href="../css/lms-admin.css" />
+    <link rel="canonical" href="https://redlineacademy.com.au/pages/create-article.html" />
+    <meta name="description" content="Halaman utilitas internal Redline Academy." />
+
+    <style>
+      /* ── Article Editor Styles ───────────────────────────────── */
+      .ca-page { padding: 2rem; }
+      .ca-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.75rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      .ca-header h1 {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--ad-text, #1e293b);
+        margin: 0;
+      }
+      .ca-header-actions { display: flex; gap: .6rem; flex-wrap: wrap; }
+
+      .ca-layout {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 1.5rem;
+        align-items: start;
+      }
+      @media (max-width: 900px) {
+        .ca-layout { grid-template-columns: 1fr; }
+      }
+
+      /* Card wrapper */
+      .ca-card {
+        background: #fff;
+        border: 1px solid var(--ad-border, #e2e8f0);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      .ca-card h2 {
+        font-size: .85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--ad-text-muted, #64748b);
+        margin: 0 0 1rem;
+        padding-bottom: .6rem;
+        border-bottom: 1px solid var(--ad-border, #e2e8f0);
+      }
+
+      /* Form fields */
+      .ca-field { margin-bottom: 1.15rem; }
+      .ca-field label {
+        display: block;
+        font-size: .82rem;
+        font-weight: 600;
+        color: var(--ad-text, #1e293b);
+        margin-bottom: .4rem;
+      }
+      .ca-field label span.ca-hint {
+        font-weight: 400;
+        color: var(--ad-text-muted, #64748b);
+        font-size: .78rem;
+        margin-left: .35rem;
+      }
+      .ca-field input[type="text"],
+      .ca-field input[type="number"],
+      .ca-field input[type="url"],
+      .ca-field select,
+      .ca-field textarea {
+        width: 100%;
+        padding: .55rem .8rem;
+        border: 1.5px solid var(--ad-border, #e2e8f0);
+        border-radius: 7px;
+        font-family: inherit;
+        font-size: .9rem;
+        color: var(--ad-text, #1e293b);
+        background: #fff;
+        transition: border-color .2s;
+        box-sizing: border-box;
+      }
+      .ca-field input:focus,
+      .ca-field select:focus,
+      .ca-field textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+      }
+      .ca-field textarea { resize: vertical; min-height: 80px; }
+
+      /* Slug row */
+      .ca-slug-row { display: flex; gap: .5rem; align-items: center; }
+      .ca-slug-row input { flex: 1; }
+      .ca-slug-prefix {
+        font-size: .75rem;
+        color: var(--ad-text-muted, #64748b);
+        white-space: nowrap;
+        background: #f8fafc;
+        border: 1.5px solid var(--ad-border, #e2e8f0);
+        border-radius: 7px 0 0 7px;
+        padding: .55rem .7rem;
+        border-right: none;
+      }
+      .ca-slug-row input { border-radius: 0 7px 7px 0; }
+
+      /* Image preview */
+      .ca-img-preview {
+        margin-top: .6rem;
+        width: 100%;
+        height: 140px;
+        border-radius: 7px;
+        object-fit: cover;
+        border: 1px solid var(--ad-border, #e2e8f0);
+        display: none;
+        background: #f1f5f9;
+      }
+      .ca-img-preview.visible { display: block; }
+
+      /* Rich text editor */
+      .ca-editor-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .35rem;
+        padding: .6rem .7rem;
+        background: #f8fafc;
+        border: 1.5px solid var(--ad-border, #e2e8f0);
+        border-bottom: none;
+        border-radius: 7px 7px 0 0;
+      }
+      .ca-editor-toolbar button {
+        padding: .25rem .6rem;
+        border: 1px solid #d1d5db;
+        border-radius: 5px;
+        background: #fff;
+        font-size: .78rem;
+        font-family: inherit;
+        cursor: pointer;
+        color: #374151;
+        font-weight: 600;
+        transition: all .15s;
+        line-height: 1.4;
+      }
+      .ca-editor-toolbar button:hover { background: #e0e7ff; border-color: #6366f1; color: #4338ca; }
+      .ca-editor-toolbar .ca-tb-sep {
+        width: 1px;
+        background: #d1d5db;
+        margin: 0 .2rem;
+        align-self: stretch;
+      }
+      .ca-editor-body {
+        min-height: 320px;
+        padding: 1rem;
+        border: 1.5px solid var(--ad-border, #e2e8f0);
+        border-radius: 0 0 7px 7px;
+        font-size: .95rem;
+        line-height: 1.7;
+        color: var(--ad-text, #1e293b);
+        outline: none;
+        background: #fff;
+        overflow-y: auto;
+      }
+      .ca-editor-body:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
+      .ca-editor-body h2 { font-size: 1.2rem; margin: 1rem 0 .5rem; }
+      .ca-editor-body h3 { font-size: 1rem; margin: .8rem 0 .4rem; }
+      .ca-editor-body ul, .ca-editor-body ol { padding-left: 1.4rem; margin: .5rem 0; }
+      .ca-editor-body blockquote {
+        border-left: 3px solid #e2e8f0;
+        margin: .8rem 0;
+        padding: .4rem 1rem;
+        color: #64748b;
+        font-style: italic;
+      }
+      .ca-editor-body p { margin: 0 0 .7rem; }
+      .ca-editor-body:empty:before {
+        content: attr(data-placeholder);
+        color: #94a3b8;
+        pointer-events: none;
+      }
+
+      /* Char count */
+      .ca-char-count { font-size: .75rem; color: var(--ad-text-muted, #64748b); margin-top: .3rem; text-align: right; }
+
+      /* Buttons */
+      .ca-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        padding: .55rem 1.1rem;
+        border-radius: 7px;
+        font-size: .88rem;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        transition: all .18s;
+        text-decoration: none;
+      }
+      .ca-btn--primary { background: #1B3A6B; color: #fff; }
+      .ca-btn--primary:hover { background: #14305a; }
+      .ca-btn--success { background: #16a34a; color: #fff; }
+      .ca-btn--success:hover { background: #15803d; }
+      .ca-btn--outline {
+        background: transparent;
+        border: 1.5px solid var(--ad-border, #e2e8f0);
+        color: var(--ad-text, #1e293b);
+      }
+      .ca-btn--outline:hover { background: #f8fafc; }
+      .ca-btn--danger { background: #dc2626; color: #fff; }
+      .ca-btn--danger:hover { background: #b91c1c; }
+      .ca-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+      /* Status badge */
+      .ca-status-badge {
+        display: inline-block;
+        padding: .22rem .7rem;
+        border-radius: 999px;
+        font-size: .75rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+      }
+      .ca-status-badge--draft { background: #fef3c7; color: #92400e; }
+      .ca-status-badge--published { background: #dcfce7; color: #166534; }
+
+      /* Toast notification */
+      .ca-toast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: #1e293b;
+        color: #fff;
+        padding: .85rem 1.3rem;
+        border-radius: 10px;
+        font-size: .9rem;
+        box-shadow: 0 8px 24px rgba(0,0,0,.18);
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+        z-index: 9999;
+        transform: translateY(120%);
+        transition: transform .35s cubic-bezier(.175,.885,.32,1.275);
+        max-width: 360px;
+      }
+      .ca-toast.active { transform: translateY(0); }
+      .ca-toast--success { border-left: 4px solid #22c55e; }
+      .ca-toast--error { border-left: 4px solid #ef4444; }
+      .ca-toast__icon { font-size: 1.1rem; }
+      .ca-toast__text { flex: 1; }
+      .ca-toast__link { color: #93c5fd; font-weight: 600; text-decoration: underline; font-size: .82rem; white-space: nowrap; }
+
+      /* Manage list */
+      .ca-article-list { list-style: none; padding: 0; margin: 0; }
+      .ca-article-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: .75rem 0;
+        border-bottom: 1px solid var(--ad-border, #e2e8f0);
+        flex-wrap: wrap;
+      }
+      .ca-article-item:last-child { border-bottom: none; }
+      .ca-article-item__title { font-weight: 600; font-size: .92rem; color: var(--ad-text, #1e293b); margin: 0 0 .2rem; }
+      .ca-article-item__meta { font-size: .77rem; color: var(--ad-text-muted, #64748b); }
+      .ca-article-item__actions { display: flex; gap: .4rem; flex-shrink: 0; }
+      .ca-article-item__actions a,
+      .ca-article-item__actions button {
+        padding: .28rem .65rem;
+        border-radius: 5px;
+        font-size: .78rem;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        border: 1.5px solid var(--ad-border, #e2e8f0);
+        background: #fff;
+        color: var(--ad-text, #1e293b);
+        text-decoration: none;
+        transition: all .15s;
+      }
+      .ca-article-item__actions a:hover,
+      .ca-article-item__actions button:hover { background: #f1f5f9; }
+      .ca-article-item__actions button.del { color: #dc2626; border-color: #fecaca; }
+      .ca-article-item__actions button.del:hover { background: #fef2f2; }
+      .ca-empty-state {
+        text-align: center;
+        padding: 2.5rem 1rem;
+        color: var(--ad-text-muted, #64748b);
+        font-size: .9rem;
+      }
+
+      /* Tab nav inside main */
+      .ca-tabs { display: flex; gap: .25rem; margin-bottom: 1.75rem; border-bottom: 2px solid var(--ad-border, #e2e8f0); }
+      .ca-tab-btn {
+        padding: .55rem 1.1rem;
+        background: none;
+        border: none;
+        border-bottom: 2.5px solid transparent;
+        font-family: inherit;
+        font-size: .88rem;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--ad-text-muted, #64748b);
+        margin-bottom: -2px;
+        transition: all .18s;
+      }
+      .ca-tab-btn.active { color: #1B3A6B; border-bottom-color: #1B3A6B; }
+      .ca-tab-panel { display: none; }
+      .ca-tab-panel.active { display: block; }
+    </style>
+  </head>
+
+  <!-- data-lms-role: hanya admin yang boleh akses halaman ini -->
+  <body class="lms-dashboard-page ad-body" data-lms-role="admin">
+    <!-- MOBILE OVERLAY -->
+    <div class="ad-overlay" id="adOverlay" aria-hidden="true"></div>
+
+    <!-- ═══════════════════════════════════════
+         SIDEBAR
+    ═══════════════════════════════════════ -->
+    <aside class="ad-sidebar" id="adSidebar" role="navigation" aria-label="Admin navigation">
+      <!-- Logo -->
+      <div class="ad-sidebar__logo">
+        <a href="../index.html" aria-label="Redline Academy Home">
+          <img src="../assets/images/dashboard-32x32.png" alt="Redline Academy Logo" class="ad-logo-image" loading="lazy" decoding="async" width="32" height="32">
+          <span class="ad-logo-text"><strong>Redline</strong> Academy</span>
+        </a>
+        <button class="ad-sidebar__close" id="adSidebarClose" aria-label="Close sidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Admin Profile -->
+      <div class="ad-sidebar__profile">
+        <div class="ad-avatar ad-avatar--lg" id="sidebarAvatar">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+        </div>
+        <div class="ad-sidebar__profile-info">
+          <p class="ad-sidebar__profile-name" id="sidebarName">—</p>
+          <span class="ad-role-badge" id="sidebarRoleBadge">Admin</span>
+        </div>
+      </div>
+
+      <!-- Nav Menu -->
+      <ul class="ad-nav" role="list">
+        <li class="ad-nav__group-label">Main</li>
+
+        <li>
+          <a href="dashboard-admin.html" class="ad-nav__item" data-section="home">
+            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/>
+            </svg>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a href="dashboard-admin.html" class="ad-nav__item" data-section="students">
+            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span>My Students</span>
+          </a>
+        </li>
+        <li>
+          <a href="dashboard-admin.html" class="ad-nav__item" data-section="courses">
+            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+            </svg>
+            <span>Course Management</span>
+          </a>
+        </li>
+        <li>
+          <a href="dashboard-admin.html" class="ad-nav__item" data-section="grading">
+            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            <span>Assignments &amp; Grading</span>
+          </a>
+        </li>
+        <li>
+          <a href="dashboard-admin.html" class="ad-nav__item" data-section="schedule">
+            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <span>Schedule</span>
+          </a>
+        </li>
+        <li>
+          <a href="dashboard-admin.html" class="ad-nav__item" data-section="messages">
+            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span>Messages</span>
+          </a>
+        </li>
+        <li>
+          <a href="dashboard-admin.html" class="ad-nav__item" data-section="reports">
+            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+            <span>Reports &amp; Analytics</span>
+          </a>
+        </li>
+
+        <!-- ── Admin-only section ── -->
+        <li class="ad-nav__group-label ad-admin-only">Administration</li>
+
+        <li class="ad-admin-only">
+          <a href="dashboard-admin.html" class="ad-nav__item" data-section="users">
+            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>User Management</span>
+          </a>
+        </li>
+        <li class="ad-admin-only">
+          <a href="dashboard-admin.html" class="ad-nav__item" data-section="enrollments">
+            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+            </svg>
+            <span>Enrollments &amp; Payments</span>
+          </a>
+        </li>
+        <li class="ad-admin-only">
+          <a href="dashboard-admin.html" class="ad-nav__item" data-section="announcements">
+            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M22 3L2 10l7 4 4 7 9-18z"/>
+            </svg>
+            <span>Announcements</span>
+          </a>
+        </li>
+        <li class="ad-admin-only">
+          <a href="dashboard-admin.html" class="ad-nav__item" data-section="settings">
+            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            <span>System Settings</span>
+          </a>
+        </li>
+
+        <!-- ── Artikel (aktif) ── -->
+        <li class="ad-admin-only">
+          <a href="create-article.html" class="ad-nav__item active" aria-current="page">
+            <svg class="ad-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+            <span data-i18n="adNavArticles">Kelola Artikel</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Sidebar Footer -->
+      <div class="ad-sidebar__footer">
+        <div class="ad-language-switcher" role="navigation" aria-label="Language selector">
+          <button class="lang-btn ad-lang-btn" data-lang="id" aria-label="Bahasa Indonesia">
+            <img src="../assets/images/flags/id.png" alt="Bendera Indonesia" class="flag" aria-hidden="true" loading="lazy" decoding="async" width="512" height="512">
+            <span>ID</span>
+          </button>
+          <button class="lang-btn ad-lang-btn" data-lang="en" aria-label="English">
+            <img src="../assets/images/flags/en.png" alt="Bendera Inggris" class="flag" aria-hidden="true" loading="lazy" decoding="async" width="512" height="512">
+            <span>EN</span>
+          </button>
+        </div>
+        <button id="logoutBtn" class="ad-logout-btn" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          <span data-i18n="logout">Log Out</span>
+        </button>
+      </div>
+    </aside>
+    <!-- /sidebar -->
+
+    <!-- ═══════════════════════════════════════
+         MAIN WRAPPER
+    ═══════════════════════════════════════ -->
+    <div class="ad-main" id="adMain">
+      <!-- TOP BAR -->
+      <header class="ad-topbar">
+        <div class="ad-topbar__left">
+          <button class="ad-hamburger" id="adHamburger" aria-label="Open sidebar" aria-expanded="false">
+            <span></span><span></span><span></span>
+          </button>
+          <span class="ad-topbar__title" data-i18n="adNavArticles">Kelola Artikel</span>
+        </div>
+        <div class="ad-topbar__right">
+          <div class="ad-topbar__profile" id="adTopbarProfileBtn" role="button" tabindex="0" aria-haspopup="true">
+            <div class="ad-avatar ad-avatar--sm" id="topbarAvatar">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+              </svg>
+            </div>
+            <span class="ad-topbar__name" id="topbarName">—</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE CONTENT -->
+      <main class="ad-page ca-page">
+
+        <!-- Tab Navigation -->
+        <nav class="ca-tabs" role="tablist" aria-label="Halaman artikel" data-i18n-aria-label="caTabsAriaLabel">
+          <button class="ca-tab-btn active" role="tab" aria-selected="true" data-tab="editor" id="tab-editor" data-i18n="caTabEditor">
+            ✏️ Buat Artikel Baru
+          </button>
+          <button class="ca-tab-btn" role="tab" aria-selected="false" data-tab="list" id="tab-list" data-i18n="caTabList">
+            📋 Daftar Artikel
+          </button>
+        </nav>
+
+        <!-- ── TAB: EDITOR ── -->
+        <div class="ca-tab-panel active" id="panel-editor" role="tabpanel" aria-labelledby="tab-editor">
+
+          <div class="ca-header">
+            <h1>
+              <span id="editorModeLabel" data-i18n="caEditorModeCreate">Buat Artikel Baru</span>
+              <span class="ca-status-badge ca-status-badge--draft" id="currentStatusBadge" data-i18n="caStatusDraft">Draft</span>
+            </h1>
+            <div class="ca-header-actions">
+              <button class="ca-btn ca-btn--outline" id="btnReset" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/>
+                </svg>
+                <span data-i18n="caBtnReset">Reset Form</span>
+              </button>
+              <button class="ca-btn ca-btn--outline" id="btnSaveDraft" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                  <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+                </svg>
+                <span data-i18n="caBtnSaveDraft">Simpan Draft</span>
+              </button>
+              <button class="ca-btn ca-btn--success" id="btnPublish" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span data-i18n="caBtnPublish">Publikasikan</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="ca-layout">
+
+            <!-- LEFT: Main editor -->
+            <div>
+              <!-- Title -->
+              <div class="ca-card">
+                <h2 data-i18n="caMainContent">Konten Utama</h2>
+                <div class="ca-field">
+                  <label for="artTitle" data-i18n="caArticleTitleLabel">Judul Artikel <span class="ca-hint">*wajib</span></label>
+                  <input type="text" id="artTitle" placeholder="Masukkan judul artikel yang menarik..." maxlength="120" autocomplete="off" data-i18n-placeholder="caArticleTitlePlaceholder" />
+                  <p class="ca-char-count"><span id="titleCount">0</span>/120</p>
+                </div>
+                <div class="ca-field">
+                  <label for="artSlug" data-i18n="caSlugLabel">URL Slug <span class="ca-hint">*auto-generate dari judul</span></label>
+                  <div class="ca-slug-row">
+                    <span class="ca-slug-prefix">pages/article-view.html?slug=</span>
+                    <input type="text" id="artSlug" placeholder="judul-artikel-anda" autocomplete="off" data-i18n-placeholder="caSlugPlaceholder" />
+                  </div>
+                </div>
+                <div class="ca-field">
+                  <label for="artExcerpt" data-i18n="caExcerptLabel">Ringkasan / Excerpt <span class="ca-hint">*untuk kartu artikel di beranda & blog (maks. 200 karakter)</span></label>
+                  <textarea id="artExcerpt" rows="3" placeholder="Tulis ringkasan singkat yang menarik perhatian pembaca..." maxlength="200" data-i18n-placeholder="caExcerptPlaceholder"></textarea>
+                  <p class="ca-char-count"><span id="excerptCount">0</span>/200</p>
+                </div>
+              </div>
+
+              <!-- Rich Text Editor -->
+              <div class="ca-card">
+                <h2 data-i18n="caArticleBody">Isi Artikel</h2>
+                <div class="ca-editor-toolbar" id="editorToolbar" role="toolbar" aria-label="Format teks" data-i18n-aria-label="caToolbarAriaLabel">
+                  <button type="button" onclick="caFormat('bold')" title="Bold" data-i18n-title="caToolbarBoldTitle"><b>B</b></button>
+                  <button type="button" onclick="caFormat('italic')" title="Italic" data-i18n-title="caToolbarItalicTitle"><i>I</i></button>
+                  <button type="button" onclick="caFormat('underline')" title="Underline" data-i18n-title="caToolbarUnderlineTitle"><u>U</u></button>
+                  <div class="ca-tb-sep"></div>
+                  <button type="button" onclick="caFormatBlock('h2')" title="Heading 2" data-i18n-title="caToolbarH2Title">H2</button>
+                  <button type="button" onclick="caFormatBlock('h3')" title="Heading 3" data-i18n-title="caToolbarH3Title">H3</button>
+                  <button type="button" onclick="caFormatBlock('p')" title="Paragraf" data-i18n-title="caToolbarParagraphTitle">P</button>
+                  <div class="ca-tb-sep"></div>
+                  <button type="button" onclick="caFormat('insertUnorderedList')" title="Bullet list" data-i18n-title="caToolbarBulletTitle" data-i18n="caToolbarBulletText">• List</button>
+                  <button type="button" onclick="caFormat('insertOrderedList')" title="Numbered list" data-i18n-title="caToolbarNumberedTitle" data-i18n="caToolbarNumberedText">1. List</button>
+                  <div class="ca-tb-sep"></div>
+                  <button type="button" onclick="caFormatBlock('blockquote')" title="Kutipan" data-i18n-title="caToolbarQuoteTitle" data-i18n="caToolbarQuoteText">❝ Quote</button>
+                  <button type="button" onclick="caInsertLink()" title="Sisipkan link" data-i18n-title="caToolbarLinkTitle" data-i18n="caToolbarLinkText">🔗 Link</button>
+                  <div class="ca-tb-sep"></div>
+                  <button type="button" onclick="caFormat('removeFormat')" title="Hapus format" data-i18n-title="caToolbarClearTitle" data-i18n="caToolbarClearText">✕ Clear</button>
+                </div>
+                <div
+                  class="ca-editor-body"
+                  id="artContent"
+                  contenteditable="true"
+                  data-placeholder="Mulai menulis isi artikel di sini... Gunakan toolbar di atas untuk memformat teks."
+                  data-i18n-data-placeholder="caEditorPlaceholder"
+                  aria-label="Isi artikel"
+                  data-i18n-aria-label="caContentAriaLabel"
+                  aria-multiline="true"
+                  role="textbox"
+                ></div>
+              </div>
+            </div>
+
+            <!-- RIGHT: Metadata sidebar -->
+            <div>
+              <!-- Metadata -->
+              <div class="ca-card">
+                <h2 data-i18n="caMetadata">Metadata</h2>
+                <div class="ca-field">
+                  <label for="artBadge" data-i18n="caBadgeLabel">Label Badge <span class="ca-hint">tampil di kartu</span></label>
+                  <input type="text" id="artBadge" placeholder="Artikel" value="Artikel" maxlength="30" data-i18n-placeholder="articlesArticleBadge" />
+                </div>
+                <div class="ca-field">
+                  <label for="artType" data-i18n="caContentType">Tipe Konten</label>
+                  <select id="artType">
+                    <option value="article" data-i18n="caTypeArticle">📄 Artikel</option>
+                    <option value="audio" data-i18n="caTypeAudio">🎧 Audio</option>
+                    <option value="video" data-i18n="caTypeVideo">🎬 Video</option>
+                  </select>
+                </div>
+                <div class="ca-field">
+                  <label for="artDifficulty" data-i18n="caLevel">Level</label>
+                  <select id="artDifficulty">
+                    <option value="beginner" data-i18n="caLevelBeginner">🟢 Pemula (Beginner)</option>
+                    <option value="intermediate" data-i18n="caLevelIntermediate">🟡 Menengah (Intermediate)</option>
+                    <option value="advanced" data-i18n="caLevelAdvanced">🔴 Mahir (Advanced)</option>
+                  </select>
+                </div>
+                <div class="ca-field">
+                  <label for="artReadTime" data-i18n="caReadTimeLabel">Estimasi Baca <span class="ca-hint">(menit)</span></label>
+                  <input type="number" id="artReadTime" min="1" max="60" value="5" />
+                </div>
+                <div class="ca-field">
+                  <label for="artCategory" data-i18n="caCategoryLabel">Kategori / Tag <span class="ca-hint">pisahkan dengan koma</span></label>
+                  <input type="text" id="artCategory" placeholder="caregiver, pelatihan, karir" data-i18n-placeholder="caCategoryPlaceholder" />
+                </div>
+              </div>
+
+              <!-- Image -->
+              <div class="ca-card">
+                <h2 data-i18n="caHeaderImage">Gambar Header</h2>
+                <div class="ca-field">
+                  <label for="artImageUrl" data-i18n="caImageUrlLabel">URL Gambar</label>
+                  <input type="url" id="artImageUrl" placeholder="https://..." />
+                </div>
+                <img class="ca-img-preview" id="artImagePreview" src="" alt="Preview gambar artikel" data-i18n-alt="caImagePreviewAlt" />
+                <p style="font-size:.75rem;color:#64748b;margin-top:.4rem;" data-i18n="caImageHelperText">
+                  Kosongkan untuk menggunakan gambar default. Gunakan URL gambar dari folder <code>assets/images/</code> atau URL eksternal.
+                </p>
+              </div>
+
+              <!-- SEO -->
+              <div class="ca-card">
+                <h2 data-i18n="caSeoOptional">SEO (Opsional)</h2>
+                <div class="ca-field">
+                  <label for="artMetaDesc" data-i18n="caMetaDescLabel">Meta Description <span class="ca-hint">(maks. 160 karakter)</span></label>
+                  <textarea id="artMetaDesc" rows="3" maxlength="160" placeholder="Deskripsi singkat untuk mesin pencari..." data-i18n-placeholder="caMetaDescPlaceholder"></textarea>
+                  <p class="ca-char-count"><span id="metaDescCount">0</span>/160</p>
+                </div>
+              </div>
+
+              <!-- Hidden ID field for editing -->
+              <input type="hidden" id="artId" value="" />
+            </div>
+          </div>
+        </div>
+        <!-- /panel-editor -->
+
+        <!-- ── TAB: ARTICLE LIST ── -->
+        <div class="ca-tab-panel" id="panel-list" role="tabpanel" aria-labelledby="tab-list">
+          <div class="ca-header">
+            <h1 data-i18n="caListTitle">Daftar Artikel</h1>
+            <div class="ca-header-actions">
+              <button class="ca-btn ca-btn--primary" id="btnNewArticle" type="button">
+                <span data-i18n="caBtnNewArticle">+ Buat Artikel Baru</span>
+              </button>
+            </div>
+          </div>
+          <div class="ca-card">
+            <ul class="ca-article-list" id="articleListEl">
+              <li class="ca-empty-state" id="emptyListState">
+                <span data-i18n="caEmptyList">Belum ada artikel. Klik <strong>Buat Artikel Baru</strong> untuk memulai.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <!-- /panel-list -->
+
+      </main>
+      <!-- /ad-page -->
+    </div>
+    <!-- /ad-main -->
+
+    <!-- Toast Notification -->
+    <div class="ca-toast" id="caToast" role="status" aria-live="polite">
+      <span class="ca-toast__icon" id="caToastIcon"></span>
+      <span class="ca-toast__text" id="caToastText"></span>
+      <a class="ca-toast__link" id="caToastLink" href="#" target="_blank" style="display:none" data-i18n="caToastViewArticle">Lihat Artikel →</a>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+      (function () {
+        if (window.__LMS_SUPABASE_BOOTSTRAP__) return;
+        var primarySrc = window.__SUPABASE_SDK_SRC__ || "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        var fallbackSrc = window.__SUPABASE_SDK_FALLBACK_SRC__ || "https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js";
+        function loadScript(src, timeoutMs) {
+          return new Promise(function (resolve, reject) {
+            var script = document.createElement("script");
+            var settled = false;
+            var timerId = window.setTimeout(function () { if (settled) return; settled = true; script.remove(); reject(new Error("Timeout: " + src)); }, timeoutMs);
+            script.src = src; script.async = true;
+            script.onload = function () { if (settled) return; settled = true; window.clearTimeout(timerId); resolve(src); };
+            script.onerror = function () { if (settled) return; settled = true; window.clearTimeout(timerId); script.remove(); reject(new Error("Failed: " + src)); };
+            document.head.appendChild(script);
+          });
+        }
+        window.__LMS_SUPABASE_BOOTSTRAP__ = loadScript(primarySrc, 6000).catch(function () { return loadScript(fallbackSrc, 6000); });
+      })();
+    </script>
+    <script src="../js/articles-store.js"></script>
+    <script src="../js/script.js" defer></script>
+    <script src="../js/supabase-client.js" defer></script>
+    <script src="../js/auth.js" defer></script>
+    <script src="../js/guard.js" defer></script>
+
+    <script>
+      function caT(key, fallback, vars) {
+        var text = (typeof t === 'function') ? t(key) : fallback;
+        if (!text || text === key) text = fallback;
+        if (vars) {
+          Object.keys(vars).forEach(function (name) {
+            text = String(text).replaceAll('{' + name + '}', vars[name]);
+          });
+        }
+        return text;
+      }
+      /* ────────────────────────────────────────────────
+         SIDEBAR TOGGLE (mobile)
+      ──────────────────────────────────────────────── */
+      (function () {
+        var sidebar   = document.getElementById('adSidebar');
+        var overlay   = document.getElementById('adOverlay');
+        var hamburger = document.getElementById('adHamburger');
+        var closeBtn  = document.getElementById('adSidebarClose');
+        function openSidebar()  { sidebar.classList.add('ad-sidebar--open');    overlay.classList.add('ad-overlay--active');    hamburger.setAttribute('aria-expanded','true');  }
+        function closeSidebar() { sidebar.classList.remove('ad-sidebar--open'); overlay.classList.remove('ad-overlay--active'); hamburger.setAttribute('aria-expanded','false'); }
+        if (hamburger) hamburger.addEventListener('click', openSidebar);
+        if (closeBtn)  closeBtn.addEventListener('click', closeSidebar);
+        if (overlay)   overlay.addEventListener('click', closeSidebar);
+
+        var logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', function () {
+            if (window.lmsLogout) { window.lmsLogout(); }
+            else { localStorage.removeItem('lms_session'); sessionStorage.removeItem('lms_session'); window.location.href = 'login.html'; }
+          });
+        }
+
+        function syncProfile() {
+          var nameEls = [document.getElementById('sidebarName'), document.getElementById('topbarName')];
+          var stored = null;
+          try { var raw = localStorage.getItem('lms_user') || sessionStorage.getItem('lms_user'); if (raw) stored = JSON.parse(raw); } catch (e) {}
+          if (stored && stored.name) nameEls.forEach(function (el) { if (el) el.textContent = stored.name; });
+        }
+        syncProfile();
+      })();
+
+      /* ────────────────────────────────────────────────
+         TAB NAVIGATION
+      ──────────────────────────────────────────────── */
+      (function () {
+        var tabs   = document.querySelectorAll('.ca-tab-btn');
+        var panels = document.querySelectorAll('.ca-tab-panel');
+        tabs.forEach(function (tab) {
+          tab.addEventListener('click', function () {
+            var target = tab.dataset.tab;
+            tabs.forEach(function (t) { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+            panels.forEach(function (p) { p.classList.remove('active'); });
+            tab.classList.add('active'); tab.setAttribute('aria-selected','true');
+            var panel = document.getElementById('panel-' + target);
+            if (panel) panel.classList.add('active');
+            if (target === 'list') renderArticleList();
+          });
+        });
+        var btnNewArticle = document.getElementById('btnNewArticle');
+        if (btnNewArticle) {
+          btnNewArticle.addEventListener('click', function () {
+            tabs.forEach(function (t) { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+            panels.forEach(function (p) { p.classList.remove('active'); });
+            document.getElementById('tab-editor').classList.add('active');
+            document.getElementById('tab-editor').setAttribute('aria-selected','true');
+            document.getElementById('panel-editor').classList.add('active');
+            resetForm();
+          });
+        }
+      })();
+
+      /* ── Char counters ── */
+      function bindCharCount(inputId, countId) {
+        var input = document.getElementById(inputId);
+        var counter = document.getElementById(countId);
+        if (!input || !counter) return;
+        input.addEventListener('input', function () { counter.textContent = input.value.length; });
+      }
+      bindCharCount('artTitle',   'titleCount');
+      bindCharCount('artExcerpt', 'excerptCount');
+      bindCharCount('artMetaDesc','metaDescCount');
+
+      /* ── Slug auto-generate ── */
+      (function () {
+        var titleInput = document.getElementById('artTitle');
+        var slugInput  = document.getElementById('artSlug');
+        var edited = false;
+        titleInput.addEventListener('input', function () {
+          if (!edited || slugInput.value === '') {
+            slugInput.value = ArticlesStore.generateSlug(titleInput.value); edited = false;
+          }
+        });
+        slugInput.addEventListener('input', function () {
+          edited = true; slugInput.value = ArticlesStore.generateSlug(slugInput.value);
+        });
+      })();
+
+      /* ── Image preview ── */
+      (function () {
+        var urlInput = document.getElementById('artImageUrl');
+        var preview  = document.getElementById('artImagePreview');
+        var timer;
+        urlInput.addEventListener('input', function () {
+          clearTimeout(timer);
+          timer = setTimeout(function () {
+            var url = urlInput.value.trim();
+            if (url) { preview.src = url; preview.classList.add('visible'); preview.onerror = function () { preview.classList.remove('visible'); }; }
+            else { preview.classList.remove('visible'); }
+          }, 500);
+        });
+      })();
+
+      /* ── Rich text editor ── */
+      function caFormat(cmd)      { document.getElementById('artContent').focus(); document.execCommand(cmd, false, null); }
+      function caFormatBlock(tag) { document.getElementById('artContent').focus(); document.execCommand('formatBlock', false, tag); }
+      function caInsertLink()     { var url = prompt(caT('caPromptInsertLink', 'Masukkan URL tautan:')); if (url) { document.getElementById('artContent').focus(); document.execCommand('createLink', false, url); } }
+
+      /* ── Toast ── */
+      var toastTimer;
+      function showToast(msg, type, articleSlug) {
+        var toast = document.getElementById('caToast');
+        var icon  = document.getElementById('caToastIcon');
+        var text  = document.getElementById('caToastText');
+        var link  = document.getElementById('caToastLink');
+        toast.className = 'ca-toast ca-toast--' + (type || 'success');
+        icon.textContent = type === 'error' ? '✕' : '✓';
+        text.textContent = msg;
+        if (articleSlug) { link.href = 'article-view.html?slug=' + encodeURIComponent(articleSlug); link.style.display = 'inline'; }
+        else { link.style.display = 'none'; }
+        toast.classList.add('active');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { toast.classList.remove('active'); }, 5000);
+      }
+
+      /* ── Form helpers ── */
+      function getFormData() {
+        return {
+          title:      document.getElementById('artTitle').value.trim(),
+          slug:       document.getElementById('artSlug').value.trim(),
+          excerpt:    document.getElementById('artExcerpt').value.trim(),
+          content:    document.getElementById('artContent').innerHTML.trim(),
+          badge:      document.getElementById('artBadge').value.trim() || 'Artikel',
+          type:       document.getElementById('artType').value,
+          difficulty: document.getElementById('artDifficulty').value,
+          readTime:   parseInt(document.getElementById('artReadTime').value) || 5,
+          category:   document.getElementById('artCategory').value.trim(),
+          imageUrl:   document.getElementById('artImageUrl').value.trim(),
+          metaDesc:   document.getElementById('artMetaDesc').value.trim(),
+        };
+      }
+
+      function validateForm(data) {
+        if (!data.title)   { showToast(caT('caValidationTitleRequired', 'Judul artikel wajib diisi.'), 'error'); return false; }
+        if (!data.slug)    { showToast(caT('caValidationSlugRequired', 'URL slug wajib diisi.'), 'error'); return false; }
+        if (!data.excerpt) { showToast(caT('caValidationExcerptRequired', 'Ringkasan / excerpt wajib diisi.'), 'error'); return false; }
+        if (!data.content) { showToast(caT('caValidationContentRequired', 'Isi artikel tidak boleh kosong.'), 'error'); return false; }
+        return true;
+      }
+
+      function updateStatusBadge(status) {
+        var badge = document.getElementById('currentStatusBadge');
+        if (!badge) return;
+        if (status === 'published') { badge.className = 'ca-status-badge ca-status-badge--published'; badge.textContent = caT('caStatusPublished', 'Published'); }
+        else                        { badge.className = 'ca-status-badge ca-status-badge--draft';     badge.textContent = caT('caStatusDraft', 'Draft'); }
+      }
+
+      function setLoading(isLoading) {
+        document.getElementById('btnSaveDraft').disabled = isLoading;
+        document.getElementById('btnPublish').disabled   = isLoading;
+      }
+
+      function buildArticleObj(data, status) {
+        var existingId = document.getElementById('artId').value;
+        var now = new Date().toISOString();
+        var author = (function () {
+          try { var u = JSON.parse(localStorage.getItem('lms_user') || sessionStorage.getItem('lms_user') || '{}'); return u.name || 'Admin'; } catch(e) { return 'Admin'; }
+        })();
+        return {
+          id:          existingId || ArticlesStore.generateId(),
+          title:       data.title,
+          slug:        data.slug,
+          excerpt:     data.excerpt,
+          content:     data.content,
+          badge:       data.badge,
+          type:        data.type,
+          difficulty:  data.difficulty,
+          readTime:    data.readTime,
+          category:    data.category,
+          imageUrl:    data.imageUrl || '../assets/images/assistant_carer-optimized.jpg',
+          metaDesc:    data.metaDesc || data.excerpt,
+          status:      status,
+          author:      author,
+          publishedAt: status === 'published' ? now : null,
+        };
+      }
+
+      /* ── Save Draft (async) ── */
+      document.getElementById('btnSaveDraft').addEventListener('click', async function () {
+        var data = getFormData();
+        if (!validateForm(data)) return;
+
+        var existingId = document.getElementById('artId').value;
+        var slugOk = await ArticlesStore.slugExists(data.slug, existingId || undefined);
+        if (slugOk) { showToast(caT('caValidationSlugUsed', 'Slug "{slug}" sudah digunakan.', { slug: data.slug }), 'error'); return; }
+
+        setLoading(true);
+        var article = buildArticleObj(data, 'draft');
+        var saved   = await ArticlesStore.save(article);
+        setLoading(false);
+
+        if (saved) {
+          document.getElementById('artId').value = saved.id;
+          document.getElementById('editorModeLabel').textContent = caT('caEditorModeEdit', 'Edit Artikel');
+          updateStatusBadge('draft');
+          showToast(caT('caToastDraftSaved', 'Draft berhasil disimpan!'), 'success');
+        } else {
+          showToast(caT('caToastDraftFailed', 'Gagal menyimpan draft. Coba lagi.'), 'error');
+        }
+      });
+
+      /* ── Publish (async) ── */
+      document.getElementById('btnPublish').addEventListener('click', async function () {
+        var data = getFormData();
+        if (!validateForm(data)) return;
+        if (!confirm(caT('caConfirmPublish', 'Artikel akan dipublikasikan dan tampil di beranda serta halaman blog. Lanjutkan?'))) return;
+
+        var existingId = document.getElementById('artId').value;
+        var slugOk = await ArticlesStore.slugExists(data.slug, existingId || undefined);
+        if (slugOk) { showToast(caT('caValidationSlugUsed', 'Slug "{slug}" sudah digunakan.', { slug: data.slug }), 'error'); return; }
+
+        setLoading(true);
+        var article = buildArticleObj(data, 'published');
+        var saved   = await ArticlesStore.save(article);
+        setLoading(false);
+
+        if (saved) {
+          document.getElementById('artId').value = saved.id;
+          document.getElementById('editorModeLabel').textContent = caT('caEditorModeEdit', 'Edit Artikel');
+          updateStatusBadge('published');
+          showToast(caT('caToastPublishSuccess', 'Artikel berhasil dipublikasikan!'), 'success', saved.slug);
+        } else {
+          showToast(caT('caToastPublishFailed', 'Gagal mempublikasikan artikel. Coba lagi.'), 'error');
+        }
+      });
+
+      /* ── Reset form ── */
+      function resetForm() {
+        ['artId','artTitle','artSlug','artExcerpt','artCategory','artImageUrl','artMetaDesc'].forEach(function(id){
+          var el = document.getElementById(id); if (el) el.value = '';
+        });
+        document.getElementById('artContent').innerHTML = '';
+        document.getElementById('artBadge').value = 'Artikel';
+        document.getElementById('artType').value = 'article';
+        document.getElementById('artDifficulty').value = 'beginner';
+        document.getElementById('artReadTime').value = '5';
+        document.getElementById('artImagePreview').classList.remove('visible');
+        ['titleCount','excerptCount','metaDescCount'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent='0'; });
+        document.getElementById('editorModeLabel').textContent = caT('caEditorModeCreate', 'Buat Artikel Baru');
+        updateStatusBadge('draft');
+      }
+      document.getElementById('btnReset').addEventListener('click', function () {
+        if (confirm(caT('caConfirmReset', 'Reset form? Perubahan yang belum disimpan akan hilang.'))) resetForm();
+      });
+
+      /* ── Article list (async) ── */
+      async function renderArticleList() {
+        var listEl = document.getElementById('articleListEl');
+        listEl.innerHTML = '<li class="ca-empty-state">' + caT('caLoadingArticles', 'Memuat artikel...') + '</li>';
+        var articles = await ArticlesStore.getAll();
+        listEl.innerHTML = '';
+
+        if (!articles.length) {
+          listEl.innerHTML = '<li class="ca-empty-state">' + caT('caEmptyList', 'Belum ada artikel. Klik <strong>Buat Artikel Baru</strong> untuk memulai.') + '</li>';
+          return;
+        }
+
+        articles.forEach(function (article) {
+          var li = document.createElement('li');
+          li.className = 'ca-article-item';
+          var statusHtml = article.status === 'published'
+            ? '<span class="ca-status-badge ca-status-badge--published">' + caT('caStatusPublished', 'Published') + '</span>'
+            : '<span class="ca-status-badge ca-status-badge--draft">' + caT('caStatusDraft', 'Draft') + '</span>';
+          var dateStr = article.status === 'published'
+            ? caT('caListPublishedDate', 'Dipublish: {date}', { date: ArticlesStore.formatDate(article.publishedAt) })
+            : caT('caListUpdatedDate', 'Diperbarui: {date}', { date: ArticlesStore.formatDate(article.updatedAt) });
+
+          li.innerHTML =
+            '<div class="ca-article-item__info">' +
+              '<p class="ca-article-item__title">' + esc(article.title) + ' ' + statusHtml + '</p>' +
+              '<p class="ca-article-item__meta">' + dateStr + ' · ' + article.type + ' · ' + article.difficulty + '</p>' +
+            '</div>' +
+            '<div class="ca-article-item__actions">' +
+              (article.status === 'published' ? '<a href="article-view.html?slug=' + encodeURIComponent(article.slug) + '" target="_blank">' + caT('caActionView', 'Lihat') + '</a>' : '') +
+              '<button class="edit-btn" data-id="' + article.id + '">' + caT('caActionEdit', 'Edit') + '</button>' +
+              (article.status !== 'published' ? '<button class="pub-btn" data-id="' + article.id + '">' + caT('caActionPublish', 'Publish') + '</button>' : '') +
+              '<button class="del" data-id="' + article.id + '">' + caT('caActionDelete', 'Hapus') + '</button>' +
+            '</div>';
+          listEl.appendChild(li);
+        });
+
+        listEl.querySelectorAll('.edit-btn').forEach(function (btn) { btn.addEventListener('click', function () { loadArticleIntoEditor(btn.dataset.id); }); });
+        listEl.querySelectorAll('.pub-btn').forEach(function (btn) { btn.addEventListener('click', function () { quickPublish(btn.dataset.id); }); });
+        listEl.querySelectorAll('.del').forEach(function (btn)     { btn.addEventListener('click', function () { deleteArticle(btn.dataset.id); }); });
+      }
+
+      async function loadArticleIntoEditor(id) {
+        var article = await ArticlesStore.getById(id);
+        if (!article) return;
+        document.getElementById('artId').value          = article.id;
+        document.getElementById('artTitle').value       = article.title;
+        document.getElementById('artSlug').value        = article.slug;
+        document.getElementById('artExcerpt').value     = article.excerpt;
+        document.getElementById('artContent').innerHTML  = article.content;
+        document.getElementById('artBadge').value       = article.badge || 'Artikel';
+        document.getElementById('artType').value        = article.type || 'article';
+        document.getElementById('artDifficulty').value  = article.difficulty || 'beginner';
+        document.getElementById('artReadTime').value    = article.readTime || 5;
+        document.getElementById('artCategory').value    = article.category || '';
+        document.getElementById('artImageUrl').value    = article.imageUrl || '';
+        document.getElementById('artMetaDesc').value    = article.metaDesc || '';
+        document.getElementById('titleCount').textContent    = article.title.length;
+        document.getElementById('excerptCount').textContent  = article.excerpt.length;
+        document.getElementById('metaDescCount').textContent = (article.metaDesc || '').length;
+        document.getElementById('editorModeLabel').textContent = caT('caEditorModeEdit', 'Edit Artikel');
+        updateStatusBadge(article.status);
+        if (article.imageUrl) { var p = document.getElementById('artImagePreview'); p.src = article.imageUrl; p.classList.add('visible'); }
+        // Switch to editor tab
+        document.querySelectorAll('.ca-tab-btn').forEach(function (t)   { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+        document.querySelectorAll('.ca-tab-panel').forEach(function (p) { p.classList.remove('active'); });
+        document.getElementById('tab-editor').classList.add('active'); document.getElementById('tab-editor').setAttribute('aria-selected','true');
+        document.getElementById('panel-editor').classList.add('active');
+        window.scrollTo(0, 0);
+      }
+
+      async function quickPublish(id) {
+        var article = await ArticlesStore.getById(id);
+        if (!article) return;
+        if (!confirm(caT('caConfirmQuickPublish', 'Publikasikan artikel "{title}"?', { title: article.title }))) return;
+        article.status      = 'published';
+        article.publishedAt = new Date().toISOString();
+        var saved = await ArticlesStore.save(article);
+        if (saved) { showToast(caT('caToastPublishSuccess', 'Artikel berhasil dipublikasikan!'), 'success', saved.slug); renderArticleList(); }
+        else        { showToast(caT('caToastQuickPublishFailed', 'Gagal mempublikasikan.'), 'error'); }
+      }
+
+      async function deleteArticle(id) {
+        var article = await ArticlesStore.getById(id);
+        if (!article) return;
+        if (!confirm(caT('caConfirmDelete', 'Hapus artikel "{title}"? Tindakan ini tidak dapat dibatalkan.', { title: article.title }))) return;
+        var ok = await ArticlesStore.delete(id);
+        if (ok) { showToast(caT('caToastDeleteSuccess', 'Artikel berhasil dihapus.'), 'success'); renderArticleList(); }
+        else     { showToast(caT('caToastDeleteFailed', 'Gagal menghapus artikel.'), 'error'); }
+      }
+
+      function esc(str) {
+        return String(str || '').replace(/[&<>"']/g, function (c) {
+          return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+        });
+      }
+    </script>
+  </body>
+</html>

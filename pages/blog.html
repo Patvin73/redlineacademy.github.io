@@ -743,6 +743,10 @@
                 <a href="daftar-menjadi-caregiver-profesional.html">Buka halaman</a>
               </div>
             </article>
+
+            <!-- ── Artikel Dinamis dari Admin ── -->
+            <div id="rl-blog-dynamic-articles" style="display:contents;"></div>
+
           </div>
         </div>
       </section>
@@ -1609,6 +1613,96 @@
     <script>
       window.addEventListener('scroll',()=>{ if(sessionStorage.getItem('glocalClosed'))return; if(window.scrollY>400)document.getElementById('glocalBar').classList.add('active'); },{passive:true});
       function closeGlocalBar(){document.getElementById('glocalBar').classList.remove('active');sessionStorage.setItem('glocalClosed','1');}
+    </script>
+    <script>
+      (function () {
+        if (window.__LMS_SUPABASE_BOOTSTRAP__) return;
+        var primarySrc = window.__SUPABASE_SDK_SRC__ || "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        var fallbackSrc = window.__SUPABASE_SDK_FALLBACK_SRC__ || "https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js";
+        function loadScript(src, timeoutMs) {
+          return new Promise(function (resolve, reject) {
+            var script = document.createElement("script");
+            var settled = false;
+            var timerId = window.setTimeout(function () {
+              if (settled) return;
+              settled = true;
+              script.remove();
+              reject(new Error("Timeout: " + src));
+            }, timeoutMs);
+            script.src = src;
+            script.async = true;
+            script.onload = function () {
+              if (settled) return;
+              settled = true;
+              window.clearTimeout(timerId);
+              resolve(src);
+            };
+            script.onerror = function () {
+              if (settled) return;
+              settled = true;
+              window.clearTimeout(timerId);
+              script.remove();
+              reject(new Error("Failed: " + src));
+            };
+            document.head.appendChild(script);
+          });
+        }
+        window.__LMS_SUPABASE_BOOTSTRAP__ = loadScript(primarySrc, 6000).catch(function () {
+          return loadScript(fallbackSrc, 6000);
+        });
+      })();
+    </script>
+    <script src="../js/supabase-client.js"></script>
+    <script src="../js/articles-store.js"></script>
+    <script>
+      // Inject artikel published dari Supabase ke blog-hub-library-grid
+      // Otomatis ikut difilter oleh blog-hub.js (data-type & data-difficulty)
+      (async function () {
+        var container = document.getElementById('rl-blog-dynamic-articles');
+        if (!container || typeof ArticlesStore === 'undefined') return;
+
+        var articles = await ArticlesStore.getPublished();
+        if (!articles || !articles.length) return;
+
+        articles.forEach(function (a) {
+          var el = document.createElement('article');
+          el.className = 'blog-hub-library-card';
+          el.setAttribute('data-type',       a.type || 'article');
+          el.setAttribute('data-difficulty', a.difficulty || 'beginner');
+          el.setAttribute('data-search', (
+            (a.title || '') + ' ' + (a.badge || '') + ' ' +
+            (a.category || '') + ' ' + (a.excerpt || '')
+          ).toLowerCase());
+
+          var href       = 'article-view.html?slug=' + encodeURIComponent(a.slug);
+          var typeLabel  = {article:'Artikel', audio:'Audio', video:'Video'}[a.type] || 'Artikel';
+          var levelLabel = {beginner:'Pemula', intermediate:'Menengah', advanced:'Mahir'}[a.difficulty] || 'Pemula';
+
+          el.innerHTML =
+            '<div class="blog-hub-library-card__body">' +
+              '<div class="blog-hub-library-card__meta">' +
+                '<span>' + esc(a.badge || typeLabel) + '</span>' +
+                '<span>' + levelLabel + '</span>' +
+              '</div>' +
+              '<h3>' + esc(a.title) + '</h3>' +
+              '<p>' + esc(a.excerpt) + '</p>' +
+              '<a href="' + href + '">Buka artikel</a>' +
+            '</div>';
+
+          container.appendChild(el);
+        });
+
+        function esc(s) {
+          return String(s || '').replace(/[&<>"']/g, function (c) {
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+          });
+        }
+
+        // Re-trigger filter blog-hub.js jika sudah aktif
+        if (typeof window.blogHubApplyFilters === 'function') {
+          window.blogHubApplyFilters();
+        }
+      })();
     </script>
   </body>
 </html>

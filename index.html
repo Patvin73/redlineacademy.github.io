@@ -1099,6 +1099,10 @@
               >
             </div>
           </article>
+
+          <!-- ── Artikel Dinamis dari Admin ── -->
+          <div id="rl-dynamic-articles" style="display:contents;"></div>
+
         </div>
       </div>
     </section>
@@ -1491,6 +1495,82 @@
     <script>
       window.addEventListener('scroll',()=>{ if(sessionStorage.getItem('glocalClosed'))return; if(window.scrollY>400)document.getElementById('glocalBar').classList.add('active'); },{passive:true});
       function closeGlocalBar(){document.getElementById('glocalBar').classList.remove('active');sessionStorage.setItem('glocalClosed','1');}
+    </script>
+    <script>
+      (function () {
+        if (window.__LMS_SUPABASE_BOOTSTRAP__) return;
+        var primarySrc = window.__SUPABASE_SDK_SRC__ || "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        var fallbackSrc = window.__SUPABASE_SDK_FALLBACK_SRC__ || "https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js";
+        function loadScript(src, timeoutMs) {
+          return new Promise(function (resolve, reject) {
+            var script = document.createElement("script");
+            var settled = false;
+            var timerId = window.setTimeout(function () {
+              if (settled) return;
+              settled = true;
+              script.remove();
+              reject(new Error("Timeout: " + src));
+            }, timeoutMs);
+            script.src = src;
+            script.async = true;
+            script.onload = function () {
+              if (settled) return;
+              settled = true;
+              window.clearTimeout(timerId);
+              resolve(src);
+            };
+            script.onerror = function () {
+              if (settled) return;
+              settled = true;
+              window.clearTimeout(timerId);
+              script.remove();
+              reject(new Error("Failed: " + src));
+            };
+            document.head.appendChild(script);
+          });
+        }
+        window.__LMS_SUPABASE_BOOTSTRAP__ = loadScript(primarySrc, 6000).catch(function () {
+          return loadScript(fallbackSrc, 6000);
+        });
+      })();
+    </script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/articles-store.js"></script>
+    <script>
+      // Inject artikel published dari Supabase ke section Artikel & Blog
+      (async function () {
+        var container = document.getElementById('rl-dynamic-articles');
+        if (!container || typeof ArticlesStore === 'undefined') return;
+
+        var articles = await ArticlesStore.getPublished();
+        if (!articles || !articles.length) return;
+
+        var defaultImg = 'assets/images/assistant_carer-optimized.jpg';
+
+        articles.forEach(function (a) {
+          var el = document.createElement('article');
+          el.className = 'card fade-in';
+          var imgSrc = a.imageUrl || defaultImg;
+          var href   = 'pages/article-view.html?slug=' + encodeURIComponent(a.slug);
+          el.innerHTML =
+            '<img src="' + esc(imgSrc) + '" alt="' + esc(a.title) +
+            '" class="card-image" loading="lazy" decoding="async" width="1536" height="1024"' +
+            ' onerror="this.src=\'' + defaultImg + '\'">' +
+            '<div class="card-body">' +
+              '<p style="color:var(--primary-color);font-weight:600;margin-bottom:.5rem;">' + esc(a.badge || 'Artikel') + '</p>' +
+              '<h3 class="card-title">' + esc(a.title) + '</h3>' +
+              '<p class="card-text">' + esc(a.excerpt) + '</p>' +
+              '<a href="' + href + '" class="btn btn-primary btn-sm">Baca Artikel</a>' +
+            '</div>';
+          container.appendChild(el);
+        });
+
+        function esc(s) {
+          return String(s || '').replace(/[&<>"']/g, function (c) {
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+          });
+        }
+      })();
     </script>
   </body>
 </html>
