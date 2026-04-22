@@ -917,6 +917,8 @@ footer {
   flex-direction: column;
   gap: 0.9rem;
 }
+.footer-section h2,
+.footer-section h3,
 .footer-section h4 {
   font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 1rem;
@@ -962,6 +964,8 @@ footer {
   display: grid;
   gap: 0.65rem;
 }
+.footer-brand-copy h2,
+.footer-brand-copy h3,
 .footer-brand-copy h4,
 .footer-brand-copy p {
   margin: 0;

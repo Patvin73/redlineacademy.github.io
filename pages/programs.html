@@ -1088,7 +1088,7 @@
     (function () {
       const form = document.querySelector(".enroll-form");
       const notice = document.getElementById("form-notification");
-      if (!form || !window.lmsConfig) return;
+      if (!form) return;
 
       const submitBtn = form.querySelector("[type=submit]");
       const showNotice = (type, message) => {
@@ -1107,15 +1107,20 @@
         if (notice) notice.style.display = "none";
 
         try {
+          const supabaseUrl = window.lmsConfig && window.lmsConfig.supabaseUrl;
+          if (!supabaseUrl) {
+            throw new Error("Konfigurasi pendaftaran belum siap. Silakan muat ulang halaman.");
+          }
+
           const formData = new FormData(form);
           if (!formData.get("payment_status")) {
             formData.set("payment_status", "ready_for_gateway");
           }
 
-          const res = await fetch(
-            window.lmsConfig.supabaseUrl + "/functions/v1/public-enroll",
-            { method: "POST", body: formData }
-          );
+          const res = await fetch(supabaseUrl + "/functions/v1/public-enroll", {
+            method: "POST",
+            body: formData
+          });
 
           const data = await res.json().catch(() => ({}));
           if (!res.ok) {

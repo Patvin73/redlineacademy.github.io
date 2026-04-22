@@ -407,7 +407,7 @@ test.describe("Student and marketer flows", {
 
     await page.goto("/pages/dashboard-student.html");
     await expect(page.locator("#profileCardName")).toHaveText("Alpha Student");
-    await expect(page.locator("#profileCardId")).toContainText("STUDENT");
+    await expect(page.locator("#profileCardId")).toHaveText("ST-001");
     await expect(page.locator("#profileCardEmail")).toHaveText("alpha@example.com");
 
     await page.locator("#logoutBtn").click();

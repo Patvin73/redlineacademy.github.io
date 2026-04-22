@@ -92,6 +92,7 @@
       adDeleteCourse:        "Hapus",
       adGradeTabPending:     "Perlu Dinilai",
       adGradeTabGraded:      "Sudah Dinilai",
+      adGradeTabResubmit:    "Perlu Revisi",
       adNoSubmissions:       "Tidak ada tugas untuk dinilai",
       adSelectSubmission:    "Pilih submission untuk dinilai",
       adSubmittedFiles:      "File yang Dikirim",
@@ -244,6 +245,7 @@
       adDeleteCourse:        "Delete",
       adGradeTabPending:     "Needs Grading",
       adGradeTabGraded:      "Graded",
+      adGradeTabResubmit:    "Needs Resubmit",
       adNoSubmissions:       "No submissions to grade",
       adSelectSubmission:    "Select a submission to grade",
       adSubmittedFiles:      "Submitted Files",
@@ -562,9 +564,14 @@
      SUPABASE DATA — main loader
   ================================================================ */
   async function loadAdminData() {
-    if (!window.lmsSupabase) return;
-
     try {
+      if (!window.lmsSupabase) {
+        if (window.__lmsSupabaseReady__) {
+          await window.__lmsSupabaseReady__;
+        }
+      }
+      if (!window.lmsSupabase) return;
+
       const { data: { user }, error: authErr } = await window.lmsSupabase.auth.getUser();
       if (authErr || !user) return;
 
@@ -1864,9 +1871,9 @@
       const btn = e.target.closest("[data-action='toggle-active']");
       if (!btn) return;
       const uid = btn.dataset.uid;
-    const isActive = btn.textContent.trim() === tSafe("lmsActionSuspend", "Suspend");
+    const isActive = btn.textContent.trim() === "Suspend";
       await window.lmsSupabase.from("profiles").update({ is_active: !isActive }).eq("id", uid).catch(() => {});
-    btn.textContent = isActive ? tSafe("lmsActionActivate", "Activate") : tSafe("lmsActionSuspend", "Suspend");
+    btn.textContent = isActive ? "Activate" : "Suspend";
     });
   }
 
@@ -1926,11 +1933,11 @@
         }
         if (p.status === "pending")   pending++;
 
-        const statusPaid = tSafe("lmsStatusPaid", "Paid");
-        const statusPending = tSafe("lmsStatusPending", "Pending");
-        const statusFailed = tSafe("lmsStatusFailed", "Failed");
-        const statusRefunded = tSafe("lmsStatusRefunded", "Refunded");
-        const statusInstallment = tSafe("lmsStatusInstallment", "Installment");
+        const statusPaid = "Paid";
+        const statusPending = "Pending";
+        const statusFailed = "Failed";
+        const statusRefunded = "Refunded";
+        const statusInstallment = "Installment";
 
         let statusTag = {
           completed: `<span class="ad-tag ad-tag--green">${statusPaid}</span>`,

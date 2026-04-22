@@ -1250,6 +1250,7 @@ body.article-caregiver-page {
   padding: 1.1rem;
 }
 
+.ch-info h3,
 .ch-info h4,
 .tc-title,
 .q-text,
@@ -1257,6 +1258,7 @@ body.article-caregiver-page {
   color: var(--article-text);
 }
 
+.ch-info h3,
 .ch-info h4,
 .tc-title {
   margin-bottom: 0.25rem;

@@ -18,6 +18,9 @@ function resolveLink(filePath, href) {
   const cleanHref = href.split('#')[0].split('?')[0];
   if (!cleanHref) return null;
   if (/^(https?:|mailto:|tel:|javascript:)/i.test(cleanHref)) return null;
+  if (cleanHref.startsWith('/')) {
+    return path.resolve(root, cleanHref.slice(1));
+  }
   return path.resolve(path.dirname(filePath), cleanHref);
 }
 

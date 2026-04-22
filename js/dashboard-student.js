@@ -702,12 +702,17 @@
      SUPABASE DATA LOADERS
   ================================================================ */
   async function loadStudentData() {
-    if (!window.lmsSupabase) {
-      console.warn("Supabase not initialised");
-      return;
-    }
-
     try {
+      if (!window.lmsSupabase) {
+        if (window.__lmsSupabaseReady__) {
+          await window.__lmsSupabaseReady__;
+        }
+      }
+      if (!window.lmsSupabase) {
+        console.warn("Supabase not initialised");
+        return;
+      }
+
       // 1. Get current user
       const { data: { user }, error: authErr } = await window.lmsSupabase.auth.getUser();
       if (authErr || !user) {
@@ -772,9 +777,7 @@
 
     // IDs
     if ($("profileCardId")) {
-      $("profileCardId").textContent = profile.id
-        ? profile.id.substring(0, 8).toUpperCase()
-        : "—";
+      $("profileCardId").textContent = profile.student_id || profile.id || "—";
     }
 
     // Joined date
@@ -1184,8 +1187,7 @@
       const { data: enrollments } = await window.lmsSupabase
         .from("enrollments")
         .select("course_id")
-        .eq("student_id", userId)
-        .eq("status", "active");
+        .eq("student_id", userId);
 
       const courseIds = (enrollments || []).map((e) => e.course_id);
 
@@ -1244,7 +1246,6 @@
         .from("enrollments")
         .select("course_id")
         .eq("student_id", userId)
-        .eq("status", "active");
 
       const courseIds = (enrollments || []).map((e) => e.course_id).filter(Boolean);
       if (courseIds.length === 0) throw new Error("No enrollments");
@@ -1501,7 +1502,6 @@
         .from("enrollments")
         .select("course_id")
         .eq("student_id", userId)
-        .eq("status", "active");
 
       if (enrollErr) throw enrollErr;
       const courseIds = (enrollments || []).map((e) => e.course_id).filter(Boolean);

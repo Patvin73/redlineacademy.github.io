@@ -6,7 +6,8 @@
       "test-results/**",
       "playwright-report/**",
       "logs/**",
-      ".playwright-cli/**"
+      ".playwright-cli/**",
+      ".tmp-pip/**"
     ]
   },
   {
