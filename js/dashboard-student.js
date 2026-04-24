@@ -1597,7 +1597,7 @@
       case "assignment_submitted":
         return { icon: "📤", iconClass: "sd-activity-item__icon--quiz", text: `Submitted assignment: <strong>${escHtml(meta.assignment_title || "Assignment")}</strong>` };
       case "quiz_passed":
-        return { icon: "🏅", iconClass: "sd-activity-item__icon--cert", text: `Passed quiz with <strong>${meta.score || 0}%</strong>` };
+        return { icon: "🏅", iconClass: "sd-activity-item__icon--cert", text: `Passed quiz with <strong>${escHtml(meta.score || 0)}%</strong>` };
       case "course_enrolled":
         return { icon: "🎓", iconClass: "sd-activity-item__icon--enroll", text: `Enrolled in <strong>${escHtml(meta.course_title || "a course")}</strong>` };
       case "certificate_issued":

@@ -160,7 +160,6 @@
    */
   async function signIn(email, password, allowedRoles) {
     try {
-      console.log("[SIGNIN] start", { email, allowedRoles });
       const supabase = await getClient();
       const supabaseUrl = window.lmsConfig?.supabaseUrl;
       const supabaseAnonKey = window.lmsConfig?.supabaseAnonKey;
@@ -207,14 +206,6 @@
       }
 
       const tokenData = await response.json().catch(() => ({}));
-      console.log("[SIGNIN] token response", {
-        ok: response.ok,
-        status: response.status,
-        hasUserId: !!tokenData.user?.id,
-        hasAccessToken: !!tokenData.access_token,
-        hasRefreshToken: !!tokenData.refresh_token,
-        error: tokenData.error_description || tokenData.msg || tokenData.message || null,
-      });
 
       if (!response.ok) {
         return {
@@ -246,10 +237,6 @@
         AUTH_REQUEST_TIMEOUT_MS,
         "Pengaturan sesi login melebihi batas waktu."
       );
-      console.log("[SIGNIN] setSession result", {
-        ok: !sessionError,
-        error: sessionError ? sessionError.message : null,
-      });
 
       if (sessionError) {
         return {
@@ -263,7 +250,6 @@
         AUTH_REQUEST_TIMEOUT_MS,
         "Pengambilan profil melebihi batas waktu."
       );
-      console.log("[SIGNIN] profile fetch", profileRes);
       if (!profileRes.ok) {
         return {
           ok: false,
@@ -295,7 +281,6 @@
         role,
         redirectTo: getDashboardRouteByRole(role),
       };
-      console.log("[SIGNIN] return", result);
       return result;
     } catch (err) {
       console.error("[SIGNIN] unexpected error", err);
