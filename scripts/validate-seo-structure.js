@@ -11,8 +11,12 @@ const htmlFiles = ['index.html', 'test-lang.html']
       .filter((file) => file.endsWith('.html'))
       .map((file) => path.join(root, 'pages', file))
   );
+const crawlSourceFiles = htmlFiles.concat(
+  ['robots.txt', 'sitemap.xml'].map((file) => path.join(root, file))
+);
 
 const issues = [];
+const insecureProductionUrlPattern = /http:\/\/(?:www\.)?redlineacademy\.com\.au[^\s"'<>)]*/gi;
 
 function resolveLink(filePath, href) {
   const cleanHref = href.split('#')[0].split('?')[0];
@@ -22,6 +26,11 @@ function resolveLink(filePath, href) {
     return path.resolve(root, cleanHref.slice(1));
   }
   return path.resolve(path.dirname(filePath), cleanHref);
+}
+
+function pointsToLocalIndexHtml(href) {
+  const cleanHref = href.split('#')[0].split('?')[0];
+  return /(?:^|\/)index\.html$/i.test(cleanHref);
 }
 
 function checkPage(filePath) {
@@ -55,6 +64,10 @@ function checkPage(filePath) {
 
   [...content.matchAll(/<a\b[^>]*href=["']([^"']+)["'][^>]*>/gi)].forEach((entry) => {
     const href = entry[1];
+    if (pointsToLocalIndexHtml(href)) {
+      issues.push(`${relative}: internal link should use canonical homepage URL instead of "${href}"`);
+    }
+
     const resolved = resolveLink(filePath, href);
     if (resolved && !fs.existsSync(resolved)) {
       issues.push(`${relative}: broken local link "${href}"`);
@@ -62,7 +75,18 @@ function checkPage(filePath) {
   });
 }
 
+function checkProductionUrls(filePath) {
+  const content = fs.readFileSync(filePath, 'utf8');
+  const relative = path.relative(root, filePath);
+  const insecureUrls = [...new Set(content.match(insecureProductionUrlPattern) || [])];
+
+  insecureUrls.forEach((url) => {
+    issues.push(`${relative}: insecure production URL "${url}"`);
+  });
+}
+
 htmlFiles.forEach(checkPage);
+crawlSourceFiles.forEach(checkProductionUrls);
 
 if (issues.length > 0) {
 console.error(['SEO structure validation failed:', ...issues.map((item) => `- ${item}`)].join('\n'));

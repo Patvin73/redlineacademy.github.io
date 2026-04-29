@@ -266,6 +266,12 @@ async function getAuthState(page, storageKey) {
   }, storageKey);
 }
 
+async function expectLoginPageReady(page) {
+  await expect(page).toHaveURL(/\/pages\/login\.html$/);
+  await page.waitForLoadState("domcontentloaded");
+  await expect(page.locator("#loginFormLMS")).toBeVisible();
+}
+
 test.describe("Session edge cases", { tag: ["@auth", "@rbac", "@critical"] }, () => {
   test("expired session redirects to login and clears the stale session", async ({ page }) => {
     const profiles = buildProfiles();
@@ -279,8 +285,7 @@ test.describe("Session edge cases", { tag: ["@auth", "@rbac", "@critical"] }, ()
       waitUntil: "domcontentloaded",
     });
 
-    await expect(page).toHaveURL(/\/pages\/login\.html$/);
-    await expect(page.locator("#loginFormLMS")).toBeVisible();
+    await expectLoginPageReady(page);
 
     const authState = await getAuthState(page, storageKey);
     expect(authState?.signOutCalls).toBe(1);
@@ -298,8 +303,7 @@ test.describe("Session edge cases", { tag: ["@auth", "@rbac", "@critical"] }, ()
       waitUntil: "domcontentloaded",
     });
 
-    await expect(page).toHaveURL(/\/pages\/login\.html$/);
-    await expect(page.locator("#loginFormLMS")).toBeVisible();
+    await expectLoginPageReady(page);
 
     const authState = await getAuthState(page, storageKey);
     expect(authState?.signOutCalls).toBe(1);
