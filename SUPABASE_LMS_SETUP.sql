@@ -298,13 +298,20 @@ create index if not exists idx_payments_student on public.payments(student_id);
 
 do $$
 begin
+  if exists (
+    select 1 from pg_constraint where conname = 'payments_installment_check'
+  ) then
+    alter table public.payments
+      drop constraint payments_installment_check;
+  end if;
+
   if not exists (
     select 1 from pg_constraint where conname = 'payments_installment_check'
   ) then
     alter table public.payments
       add constraint payments_installment_check
       check (
-        installment_total between 1 and 4
+        installment_total >= 1
         and installment_paid between 0 and installment_total
       );
   end if;

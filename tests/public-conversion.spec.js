@@ -75,6 +75,11 @@ async function expectCurrencyText(locator, expectedValue) {
   await expect(locator).toHaveText(pattern);
 }
 
+async function choosePaymentPlan(page, planId) {
+  await page.locator(`label[for='${planId}']`).click();
+  await expect(page.locator(`#${planId}`)).toBeChecked();
+}
+
 test.describe("Public conversion and utility pages", { tag: "@public" }, () => {
   test("programs page prepares a payment payload with summary, promo, and gateway reference", async ({ page }) => {
     await stubExternalAssets(page);
@@ -90,7 +95,7 @@ test.describe("Public conversion and utility pages", { tag: "@public" }, () => {
     await page.waitForLoadState("domcontentloaded");
 
     await page.selectOption("#selected_program", "assistant_carer");
-    await page.check("#payment_plan_full");
+    await choosePaymentPlan(page, "payment_plan_full");
     await page.selectOption("#payment_method", "bank_transfer");
     await page.fill("#invoice_name", "QA Candidate");
     await page.fill("#invoice_email", "qa.candidate@example.com");
@@ -223,10 +228,17 @@ test.describe("Public conversion and utility pages", { tag: "@public" }, () => {
     await page.fill("textarea[name='experience']", "Pernah membantu merawat anggota keluarga.");
 
     await page.selectOption("#selected_program", "assistant_carer");
-    await page.check("#payment_plan_installment");
+    await choosePaymentPlan(page, "payment_plan_installment");
     await page.selectOption("#payment_method", "bank_transfer");
     await page.fill("#invoice_name", "QA Enrollment");
     await page.fill("#invoice_email", "billing.qa@example.com");
+
+    await expectCurrencyText(page.locator("#summary_total"), "Rp500.000");
+    await expect(page.locator("#payment_total")).toHaveValue("500000");
+    await expect(page.locator("#installment_monthly_amount")).toHaveValue("500000");
+    await expect(page.locator("#installment_total")).toHaveValue("10");
+    await expect(page.locator("#installment_balance_total")).toHaveValue("4600000");
+
     await page.click("#prepare-payment-btn");
 
     await page.check("input[name='accuracy']");
@@ -269,9 +281,12 @@ test.describe("Public conversion and utility pages", { tag: "@public" }, () => {
     expect(requests[0].entries.payment_method).toBe("bank_transfer");
     expect(requests[0].entries.payment_status).toBe("ready_for_gateway");
     expect(requests[0].entries.payment_reference).toMatch(/^RL-\d+$/);
+    expect(requests[0].entries.payment_total).toBe("500000");
+    expect(requests[0].entries.installment_monthly_amount).toBe("500000");
+    expect(requests[0].entries.installment_total).toBe("10");
+    expect(requests[0].entries.installment_balance_total).toBe("4600000");
     expect(requests[0].entries.invoice_email).toBe("billing.qa@example.com");
     expect(requests[0].entries.id_document.name).toBe("ktp-qa.pdf");
-    expect(Number(requests[0].entries.payment_total)).toBeGreaterThan(0);
   });
 
   test("whatsapp enquiry builds a personalized preview and opens the correct WhatsApp deep link", async ({ page }) => {

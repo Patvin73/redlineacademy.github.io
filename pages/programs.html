@@ -521,7 +521,7 @@
                             </span>
                             <span class="payment-plan-content">
                               <strong data-i18n="paymentPlanInstallmentTitle">Cicilan</strong>
-                              <small data-i18n="paymentPlanInstallmentDesc">Tanpa Diskon</small>
+                              <small data-i18n="paymentPlanInstallmentDesc">Rp500.000/bulan hingga lunas</small>
                             </span>
                           </label>
                         </div>
@@ -595,6 +595,9 @@
                     <input type="hidden" name="plan_discount" id="plan_discount" value="0">
                     <input type="hidden" name="promo_discount" id="promo_discount" value="0">
                     <input type="hidden" name="payment_total" id="payment_total" value="0">
+                    <input type="hidden" name="installment_monthly_amount" id="installment_monthly_amount" value="0">
+                    <input type="hidden" name="installment_total" id="installment_total" value="1">
+                    <input type="hidden" name="installment_balance_total" id="installment_balance_total" value="0">
                     <input type="hidden" name="payment_currency" value="IDR">
                     <input type="hidden" name="payment_status" id="payment_status" value="draft">
                     <input type="hidden" name="payment_reference" id="payment_reference" value="">
@@ -968,6 +971,10 @@
       const paymentTotalInput = document.getElementById('payment_total');
       const paymentStatusInput = document.getElementById('payment_status');
       const paymentReferenceInput = document.getElementById('payment_reference');
+      const installmentMonthlyAmountInput = document.getElementById('installment_monthly_amount');
+      const installmentTotalInput = document.getElementById('installment_total');
+      const installmentBalanceTotalInput = document.getElementById('installment_balance_total');
+      const INSTALLMENT_MONTHLY_AMOUNT = 500000;
 
       const promoDiscountMap = {
         EARLYBIRD10: 0.1,
@@ -995,12 +1002,24 @@
         return parseNumeric(selectedPlan.dataset.discount);
       }
 
+      function isInstallmentPlan() {
+        const selectedPlan = form.querySelector('input[name="payment_plan"]:checked');
+        return selectedPlan && selectedPlan.value === 'installment';
+      }
+
       function updateSummary() {
         const selectedOption = selectedProgram.options[selectedProgram.selectedIndex];
         const programFee = selectedOption ? parseNumeric(selectedOption.dataset.price) : 0;
         const planDiscount = Math.round(programFee * getSelectedPlanDiscountRate());
         const promoDiscount = Math.round(programFee * promoRate);
-        const total = Math.max(programFee - planDiscount - promoDiscount, 0);
+        const balanceTotal = Math.max(programFee - planDiscount - promoDiscount, 0);
+        const installmentSelected = isInstallmentPlan();
+        const installmentTotal = installmentSelected && balanceTotal > 0
+          ? Math.ceil(balanceTotal / INSTALLMENT_MONTHLY_AMOUNT)
+          : 1;
+        const total = installmentSelected && balanceTotal > 0
+          ? Math.min(INSTALLMENT_MONTHLY_AMOUNT, balanceTotal)
+          : balanceTotal;
 
         summaryProgramFee.textContent = formatCurrency(programFee);
         summaryPlanDiscount.textContent = '-' + formatCurrency(planDiscount);
@@ -1012,6 +1031,9 @@
         planDiscountInput.value = String(planDiscount);
         promoDiscountInput.value = String(promoDiscount);
         paymentTotalInput.value = String(total);
+        installmentMonthlyAmountInput.value = installmentSelected ? String(INSTALLMENT_MONTHLY_AMOUNT) : '0';
+        installmentTotalInput.value = String(installmentTotal);
+        installmentBalanceTotalInput.value = String(balanceTotal);
       }
 
       function setFeedback(element, message, variant) {

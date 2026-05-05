@@ -6,6 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS"
 };
+const INSTALLMENT_MONTHLY_AMOUNT = 500000;
 
 function jsonResponse(status: number, body: Record<string, unknown>) {
   return new Response(JSON.stringify(body), {
@@ -97,7 +98,7 @@ serve(async (req) => {
     const promoCode = safeString(payload.promo_code);
 
     const paymentCurrency = safeString(payload.payment_currency || "IDR");
-    const paymentTotal = Number(payload.payment_total || 0) || 0;
+    const submittedPaymentTotal = Number(payload.payment_total || 0) || 0;
     const programFee = Number(payload.program_fee || 0) || 0;
     const planDiscount = Number(payload.plan_discount || 0) || 0;
     const promoDiscount = Number(payload.promo_discount || 0) || 0;
@@ -118,7 +119,7 @@ serve(async (req) => {
     if (!invoiceName || !invoiceEmail || !isValidEmail(invoiceEmail)) {
       return jsonResponse(400, { error: "Valid invoice name and email are required" });
     }
-    if (paymentTotal <= 0) {
+    if (submittedPaymentTotal <= 0) {
       return jsonResponse(400, { error: "Payment total is invalid" });
     }
 
@@ -220,7 +221,7 @@ serve(async (req) => {
           slug: desiredSlug,
           description: "",
           enrollment_type: "paid",
-          price: programFee || paymentTotal,
+          price: programFee || submittedPaymentTotal,
           status: "published"
         })
         .select("id, title, slug, status")
@@ -332,7 +333,13 @@ serve(async (req) => {
 
     const paymentStatus = "pending";
     const planValue = paymentPlan === "installment" ? "installment" : "full";
-    const installmentTotal = planValue === "installment" ? 2 : 1;
+    const payableBalance = Math.max(programFee - planDiscount - promoDiscount, submittedPaymentTotal);
+    const paymentTotal = planValue === "installment"
+      ? Math.min(INSTALLMENT_MONTHLY_AMOUNT, payableBalance)
+      : submittedPaymentTotal;
+    const installmentTotal = planValue === "installment"
+      ? Math.max(1, Math.ceil(payableBalance / INSTALLMENT_MONTHLY_AMOUNT))
+      : 1;
     const installmentPaid = 0;
 
     const { data: existingPayment, error: paymentFindErr } = await adminClient
