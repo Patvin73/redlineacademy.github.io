@@ -341,6 +341,7 @@
   let activeUserRoleFilter = "all";
   let selectedSubmissionId = null;
   let editingCourseId  = null;
+  const USER_ROLE_TAGS = { admin: "red", trainer: "purple", student: "blue" };
 
   /* ================================================================
      HELPERS
@@ -1832,8 +1833,8 @@
 
     if (empty) empty.style.display = "none";
 
+    const fragment = document.createDocumentFragment();
     users.forEach((u) => {
-      const roleTags = { admin: "red", trainer: "purple", student: "blue" };
       const tr = document.createElement("tr");
       tr.className = "ad-user-row";
       tr.dataset.role = u.role || "";
@@ -1849,7 +1850,7 @@
           </div>
         </td>
         <td style="color:var(--sd-text-muted);font-size:.82rem">${escHtml(u.email)}</td>
-        <td><span class="ad-tag ad-tag--${roleTags[u.role] || "gray"}">${u.role}</span></td>
+        <td><span class="ad-tag ad-tag--${USER_ROLE_TAGS[u.role] || "gray"}">${u.role}</span></td>
         <td><span class="ad-tag ${u.is_active ? "ad-tag--green" : "ad-tag--gray"}">${u.is_active ? tSafe("lmsStatusActive", "Active") : tSafe("lmsStatusInactive", "Inactive")}</span></td>
         <td style="color:var(--sd-text-muted);font-size:.82rem">${formatDT(u.created_at)}</td>
         <td>
@@ -1857,8 +1858,9 @@
             ${u.is_active ? "Suspend" : "Activate"}
           </button>
         </td>`;
-      tbody.appendChild(tr);
+      fragment.appendChild(tr);
     });
+    tbody.appendChild(fragment);
   }
 
   function bindUserTableActions() {
