@@ -147,9 +147,10 @@ const translations = {
     ourCommitment: "Komitmen Kami",
 
     caregiverExcellence:
-      "Keunggulan Care Giver: Memberdayakan Hidup dengan Pendekatan Person-Centred Care",
+      "Profil Redline Academy",
     caregiverExcellenceIntro:
-      "Jembatani potensi Anda dengan kurikulum yang menyelaraskan kompetensi praktis dan pendekatan perawatan yang berpusat pada individu (person-centred care). Program ini membekali Anda dengan kecakapan yang diperlukan untuk unggul di rumah sakit, perawatan lansia, maupun lingkungan masyarakat dengan tetap menghargai martabat serta pilihan unik setiap pribadi. Bergabunglah bersama kami untuk memberikan dukungan yang bukan sekadar layanan, melainkan komitmen tulus untuk meningkatkan kualitas hidup sesama. Mulailah langkah Anda untuk membawa perubahan berarti bagi dunia, melalui pengabdian tulus bagi setiap pribadi yang Anda rawat.",
+      "Redline Academy adalah lembaga pendidikan vokasional terdaftar di Australia yang hadir khusus untuk tenaga caregiver Indonesia. Kami menghadirkan pelatihan berstandar Australian Micro-credentials Framework (AUS NMF) - sertifikasi kelas dunia dengan harga yang bisa dijangkau di dalam negeri. Dari merawat keluarga di rumah sejak Hari Pertama, hingga bekerja secara profesional di Australia, Inggris, Kanada, dan Singapura - Redline Academy adalah satu-satunya jalan karier lengkap yang bisa Anda mulai hari ini.",
+    viewFullProfile: "Lihat Profil Lengkap",
 
     dedicatedEducator: "Pendidik yang Berdedikasi",
     dedicatedEducatorDesc:
@@ -649,9 +650,10 @@ const translations = {
     ourCommitment: "Our Commitment",
 
     caregiverExcellence:
-      "Care Giver Excellence: Empowering Lives with a Person-Centred Care Approach",
+      "Redline Academy Profile",
     caregiverExcellenceIntro:
-      "Bridge your potential with a curriculum that aligns practical competence and person-centred care. This program equips you with the skills to excel in hospitals, aged care and community settings while honoring each person's dignity and choices. Join us to provide support that goes beyond service - a genuine commitment to improving quality of life. Start your journey to make meaningful change through compassionate care.",
+      "Redline Academy is a vocational education institution registered in Australia, created specifically for Indonesian caregivers. We deliver training aligned with the Australian Micro-credentials Framework (AUS NMF) - world-class certification at a price that remains accessible locally. From caring for family at home from Day One to working professionally in Australia, the United Kingdom, Canada, and Singapore, Redline Academy is the only complete career pathway you can start today.",
+    viewFullProfile: "View Full Profile",
 
     dedicatedEducator: "Dedicated Educator",
     dedicatedEducatorDesc:

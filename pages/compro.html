@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Redline Academy — Company Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --red: #c8102e;
+    --red-deep: #8b0000;
+    --red-bright: #e8192e;
+    --black: #0a0a0a;
+    --charcoal: #141414;
+    --grey-dark: #1e1e1e;
+    --grey-mid: #2e2e2e;
+    --grey-light: #888;
+    --white: #f5f5f5;
+    --cream: #f0ece4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.4;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 70% 40%, rgba(200,16,46,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 80% at 10% 80%, rgba(139,0,0,0.12) 0%, transparent 60%),
+      var(--black);
+  }
+
+  /* diagonal red accent stripe */
+  .hero-bg::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--red-bright), transparent 80%);
+  }
+
+  nav {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 5vw;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .logo-mark {
+    height: 52px;
+    width: auto;
+  }
+
+  .logo-wordmark {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 0.15em;
+    color: var(--white);
+    line-height: 1;
+  }
+
+  .logo-wordmark span {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 400;
+    letter-spacing: 0.3em;
+    color: var(--grey-light);
+    margin-top: 2px;
+  }
+
+  .nav-meta {
+    text-align: right;
+    font-size: 0.7rem;
+    color: var(--grey-light);
+    letter-spacing: 0.1em;
+    line-height: 1.8;
+  }
+
+  .nav-meta strong {
+    color: rgba(255,255,255,0.5);
+    font-weight: 500;
+  }
+
+  /* ── HERO CONTENT ── */
+  .hero-content {
+    position: relative;
+    z-index: 5;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6rem 5vw 4rem;
+    max-width: 900px;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--red-bright);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--red-bright);
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.5rem, 9vw, 7rem);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    margin-bottom: 0.3em;
+  }
+
+  .hero-title em {
+    font-style: normal;
+    color: var(--red-bright);
+    -webkit-text-stroke: 1px var(--red-bright);
+  }
+
+  .hero-subtitle {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 2.5rem;
+    max-width: 560px;
+    line-height: 1.5;
+  }
+
+  .hero-tagline {
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    border-left: 2px solid var(--red);
+    padding-left: 1rem;
+    line-height: 2;
+  }
+
+  /* hero stat bar */
+  .hero-stats {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    gap: 0;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    margin: 0 0 0 0;
+  }
+
+  .stat-item {
+    flex: 1;
+    padding: 2rem 5vw;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .stat-item:last-child { border-right: none; }
+
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.8rem;
+    color: var(--red-bright);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--grey-light);
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    padding: 7rem 5vw;
+  }
+
+  .section-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 0 0 40px;
+    height: 1px;
+    background: var(--red);
+  }
+
+  /* ── ABOUT ── */
+  #about {
+    background: var(--charcoal);
+    position: relative;
+    overflow: hidden;
+  }
+
+  #about::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(200,16,46,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: start;
+    max-width: 1200px;
+  }
+
+  .about-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    margin-bottom: 1.5rem;
+    color: var(--white);
+  }
+
+  .about-heading em {
+    color: var(--red-bright);
+    font-style: normal;
+  }
+
+  .about-body {
+    font-size: 1rem;
+    line-height: 1.85;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 1.5rem;
+  }
+
+  .about-body strong {
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .divider-red {
+    width: 48px;
+    height: 2px;
+    background: var(--red);
+    margin: 2rem 0;
+  }
+
+  .mission-box {
+    border: 1px solid rgba(200,16,46,0.3);
+    padding: 2.5rem;
+    border-radius: 2px;
+    background: rgba(200,16,46,0.04);
+    position: relative;
+  }
+
+  .mission-box::before {
+    content: '"';
+    position: absolute;
+    top: -0.5rem;
+    left: 2rem;
+    font-family: 'DM Serif Display', serif;
+    font-size: 5rem;
+    color: var(--red);
+    line-height: 1;
+    opacity: 0.4;
+  }
+
+  .mission-text {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 1rem;
+  }
+
+  .mission-attr {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+  }
+
+  /* ── OFFERINGS ── */
+  #offerings {
+    background: var(--black);
+  }
+
+  .offerings-header {
+    max-width: 1200px;
+    margin-bottom: 4rem;
+  }
+
+  .offerings-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: var(--white);
+  }
+
+  .offerings-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5px;
+    max-width: 1200px;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .offer-card {
+    background: var(--black);
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s ease;
+  }
+
+  .offer-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--red-bright);
+    transition: width 0.4s ease;
+  }
+
+  .offer-card:hover { background: var(--charcoal); }
+  .offer-card:hover::after { width: 100%; }
+
+  .offer-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem;
+    color: rgba(200,16,46,0.12);
+    line-height: 1;
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+  }
+
+  .offer-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .offer-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    margin-bottom: 0.8rem;
+  }
+
+  .offer-body {
+    font-size: 0.85rem;
+    line-height: 1.75;
+    color: rgba(255,255,255,0.5);
+  }
+
+  /* ── PATHWAY ── */
+  #pathway {
+    background: var(--charcoal);
+    position: relative;
+  }
+
+  .pathway-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    margin-bottom: 4rem;
+  }
+
+  .pathway-track {
+    max-width: 1100px;
+    position: relative;
+  }
+
+  .pathway-track::before {
+    content: '';
+    position: absolute;
+    left: 28px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--red), rgba(200,16,46,0.1));
+  }
+
+  .pathway-step {
+    display: flex;
+    gap: 2.5rem;
+    align-items: flex-start;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+
+  .step-dot {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--grey-dark);
+    border: 1px solid var(--red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    color: var(--red-bright);
+    position: relative;
+    z-index: 2;
+  }
+
+  .step-content { padding-top: 0.5rem; }
+
+  .step-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+  }
+
+  .step-flag {
+    font-size: 1rem;
+    margin-left: 0.5rem;
+  }
+
+  .step-body {
+    font-size: 0.875rem;
+    line-height: 1.75;
+    color: rgba(255,255,255,0.5);
+    max-width: 600px;
+  }
+
+  .step-badge {
+    display: inline-block;
+    margin-top: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(200,16,46,0.12);
+    border: 1px solid rgba(200,16,46,0.3);
+    border-radius: 2px;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red-bright);
+  }
+
+  /* ── WHY ── */
+  #why {
+    background: var(--black);
+  }
+
+  .why-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    margin-bottom: 4rem;
+  }
+
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    max-width: 1200px;
+    background: rgba(255,255,255,0.05);
+  }
+
+  .why-item {
+    background: var(--black);
+    padding: 2.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .why-item-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .why-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--red);
+    flex-shrink: 0;
+  }
+
+  .why-item-body {
+    font-size: 0.85rem;
+    line-height: 1.75;
+    color: rgba(255,255,255,0.45);
+    padding-left: 1.5rem;
+  }
+
+  /* ── CONTACT ── */
+  #contact {
+    background: var(--charcoal);
+    position: relative;
+    overflow: hidden;
+  }
+
+  #contact::before {
+    content: 'REDLINE';
+    position: absolute;
+    bottom: -2rem;
+    right: -2rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12rem;
+    color: rgba(255,255,255,0.02);
+    pointer-events: none;
+    letter-spacing: 0.1em;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: start;
+    max-width: 1200px;
+  }
+
+  .contact-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    margin-bottom: 1.5rem;
+  }
+
+  .contact-body {
+    font-size: 0.9rem;
+    line-height: 1.85;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 2rem;
+  }
+
+  .contact-cta {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background: var(--red);
+    color: var(--white);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+
+  .contact-cta:hover {
+    background: var(--red-bright);
+    transform: translateY(-2px);
+  }
+
+  .contact-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding-top: 1rem;
+  }
+
+  .contact-item {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+
+  .contact-icon {
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(200,16,46,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: var(--red);
+    flex-shrink: 0;
+  }
+
+  .contact-item-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--grey-light);
+    margin-bottom: 0.3rem;
+  }
+
+  .contact-item-value {
+    font-size: 0.9rem;
+    color: var(--white);
+    font-weight: 400;
+  }
+
+  .contact-item-value a {
+    color: var(--white);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(200,16,46,0.4);
+    transition: border-color 0.2s;
+  }
+
+  .contact-item-value a:hover { border-color: var(--red-bright); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--black);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 2rem 5vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.3);
+  }
+
+  .footer-brand span { color: var(--red); }
+
+  .footer-abn {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.2);
+    text-align: right;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in { animation: fadeUp 0.7s ease both; }
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+  .delay-4 { animation-delay: 0.4s; }
+  .delay-5 { animation-delay: 0.5s; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .about-grid,
+    .contact-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .offerings-grid { grid-template-columns: 1fr; }
+    .why-grid { grid-template-columns: 1fr; }
+    .hero-stats { flex-wrap: wrap; }
+    .stat-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .pathway-track::before { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ HEADER ══════════ -->
+<header>
+  <div class="hero-bg"></div>
+
+  <nav>
+    <div class="nav-logo">
+      <img class="logo-mark" src="data:image/png;base64,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" alt="Redline Academy" />
+    </div>
+    <div class="nav-meta">
+      <strong>Company Profile</strong><br>
+      Registered · Australia<br>
+      redlineacademy.com.au
+    </div>
+  </nav>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow fade-in">Company Profile</div>
+    <h1 class="hero-title fade-in delay-1">
+      World-Class<br><em>Standards.</em><br>Indonesian Access.
+    </h1>
+    <p class="hero-subtitle fade-in delay-2">
+      Bridging professional healthcare education across borders — empowering caregivers from Day One to global deployment.
+    </p>
+    <div class="hero-tagline fade-in delay-3">
+      Act Locally &nbsp;·&nbsp; Grow Locally &nbsp;·&nbsp; Think Globally
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item fade-in delay-1">
+      <div class="stat-num">15</div>
+      <div class="stat-label">Week Programme</div>
+    </div>
+    <div class="stat-item fade-in delay-2">
+      <div class="stat-num">4.9</div>
+      <div class="stat-label">Programme Rating</div>
+    </div>
+    <div class="stat-item fade-in delay-3">
+      <div class="stat-num">AU</div>
+      <div class="stat-label">Micro-credential Standard</div>
+    </div>
+    <div class="stat-item fade-in delay-4">
+      <div class="stat-num">4</div>
+      <div class="stat-label">Global Pathways — AU · UK · CA · SG</div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════ ABOUT ══════════ -->
+<section id="about">
+  <div class="about-grid">
+    <div>
+      <div class="section-label">Who We Are</div>
+      <h2 class="about-heading">Purpose-Built<br>for <em>Care</em><br>Professionals</h2>
+      <div class="divider-red"></div>
+      <p class="about-body">
+        <strong>Redline Academy</strong> is an Australian-registered vocational education provider specialising in caregiver training that meets Australian Micro-credentials Framework (AUS NMF) standards. We are purpose-built to serve Indonesian caregiving talent — delivering world-class credentials at local price points.
+      </p>
+      <p class="about-body">
+        Founded to close the gap between global demand for qualified care workers and the limited access to internationally recognised training in emerging markets, Redline Academy offers a complete career pathway: from caring for a family member on Day One, through to professional employment in Australia, the United Kingdom, Canada, and Singapore.
+      </p>
+      <p class="about-body">
+        Our programmes are delivered entirely online, making professional certification accessible regardless of geography, income bracket, or prior experience in the health sector.
+      </p>
+    </div>
+    <div>
+      <div class="mission-box">
+        <p class="mission-text">
+          To make world-standard caregiver education accessible to every Indonesian who wants to serve with dignity — locally today, globally when ready.
+        </p>
+        <div class="mission-attr">— Mission Statement, Redline Academy</div>
+      </div>
+
+      <div style="margin-top: 2.5rem;">
+        <div class="section-label" style="margin-bottom: 1rem;">Business Information</div>
+        <table style="width:100%; border-collapse:collapse; font-size:0.82rem; color:rgba(255,255,255,0.55);">
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+            <td style="padding:0.75rem 0; color:rgba(255,255,255,0.3); font-size:0.65rem; letter-spacing:0.15em; text-transform:uppercase; width:40%">Legal Name</td>
+            <td style="padding:0.75rem 0; color:var(--white);">Redline Academy</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+            <td style="padding:0.75rem 0; color:rgba(255,255,255,0.3); font-size:0.65rem; letter-spacing:0.15em; text-transform:uppercase;">ABN</td>
+            <td style="padding:0.75rem 0; color:var(--white);">92 153 029 925</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+            <td style="padding:0.75rem 0; color:rgba(255,255,255,0.3); font-size:0.65rem; letter-spacing:0.15em; text-transform:uppercase;">Country</td>
+            <td style="padding:0.75rem 0; color:var(--white);">Australia</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+            <td style="padding:0.75rem 0; color:rgba(255,255,255,0.3); font-size:0.65rem; letter-spacing:0.15em; text-transform:uppercase;">Sector</td>
+            <td style="padding:0.75rem 0; color:var(--white);">Vocational Education & Training</td>
+          </tr>
+          <tr>
+            <td style="padding:0.75rem 0; color:rgba(255,255,255,0.3); font-size:0.65rem; letter-spacing:0.15em; text-transform:uppercase;">Credential Standard</td>
+            <td style="padding:0.75rem 0; color:var(--white);">AUS Micro-credentials Framework</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ OFFERINGS ══════════ -->
+<section id="offerings">
+  <div class="offerings-header">
+    <div class="section-label">What We Offer</div>
+    <h2 class="offerings-heading">Programmes &amp; Services</h2>
+  </div>
+  <div class="offerings-grid">
+    <div class="offer-card">
+      <div class="offer-num">01</div>
+      <div class="offer-icon">🩺</div>
+      <div class="offer-title">Caregiver Certification</div>
+      <p class="offer-body">A 15-week online programme covering person-centred care, infection control, safety management, and aged care — delivered against Australian Micro-credentials Framework standards, starting from IDR 500,000 per month.</p>
+    </div>
+    <div class="offer-card">
+      <div class="offer-num">02</div>
+      <div class="offer-icon">🌏</div>
+      <div class="offer-title">Global Pathway Programme</div>
+      <p class="offer-body">A structured four-stage career roadmap from local family care through Indonesian facility employment, credential building, and international deployment to Australia, the UK, Canada, or Singapore.</p>
+    </div>
+    <div class="offer-card">
+      <div class="offer-num">03</div>
+      <div class="offer-icon">📋</div>
+      <div class="offer-title">Australian Micro-Credentials</div>
+      <p class="offer-body">Credentials issued under the AUS NMF, recognised by international employers. Graduates hold a qualification profile that opens doors to aged care, disability support, and community health roles globally.</p>
+    </div>
+    <div class="offer-card">
+      <div class="offer-num">04</div>
+      <div class="offer-icon">👥</div>
+      <div class="offer-title">Personalised Learning Support</div>
+      <p class="offer-body">Dedicated mentors and personalised guidance throughout the programme. Our educators bring deep sector expertise and a genuine commitment to each learner's progression.</p>
+    </div>
+    <div class="offer-card">
+      <div class="offer-num">05</div>
+      <div class="offer-icon">💼</div>
+      <div class="offer-title">Career Readiness &amp; Employment</div>
+      <p class="offer-body">Graduates leave with a tracked work history, a recognised credential, and support in connecting with local Indonesian health facilities and international recruitment pathways.</p>
+    </div>
+    <div class="offer-card">
+      <div class="offer-num">06</div>
+      <div class="offer-icon">🔬</div>
+      <div class="offer-title">Innovative Online Delivery</div>
+      <p class="offer-body">Fully digital, mobile-accessible learning platform. Learners can complete their studies around existing family and work commitments — no classroom attendance required.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ PATHWAY ══════════ -->
+<section id="pathway">
+  <div class="section-label">Career Pathway</div>
+  <h2 class="pathway-heading">One Certificate.<br>One Journey.</h2>
+  <div class="pathway-track">
+    <div class="pathway-step">
+      <div class="step-dot">01</div>
+      <div class="step-content">
+        <div class="step-title">🏠 Care for Family — From Day One</div>
+        <p class="step-body">Graduates can immediately apply their skills in the home — supporting elderly parents, family members, or neighbours using professional, evidence-based care approaches. No waiting. No gap.</p>
+        <div class="step-badge">Act Locally · Immediate Application</div>
+      </div>
+    </div>
+    <div class="pathway-step">
+      <div class="step-dot">02</div>
+      <div class="step-content">
+        <div class="step-title">💼 Enter Indonesian Healthcare Facilities</div>
+        <p class="step-body">With an Australian-standard credential, graduates access formal employment in Indonesian hospitals, aged care facilities, and community health organisations — a significant salary step-up from informal caregiving.</p>
+        <div class="step-badge">Grow Locally · IDR 4,500,000 / Month</div>
+      </div>
+    </div>
+    <div class="pathway-step">
+      <div class="step-dot">03</div>
+      <div class="step-content">
+        <div class="step-title">📋 Build an Internationally Recognised Profile</div>
+        <p class="step-body">Combining an AUS NMF credential with a verified local work history creates a professional profile that is actively sought by international employers — the critical differentiator in a competitive global talent market.</p>
+        <div class="step-badge">Profile Building · Credential + Work History</div>
+      </div>
+    </div>
+    <div class="pathway-step">
+      <div class="step-dot">04</div>
+      <div class="step-content">
+        <div class="step-title">🌏 Think Globally, Act Locally</div>
+        <p class="step-body">Graduates who choose international pathways carry more than a certificate — they carry a verified track record. Equipped with an Australian-standard credential and real-world local experience, they are precisely the professionals that global healthcare employers actively seek. Acting with purpose locally is the very foundation of thinking — and working — globally.</p>
+        <div class="step-badge">Think Globally · Act Locally</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ WHY ══════════ -->
+<section id="why">
+  <div class="section-label">Our Difference</div>
+  <h2 class="why-heading">Why Redline Academy</h2>
+  <div class="why-grid">
+    <div class="why-item">
+      <div class="why-item-title"><div class="why-dot"></div>Australian-Standard Credentials</div>
+      <p class="why-item-body">Our certifications are issued under the Australian Micro-credentials Framework — not generic local certificates. This distinction is recognised and valued by healthcare employers across four international markets.</p>
+    </div>
+    <div class="why-item">
+      <div class="why-item-title"><div class="why-dot"></div>Accessible Pricing for Indonesian Learners</div>
+      <p class="why-item-body">World-class training starting from IDR 500,000 per month breaks down the financial barrier that has historically excluded Indonesian caregivers from globally competitive education.</p>
+    </div>
+    <div class="why-item">
+      <div class="why-item-title"><div class="why-dot"></div>Immediate, Practical Value</div>
+      <p class="why-item-body">Unlike programmes that only serve those seeking overseas employment, Redline graduates can apply their skills from Day One — at home, locally, and globally as their career develops.</p>
+    </div>
+    <div class="why-item">
+      <div class="why-item-title"><div class="why-dot"></div>Fully Online &amp; Flexible</div>
+      <p class="why-item-body">Designed for working adults and family carers, our 15-week curriculum is delivered entirely online — accessible from anywhere in Indonesia without disrupting existing responsibilities.</p>
+    </div>
+    <div class="why-item">
+      <div class="why-item-title"><div class="why-dot"></div>Dedicated, Expert Educators</div>
+      <p class="why-item-body">Our trainers are deeply specialised in aged care, disability support, and person-centred practice. They bring both clinical expertise and a genuine passion for learner success.</p>
+    </div>
+    <div class="why-item">
+      <div class="why-item-title"><div class="why-dot"></div>A Global Vision with Local Roots</div>
+      <p class="why-item-body">Redline Academy is built on the conviction that Indonesian care workers deserve access to the same quality of education as their counterparts in developed nations — and that this investment benefits individuals, families, and the global healthcare system.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CONTACT ══════════ -->
+<section id="contact">
+  <div class="contact-grid">
+    <div>
+      <div class="section-label">Connect With Us</div>
+      <h2 class="contact-heading">Partner.<br>Enrol.<br>Engage.</h2>
+      <p class="contact-body">
+        We welcome enquiries from potential students, healthcare employers, recruitment partners, investors, and institutional collaborators. Whether you are exploring enrolment, workforce solutions, or a strategic partnership — we would like to hear from you.
+      </p>
+      <a href="https://redlineacademy.com.au/pages/contact.html" class="contact-cta" target="_blank">Visit Our Website →</a>
+    </div>
+    <div class="contact-details">
+      <div class="contact-item">
+        <div class="contact-icon">🌐</div>
+        <div>
+          <div class="contact-item-label">Website</div>
+          <div class="contact-item-value"><a href="https://redlineacademy.com.au" target="_blank">redlineacademy.com.au</a></div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon">🇦🇺</div>
+        <div>
+          <div class="contact-item-label">Jurisdiction</div>
+          <div class="contact-item-value">Australia</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon">📋</div>
+        <div>
+          <div class="contact-item-label">ABN</div>
+          <div class="contact-item-value">92 153 029 925</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon">🎓</div>
+        <div>
+          <div class="contact-item-label">Credential Standard</div>
+          <div class="contact-item-value">Australian Micro-credentials Framework (AUS NMF)</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon">🌏</div>
+        <div>
+          <div class="contact-item-label">Serving</div>
+          <div class="contact-item-value">Indonesia · Australia · UK · Canada · Singapore</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <div class="footer-brand"><span>RED</span>LINE ACADEMY &nbsp;·&nbsp; Company Profile 2026</div>
+  <div class="footer-abn">
+    ABN 92 153 029 925 · Registered Australia<br>
+    Act Locally. Grow Locally. Think Globally.
+  </div>
+</footer>
+
+</body>
+</html>
