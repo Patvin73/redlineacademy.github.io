@@ -378,7 +378,7 @@ create or replace function public.is_admin(user_id uuid)
 returns boolean
 language plpgsql
 stable
-security definer
+security invoker
 set search_path = public
 as $$
 begin
@@ -401,7 +401,7 @@ create or replace function public.is_staff(user_id uuid)
 returns boolean
 language plpgsql
 stable
-security definer
+security invoker
 set search_path = public
 as $$
 begin
