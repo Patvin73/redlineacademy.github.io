@@ -151,18 +151,22 @@ async function installSupabaseStub(page, role) {
       title: "Leadership Basics",
       status: "published",
       category_id: "communication",
+      trainer_id: "e2e-trainer",
       thumbnail_url: "",
       created_at: "2026-03-01T08:00:00.000Z",
-      categories: { name: "Communication" }
+      categories: { name: "Communication" },
+      profiles: { admin_id: "TR-002" }
     },
     {
       id: "course-2",
       title: "Emergency Response",
       status: "draft",
       category_id: "first-aid",
+      trainer_id: "e2e-admin",
       thumbnail_url: "",
       created_at: "2026-03-02T08:00:00.000Z",
-      categories: { name: "First Aid" }
+      categories: { name: "First Aid" },
+      profiles: { admin_id: "ADM-001" }
     }
   ];
 
@@ -401,6 +405,32 @@ test("trainer sees KPI values and role badge", async ({ page }) => {
   await expect(page.locator("#kpiCompletionRate")).toHaveText("76%");
 });
 
+test("admin sees registered students even without enrollments", async ({ page }) => {
+  await installSupabaseStub(page, "admin");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='students']").click();
+  await expect(page.locator("#section-students")).toHaveClass(/active/);
+
+  const rows = page.locator("#studentTableBody tr.ad-student-row");
+  await expect(rows).toHaveCount(2);
+  await expect(page.locator("#studentTableBody")).toContainText("Alpha Student");
+  await expect(page.locator("#studentTableBody")).toContainText("Bravo Student");
+});
+
+test("trainer sees registered students even without course enrollments", async ({ page }) => {
+  await installSupabaseStub(page, "trainer");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='students']").click();
+  await expect(page.locator("#section-students")).toHaveClass(/active/);
+
+  const rows = page.locator("#studentTableBody tr.ad-student-row");
+  await expect(rows).toHaveCount(2);
+  await expect(page.locator("#studentTableBody")).toContainText("Alpha Student");
+  await expect(page.locator("#studentTableBody")).toContainText("Bravo Student");
+});
+
 test("trainer can open grading submission and save grade", async ({ page }) => {
   await installSupabaseStub(page, "trainer");
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
@@ -577,6 +607,40 @@ test("trainer can use course builder tabs and save draft", async ({ page }) => {
   await expect(page.locator("#builderMsg")).toContainText("Course saved");
 
   await expect(page.locator(".ad-course-row__title", { hasText: "E2E Draft Course" })).toBeVisible();
+});
+
+test("trainer sees all courses with creator IDs", async ({ page }) => {
+  await installSupabaseStub(page, "trainer");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='courses']").click();
+  await expect(page.locator("#section-courses")).toHaveClass(/active/);
+
+  const rows = page.locator("#adminCourseList .ad-course-row:not(.ad-skeleton-row)");
+  await expect(rows).toHaveCount(2);
+  await expect(page.locator("#adminCourseList")).toContainText("Leadership Basics");
+  await expect(page.locator("#adminCourseList")).toContainText("Emergency Response");
+  await expect(page.locator("#adminCourseList")).toContainText("Creator ID: TR-002");
+  await expect(page.locator("#adminCourseList")).toContainText("Creator ID: ADM-001");
+
+  await expect(page.locator(".ad-course-row", { hasText: "Leadership Basics" }).locator("[data-action='edit']")).toBeVisible();
+  await expect(page.locator(".ad-course-row", { hasText: "Emergency Response" }).locator("[data-action='edit']")).toHaveCount(0);
+});
+
+test("admin sees all courses with creator IDs", async ({ page }) => {
+  await installSupabaseStub(page, "admin");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='courses']").click();
+  await expect(page.locator("#section-courses")).toHaveClass(/active/);
+
+  const rows = page.locator("#adminCourseList .ad-course-row:not(.ad-skeleton-row)");
+  await expect(rows).toHaveCount(2);
+  await expect(page.locator("#adminCourseList")).toContainText("Leadership Basics");
+  await expect(page.locator("#adminCourseList")).toContainText("Emergency Response");
+  await expect(page.locator("#adminCourseList")).toContainText("Creator ID: TR-002");
+  await expect(page.locator("#adminCourseList")).toContainText("Creator ID: ADM-001");
+  await expect(rows.locator("[data-action='edit']")).toHaveCount(2);
 });
 
 test("trainer can open course builder edit flow", async ({ page }) => {

@@ -359,6 +359,12 @@
     return typeof t === "function" ? t(key) : fallback;
   }
 
+  function creatorIdForCourse(course) {
+    const profileId = course?.profiles?.admin_id || course?.profiles?.student_id;
+    if (profileId) return profileId;
+    return course?.trainer_id ? course.trainer_id.substring(0, 8).toUpperCase() : "-";
+  }
+
   function formatCurrency(value, currency = "IDR") {
     const amount = Number(value || 0);
     try {
@@ -974,53 +980,35 @@
     if (!tbody) return;
 
     try {
+      const { data: students, error: studentsErr } = await window.lmsSupabase
+        .from("profiles")
+        .select("id, full_name, email, avatar_url, student_id, is_active")
+        .eq("role", "student")
+        .order("full_name", { ascending: true });
+
+      if (studentsErr) throw studentsErr;
+      if (!students || students.length === 0) throw new Error("No students");
+
+      const studentIds = students.map((student) => student.id).filter(Boolean);
       let enrollments = [];
 
-      if (currentRole === "admin") {
-        const { data, error } = await window.lmsSupabase
-          .from("enrollments")
-          .select(`
-            id, status, enrolled_at,
-            profiles ( id, full_name, email, avatar_url ),
-            courses   ( id, title, enrollment_type, price ),
-            course_progress ( completion_percent, last_accessed_at )
-          `)
-          .order("enrolled_at", { ascending: false });
-        if (error) throw error;
-        enrollments = data || [];
-      } else {
-        if (!currentProfile?.id) throw new Error("Missing trainer profile");
-
-        const { data: courses, error: courseErr } = await window.lmsSupabase
-          .from("courses")
-          .select("id")
-          .eq("trainer_id", currentProfile.id);
-
-        if (courseErr) throw courseErr;
-
-        const courseIds = (courses || []).map((c) => c.id).filter(Boolean);
-        if (courseIds.length === 0) throw new Error("No courses");
-
+      if (studentIds.length) {
         const { data, error: enrollErr } = await window.lmsSupabase
           .from("enrollments")
           .select(`
-            id, status, enrolled_at,
-            profiles ( id, full_name, email, avatar_url ),
+            id, student_id, status, enrolled_at,
             courses   ( id, title, enrollment_type, price ),
             course_progress ( completion_percent, last_accessed_at )
           `)
-          .in("course_id", courseIds)
+          .in("student_id", studentIds)
           .order("enrolled_at", { ascending: false });
 
         if (enrollErr) throw enrollErr;
         enrollments = data || [];
       }
 
-      if (!enrollments || enrollments.length === 0) throw new Error("No enrollments");
-
       let paymentMap = new Map();
       if (currentRole === "admin") {
-        const studentIds = [...new Set(enrollments.map((en) => en.profiles?.id).filter(Boolean))];
         const courseIds = [...new Set(enrollments.map((en) => en.courses?.id).filter(Boolean))];
         if (studentIds.length && courseIds.length) {
           const { data: payments } = await window.lmsSupabase
@@ -1036,26 +1024,31 @@
         }
       }
 
+      const enrollmentByStudent = new Map();
+      enrollments.forEach((en) => {
+        if (en.student_id && !enrollmentByStudent.has(en.student_id)) {
+          enrollmentByStudent.set(en.student_id, en);
+        }
+      });
+
       if (empty) empty.style.display = "none";
       tbody.querySelectorAll("tr:not(#studentTableEmpty)").forEach((r) => r.remove());
 
-      const requiresPayment = (course) => {
-        const price = parseFloat(course?.price || 0);
-        return course?.enrollment_type === "paid" || price > 0;
-      };
-
-      enrollments.forEach((en) => {
-        const p   = en.profiles;
-        const c   = en.courses;
-        const cp  = en.course_progress?.[0];
+      students.forEach((p) => {
+        const en  = enrollmentByStudent.get(p.id);
+        const c   = en?.courses;
+        const cp  = en?.course_progress?.[0];
         const pct = Math.round(cp?.completion_percent || 0);
 
         const statusCompleted = tSafe("lmsStatusCompleted", "Completed");
         const statusActive = tSafe("lmsStatusActive", "Active");
+        const statusInactive = tSafe("lmsStatusInactive", "Inactive");
         const statusPaid = tSafe("lmsStatusPaid", "Paid");
         const statusInstallment = tSafe("lmsStatusInstallment", "Installment");
 
-        let statusTag = en.status === "completed"
+        let statusTag = !en
+          ? `<span class="ad-tag ${p?.is_active === false ? "ad-tag--gray" : "ad-tag--blue"}">${p?.is_active === false ? statusInactive : statusActive}</span>`
+          : en.status === "completed"
           ? `<span class="ad-tag ad-tag--green">${statusCompleted}</span>`
           : en.status === "active"
           ? `<span class="ad-tag ad-tag--blue">${statusActive}</span>`
@@ -1064,7 +1057,6 @@
         if (currentRole === "admin" && p?.id && c?.id) {
           const key = `${p.id}:${c.id}`;
           const payment = paymentMap.get(key);
-          if (requiresPayment(c) && !payment) return;
           if (payment?.payment_plan === "installment") {
             const paid = parseInt(payment.installment_paid || 0, 10);
             const total = parseInt(payment.installment_total || 0, 10);
@@ -1075,8 +1067,6 @@
             statusTag = `<span class="ad-tag ${isLunas ? "ad-tag--green" : "ad-tag--orange"}">${label}</span>`;
           } else if (payment?.status === "completed") {
             statusTag = `<span class="ad-tag ad-tag--green">${statusPaid}</span>`;
-          } else if (requiresPayment(c)) {
-            return;
           }
         }
 
@@ -1109,7 +1099,7 @@
           <td>${cp?.last_accessed_at ? timeAgo(cp.last_accessed_at) : "-"}</td>
           <td>${statusTag}</td>
           <td>
-            <button class="ad-btn ad-btn--outline ad-btn--sm" data-student-id="${p?.id}">Message</button>
+            <button class="ad-btn ad-btn--outline ad-btn--sm" data-student-id="${p.id}">Message</button>
           </td>`;
         tbody.appendChild(tr);
       });
@@ -1119,7 +1109,7 @@
         empty.style.display = "table-row";
         const cell = empty.querySelector("td");
         if (cell) {
-          const key = currentRole === "admin" ? "lmsNoStudents" : "adNoEnrollmentsForTrainer";
+          const key = "lmsNoStudents";
           cell.setAttribute("data-i18n", key);
           cell.textContent = typeof t === "function" ? t(key) : "No students found";
         }
@@ -1136,8 +1126,11 @@
     try {
       const { data: courses } = await window.lmsSupabase
         .from("courses")
-        .select("id, title, status, category_id, thumbnail_url, created_at, categories(name)")
-        .eq("trainer_id", currentProfile.id)
+        .select(`
+          id, title, status, category_id, thumbnail_url, created_at, trainer_id,
+          categories(name),
+          profiles!courses_trainer_id_fkey(admin_id, student_id)
+        `)
         .order("created_at", { ascending: false });
 
       // Remove skeletons
@@ -1149,6 +1142,8 @@
       }
 
       courses.forEach((course) => {
+        const canManageCourse = currentRole === "admin" || course.trainer_id === currentProfile?.id;
+        const creatorId = creatorIdForCourse(course);
         const statusTag = {
           published: `<span class="ad-tag ad-tag--green">Published</span>`,
           draft:     `<span class="ad-tag ad-tag--orange">Draft</span>`,
@@ -1167,14 +1162,17 @@
           </div>
           <div class="ad-course-row__body">
             <p class="ad-course-row__title">${escHtml(course.title)}</p>
-            <p class="ad-course-row__meta">${escHtml(course.categories?.name || "—")} · Created ${formatDT(course.created_at)}</p>
+            <p class="ad-course-row__meta">${escHtml(course.categories?.name || "—")} · Creator ID: ${escHtml(creatorId)} · Created ${formatDT(course.created_at)}</p>
           </div>
           ${statusTag}
           <div class="ad-course-row__actions">
-            <button class="ad-btn ad-btn--outline ad-btn--sm" data-action="edit" data-i18n="adEditCourse">Edit</button>
-            <button class="ad-icon-btn ad-icon-btn--danger" data-action="delete" aria-label="Delete course">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-            </button>
+            ${canManageCourse
+              ? `<button class="ad-btn ad-btn--outline ad-btn--sm" data-action="edit" data-i18n="adEditCourse">Edit</button>
+                <button class="ad-icon-btn ad-icon-btn--danger" data-action="delete" aria-label="Delete course">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                </button>`
+              : ""
+            }
           </div>`;
         list.appendChild(row);
       });

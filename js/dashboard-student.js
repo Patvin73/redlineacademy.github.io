@@ -67,6 +67,8 @@
       lmsJoinedLabel:        "Bergabung:",
       lmsContinueBtn:        "Lanjutkan",
       lmsProgress:           "Progres",
+      lmsStatusAvailable:    "Tersedia",
+      lmsCreatorId:          "Creator ID",
     },
     en: {
       lmsDashboardHome:      "Dashboard",
@@ -123,6 +125,8 @@
       lmsJoinedLabel:        "Joined:",
       lmsContinueBtn:        "Continue",
       lmsProgress:           "Progress",
+      lmsStatusAvailable:    "Available",
+      lmsCreatorId:          "Creator ID",
     },
   };
 
@@ -952,26 +956,19 @@
         .eq("student_id", userId);
 
       if (enrollErr) throw enrollErr;
-      if (!enrollments || enrollments.length === 0) {
-        renderEmpty();
-        setupFilterHandler();
-        return;
+      const enrolledCourseIds = (enrollments || []).map((e) => e.course_id).filter(Boolean);
+
+      let progressRows = [];
+      if (enrolledCourseIds.length) {
+        const { data, error: progressErr } = await window.lmsSupabase
+          .from("course_progress")
+          .select("course_id, completion_percent")
+          .eq("student_id", userId)
+          .in("course_id", enrolledCourseIds);
+
+        if (progressErr) throw progressErr;
+        progressRows = data || [];
       }
-
-      const courseIds = enrollments.map((e) => e.course_id).filter(Boolean);
-      if (courseIds.length === 0) {
-        renderEmpty();
-        setupFilterHandler();
-        return;
-      }
-
-      const { data: progressRows, error: progressErr } = await window.lmsSupabase
-        .from("course_progress")
-        .select("course_id, completion_percent")
-        .eq("student_id", userId)
-        .in("course_id", courseIds);
-
-      if (progressErr) throw progressErr;
       const progressMap = new Map(
         (progressRows || [])
           .filter((row) => row.course_id)
@@ -980,30 +977,43 @@
 
       const { data: courses, error: courseErr } = await window.lmsSupabase
         .from("courses")
-        .select("id, title, thumbnail_url, category_id, trainer_id")
-        .in("id", courseIds);
+        .select(`
+          id, title, thumbnail_url, category_id, trainer_id,
+          profiles!courses_trainer_id_fkey(admin_id, student_id)
+        `)
+        .order("title", { ascending: true });
 
       if (courseErr) throw courseErr;
+      if (!courses || courses.length === 0) {
+        renderEmpty();
+        setupFilterHandler();
+        return;
+      }
 
-      const courseMap = new Map((courses || []).map((c) => [c.id, c]));
+      const enrollmentMap = new Map((enrollments || []).map((enroll) => [enroll.course_id, enroll]));
 
       grid.innerHTML = "";
 
-      const cards = enrollments.map((enroll) => {
-        const course = courseMap.get(enroll.course_id) || {};
-        const statusRaw = (enroll.status || "active").toLowerCase();
-        const status = statusRaw === "completed" ? "completed" : "active";
+      const cards = courses.map((course) => {
+        const enroll = enrollmentMap.get(course.id);
+        const statusRaw = (enroll?.status || "available").toLowerCase();
+        const status = statusRaw === "completed"
+          ? "completed"
+          : enroll
+          ? "active"
+          : "available";
         const statusLabel = typeof t === "function"
-          ? t(status === "completed" ? "lmsFilterCompleted" : "lmsFilterActive")
-          : status === "completed" ? "Completed" : "Active";
+          ? t(status === "completed" ? "lmsFilterCompleted" : status === "available" ? "lmsStatusAvailable" : "lmsFilterActive")
+          : status === "completed" ? "Completed" : status === "available" ? "Available" : "Active";
         const badgeClass = status === "completed"
           ? "sd-status-badge--completed"
           : "sd-status-badge--active";
-        const progress = Math.round(progressMap.get(enroll.course_id) || 0);
+        const progress = Math.round(progressMap.get(course.id) || 0);
         const progressLabel = typeof t === "function" ? t("lmsProgress") : "Progress";
         const thumbSrc = toSafeUiUrl(course.thumbnail_url) || "";
         const category = course.category_id || "Course";
-        const trainer = "Redline Academy";
+        const creatorLabel = typeof t === "function" ? t("lmsCreatorId") : "Creator ID";
+        const creatorId = creatorIdForCourse(course);
 
         return `
           <div class="sd-course-card" data-status="${status}">
@@ -1016,7 +1026,7 @@
             <div class="sd-course-card__body">
               <p class="sd-course-card__category">${escHtml(category)}</p>
               <h3 class="sd-course-card__title">${escHtml(course.title || "Course")}</h3>
-              <p class="sd-course-card__trainer">${escHtml(trainer)}</p>
+              <p class="sd-course-card__trainer">${escHtml(creatorLabel)}: ${escHtml(creatorId)}</p>
               <div class="sd-course-card__footer">
                 <span class="sd-status-badge ${badgeClass}">${escHtml(statusLabel)}</span>
                 <span class="sd-course-card__progress">${progress}% ${escHtml(progressLabel)}</span>
@@ -1653,6 +1663,12 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
+  }
+
+  function creatorIdForCourse(course) {
+    const profileId = course?.profiles?.admin_id || course?.profiles?.student_id;
+    if (profileId) return profileId;
+    return course?.trainer_id ? course.trainer_id.substring(0, 8).toUpperCase() : "-";
   }
 
   function timeAgo(iso) {

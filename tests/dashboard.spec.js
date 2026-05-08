@@ -263,6 +263,7 @@ function makeStudentFixture() {
           thumbnail_url: "",
           category_id: "aged-care",
           trainer_id: trainerId,
+          profiles: { admin_id: "TR-001" },
           categories: { id: "aged-care", name: "Aged Care" }
         },
         {
@@ -271,7 +272,17 @@ function makeStudentFixture() {
           thumbnail_url: "",
           category_id: "first-aid",
           trainer_id: trainerId,
+          profiles: { admin_id: "TR-001" },
           categories: { id: "first-aid", name: "First Aid" }
+        },
+        {
+          id: "course-3",
+          title: "Clinical Communication",
+          thumbnail_url: "",
+          category_id: "communication",
+          trainer_id: "trainer-2",
+          profiles: { admin_id: "TR-009" },
+          categories: { id: "communication", name: "Communication" }
         }
       ],
       assignments: [
@@ -474,6 +485,22 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#pfCurrentPw")).toHaveValue("");
     await expect(page.locator("#pfNewPw")).toHaveValue("");
     await expect(page.locator("#pfConfirmPw")).toHaveValue("");
+  });
+
+  test("shows all courses with creator IDs, including courses not yet enrolled", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html");
+    await page.locator(".sd-nav__item[data-section='courses']").click();
+
+    await expect(page.locator("#courseGrid .sd-course-card")).toHaveCount(3);
+    await expect(page.locator("#courseGrid")).toContainText("Aged Care Basics");
+    await expect(page.locator("#courseGrid")).toContainText("First Aid Essentials");
+    await expect(page.locator("#courseGrid")).toContainText("Clinical Communication");
+    await expect(page.locator("#courseGrid")).toContainText("Creator ID: TR-001");
+    await expect(page.locator("#courseGrid")).toContainText("Creator ID: TR-009");
+    await expect(page.locator("#courseGrid .sd-course-card[data-status='available']")).toHaveCount(1);
   });
 
   test("switches schedule view from list to calendar using real dashboard controls", async ({ page }) => {
