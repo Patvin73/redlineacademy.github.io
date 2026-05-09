@@ -143,6 +143,15 @@ create table if not exists public.lessons (
 
 create index if not exists idx_lessons_course on public.lessons(course_id);
 
+alter table public.lessons add column if not exists module_title text;
+alter table public.lessons add column if not exists module_order integer;
+alter table public.lessons add column if not exists material_type text check (material_type is null or material_type in ('video','pdf','text','quiz','assignment'));
+alter table public.lessons add column if not exists material_url text;
+alter table public.lessons add column if not exists material_path text;
+alter table public.lessons add column if not exists updated_at timestamptz default now();
+
+create index if not exists idx_lessons_course_order on public.lessons(course_id, module_order, lesson_order);
+
 create table if not exists public.enrollments (
   id uuid primary key default gen_random_uuid(),
   student_id uuid not null references public.profiles(id) on delete cascade,
@@ -848,6 +857,26 @@ create policy "avatars_public_read" on storage.objects for select to public usin
 create policy "avatars_insert_own_or_staff" on storage.objects for insert to authenticated with check (bucket_id = 'avatars' and (name like ('avatars/' || auth.uid()::text || '.%') or public.is_staff(auth.uid())));
 create policy "avatars_update_own_or_staff" on storage.objects for update to authenticated using (bucket_id = 'avatars' and (name like ('avatars/' || auth.uid()::text || '.%') or public.is_staff(auth.uid()))) with check (bucket_id = 'avatars' and (name like ('avatars/' || auth.uid()::text || '.%') or public.is_staff(auth.uid())));
 create policy "avatars_delete_own_or_staff" on storage.objects for delete to authenticated using (bucket_id = 'avatars' and (name like ('avatars/' || auth.uid()::text || '.%') or public.is_staff(auth.uid())));
+
+-- ==========================================================
+-- STORAGE BUCKET FOR COURSE MATERIALS
+-- ==========================================================
+
+insert into storage.buckets (id, name, public)
+values ('course-materials', 'course-materials', false)
+on conflict (id) do update
+set name = excluded.name,
+    public = excluded.public;
+
+drop policy if exists "course_materials_authenticated_read" on storage.objects;
+drop policy if exists "course_materials_staff_insert" on storage.objects;
+drop policy if exists "course_materials_staff_update" on storage.objects;
+drop policy if exists "course_materials_staff_delete" on storage.objects;
+
+create policy "course_materials_authenticated_read" on storage.objects for select to authenticated using (bucket_id = 'course-materials');
+create policy "course_materials_staff_insert" on storage.objects for insert to authenticated with check (bucket_id = 'course-materials' and public.is_staff(auth.uid()));
+create policy "course_materials_staff_update" on storage.objects for update to authenticated using (bucket_id = 'course-materials' and public.is_staff(auth.uid())) with check (bucket_id = 'course-materials' and public.is_staff(auth.uid()));
+create policy "course_materials_staff_delete" on storage.objects for delete to authenticated using (bucket_id = 'course-materials' and public.is_staff(auth.uid()));
 
 -- Bootstrap example:
 -- update public.profiles set role = 'admin', admin_id = 'ADM-001'

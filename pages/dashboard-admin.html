@@ -1003,7 +1003,7 @@
                   <!-- Lessons inside module -->
                   <ul class="ad-lessons-list">
                     <li class="ad-lesson-item">
-                      <select class="ad-input ad-select ad-select--xs">
+                      <select class="ad-input ad-select ad-select--xs ad-lesson-type">
                         <option value="video">📹 Video</option>
                         <option value="pdf">📄 PDF</option>
                         <option value="text">📝 Text</option>
@@ -1015,6 +1015,21 @@
                         type="text"
                         placeholder="Lesson title..."
                       />
+                      <div class="ad-material-upload">
+                        <input
+                          class="ad-material-input"
+                          type="file"
+                          accept="video/*"
+                          hidden
+                        />
+                        <button
+                          class="ad-btn ad-btn--outline ad-btn--sm ad-material-upload-btn"
+                          type="button"
+                        >
+                          Upload Material
+                        </button>
+                        <span class="ad-material-file">No file selected</span>
+                      </div>
                       <button
                         class="ad-icon-btn ad-icon-btn--danger"
                         aria-label="Remove lesson"

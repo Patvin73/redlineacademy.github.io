@@ -342,6 +342,14 @@
   let selectedSubmissionId = null;
   let editingCourseId  = null;
   const USER_ROLE_TAGS = { admin: "red", trainer: "purple", student: "blue" };
+  const COURSE_MATERIAL_BUCKET = "course-materials";
+  const LESSON_MATERIAL_ACCEPT = {
+    video: "video/*",
+    pdf: "application/pdf",
+    text: ".txt,.md,text/plain,text/markdown",
+    quiz: ".pdf,.doc,.docx,.txt,.md,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown",
+    assignment: ".pdf,.doc,.docx,.txt,.md,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown"
+  };
 
   /* ================================================================
      HELPERS
@@ -357,6 +365,19 @@
 
   function tSafe(key, fallback) {
     return typeof t === "function" ? t(key) : fallback;
+  }
+
+  function createClientId() {
+    if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+    return "10000000-1000-4000-8000-" + Math.random().toString(16).slice(2, 14).padEnd(12, "0");
+  }
+
+  function safeStorageSegment(value, fallback = "material") {
+    return String(value || fallback)
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80) || fallback;
   }
 
   function creatorIdForCourse(course) {
@@ -1211,6 +1232,27 @@
       e.preventDefault();
       saveBtn && saveBtn.click();
     });
+    panel && panel.addEventListener("click", (e) => {
+      const uploadBtn = e.target.closest(".ad-material-upload-btn");
+      const removeLessonBtn = e.target.closest(".ad-lesson-item .ad-icon-btn--danger");
+      const removeModuleBtn = e.target.closest(".ad-module-item__header .ad-icon-btn--danger");
+
+      if (uploadBtn) {
+        uploadBtn.closest(".ad-material-upload")?.querySelector(".ad-material-input")?.click();
+        return;
+      }
+      if (removeLessonBtn) {
+        removeLessonBtn.closest(".ad-lesson-item")?.remove();
+        return;
+      }
+      if (removeModuleBtn) removeModuleBtn.closest(".ad-module-item")?.remove();
+    });
+    panel && panel.addEventListener("change", (e) => {
+      const lessonItem = e.target.closest(".ad-lesson-item");
+      if (!lessonItem) return;
+      if (e.target.matches(".ad-lesson-type")) updateLessonMaterialControl(lessonItem, true);
+      if (e.target.matches(".ad-material-input")) updateLessonFileLabel(lessonItem);
+    });
 
     // Add module button
     const addModuleBtn = $("addModuleBtn");
@@ -1235,15 +1277,12 @@
     const clone    = template.cloneNode(true);
     clone.id       = "module-" + Date.now();
 
-    // Remove lesson button
-    clone.querySelector(".ad-icon-btn--danger").addEventListener("click", () => clone.remove());
-
     // Add lesson to module
     clone.querySelector(".ad-add-lesson-btn").addEventListener("click", () => {
       const li = document.createElement("li");
       li.className = "ad-lesson-item";
       li.innerHTML = `
-        <select class="ad-input ad-select ad-select--xs">
+        <select class="ad-input ad-select ad-select--xs ad-lesson-type">
           <option value="video">📹 Video</option>
           <option value="pdf">📄 PDF</option>
           <option value="text">📝 Text</option>
@@ -1251,6 +1290,11 @@
           <option value="assignment">📋 Assignment</option>
         </select>
         <input class="ad-input ad-input--grow" type="text" placeholder="Lesson title..." />
+        <div class="ad-material-upload">
+          <input class="ad-material-input" type="file" accept="video/*" hidden />
+          <button class="ad-btn ad-btn--outline ad-btn--sm ad-material-upload-btn" type="button">Upload Material</button>
+          <span class="ad-material-file">No file selected</span>
+        </div>
         <button class="ad-icon-btn ad-icon-btn--danger" aria-label="Remove lesson">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>`;
@@ -1261,6 +1305,113 @@
     modulesList.appendChild(clone);
   }
 
+  function updateLessonMaterialControl(lessonItem, resetFile) {
+    const type = lessonItem.querySelector(".ad-lesson-type")?.value || "video";
+    const input = lessonItem.querySelector(".ad-material-input");
+    if (input) {
+      input.accept = LESSON_MATERIAL_ACCEPT[type] || "";
+      if (resetFile) input.value = "";
+    }
+    updateLessonFileLabel(lessonItem);
+  }
+
+  function updateLessonFileLabel(lessonItem) {
+    const fileInput = lessonItem.querySelector(".ad-material-input");
+    const label = lessonItem.querySelector(".ad-material-file");
+    if (!label) return;
+    label.textContent = fileInput?.files?.[0]?.name || "No file selected";
+  }
+
+  function collectCourseModules() {
+    const modulesList = $("builderModulesList");
+    if (!modulesList) return [];
+
+    return [...modulesList.querySelectorAll(".ad-module-item")]
+      .map((moduleEl, moduleIndex) => {
+        const moduleTitle = moduleEl.querySelector(".ad-module-item__header input")?.value.trim() || `Module ${moduleIndex + 1}`;
+        const lessons = [...moduleEl.querySelectorAll(".ad-lesson-item")]
+          .map((lessonEl) => {
+            const title = lessonEl.querySelector(".ad-input--grow")?.value.trim() || "";
+            const materialType = lessonEl.querySelector(".ad-lesson-type")?.value || "video";
+            const file = lessonEl.querySelector(".ad-material-input")?.files?.[0] || null;
+            return { title, materialType, file };
+          })
+          .filter((lesson) => lesson.title || lesson.file);
+
+        return { title: moduleTitle, order: moduleIndex + 1, lessons };
+      })
+      .filter((module) => module.lessons.length);
+  }
+
+  async function uploadLessonMaterial(file, courseId, moduleOrder, lessonOrder, materialType) {
+    if (!file) return { materialPath: null, materialUrl: null };
+    if (!window.lmsSupabase?.storage) throw new Error("Supabase Storage is not available.");
+
+    const fileName = safeStorageSegment(file.name);
+    const path = [
+      "courses",
+      safeStorageSegment(courseId, "course"),
+      `module-${moduleOrder}`,
+      `lesson-${lessonOrder}-${safeStorageSegment(materialType)}-${Date.now()}-${fileName}`
+    ].join("/");
+
+    const { error } = await window.lmsSupabase.storage
+      .from(COURSE_MATERIAL_BUCKET)
+      .upload(path, file, { upsert: true });
+    if (error) throw error;
+
+    const { data } = window.lmsSupabase.storage
+      .from(COURSE_MATERIAL_BUCKET)
+      .getPublicUrl(path);
+
+    return { materialPath: path, materialUrl: data?.publicUrl || null };
+  }
+
+  async function insertLessonRows(rows) {
+    if (!rows.length) return;
+
+    const { error } = await window.lmsSupabase.from("lessons").insert(rows);
+    if (!error) return;
+
+    const legacyRows = rows.map((row) => ({
+      course_id: row.course_id,
+      title: row.title,
+      content: row.material_type === "video" ? null : row.material_url,
+      video_url: row.material_type === "video" ? row.material_url : null,
+      lesson_order: row.lesson_order
+    }));
+    const { error: legacyError } = await window.lmsSupabase.from("lessons").insert(legacyRows);
+    if (legacyError) throw legacyError;
+  }
+
+  async function saveCourseLessons(courseId, modules) {
+    if (!modules.length) return;
+
+    const rows = [];
+    let lessonOrder = 1;
+    for (const module of modules) {
+      for (const lesson of module.lessons) {
+        const material = await uploadLessonMaterial(lesson.file, courseId, module.order, lessonOrder, lesson.materialType);
+        rows.push({
+          course_id: courseId,
+          title: lesson.title || lesson.file?.name || "Untitled lesson",
+          content: lesson.materialType === "video" ? null : material.materialUrl,
+          video_url: lesson.materialType === "video" ? material.materialUrl : null,
+          lesson_order: lessonOrder,
+          module_title: module.title,
+          module_order: module.order,
+          material_type: lesson.materialType,
+          material_url: material.materialUrl,
+          material_path: material.materialPath
+        });
+        lessonOrder += 1;
+      }
+    }
+
+    await window.lmsSupabase.from("lessons").delete().eq("course_id", courseId);
+    await insertLessonRows(rows);
+  }
+
   async function saveCourse(status) {
     const msg = $("builderMsg");
     const btn = status === "draft" ? $("saveDraftBtn") : $("saveCourseBtn");
@@ -1268,6 +1419,7 @@
     const title    = $("cbTitle")?.value.trim();
     const category = $("cbCategory")?.value;
     const desc     = $("cbDesc")?.value.trim();
+    const modules  = collectCourseModules();
     if ($("cbTitle") && !$("cbTitle").reportValidity()) return;
 
     if (!title) {
@@ -1294,13 +1446,20 @@
       };
 
       let error = null;
+      let courseId = editingCourseId;
       if (editingCourseId) {
         ({ error } = await window.lmsSupabase.from("courses").update(payload).eq("id", editingCourseId));
       } else {
+        courseId = createClientId();
+        payload.id = courseId;
         payload.slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Date.now();
         ({ error } = await window.lmsSupabase.from("courses").insert(payload));
       }
       if (error) throw error;
+      if (modules.length) {
+        if (msg) { msg.textContent = "Uploading course materials..."; msg.style.color = "var(--sd-text-secondary)"; }
+        await saveCourseLessons(courseId, modules);
+      }
 
       if (msg) { msg.textContent = "✓ Course saved!"; msg.style.color = "var(--sd-green)"; }
 
@@ -1343,6 +1502,25 @@
     if ($("cbPrice")) $("cbPrice").value = 0;
     if ($("cbStatus")) $("cbStatus").value = "draft";
     if ($("cbIsFeatured")) $("cbIsFeatured").value = "false";
+    document.querySelectorAll("#builderModulesList .ad-module-item").forEach((moduleEl, index) => {
+      if (index > 0) {
+        moduleEl.remove();
+        return;
+      }
+      const moduleTitleInput = moduleEl.querySelector(".ad-module-item__header input");
+      if (moduleTitleInput) moduleTitleInput.value = "";
+      moduleEl.querySelectorAll(".ad-lesson-item").forEach((lessonEl, lessonIndex) => {
+        if (lessonIndex > 0) {
+          lessonEl.remove();
+          return;
+        }
+        const lessonType = lessonEl.querySelector(".ad-lesson-type");
+        const lessonTitle = lessonEl.querySelector(".ad-input--grow");
+        if (lessonType) lessonType.value = "video";
+        if (lessonTitle) lessonTitle.value = "";
+        updateLessonMaterialControl(lessonEl, true);
+      });
+    });
   }
 
   async function openEditCourse(courseId) {

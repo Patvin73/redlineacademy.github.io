@@ -172,6 +172,7 @@ async function installSupabaseStub(page, role) {
 
   const announcements = [];
   const certificates = [{ id: "cert-1" }, { id: "cert-2" }];
+  const lessons = [];
 
   const tableData = {
     profiles,
@@ -185,6 +186,7 @@ async function installSupabaseStub(page, role) {
     v_students_at_risk: [],
     activity_logs: [],
     courses,
+    lessons,
     enrollments: [],
     forum_posts: [],
     notifications: [],
@@ -196,6 +198,7 @@ async function installSupabaseStub(page, role) {
   const supabaseStub = `
     (() => {
       const tableData = ${JSON.stringify(tableData)};
+      const uploadedFiles = [];
       const storedMessages = window.localStorage.getItem("__e2eMessages");
       if (storedMessages) {
         try { tableData.messages = JSON.parse(storedMessages); } catch {}
@@ -313,6 +316,17 @@ async function installSupabaseStub(page, role) {
             signOut: async () => ({ error: null })
           },
           from: (table) => createQuery(table),
+          storage: {
+            from: (bucket) => ({
+              upload: async (path, file, options) => {
+                uploadedFiles.push({ bucket, path, name: file.name, type: file.type, size: file.size, options });
+                return { data: { path }, error: null };
+              },
+              getPublicUrl: (path) => ({
+                data: { publicUrl: "https://storage.example.com/" + bucket + "/" + path }
+              })
+            })
+          },
           channel: () => ({
             on: () => ({ subscribe: () => ({}) })
           })
@@ -323,6 +337,8 @@ async function installSupabaseStub(page, role) {
         tableData.messages = msgs;
         window.localStorage.setItem("__e2eMessages", JSON.stringify(msgs));
       };
+      window.__e2eGetTableData = () => tableData;
+      window.__e2eGetUploadedFiles = () => uploadedFiles;
     })();
   `;
 
@@ -607,6 +623,46 @@ test("trainer can use course builder tabs and save draft", async ({ page }) => {
   await expect(page.locator("#builderMsg")).toContainText("Course saved");
 
   await expect(page.locator(".ad-course-row__title", { hasText: "E2E Draft Course" })).toBeVisible();
+});
+
+test("trainer can upload lesson material and save it with course lessons", async ({ page }) => {
+  await installSupabaseStub(page, "trainer");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='courses']").click();
+  await page.click("#createCourseBtn");
+  await page.fill("#cbTitle", "Course With Materials");
+  await page.click(".ad-builder-tab[data-tab='modules']");
+
+  const lesson = page.locator("#builderTab-modules .ad-lesson-item").first();
+  await lesson.locator(".ad-input--grow").fill("Lesson PDF");
+  await lesson.locator(".ad-lesson-type").selectOption("pdf");
+  await lesson.locator(".ad-material-input").setInputFiles({
+    name: "lesson.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.from("%PDF-1.4 test lesson")
+  });
+
+  await expect(lesson.locator(".ad-material-file")).toHaveText("lesson.pdf");
+  await page.click("#saveDraftBtn");
+  await expect(page.locator("#builderMsg")).toContainText("Course saved");
+
+  const uploadedFiles = await page.evaluate(() => window.__e2eGetUploadedFiles());
+  expect(uploadedFiles).toHaveLength(1);
+  expect(uploadedFiles[0]).toMatchObject({
+    bucket: "course-materials",
+    name: "lesson.pdf"
+  });
+
+  const lessons = await page.evaluate(() => window.__e2eGetTableData().lessons);
+  expect(lessons).toHaveLength(1);
+  expect(lessons[0]).toMatchObject({
+    title: "Lesson PDF",
+    material_type: "pdf",
+    material_path: expect.stringContaining("lesson-1-pdf"),
+    module_order: 1,
+    lesson_order: 1
+  });
 });
 
 test("trainer sees all courses with creator IDs", async ({ page }) => {
