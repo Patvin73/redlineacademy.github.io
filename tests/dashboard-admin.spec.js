@@ -173,6 +173,24 @@ async function installSupabaseStub(page, role) {
   const announcements = [];
   const certificates = [{ id: "cert-1" }, { id: "cert-2" }];
   const lessons = [];
+  const enrollments = [
+    {
+      id: "enroll-1",
+      student_id: "e2e-student-1",
+      course_id: "course-1",
+      status: "active",
+      enrolled_at: "2026-03-05T08:00:00.000Z",
+      courses: { id: "course-1", title: "Leadership Basics", trainer_id: "e2e-trainer" }
+    },
+    {
+      id: "enroll-2",
+      student_id: "e2e-student-2",
+      course_id: "course-2",
+      status: "active",
+      enrolled_at: "2026-03-06T08:00:00.000Z",
+      courses: { id: "course-2", title: "Emergency Response", trainer_id: "e2e-admin" }
+    }
+  ];
 
   const tableData = {
     profiles,
@@ -187,7 +205,7 @@ async function installSupabaseStub(page, role) {
     activity_logs: [],
     courses,
     lessons,
-    enrollments: [],
+    enrollments,
     forum_posts: [],
     notifications: [],
     v_course_overview: []
@@ -498,6 +516,70 @@ test("trainer sees unread messages badge", async ({ page }) => {
 
   await expect(page.locator("#adMsgBadge")).toHaveText("1");
   await expect(page.locator(".ad-inbox-item.unread")).toHaveCount(1);
+});
+
+test("trainer can open message detail", async ({ page }) => {
+  await installSupabaseStub(page, "trainer");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#sidebarRoleBadge")).toHaveText("Trainer");
+
+  await page.locator(".ad-nav__item[data-section='messages']").click();
+  await expect(page.locator("#section-messages")).toHaveClass(/active/);
+
+  await page.locator(".ad-inbox-item", { hasText: "Need help with Module 2." }).click();
+  await expect(page.locator("#adMsgViewEmpty")).toBeHidden();
+  await expect(page.locator("#adMsgDetail")).toBeVisible();
+  await expect(page.locator("#adMsgDetail")).toContainText("Need help with Module 2.");
+});
+
+test("trainer can compose a system message to an enrolled student", async ({ page }) => {
+  await installSupabaseStub(page, "trainer");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#sidebarRoleBadge")).toHaveText("Trainer");
+
+  await page.locator(".ad-nav__item[data-section='messages']").click();
+  await page.locator("#adNewMsgBtn").click();
+
+  await expect(page.locator("#adMsgComposeForm")).toBeVisible();
+  await expect(page.locator("#adMsgViewEmpty")).toBeHidden();
+  await expect(page.locator("#adMsgDetail")).toBeHidden();
+
+  const recipients = await page.locator("#adMsgRecipient option").allTextContents();
+  expect(recipients).toContain("Alpha Student");
+  expect(recipients).not.toContain("Bravo Student");
+
+  await page.selectOption("#adMsgRecipient", "e2e-student-1");
+  await page.fill("#adMsgBody", "Please review Module 2.");
+  await page.locator("#adSendMsgBtn").click();
+
+  await expect(page.locator("#adMsgComposeMsg")).toContainText(/Message sent\.|Pesan terkirim\./);
+  const sentMessages = await page.evaluate(() => window.__e2eGetTableData().messages);
+  expect(sentMessages).toEqual(expect.arrayContaining([
+    expect.objectContaining({
+      sender_id: "e2e-trainer",
+      recipient_id: "e2e-student-1",
+      body: "Please review Module 2."
+    })
+  ]));
+});
+
+test("admin composer lists all other users and cancel hides the form", async ({ page }) => {
+  await installSupabaseStub(page, "admin");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#sidebarRoleBadge")).toHaveText("Admin");
+
+  await page.locator(".ad-nav__item[data-section='messages']").click();
+  await page.locator("#adNewMsgBtn").click();
+
+  await expect(page.locator("#adMsgComposeForm")).toBeVisible();
+  const recipients = await page.locator("#adMsgRecipient option").allTextContents();
+  expect(recipients).toContain("E2E Trainer");
+  expect(recipients).toContain("Alpha Student");
+  expect(recipients).toContain("Bravo Student");
+  expect(recipients).not.toContain("E2E Admin");
+
+  await page.locator("#adCancelMsgBtn").click();
+  await expect(page.locator("#adMsgComposeForm")).toBeHidden();
 });
 
 test("trainer can mark message as read (simulated)", async ({ page }) => {

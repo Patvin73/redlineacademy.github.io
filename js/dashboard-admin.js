@@ -165,6 +165,14 @@
       adStorageNote:         "Batas Supabase Free Tier",
       adSendMessage:         "Kirim Pesan",
       adMsgToStudent:        "Kirim ke student ini",
+      adComposeTitle:        "Pesan Baru",
+      adMsgRecipient:        "Kirim ke",
+      adMsgSelectRecipient:  "Pilih penerima",
+      adMsgBody:             "Isi pesan",
+      adMsgBodyPlaceholder:  "Tulis isi pesan...",
+      adMsgSent:             "Pesan terkirim.",
+      adMsgNoRecipients:     "Tidak ada penerima tersedia.",
+      adMsgRequired:         "Penerima dan isi pesan wajib diisi.",
     },
     en: {
       adNavDashboard:        "Dashboard",
@@ -318,6 +326,14 @@
       adStorageNote:         "Supabase Free Tier limits",
       adSendMessage:         "Send Message",
       adMsgToStudent:        "Message this student",
+      adComposeTitle:        "New Message",
+      adMsgRecipient:        "Send to",
+      adMsgSelectRecipient:  "Select recipient",
+      adMsgBody:             "Message",
+      adMsgBodyPlaceholder:  "Write your message...",
+      adMsgSent:             "Message sent.",
+      adMsgNoRecipients:     "No recipients available.",
+      adMsgRequired:         "Recipient and message are required.",
     },
   };
 
@@ -532,9 +548,7 @@
       runAdminSearch(query);
     });
 
-    newMsgBtn && newMsgBtn.addEventListener("click", () => {
-      window.location.href = "mailto:";
-    });
+    newMsgBtn && newMsgBtn.addEventListener("click", () => openMessageComposer());
 
     exportReportBtn && exportReportBtn.addEventListener("click", () => {
       exportTableToCsv($("courseOverviewBody")?.closest("table"), "reports.csv");
@@ -1853,17 +1867,170 @@
   /* ================================================================
      MESSAGES
   ================================================================ */
+  let messageComposerBound = false;
+
+  function setComposerStatus(text, isError = false) {
+    const msg = $("adMsgComposeMsg");
+    if (!msg) return;
+    msg.textContent = text || "";
+    msg.style.color = isError ? "var(--sd-red)" : "var(--sd-green)";
+  }
+
+  function setMessagePanelVisible(el, visible) {
+    if (!el) return;
+    el.hidden = !visible;
+    el.style.display = visible ? "" : "none";
+  }
+
+  function closeMessageComposer() {
+    const composeForm = $("adMsgComposeForm");
+    const viewEmpty = $("adMsgViewEmpty");
+    const viewDetail = $("adMsgDetail");
+    setMessagePanelVisible(composeForm, false);
+    setComposerStatus("");
+    if (viewDetail && viewDetail.innerHTML.trim()) {
+      setMessagePanelVisible(viewDetail, true);
+      return;
+    }
+    setMessagePanelVisible(viewEmpty, true);
+  }
+
+  async function loadMessageRecipients() {
+    const recipient = $("adMsgRecipient");
+    if (!recipient || !window.lmsSupabase || !currentProfile?.id) return [];
+
+    recipient.disabled = true;
+    recipient.innerHTML = "";
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = tSafe("adMsgSelectRecipient", "Select recipient");
+    recipient.appendChild(placeholder);
+
+    let recipients = [];
+    if (currentRole === "admin") {
+      const { data, error } = await window.lmsSupabase
+        .from("profiles")
+        .select("id, full_name, email, role")
+        .order("full_name", { ascending: true });
+      if (error) throw error;
+      recipients = (data || []).filter((profile) => profile.id && profile.id !== currentProfile.id);
+    } else {
+      const { data: enrollments, error: enrollErr } = await window.lmsSupabase
+        .from("enrollments")
+        .select("student_id, courses!inner(trainer_id)")
+        .eq("courses.trainer_id", currentProfile.id);
+      if (enrollErr) throw enrollErr;
+
+      const studentIds = Array.from(new Set((enrollments || []).map((row) => row.student_id).filter(Boolean)));
+      if (studentIds.length > 0) {
+        const { data, error } = await window.lmsSupabase
+          .from("profiles")
+          .select("id, full_name, email, role")
+          .in("id", studentIds)
+          .eq("role", "student")
+          .order("full_name", { ascending: true });
+        if (error) throw error;
+        recipients = data || [];
+      }
+    }
+
+    recipients.forEach((profile) => {
+      const option = document.createElement("option");
+      option.value = profile.id;
+      option.textContent = profile.full_name || profile.email || profile.id;
+      recipient.appendChild(option);
+    });
+
+    recipient.disabled = recipients.length === 0;
+    if (recipients.length === 0) setComposerStatus(tSafe("adMsgNoRecipients", "No recipients available."), true);
+    return recipients;
+  }
+
+  async function sendComposedMessage(e) {
+    if (e) e.preventDefault();
+    const recipient = $("adMsgRecipient");
+    const body = $("adMsgBody");
+    const sendBtn = $("adSendMsgBtn");
+    const recipientId = recipient?.value || "";
+    const messageBody = body?.value.trim() || "";
+
+    if (!recipientId || !messageBody) {
+      setComposerStatus(tSafe("adMsgRequired", "Recipient and message are required."), true);
+      return;
+    }
+    if (!window.lmsSupabase || !currentProfile?.id) return;
+
+    try {
+      if (sendBtn) sendBtn.disabled = true;
+      const { error } = await window.lmsSupabase
+        .from("messages")
+        .insert({
+          sender_id: currentProfile.id,
+          recipient_id: recipientId,
+          subject: null,
+          body: messageBody
+        });
+      if (error) throw error;
+      if (body) body.value = "";
+      setComposerStatus(tSafe("adMsgSent", "Message sent."));
+      loadedSections.delete("messages");
+      await loadMessages();
+    } catch (err) {
+      setComposerStatus(err.message || "Message failed.", true);
+    } finally {
+      if (sendBtn) sendBtn.disabled = false;
+    }
+  }
+
+  async function openMessageComposer(selectedRecipientId = "") {
+    if (window._adActivateSection) window._adActivateSection("messages");
+
+    const viewEmpty = $("adMsgViewEmpty");
+    const viewDetail = $("adMsgDetail");
+    const composeForm = $("adMsgComposeForm");
+    const recipient = $("adMsgRecipient");
+    const body = $("adMsgBody");
+    const sendBtn = $("adSendMsgBtn");
+    const cancelBtn = $("adCancelMsgBtn");
+    if (!composeForm) return;
+
+    setMessagePanelVisible(viewEmpty, false);
+    setMessagePanelVisible(viewDetail, false);
+    setMessagePanelVisible(composeForm, true);
+    setComposerStatus("");
+
+    if (!messageComposerBound) {
+      composeForm.addEventListener("submit", sendComposedMessage);
+      sendBtn && sendBtn.addEventListener("click", sendComposedMessage);
+      cancelBtn && cancelBtn.addEventListener("click", closeMessageComposer);
+      messageComposerBound = true;
+    }
+
+    try {
+      await loadMessageRecipients();
+      const selectedOption = Array.from(recipient?.options || []).find((option) => option.value === selectedRecipientId);
+      if (selectedOption) {
+        recipient.value = selectedRecipientId;
+      }
+    } catch (err) {
+      setComposerStatus(err.message || "Recipients failed to load.", true);
+    }
+
+    if (body) body.focus();
+  }
+
   async function loadMessages() {
     const inbox = $("adInboxList");
     const empty = $("adInboxEmpty");
-    const view = $("adMessageView");
     const viewEmpty = $("adMsgViewEmpty");
+    const viewDetail = $("adMsgDetail");
+    const composeForm = $("adMsgComposeForm");
     if (!inbox) return;
 
     try {
       const { data } = await window.lmsSupabase
         .from("messages")
-        .select(`id, subject, body, is_read, created_at, profiles!sender_id(full_name, avatar_url)`)
+        .select(`id, sender_id, recipient_id, subject, body, is_read, created_at, profiles!sender_id(full_name, avatar_url)`)
         .or(`sender_id.eq.${currentProfile.id},recipient_id.eq.${currentProfile.id}`)
         .order("created_at", { ascending: false })
         .limit(20);
@@ -1892,9 +2059,11 @@
         item.addEventListener("click", () => {
           inbox.querySelectorAll(".ad-inbox-item").forEach((el) => el.classList.remove("active"));
           item.classList.add("active");
-          if (viewEmpty) viewEmpty.hidden = true;
-          if (view) {
-            view.innerHTML = `
+          setMessagePanelVisible(viewEmpty, false);
+          setMessagePanelVisible(composeForm, false);
+          if (viewDetail) {
+            setMessagePanelVisible(viewDetail, true);
+            viewDetail.innerHTML = `
               <div class="ad-message-view__detail">
                 <p class="ad-inbox-item__name">${escHtml(msg.subject || msg.profiles?.full_name || "Message")}</p>
                 <p class="ad-inbox-item__time">${timeAgo(msg.created_at)}</p>

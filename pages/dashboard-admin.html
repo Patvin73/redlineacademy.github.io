@@ -1552,6 +1552,36 @@
                 </svg>
                 <p data-i18n="lmsSelectMessage">Select a message to view</p>
               </div>
+              <div class="ad-message-view__detail" id="adMsgDetail" hidden></div>
+              <form class="ad-message-view__compose-panel" id="adMsgComposeForm" hidden>
+                <h3 data-i18n="adComposeTitle">New Message</h3>
+                <div class="ad-field">
+                  <label class="ad-label" for="adMsgRecipient" data-i18n="adMsgRecipient">Send to</label>
+                  <select class="ad-input ad-select" id="adMsgRecipient" required>
+                    <option value="" data-i18n="adMsgSelectRecipient">Select recipient</option>
+                  </select>
+                </div>
+                <div class="ad-field">
+                  <label class="ad-label" for="adMsgBody" data-i18n="adMsgBody">Message</label>
+                  <textarea
+                    class="ad-input ad-textarea"
+                    id="adMsgBody"
+                    rows="7"
+                    data-i18n="adMsgBodyPlaceholder"
+                    placeholder="Write your message..."
+                    required
+                  ></textarea>
+                </div>
+                <div class="ad-message-compose__actions">
+                  <button class="ad-btn ad-btn--outline" type="button" id="adCancelMsgBtn" data-i18n="adCancel">
+                    Cancel
+                  </button>
+                  <button class="ad-btn ad-btn--primary" type="submit" id="adSendMsgBtn" data-i18n="adSendMessage">
+                    Send Message
+                  </button>
+                </div>
+                <p class="ad-message-compose__msg" id="adMsgComposeMsg" aria-live="polite"></p>
+              </form>
             </div>
           </div>
         </section>
