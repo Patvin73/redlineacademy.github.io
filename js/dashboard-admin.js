@@ -1009,6 +1009,32 @@
   /* ================================================================
      STUDENTS TABLE
   ================================================================ */
+  function getStudentRowStatus(profile, enrollment, progress) {
+    if (enrollment?.status === "completed") return "completed";
+    if (profile?.is_active === false) return "at_risk";
+    if (enrollment?.status === "active") {
+      const lastAccessed = progress?.last_accessed_at || null;
+      if (!lastAccessed) return "at_risk";
+      const inactiveDays = Math.floor((Date.now() - new Date(lastAccessed).getTime()) / 86400000);
+      if (inactiveDays >= 7) return "at_risk";
+    }
+    return "active";
+  }
+
+  function applyStudentFilter(filter = "all") {
+    const rows = Array.from(document.querySelectorAll("#studentTableBody tr.ad-student-row"));
+    let visibleCount = 0;
+
+    rows.forEach((row) => {
+      const isVisible = filter === "all" || row.dataset.status === filter;
+      row.style.display = isVisible ? "" : "none";
+      if (isVisible) visibleCount += 1;
+    });
+
+    const empty = $("studentTableEmpty");
+    if (empty && rows.length > 0) empty.style.display = visibleCount === 0 ? "table-row" : "none";
+  }
+
   async function loadStudentsTable() {
     const tbody = $("studentTableBody");
     const empty = $("studentTableEmpty");
@@ -1107,6 +1133,7 @@
 
         const tr = document.createElement("tr");
         tr.className = "ad-student-row";
+        tr.dataset.status = getStudentRowStatus(p, en, cp);
         tr.innerHTML = `
           <td>
             <div class="ad-table-user">
@@ -1138,6 +1165,9 @@
           </td>`;
         tbody.appendChild(tr);
       });
+
+      const activeFilter = document.querySelector("#section-students .ad-filter-tab.active")?.dataset.filter || "all";
+      applyStudentFilter(activeFilter);
 
     } catch {
       if (empty) {
@@ -2993,18 +3023,8 @@
 
   async function openStudentMessage(studentId) {
     if (!studentId) return;
-    try {
-      const { data, error } = await window.lmsSupabase
-        .from("profiles")
-        .select("email")
-        .eq("id", studentId)
-        .single();
-      if (error) throw error;
-      if (!data?.email) throw new Error("Student email not found");
-      window.location.href = "mailto:" + data.email;
-    } catch (err) {
-      alert("Message failed: " + err.message);
-    }
+    if (window._adActivateSection) window._adActivateSection("messages");
+    await openMessageComposer(studentId);
   }
 
   /* ================================================================
@@ -3145,6 +3165,9 @@
         tab.addEventListener("click", () => {
           group.querySelectorAll(".ad-filter-tab").forEach((t) => t.classList.remove("active"));
           tab.classList.add("active");
+          if (group.closest("#section-students")) {
+            applyStudentFilter(tab.dataset.filter || "all");
+          }
         });
       });
     });

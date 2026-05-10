@@ -10,7 +10,7 @@ function makeLocalDateTime(daysFromNow, hour = 9) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-async function installSupabaseStub(page, role) {
+async function installSupabaseStub(page, role, options = {}) {
   const profiles = [
     {
       id: "e2e-admin",
@@ -199,6 +199,30 @@ async function installSupabaseStub(page, role) {
       courses: { id: "course-1", title: "Leadership Basics", trainer_id: "e2e-trainer" }
     }
   ];
+
+  if (options.studentFilterFixture) {
+    profiles.push({
+      id: "e2e-student-3",
+      full_name: "Charlie Student",
+      role: "student",
+      student_id: "ST-003",
+      email: "charlie@example.com",
+      is_active: true,
+      created_at: "2026-03-05T08:00:00.000Z"
+    });
+    enrollments[0].course_progress = [{ completion_percent: 35, last_accessed_at: new Date().toISOString() }];
+    enrollments[1].status = "completed";
+    enrollments[1].course_progress = [{ completion_percent: 100, last_accessed_at: "2026-03-06T08:00:00.000Z" }];
+    enrollments.push({
+      id: "enroll-4",
+      student_id: "e2e-student-3",
+      course_id: "course-1",
+      status: "active",
+      enrolled_at: "2026-03-08T08:00:00.000Z",
+      courses: { id: "course-1", title: "Leadership Basics", trainer_id: "e2e-trainer" },
+      course_progress: [{ completion_percent: 20, last_accessed_at: "2026-01-01T08:00:00.000Z" }]
+    });
+  }
 
   const tableData = {
     profiles,
@@ -471,6 +495,50 @@ test("trainer sees registered students even without course enrollments", async (
   await expect(rows).toHaveCount(2);
   await expect(page.locator("#studentTableBody")).toContainText("Alpha Student");
   await expect(page.locator("#studentTableBody")).toContainText("Bravo Student");
+});
+
+test("admin can filter student table by status tabs", async ({ page }) => {
+  await installSupabaseStub(page, "admin", { studentFilterFixture: true });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='students']").click();
+  await expect(page.locator("#section-students")).toHaveClass(/active/);
+
+  const visibleRows = page.locator("#studentTableBody tr.ad-student-row:visible");
+  await expect(visibleRows).toHaveCount(3);
+
+  await page.locator("#section-students .ad-filter-tab[data-filter='active']").click();
+  await expect(visibleRows).toHaveCount(1);
+  await expect(visibleRows).toContainText("Alpha Student");
+
+  await page.locator("#section-students .ad-filter-tab[data-filter='completed']").click();
+  await expect(visibleRows).toHaveCount(1);
+  await expect(visibleRows).toContainText("Bravo Student");
+
+  await page.locator("#section-students .ad-filter-tab[data-filter='at_risk']").click();
+  await expect(visibleRows).toHaveCount(1);
+  await expect(visibleRows).toContainText("Charlie Student");
+
+  await page.locator("#section-students .ad-filter-tab[data-filter='all']").click();
+  await expect(visibleRows).toHaveCount(3);
+});
+
+test("student message action opens compose with selected recipient", async ({ page }) => {
+  await installSupabaseStub(page, "admin");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='students']").click();
+  await expect(page.locator("#section-students")).toHaveClass(/active/);
+
+  await page
+    .locator("#studentTableBody tr.ad-student-row", { hasText: "Alpha Student" })
+    .locator("[data-student-id='e2e-student-1']")
+    .click();
+
+  await expect(page.locator("#section-messages")).toHaveClass(/active/);
+  await expect(page.locator("#adMsgComposeForm")).toBeVisible();
+  await expect(page.locator("#adMsgDetail")).toBeHidden();
+  await expect(page.locator("#adMsgRecipient")).toHaveValue("e2e-student-1");
 });
 
 test("trainer can open grading submission and save grade", async ({ page }) => {
