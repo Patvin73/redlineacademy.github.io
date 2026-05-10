@@ -1081,10 +1081,40 @@
     };
 
     try {
+      const { data: enrollments, error: enrollErr } = await window.lmsSupabase
+        .from("enrollments")
+        .select("course_id")
+        .eq("student_id", userId);
+
+      if (enrollErr) throw enrollErr;
+
+      const courseIds = [
+        ...new Set((enrollments || []).map((enroll) => enroll.course_id).filter(Boolean))
+      ];
+
+      if (courseIds.length === 0) {
+        renderEmpty();
+        setupFilterHandler();
+        return;
+      }
+
       const { data: assignments, error: assignErr } = await window.lmsSupabase
         .from("assignments")
-        .select("*")
-        .eq("student_id", userId)
+        .select(`
+          *,
+          courses ( title ),
+          assignment_submissions (
+            id,
+            assignment_id,
+            student_id,
+            status,
+            submitted_at,
+            grade,
+            feedback
+          )
+        `)
+        .in("course_id", courseIds)
+        .eq("assignment_submissions.student_id", userId)
         .order("due_at", { ascending: true });
 
       if (assignErr) throw assignErr;
@@ -1094,20 +1124,14 @@
         return;
       }
 
-      const { data: submissions } = await window.lmsSupabase
-        .from("assignment_submissions")
-        .select("*")
-        .eq("student_id", userId);
-
-      const submissionMap = new Map(
-        (submissions || []).map((s) => [s.assignment_id, s])
-      );
-
       list.querySelectorAll(".sd-assignment-item").forEach((el) => el.remove());
       hideEmpty();
 
       assignments.forEach((assignment) => {
-        const submission = submissionMap.get(assignment.id);
+        const joinedSubmissions = Array.isArray(assignment.assignment_submissions)
+          ? assignment.assignment_submissions
+          : [];
+        const submission = joinedSubmissions.find((item) => item.student_id === userId);
         const statusRaw = submission?.status || "pending";
         const status = ["pending", "submitted", "graded"].includes(statusRaw)
           ? statusRaw
@@ -1125,7 +1149,7 @@
 
         const icon = assignment.type === "quiz" ? "📝" : "📘";
         const title = assignment.title || "Assignment";
-        const courseLabel = assignment.course_title || "Course";
+        const courseLabel = assignment.course_title || assignment.courses?.title || "Course";
         const dueLabel = assignment.due_at
           ? new Date(assignment.due_at).toLocaleDateString("en-AU")
           : "";

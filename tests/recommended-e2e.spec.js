@@ -30,9 +30,24 @@ function buildSupabaseStub({ tableData, currentUser }) {
         let limitValue = null;
 
         const api = {
-          select: () => api,
+          select: (expression = "") => {
+            if (table === "assignments" && String(expression).includes("assignment_submissions")) {
+              rows = rows.map((row) => ({
+                ...row,
+                assignment_submissions: (tableData.assignment_submissions || [])
+                  .filter((submission) => submission.assignment_id === row.id)
+              }));
+            }
+            return api;
+          },
           eq: (col, val) => {
             rows = rows.filter((row) => {
+              if (col.startsWith("assignment_submissions.") && Array.isArray(row.assignment_submissions)) {
+                const nestedCol = col.slice("assignment_submissions.".length);
+                row.assignment_submissions = row.assignment_submissions
+                  .filter((submission) => getValue(submission, nestedCol) === val);
+                return true;
+              }
               const value = getValue(row, col);
               if (typeof value === "undefined") return true;
               return value === val;
@@ -223,7 +238,7 @@ function makeStudentStub(role = "student") {
   const assignments = [
     {
       id: "assign-1",
-      student_id: "student-1",
+      course_id: "course-1",
       title: "Module 1 Quiz",
       type: "quiz",
       course_title: "Caregiver Basics",
@@ -231,7 +246,7 @@ function makeStudentStub(role = "student") {
     },
     {
       id: "assign-2",
-      student_id: "student-1",
+      course_id: "course-2",
       title: "Final Assignment",
       type: "assignment",
       course_title: "Clinical Skills",

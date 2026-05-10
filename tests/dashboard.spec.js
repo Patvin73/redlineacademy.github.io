@@ -58,9 +58,24 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
         let limitValue = null;
 
         const api = {
-          select: () => api,
+          select: (expression = "") => {
+            if (table === "assignments" && String(expression).includes("assignment_submissions")) {
+              rows = rows.map((row) => ({
+                ...row,
+                assignment_submissions: (tableData.assignment_submissions || [])
+                  .filter((submission) => submission.assignment_id === row.id)
+              }));
+            }
+            return api;
+          },
           eq: (col, val) => {
             rows = rows.filter((row) => {
+              if (col.startsWith("assignment_submissions.") && Array.isArray(row.assignment_submissions)) {
+                const nestedCol = col.slice("assignment_submissions.".length);
+                row.assignment_submissions = row.assignment_submissions
+                  .filter((submission) => getValue(submission, nestedCol) === val);
+                return true;
+              }
               const value = getValue(row, col);
               if (typeof value === "undefined") return true;
               return value === val;
@@ -288,7 +303,7 @@ function makeStudentFixture() {
       assignments: [
         {
           id: "assign-1",
-          student_id: studentId,
+          course_id: "course-1",
           title: "Module 1 Quiz",
           type: "quiz",
           course_title: "Aged Care Basics",
@@ -296,11 +311,19 @@ function makeStudentFixture() {
         },
         {
           id: "assign-2",
-          student_id: studentId,
+          course_id: "course-2",
           title: "Final Assignment",
           type: "assignment",
           course_title: "First Aid Essentials",
           due_at: "2099-01-06"
+        },
+        {
+          id: "assign-3",
+          course_id: "course-3",
+          title: "Unenrolled Course Quiz",
+          type: "quiz",
+          course_title: "Clinical Communication",
+          due_at: "2099-01-07"
         }
       ],
       assignment_submissions: [
@@ -501,6 +524,24 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#courseGrid")).toContainText("Creator ID: TR-001");
     await expect(page.locator("#courseGrid")).toContainText("Creator ID: TR-009");
     await expect(page.locator("#courseGrid .sd-course-card[data-status='available']")).toHaveCount(1);
+  });
+
+  test("loads assignments from enrolled courses and maps submission status", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html");
+    await page.locator(".sd-nav__item[data-section='assignments']").click();
+
+    await expect(page.locator("#assignmentList .sd-assignment-item")).toHaveCount(2);
+    await expect(page.locator("#assignmentList")).toContainText("Module 1 Quiz");
+    await expect(page.locator("#assignmentList")).toContainText("Final Assignment");
+    await expect(page.locator("#assignmentList")).not.toContainText("Unenrolled Course Quiz");
+    await expect(page.locator(".sd-assignment-item[data-status='pending']")).toHaveCount(1);
+
+    await page.locator(".sd-filter-tab[data-filter='graded']").click();
+    await expect(page.locator(".sd-assignment-item[data-status='graded']")).toBeVisible();
+    await expect(page.locator(".sd-assignment-item[data-status='graded']")).toContainText("Final Assignment");
   });
 
   test("switches schedule view from list to calendar using real dashboard controls", async ({ page }) => {

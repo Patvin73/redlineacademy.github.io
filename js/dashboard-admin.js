@@ -2120,6 +2120,36 @@
 
       if ($("metricCerts")) $("metricCerts").textContent = certs?.length || 0;
 
+      const { data: gradedSubmissions, error: gradedErr } = await window.lmsSupabase
+        .from("assignment_submissions")
+        .select("grade")
+        .eq("status", "graded");
+
+      if (gradedErr) throw gradedErr;
+
+      const grades = (gradedSubmissions || [])
+        .map((row) => Number(row.grade))
+        .filter((grade) => Number.isFinite(grade));
+      const avgScore = grades.length
+        ? Math.round((grades.reduce((sum, grade) => sum + grade, 0) / grades.length) * 10) / 10
+        : 0;
+      if ($("metricAvgScore")) $("metricAvgScore").textContent = `${avgScore}%`;
+
+      const { data: enrollments, error: enrollErr } = await window.lmsSupabase
+        .from("enrollments")
+        .select("status");
+
+      if (enrollErr) throw enrollErr;
+
+      const totalEnrollments = (enrollments || []).length;
+      const dropoutCount = (enrollments || [])
+        .filter((row) => ["inactive", "dropped"].includes(row.status))
+        .length;
+      const dropoutRate = totalEnrollments
+        ? Math.round((dropoutCount / totalEnrollments) * 1000) / 10
+        : 0;
+      if ($("metricDropout")) $("metricDropout").textContent = `${dropoutRate}%`;
+
       // Revenue (admin only)
       if (currentRole === "admin") {
         const { data: payments } = await window.lmsSupabase

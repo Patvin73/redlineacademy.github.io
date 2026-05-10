@@ -189,6 +189,14 @@ async function installSupabaseStub(page, role) {
       status: "active",
       enrolled_at: "2026-03-06T08:00:00.000Z",
       courses: { id: "course-2", title: "Emergency Response", trainer_id: "e2e-admin" }
+    },
+    {
+      id: "enroll-3",
+      student_id: "e2e-student-2",
+      course_id: "course-1",
+      status: "dropped",
+      enrolled_at: "2026-03-07T08:00:00.000Z",
+      courses: { id: "course-1", title: "Leadership Basics", trainer_id: "e2e-trainer" }
     }
   ];
 
@@ -848,13 +856,15 @@ test("admin can schedule announcement in the future", async ({ page }) => {
   await expect(scheduledItem.locator(".ad-tag", { hasText: "Scheduled" })).toBeVisible();
 });
 
-test("admin sees reports revenue metrics", async ({ page }) => {
+test("admin sees reports analytics metrics", async ({ page }) => {
   await installSupabaseStub(page, "admin");
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
 
   await page.locator(".ad-nav__item[data-section='reports']").click();
   await expect(page.locator("#section-reports")).toHaveClass(/active/);
 
+  await expect(page.locator("#metricAvgScore")).toHaveText("88%");
+  await expect(page.locator("#metricDropout")).toHaveText("33.3%");
   await expect(page.locator("#metricRevenue")).toHaveText("$120.00");
   await expect(page.locator("#metricCerts")).toHaveText("2");
 });
