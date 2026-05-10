@@ -149,9 +149,40 @@
   let currentStudentProfile = null;
   let currentSection = "home";
   let fullScheduleCache = [];
+  const ASSIGNMENT_SUBMISSIONS_BUCKET = "assignment-submissions";
 
   /* ── DOM refs ───────────────────────────────────────────────────── */
   const $ = (id) => document.getElementById(id);
+
+  function safeStorageSegment(value, fallback = "file") {
+    return String(value || fallback)
+      .trim()
+      .replace(/[^a-zA-Z0-9._-]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 120) || fallback;
+  }
+
+  async function uploadAssignmentSubmissionFile(file, userId, assignmentId) {
+    if (!file) throw new Error("Please choose a file before submitting.");
+    if (!window.lmsSupabase?.storage) throw new Error("Supabase Storage is not available.");
+
+    const path = [
+      safeStorageSegment(userId, "student"),
+      safeStorageSegment(assignmentId, "assignment"),
+      safeStorageSegment(file.name, "submission")
+    ].join("/");
+
+    const { error } = await window.lmsSupabase.storage
+      .from(ASSIGNMENT_SUBMISSIONS_BUCKET)
+      .upload(path, file, { upsert: true });
+    if (error) throw error;
+
+    const { data } = window.lmsSupabase.storage
+      .from(ASSIGNMENT_SUBMISSIONS_BUCKET)
+      .getPublicUrl(path);
+
+    return data?.publicUrl || path;
+  }
 
   /* ================================================================
      INIT — runs after DOM is ready
@@ -1155,7 +1186,8 @@
           : "";
 
         const actions = status === "pending"
-          ? `<button class="sd-btn sd-btn--primary sd-btn--sm" data-action="submit" data-assignment-id="${assignment.id}">
+          ? `<input class="sd-assignment-item__file" type="file" data-assignment-file="${escHtml(assignment.id)}" aria-label="Assignment submission file" />
+             <button class="sd-btn sd-btn--primary sd-btn--sm" data-action="submit" data-assignment-id="${assignment.id}">
                ${typeof t === "function" ? t("submit") : "Submit"}
              </button>`
           : `<span class="sd-status-badge ${
@@ -1184,15 +1216,19 @@
         btn.addEventListener("click", async () => {
           const assignmentId = btn.getAttribute("data-assignment-id");
           if (!assignmentId) return;
+          const fileInput = btn.closest(".sd-assignment-item")?.querySelector("input[type='file']");
+          const file = fileInput?.files?.[0] || null;
           btn.disabled = true;
           try {
+            const fileUrl = await uploadAssignmentSubmissionFile(file, userId, assignmentId);
             await window.lmsSupabase
               .from("assignment_submissions")
               .insert({
                 student_id: userId,
                 assignment_id: assignmentId,
                 status: "submitted",
-                submitted_at: new Date().toISOString()
+                submitted_at: new Date().toISOString(),
+                file_urls: [fileUrl]
               });
             await loadAssignments(userId);
           } catch (err) {

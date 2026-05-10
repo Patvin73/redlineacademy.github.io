@@ -1784,6 +1784,34 @@
   /* ================================================================
      SCHEDULE
   ================================================================ */
+  async function populateCourseSelect(selectId) {
+    const select = $(selectId);
+    if (!select || select.dataset.loaded === "true") return;
+
+    try {
+      const { data, error } = await window.lmsSupabase
+        .from("courses")
+        .select("id, title")
+        .order("title");
+      if (error) throw error;
+
+      const defaultOption = select.querySelector("option[value='']");
+      select.innerHTML = "";
+      if (defaultOption) select.appendChild(defaultOption);
+
+      (data || []).forEach((course) => {
+        const option = document.createElement("option");
+        option.value = course.id;
+        option.textContent = course.title || "";
+        select.appendChild(option);
+      });
+
+      select.dataset.loaded = "true";
+    } catch (err) {
+      console.warn("course select load error:", err.message || err);
+    }
+  }
+
   function setupScheduleForm() {
     const createBtn = $("createEventBtn");
     const card      = $("eventFormCard");
@@ -1792,7 +1820,11 @@
 
     ["evTitle", "evStart", "evEnd"].forEach((id) => { if ($(id)) $(id).required = true; });
 
-    createBtn && createBtn.addEventListener("click", () => { card.hidden = false; card.scrollIntoView({ behavior: "smooth" }); });
+    createBtn && createBtn.addEventListener("click", async () => {
+      card.hidden = false;
+      await populateCourseSelect("evCourse");
+      card.scrollIntoView({ behavior: "smooth" });
+    });
     cancelBtn && cancelBtn.addEventListener("click", () => { card.hidden = true; });
     saveBtn   && saveBtn.addEventListener("click",   saveEvent);
     card && card.addEventListener("keydown", (e) => {
@@ -2393,7 +2425,11 @@
 
     ["anTitle", "anBody"].forEach((id) => { if ($(id)) $(id).required = true; });
 
-    createBtn && createBtn.addEventListener("click", () => { card.hidden = false; card.scrollIntoView({ behavior: "smooth" }); });
+    createBtn && createBtn.addEventListener("click", async () => {
+      card.hidden = false;
+      await populateCourseSelect("anCourse");
+      card.scrollIntoView({ behavior: "smooth" });
+    });
     cancelBtn && cancelBtn.addEventListener("click", () => { card.hidden = true; });
     saveBtn   && saveBtn.addEventListener("click",   saveAnnouncement);
     card && card.addEventListener("keydown", (e) => {

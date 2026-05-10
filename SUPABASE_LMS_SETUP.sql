@@ -878,6 +878,26 @@ create policy "course_materials_staff_insert" on storage.objects for insert to a
 create policy "course_materials_staff_update" on storage.objects for update to authenticated using (bucket_id = 'course-materials' and public.is_staff(auth.uid())) with check (bucket_id = 'course-materials' and public.is_staff(auth.uid()));
 create policy "course_materials_staff_delete" on storage.objects for delete to authenticated using (bucket_id = 'course-materials' and public.is_staff(auth.uid()));
 
+-- ==========================================================
+-- STORAGE BUCKET FOR ASSIGNMENT SUBMISSIONS
+-- ==========================================================
+
+insert into storage.buckets (id, name, public)
+values ('assignment-submissions', 'assignment-submissions', true)
+on conflict (id) do update
+set name = excluded.name,
+    public = excluded.public;
+
+drop policy if exists "assignment_submissions_public_read" on storage.objects;
+drop policy if exists "assignment_submissions_insert_own_or_staff" on storage.objects;
+drop policy if exists "assignment_submissions_update_own_or_staff" on storage.objects;
+drop policy if exists "assignment_submissions_delete_own_or_staff" on storage.objects;
+
+create policy "assignment_submissions_public_read" on storage.objects for select to public using (bucket_id = 'assignment-submissions');
+create policy "assignment_submissions_insert_own_or_staff" on storage.objects for insert to authenticated with check (bucket_id = 'assignment-submissions' and (name like (auth.uid()::text || '/%') or public.is_staff(auth.uid())));
+create policy "assignment_submissions_update_own_or_staff" on storage.objects for update to authenticated using (bucket_id = 'assignment-submissions' and (name like (auth.uid()::text || '/%') or public.is_staff(auth.uid()))) with check (bucket_id = 'assignment-submissions' and (name like (auth.uid()::text || '/%') or public.is_staff(auth.uid())));
+create policy "assignment_submissions_delete_own_or_staff" on storage.objects for delete to authenticated using (bucket_id = 'assignment-submissions' and (name like (auth.uid()::text || '/%') or public.is_staff(auth.uid())));
+
 -- Bootstrap example:
 -- update public.profiles set role = 'admin', admin_id = 'ADM-001'
 -- where id = '00000000-0000-0000-0000-000000000000';

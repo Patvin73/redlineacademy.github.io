@@ -572,15 +572,22 @@ test("trainer can create schedule event", async ({ page }) => {
 
   await page.click("#createEventBtn");
   await expect(page.locator("#eventFormCard")).toBeVisible();
+  await expect(page.locator("#evCourse option")).toHaveCount(3);
+  await expect(page.locator("#evCourse option[value='']")).toHaveText("All Enrolled Students");
+  await expect(page.locator("#evCourse option[value='course-1']")).toHaveText("Leadership Basics");
+  await expect(page.locator("#evCourse option[value='course-2']")).toHaveText("Emergency Response");
 
   await page.fill("#evTitle", "E2E Trainer Event");
   await page.fill("#evStart", makeLocalDateTime(2, 10));
   await page.fill("#evEnd", makeLocalDateTime(2, 11));
+  await page.selectOption("#evCourse", "course-1");
 
   await page.click("#saveEventBtn");
   await expect(page.locator("#eventMsg")).toContainText("Event created");
 
   await expect(page.locator(".ad-event-row__title", { hasText: "E2E Trainer Event" })).toBeVisible();
+  const schedules = await page.evaluate(() => window.__e2eGetTableData().schedules);
+  expect(schedules.at(-1)).toMatchObject({ course_id: "course-1" });
 });
 
 test("trainer sees unread messages badge", async ({ page }) => {
@@ -890,14 +897,21 @@ test("admin can publish and delete announcement", async ({ page }) => {
 
   await page.click("#createAnnouncementBtn");
   await expect(page.locator("#announcementFormCard")).toBeVisible();
+  await expect(page.locator("#anCourse option")).toHaveCount(3);
+  await expect(page.locator("#anCourse option[value='']")).toHaveText("All Courses (Global)");
+  await expect(page.locator("#anCourse option[value='course-1']")).toHaveText("Leadership Basics");
+  await expect(page.locator("#anCourse option[value='course-2']")).toHaveText("Emergency Response");
 
   await page.fill("#anTitle", "E2E Announcement");
   await page.fill("#anBody", "This is an automated admin announcement.");
+  await page.selectOption("#anCourse", "course-2");
   await page.click("#saveAnnouncementBtn");
 
   await expect(page.locator("#annMsg")).toContainText("Announcement published");
   const announcementItem = page.locator(".ad-announcement-item", { hasText: "E2E Announcement" });
   await expect(announcementItem).toBeVisible();
+  const announcements = await page.evaluate(() => window.__e2eGetTableData().announcements);
+  expect(announcements.at(-1)).toMatchObject({ course_id: "course-2" });
 
   page.once("dialog", (dialog) => dialog.accept());
   await announcementItem.locator(".ad-icon-btn--danger").click();

@@ -5,6 +5,9 @@ function buildSupabaseStub({ tableData, currentUser }) {
     (() => {
       const tableData = ${JSON.stringify(tableData)};
       const currentUser = ${JSON.stringify(currentUser)};
+      const uploadedFiles = [];
+
+      window.__QA_UPLOADED_FILES__ = uploadedFiles;
 
       const getValue = (obj, path) => {
         if (!obj) return undefined;
@@ -136,9 +139,12 @@ function buildSupabaseStub({ tableData, currentUser }) {
             on: () => ({ subscribe: () => ({}) })
           }),
           storage: {
-            from: () => ({
-              upload: async () => ({ error: null }),
-              getPublicUrl: () => ({ data: { publicUrl: "" } })
+            from: (bucket) => ({
+              upload: async (path, file, options) => {
+                uploadedFiles.push({ bucket, path, name: file.name, type: file.type, size: file.size, options });
+                return { data: { path }, error: null };
+              },
+              getPublicUrl: (path) => ({ data: { publicUrl: "https://example.com/" + bucket + "/" + path } })
             })
           }
         })
@@ -476,6 +482,11 @@ test.describe("Student and marketer flows", {
 
     const pendingItem = page.locator(".sd-assignment-item[data-status='pending']");
     await expect(pendingItem).toHaveCount(1);
+    await pendingItem.locator("input[type='file']").setInputFiles({
+      name: "submission.pdf",
+      mimeType: "application/pdf",
+      buffer: Buffer.from("%PDF-1.4 student submission")
+    });
     await pendingItem.locator("button[data-action='submit']").click();
 
     await page.locator(".sd-filter-tab[data-filter='submitted']").click();
@@ -490,6 +501,18 @@ test.describe("Student and marketer flows", {
     });
 
     expect(submissions.some((s) => s.assignment_id === "assign-1")).toBeTruthy();
+    expect(submissions.find((s) => s.assignment_id === "assign-1")?.file_urls).toEqual([
+      "https://example.com/assignment-submissions/student-1/assign-1/submission.pdf"
+    ]);
+
+    const uploadedFiles = await page.evaluate(() => window.__QA_UPLOADED_FILES__);
+    expect(uploadedFiles).toHaveLength(1);
+    expect(uploadedFiles[0]).toMatchObject({
+      bucket: "assignment-submissions",
+      path: "student-1/assign-1/submission.pdf",
+      name: "submission.pdf",
+      options: { upsert: true }
+    });
   });
 
   test("marketer auth/guard allows marketer and blocks student", {
