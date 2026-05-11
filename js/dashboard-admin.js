@@ -356,6 +356,7 @@
   let usersCache       = [];
   let activeUserRoleFilter = "all";
   let selectedSubmissionId = null;
+  let currentGradingFilter = "submitted";
   let editingCourseId  = null;
   const USER_ROLE_TAGS = { admin: "red", trainer: "purple", student: "blue" };
   const COURSE_MATERIAL_BUCKET = "course-materials";
@@ -766,29 +767,33 @@
     if (!list) return;
 
     try {
-      // Get activities from students enrolled in trainer's courses
-      const { data: courseIds } = await window.lmsSupabase
-        .from("courses")
-        .select("id")
-        .eq("trainer_id", currentProfile.id);
-
-      const ids = (courseIds || []).map((c) => c.id);
-      if (ids.length === 0) throw new Error("No courses");
-
-      const { data: enrollments } = await window.lmsSupabase
-        .from("enrollments")
-        .select("student_id")
-        .in("course_id", ids);
-
-      const studentIds = [...new Set((enrollments || []).map((e) => e.student_id))];
-      if (studentIds.length === 0) throw new Error("No students");
-
-      const { data: logs } = await window.lmsSupabase
+      let query = window.lmsSupabase
         .from("activity_logs")
         .select("user_id, action, metadata, created_at, profiles(full_name)")
-        .in("user_id", studentIds)
         .order("created_at", { ascending: false })
         .limit(10);
+
+      if (currentRole !== "admin") {
+        const { data: courseIds } = await window.lmsSupabase
+          .from("courses")
+          .select("id")
+          .eq("trainer_id", currentProfile.id);
+
+        const ids = (courseIds || []).map((c) => c.id);
+        if (ids.length === 0) throw new Error("No courses");
+
+        const { data: enrollments } = await window.lmsSupabase
+          .from("enrollments")
+          .select("student_id")
+          .in("course_id", ids);
+
+        const studentIds = [...new Set((enrollments || []).map((e) => e.student_id))];
+        if (studentIds.length === 0) throw new Error("No students");
+
+        query = query.in("user_id", studentIds);
+      }
+
+      const { data: logs } = await query;
 
       if (!logs || logs.length === 0) throw new Error("No activity");
 
@@ -1727,7 +1732,8 @@
         tab.addEventListener("click", () => {
           gradingSection.querySelectorAll(".ad-filter-tab").forEach((t) => t.classList.remove("active"));
           tab.classList.add("active");
-          loadSubmissionQueue(tab.dataset.filter);
+          currentGradingFilter = tab.dataset.filter || "submitted";
+          loadSubmissionQueue(currentGradingFilter);
         });
       });
     }
@@ -1771,7 +1777,7 @@
       if (error) throw error;
 
       if (msg) { msg.textContent = "✓ Saved! Student notified."; msg.className = "ad-grading-msg success"; }
-      setTimeout(() => loadSubmissionQueue(), 1500);
+      setTimeout(() => loadSubmissionQueue(currentGradingFilter), 1500);
 
     } catch (err) {
       if (msg) { msg.textContent = "Error: " + (err.message || "Save failed"); msg.className = "ad-grading-msg error"; }
@@ -1980,7 +1986,8 @@
       const { data: enrollments, error: enrollErr } = await window.lmsSupabase
         .from("enrollments")
         .select("student_id, courses!inner(trainer_id)")
-        .eq("courses.trainer_id", currentProfile.id);
+        .eq("courses.trainer_id", currentProfile.id)
+        .eq("status", "active");
       if (enrollErr) throw enrollErr;
 
       const studentIds = Array.from(new Set((enrollments || []).map((row) => row.student_id).filter(Boolean)));

@@ -224,17 +224,38 @@ async function installSupabaseStub(page, role, options = {}) {
     });
   }
 
+  const activityLogs = options.activityFixture ? [
+    {
+      id: "activity-1",
+      user_id: "e2e-student-1",
+      action: "assignment_submitted",
+      metadata: { assignment_title: "Module 1 Quiz" },
+      created_at: "2026-03-12T10:00:00.000Z",
+      profiles: { full_name: "Alpha Student" }
+    },
+    {
+      id: "activity-2",
+      user_id: "e2e-student-2",
+      action: "lesson_completed",
+      metadata: { lesson_title: "Emergency Basics" },
+      created_at: "2026-03-11T10:00:00.000Z",
+      profiles: { full_name: "Bravo Student" }
+    }
+  ] : [];
+
+  const hasMessageFixture = Object.prototype.hasOwnProperty.call(options, "messages");
+
   const tableData = {
     profiles,
     payments,
     schedules,
     assignment_submissions: assignmentSubmissions,
-    messages: defaultMessages,
+    messages: hasMessageFixture ? options.messages : defaultMessages,
     announcements,
     certificates,
     v_trainer_dashboard: [kpiRow],
     v_students_at_risk: [],
-    activity_logs: [],
+    activity_logs: activityLogs,
     courses,
     lessons,
     enrollments,
@@ -249,8 +270,9 @@ async function installSupabaseStub(page, role, options = {}) {
     (() => {
       const tableData = ${JSON.stringify(tableData)};
       const uploadedFiles = [];
+      const shouldLoadStoredMessages = ${JSON.stringify(!hasMessageFixture)};
       const storedMessages = window.localStorage.getItem("__e2eMessages");
-      if (storedMessages) {
+      if (shouldLoadStoredMessages && storedMessages) {
         try { tableData.messages = JSON.parse(storedMessages); } catch {}
       }
       const currentUser = ${JSON.stringify({ id: profile.id, email: profile.email })};
@@ -270,6 +292,8 @@ async function installSupabaseStub(page, role, options = {}) {
         const baseRows = Array.isArray(tableData[table]) ? tableData[table] : [];
         let rows = baseRows.slice();
         let limitValue = null;
+        let pendingUpdate = null;
+        let pendingDelete = false;
 
         const toComparable = (value) => {
           if (!value) return value;
@@ -332,19 +356,27 @@ async function installSupabaseStub(page, role, options = {}) {
             return api;
           },
           update: (payload) => {
-            rows.forEach((row) => Object.assign(row, payload));
+            pendingUpdate = payload;
             return api;
           },
           delete: () => {
-            rows.forEach((row) => {
-              const idx = baseRows.indexOf(row);
-              if (idx >= 0) baseRows.splice(idx, 1);
-            });
+            pendingDelete = true;
             return api;
           }
         };
 
         api.then = (resolve) => {
+          if (pendingUpdate) {
+            rows.forEach((row) => Object.assign(row, pendingUpdate));
+            pendingUpdate = null;
+          }
+          if (pendingDelete) {
+            rows.forEach((row) => {
+              const idx = baseRows.indexOf(row);
+              if (idx >= 0) baseRows.splice(idx, 1);
+            });
+            pendingDelete = false;
+          }
           const data = limitValue ? rows.slice(0, limitValue) : rows;
           return resolve(makeResponse(data));
         };
@@ -693,14 +725,8 @@ test("trainer can mark message as read (simulated)", async ({ page }) => {
 });
 
 test("trainer sees empty state when no messages", async ({ page }) => {
-  await installSupabaseStub(page, "trainer");
+  await installSupabaseStub(page, "trainer", { messages: [] });
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
-
-  await page.evaluate(() => {
-    if (window.__e2eSetMessages) window.__e2eSetMessages([]);
-  });
-
-  await page.reload();
   await page.locator(".ad-nav__item[data-section='messages']").click();
   await expect(page.locator("#section-messages")).toHaveClass(/active/);
   await expect(page.locator("#adInboxEmpty")).toBeVisible();
@@ -725,6 +751,28 @@ test("trainer can filter grading tabs (submitted/graded/all)", async ({ page }) 
   await page.locator("#section-grading .ad-filter-tab[data-filter='all']").click();
   await expect(page.locator(".ad-submission-item")).toHaveCount(3);
   await expect(page.locator(".ad-tag", { hasText: "Resubmit" })).toBeVisible();
+});
+
+test("trainer keeps active grading filter after saving a grade", async ({ page }) => {
+  await installSupabaseStub(page, "trainer");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='grading']").click();
+  await expect(page.locator("#section-grading")).toHaveClass(/active/);
+
+  await page.locator("#section-grading .ad-filter-tab[data-filter='graded']").click();
+  await expect(page.locator(".ad-submission-item")).toHaveCount(1);
+  await expect(page.locator(".ad-submission-item__assignment")).toContainText("Final Quiz");
+
+  await page.locator(".ad-submission-item").first().click();
+  await page.fill("#gradeScore", "90");
+  await page.click("#saveGradeBtn");
+  await expect(page.locator("#gradingMsg")).toContainText("Saved");
+
+  await page.waitForTimeout(1700);
+  await expect(page.locator("#section-grading .ad-filter-tab[data-filter='graded']")).toHaveClass(/active/);
+  await expect(page.locator(".ad-submission-item")).toHaveCount(1);
+  await expect(page.locator(".ad-submission-item__assignment")).toContainText("Final Quiz");
 });
 
 test("trainer can request resubmit from grading panel", async ({ page }) => {
@@ -886,6 +934,17 @@ test("trainer sees empty activity feed state", async ({ page }) => {
   await expect(page.locator("#sidebarName")).toHaveText("E2E Trainer");
   await expect(page.locator("#adActivityEmpty")).toBeVisible();
   await expect(page.locator(".ad-activity-item")).toHaveCount(0);
+});
+
+test("admin activity feed is not limited to admin-owned courses", async ({ page }) => {
+  await installSupabaseStub(page, "admin", { activityFixture: true });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await expect(page.locator("#sidebarName")).toHaveText("E2E Admin");
+  await expect(page.locator("#adActivityEmpty")).toBeHidden();
+  await expect(page.locator(".ad-activity-item")).toHaveCount(2);
+  await expect(page.locator("#adActivityList")).toContainText("Alpha Student");
+  await expect(page.locator("#adActivityList")).toContainText("Bravo Student");
 });
 
 test("admin can publish and delete announcement", async ({ page }) => {
