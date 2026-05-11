@@ -44,6 +44,18 @@
       lmsNotifications:      "Notifikasi",
       lmsNewMessage:         "Pesan Baru",
       lmsSelectMessage:      "Pilih pesan untuk dibaca",
+      lmsComposeTitle:       "Pesan Baru",
+      lmsMsgRecipient:       "Kirim ke",
+      lmsMsgSelectRecipient: "Pilih trainer",
+      lmsMsgSubject:         "Subjek",
+      lmsMsgBody:            "Isi pesan",
+      lmsMsgBodyPlaceholder: "Tulis isi pesan...",
+      lmsMsgSent:            "Pesan terkirim.",
+      lmsMsgNoRecipients:    "Tidak ada trainer aktif tersedia.",
+      lmsMsgRequired:        "Trainer, subjek, dan isi pesan wajib diisi.",
+      lmsMsgFailed:          "Pesan gagal dikirim.",
+      lmsCancel:             "Batal",
+      lmsSendMessage:        "Kirim Pesan",
       lmsFilterAll:          "Semua",
       lmsFilterActive:       "Sedang Berjalan",
       lmsFilterCompleted:    "Selesai",
@@ -102,6 +114,18 @@
       lmsNotifications:      "Notifications",
       lmsNewMessage:         "New Message",
       lmsSelectMessage:      "Select a message to view",
+      lmsComposeTitle:       "New Message",
+      lmsMsgRecipient:       "Send to",
+      lmsMsgSelectRecipient: "Select trainer",
+      lmsMsgSubject:         "Subject",
+      lmsMsgBody:            "Message",
+      lmsMsgBodyPlaceholder: "Write your message...",
+      lmsMsgSent:            "Message sent.",
+      lmsMsgNoRecipients:    "No active trainer available.",
+      lmsMsgRequired:        "Trainer, subject, and message are required.",
+      lmsMsgFailed:          "Message failed to send.",
+      lmsCancel:             "Cancel",
+      lmsSendMessage:        "Send Message",
       lmsFilterAll:          "All",
       lmsFilterActive:       "In Progress",
       lmsFilterCompleted:    "Completed",
@@ -149,6 +173,7 @@
   let currentStudentProfile = null;
   let currentSection = "home";
   let fullScheduleCache = [];
+  let studentMessageComposerBound = false;
   const ASSIGNMENT_SUBMISSIONS_BUCKET = "assignment-submissions";
 
   /* ── DOM refs ───────────────────────────────────────────────────── */
@@ -354,35 +379,8 @@
       }
     });
 
-    newMessageBtn && newMessageBtn.addEventListener("click", async () => {
-      if (!currentStudentProfile?.id || !window.lmsSupabase) return;
-      const subject = window.prompt("Subject");
-      if (subject === null) return;
-      const body = window.prompt("Message");
-      if (body === null) return;
-      if (!subject.trim() || !body.trim()) return;
-
-      const { data: enrollments } = await window.lmsSupabase
-        .from("enrollments")
-        .select("courses!inner(trainer_id)")
-        .eq("student_id", currentStudentProfile.id)
-        .eq("status", "active")
-        .limit(1);
-
-      const recipientId = enrollments?.[0]?.courses?.trainer_id;
-      if (!recipientId) return;
-
-      const { error } = await window.lmsSupabase
-        .from("messages")
-        .insert({
-          sender_id: currentStudentProfile.id,
-          recipient_id: recipientId,
-          subject: subject.trim(),
-          body: body.trim()
-        });
-      if (error) return;
-      if (window._sdActivateSection) window._sdActivateSection("messages");
-      await loadMessages(currentStudentProfile.id);
+    newMessageBtn && newMessageBtn.addEventListener("click", () => {
+      openStudentMessageComposer();
     });
 
     resourceSearch && resourceSearch.addEventListener("input", () => {
@@ -1475,22 +1473,199 @@
     }
   }
 
+  function dashboardText(key, fallback) {
+    if (typeof window.t === "function") {
+      const value = window.t(key);
+      if (value && value !== key) return value;
+    }
+    return fallback;
+  }
+
+  function setMessagePanelVisible(el, visible) {
+    if (!el) return;
+    el.hidden = !visible;
+    el.style.display = visible ? "" : "none";
+  }
+
+  function setStudentComposerStatus(text, isError = false) {
+    const msg = $("studentMsgComposeMsg");
+    if (!msg) return;
+    msg.textContent = text || "";
+    msg.className = `sd-profile-form__msg${isError ? " error" : text ? " success" : ""}`;
+  }
+
+  function closeStudentMessageComposer() {
+    const composeForm = $("studentMsgComposeForm");
+    const viewEmpty = $("messageViewEmpty");
+    const detail = $("messageDetail");
+
+    setMessagePanelVisible(composeForm, false);
+    setStudentComposerStatus("");
+    if (detail && detail.innerHTML.trim()) {
+      setMessagePanelVisible(detail, true);
+      return;
+    }
+    setMessagePanelVisible(viewEmpty, true);
+  }
+
+  async function loadStudentMessageRecipients() {
+    const recipient = $("studentMsgRecipient");
+    if (!recipient || !window.lmsSupabase || !currentStudentProfile?.id) return [];
+
+    recipient.disabled = true;
+    recipient.innerHTML = "";
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = dashboardText("lmsMsgSelectRecipient", "Select trainer");
+    recipient.appendChild(placeholder);
+
+    const { data: enrollments, error: enrollErr } = await window.lmsSupabase
+      .from("enrollments")
+      .select("course_id")
+      .eq("student_id", currentStudentProfile.id)
+      .eq("status", "active");
+    if (enrollErr) throw enrollErr;
+
+    const courseIds = Array.from(new Set((enrollments || []).map((row) => row.course_id).filter(Boolean)));
+    if (courseIds.length === 0) {
+      setStudentComposerStatus(dashboardText("lmsMsgNoRecipients", "No active trainer available."), true);
+      return [];
+    }
+
+    const { data: courses, error: courseErr } = await window.lmsSupabase
+      .from("courses")
+      .select("id, title, trainer_id")
+      .in("id", courseIds);
+    if (courseErr) throw courseErr;
+
+    const trainerIds = Array.from(new Set((courses || []).map((course) => course.trainer_id).filter(Boolean)));
+    if (trainerIds.length === 0) {
+      setStudentComposerStatus(dashboardText("lmsMsgNoRecipients", "No active trainer available."), true);
+      return [];
+    }
+
+    const { data: trainers, error: trainerErr } = await window.lmsSupabase
+      .from("profiles")
+      .select("id, full_name, email, role")
+      .in("id", trainerIds)
+      .eq("role", "trainer")
+      .order("full_name", { ascending: true });
+    if (trainerErr) throw trainerErr;
+
+    (trainers || []).forEach((trainer) => {
+      const option = document.createElement("option");
+      option.value = trainer.id;
+      option.textContent = trainer.full_name || trainer.email || trainer.id;
+      recipient.appendChild(option);
+    });
+
+    recipient.disabled = !trainers || trainers.length === 0;
+    if (!trainers || trainers.length === 0) {
+      setStudentComposerStatus(dashboardText("lmsMsgNoRecipients", "No active trainer available."), true);
+    }
+    return trainers || [];
+  }
+
+  async function sendStudentComposedMessage(e) {
+    if (e) e.preventDefault();
+    if (!window.lmsSupabase || !currentStudentProfile?.id) return;
+
+    const recipient = $("studentMsgRecipient");
+    const subject = $("studentMsgSubject");
+    const body = $("studentMsgBody");
+    const sendBtn = $("studentSendMsgBtn");
+    const recipientId = recipient?.value || "";
+    const messageSubject = subject?.value.trim() || "";
+    const messageBody = body?.value.trim() || "";
+
+    if (!recipientId || !messageSubject || !messageBody) {
+      setStudentComposerStatus(
+        dashboardText("lmsMsgRequired", "Trainer, subject, and message are required."),
+        true
+      );
+      return;
+    }
+
+    try {
+      if (sendBtn) sendBtn.disabled = true;
+      const { error } = await window.lmsSupabase
+        .from("messages")
+        .insert({
+          sender_id: currentStudentProfile.id,
+          recipient_id: recipientId,
+          subject: messageSubject,
+          body: messageBody
+        });
+      if (error) throw error;
+
+      if (subject) subject.value = "";
+      if (body) body.value = "";
+      setStudentComposerStatus(dashboardText("lmsMsgSent", "Message sent."));
+      if (window._sdActivateSection) window._sdActivateSection("messages");
+      await loadMessages(currentStudentProfile.id);
+    } catch (err) {
+      setStudentComposerStatus(err.message || dashboardText("lmsMsgFailed", "Message failed to send."), true);
+    } finally {
+      if (sendBtn) sendBtn.disabled = false;
+    }
+  }
+
+  async function openStudentMessageComposer() {
+    if (window._sdActivateSection) window._sdActivateSection("messages");
+    if (!currentStudentProfile?.id || !window.lmsSupabase) return;
+
+    const viewEmpty = $("messageViewEmpty");
+    const detail = $("messageDetail");
+    const composeForm = $("studentMsgComposeForm");
+    const recipient = $("studentMsgRecipient");
+    const subject = $("studentMsgSubject");
+    const cancelBtn = $("studentCancelMsgBtn");
+    if (!composeForm) return;
+
+    setMessagePanelVisible(viewEmpty, false);
+    setMessagePanelVisible(detail, false);
+    setMessagePanelVisible(composeForm, true);
+    setStudentComposerStatus("");
+
+    if (!studentMessageComposerBound) {
+      composeForm.addEventListener("submit", sendStudentComposedMessage);
+      cancelBtn && cancelBtn.addEventListener("click", closeStudentMessageComposer);
+      studentMessageComposerBound = true;
+    }
+
+    try {
+      await loadStudentMessageRecipients();
+    } catch (err) {
+      setStudentComposerStatus(err.message || "Recipients failed to load.", true);
+    }
+
+    if (recipient && !recipient.disabled && recipient.options.length === 2) {
+      recipient.selectedIndex = 1;
+    }
+    if (subject) subject.focus();
+  }
+
   async function loadMessages(userId) {
     const inbox = $("inboxList");
     const inboxEmpty = $("inboxEmpty");
     const view = $("messageView");
     const viewEmpty = $("messageViewEmpty");
+    const detail = $("messageDetail");
+    const composeForm = $("studentMsgComposeForm");
     if (!inbox || !view) return;
 
     const openMessage = async (msg) => {
-      if (viewEmpty) viewEmpty.style.display = "none";
-      view.innerHTML = `
+      setMessagePanelVisible(viewEmpty, false);
+      setMessagePanelVisible(composeForm, false);
+      const target = detail || view;
+      target.innerHTML = `
         <div class="sd-message-view__body">
           <p class="sd-inbox-item__name">${escHtml(msg.profiles?.full_name || "System")}</p>
           <p class="sd-inbox-item__time">${formatDateTime(msg.created_at)}</p>
           <h3>${escHtml(msg.subject || "Message")}</h3>
-          <p>${escHtml(msg.body || "—").replace(/\n/g, "<br>")}</p>
+          <p>${escHtml(msg.body || "-").replace(/\n/g, "<br>")}</p>
         </div>`;
+      if (detail) setMessagePanelVisible(detail, true);
 
       if (!msg.is_read && msg.recipient_id === userId) {
         await window.lmsSupabase
@@ -1537,6 +1712,10 @@
       });
     } catch {
       if (inboxEmpty) inboxEmpty.style.display = "flex";
+      if (composeForm?.hidden) {
+        setMessagePanelVisible(detail, false);
+        setMessagePanelVisible(viewEmpty, true);
+      }
     }
   }
 

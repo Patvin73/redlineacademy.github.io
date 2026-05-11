@@ -602,6 +602,45 @@ test.describe("Student Dashboard", () => {
     );
     expect(unread).toBe(0);
   });
+
+  test("student composes a message to the active enrollment trainer", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html");
+    await page.evaluate(() => {
+      window.prompt = () => {
+        throw new Error("Student compose must not use window.prompt");
+      };
+    });
+
+    await page.locator(".sd-nav__item[data-section='messages']").click();
+    await page.locator("#newMessageBtn").click();
+
+    await expect(page.locator("#studentMsgComposeForm")).toBeVisible();
+    await expect(page.locator("#messageViewEmpty")).toBeHidden();
+
+    const recipients = await page.locator("#studentMsgRecipient option").allTextContents();
+    expect(recipients).toContain("Trainer One");
+
+    await page.selectOption("#studentMsgRecipient", "trainer-1");
+    await page.fill("#studentMsgSubject", "Question about Module 1");
+    await page.fill("#studentMsgBody", "Can you review my answer?");
+    await page.locator("#studentSendMsgBtn").click();
+
+    await expect(page.locator("#studentMsgComposeMsg")).toContainText(/Message sent\.|Pesan terkirim\./);
+    await expect(page.locator("#section-messages")).toHaveClass(/active/);
+
+    const sentMessages = await page.evaluate(() => window.__QA_TABLE_DATA__.messages);
+    expect(sentMessages).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        sender_id: "student-1",
+        recipient_id: "trainer-1",
+        subject: "Question about Module 1",
+        body: "Can you review my answer?"
+      })
+    ]));
+  });
 });
 
 test.describe("Marketer Dashboard", () => {

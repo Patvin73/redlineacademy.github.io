@@ -2824,7 +2824,7 @@
           return;
         }
       } else if (!amount) {
-        setMessage("Next due date is required for installments.", "var(--sd-red)");
+        setMessage("Amount is required.", "var(--sd-red)");
         return;
       }
 

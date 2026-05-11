@@ -887,6 +887,76 @@
                 </svg>
                 <p data-i18n="lmsSelectMessage">Select a message to view</p>
               </div>
+              <div id="messageDetail" hidden></div>
+              <form class="sd-message-view__body" id="studentMsgComposeForm" hidden>
+                <h3 class="sd-message-view__subject" data-i18n="lmsComposeTitle">
+                  New Message
+                </h3>
+                <div class="sd-field">
+                  <label
+                    class="sd-label"
+                    for="studentMsgRecipient"
+                    data-i18n="lmsMsgRecipient"
+                    >Send to</label
+                  >
+                  <select class="sd-input sd-select" id="studentMsgRecipient" required>
+                    <option value="" data-i18n="lmsMsgSelectRecipient">
+                      Select trainer
+                    </option>
+                  </select>
+                </div>
+                <div class="sd-field">
+                  <label
+                    class="sd-label"
+                    for="studentMsgSubject"
+                    data-i18n="lmsMsgSubject"
+                    >Subject</label
+                  >
+                  <input
+                    class="sd-input"
+                    type="text"
+                    id="studentMsgSubject"
+                    required
+                  />
+                </div>
+                <div class="sd-field">
+                  <label
+                    class="sd-label"
+                    for="studentMsgBody"
+                    data-i18n="lmsMsgBody"
+                    >Message</label
+                  >
+                  <textarea
+                    class="sd-input sd-textarea"
+                    id="studentMsgBody"
+                    rows="7"
+                    data-i18n="lmsMsgBodyPlaceholder"
+                    placeholder="Write your message..."
+                    required
+                  ></textarea>
+                </div>
+                <div class="sd-profile-form__actions">
+                  <p class="sd-profile-form__msg" id="studentMsgComposeMsg" aria-live="polite"></p>
+                  <div class="sd-btn-group">
+                    <button
+                      class="sd-btn sd-btn--outline"
+                      type="button"
+                      id="studentCancelMsgBtn"
+                      data-i18n="lmsCancel"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      class="sd-btn sd-btn--primary"
+                      type="submit"
+                      id="studentSendMsgBtn"
+                      data-i18n="lmsSendMessage"
+                    >
+                      Send Message
+                    </button>
+                  </div>
+                </div>
+              </form>
             </div>
           </div>
         </section>
