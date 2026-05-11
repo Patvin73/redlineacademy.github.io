@@ -786,6 +786,14 @@
     const empty = $("adActivityEmpty");
     if (!list) return;
 
+    const actionToSection = {
+      assignment_submitted: "grading",
+      quiz_submitted:       "grading",
+      course_enrolled:      "students",
+      lesson_completed:     "students",
+      certificate_issued:   "reports",
+    };
+
     try {
       let query = window.lmsSupabase
         .from("activity_logs")
@@ -831,6 +839,17 @@
             <p class="ad-activity-item__text">${text}</p>
             <p class="ad-activity-item__time">${timeAgo(log.created_at)}</p>
           </div>`;
+        const targetSection = actionToSection[log.action] || "home";
+        li.style.cursor = "pointer";
+        li.setAttribute("tabindex", "0");
+        li.setAttribute("title", `Buka ${targetSection}`);
+        li.addEventListener("click", () => window._adActivateSection?.(targetSection));
+        li.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            window._adActivateSection?.(targetSection);
+          }
+        });
         list.insertBefore(li, empty);
       });
 

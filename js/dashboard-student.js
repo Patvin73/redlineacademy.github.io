@@ -878,6 +878,31 @@
         badge.textContent = count;
         badge.style.display = count > 0 ? "inline-block" : "none";
       }
+
+      const statNavMap = [
+        { cardId: "statCoursesEnrolled",    section: "courses",      trend: "up"   },
+        { cardId: "statLessonsCompleted",   section: "courses",      trend: "up"   },
+        { cardId: "statPendingAssignments", section: "assignments",  trend: "down" },
+        { cardId: "statCertificates",       section: "certificates", trend: "up"   },
+      ];
+      statNavMap.forEach(({ cardId, section, trend }) => {
+        const card = $(cardId)?.closest(".sd-stat-card");
+        if (!card) return;
+        if (!card.querySelector(".sd-stat-card__trend")) {
+          const trendEl = document.createElement("div");
+          trendEl.className = "sd-stat-card__trend";
+          trendEl.innerHTML = `<span class="sd-trend sd-trend--${trend}">${trend === "up" ? "↑" : "↓"}</span>`;
+          card.appendChild(trendEl);
+        }
+        card.style.cursor = "pointer";
+        card.setAttribute("role", "button");
+        card.setAttribute("tabindex", "0");
+        card.setAttribute("aria-label", `Buka section ${section}`);
+        card.addEventListener("click", () => window._sdActivateSection?.(section));
+        card.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); window._sdActivateSection?.(section); }
+        });
+      });
     } catch (err) {
       console.warn("Stats load error (view may not exist yet):", err.message);
       // Fallback: set all stats to 0
@@ -1299,6 +1324,11 @@
             ? `<a href="${escHtml(toSafeUiUrl(event.meeting_url))}" target="_blank" rel="noopener" class="sd-btn sd-btn--outline sd-btn--sm">Join</a>`
             : ""}
         `;
+        li.style.cursor = "pointer";
+        li.addEventListener("click", (e) => {
+          if (e.target.closest("a")) return;
+          window._sdActivateSection?.("schedule");
+        });
         list.insertBefore(li, empty);
       });
     } catch {
@@ -1831,6 +1861,21 @@
             <p class="sd-activity-item__text">${text}</p>
             <p class="sd-activity-item__time">${timeAgo(log.created_at)}</p>
           </div>`;
+        const activityNavMap = {
+          lesson_completed:     "courses",
+          quiz_submitted:       "assignments",
+          quiz_passed:          "assignments",
+          assignment_submitted: "assignments",
+          course_enrolled:      "courses",
+          certificate_issued:   "certificates",
+        };
+        const targetSection = activityNavMap[log.action] || "home";
+        li.style.cursor = "pointer";
+        li.setAttribute("tabindex", "0");
+        li.addEventListener("click", () => window._sdActivateSection?.(targetSection));
+        li.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); window._sdActivateSection?.(targetSection); }
+        });
         list.insertBefore(li, empty);
       });
     } catch {
