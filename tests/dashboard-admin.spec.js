@@ -450,6 +450,35 @@ test("dashboard admin renders core sections", { tag: "@critical" }, async ({ pag
   await expect(page.locator("#kpiCompletionRate")).toBeVisible();
 });
 
+test("admin KPI cards navigate to their target sections and count published courses only", async ({ page }) => {
+  await installSupabaseStub(page, "admin");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await expect(page.locator("#welcomeName")).toHaveText("E2E Admin", { timeout: 30000 });
+  await expect(page.locator("#kpiActiveCourses")).toHaveText("1");
+
+  const kpiRoutes = [
+    { cardId: "kpiTotalStudents", section: "students" },
+    { cardId: "kpiActiveCourses", section: "courses" },
+    { cardId: "kpiPendingGrading", section: "grading" },
+    { cardId: "kpiCompletionRate", section: "reports" },
+  ];
+
+  for (const { cardId, section } of kpiRoutes) {
+    await page.locator(".ad-nav__item[data-section='home']").click();
+    const card = page.locator(`.ad-kpi-card:has(#${cardId})`);
+    await expect(card).toHaveAttribute("role", "button");
+    await expect(card).toHaveAttribute("tabindex", "0");
+    await card.click();
+    await expect(page.locator(`#section-${section}`)).toHaveClass(/active/);
+  }
+
+  await page.locator(".ad-nav__item[data-section='home']").click();
+  await page.locator(".ad-kpi-card:has(#kpiCompletionRate)").focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#section-reports")).toHaveClass(/active/);
+});
+
 test("admin can open Users section and toggle active", { tag: "@critical" }, async ({ page }) => {
   await installSupabaseStub(page, "admin");
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });

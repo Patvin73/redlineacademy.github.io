@@ -714,7 +714,7 @@
           { data: progressRows }
         ] = await Promise.all([
           window.lmsSupabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "student"),
-          window.lmsSupabase.from("courses").select("id", { count: "exact", head: true }),
+          window.lmsSupabase.from("courses").select("id", { count: "exact", head: true }).eq("status", "published"),
           window.lmsSupabase.from("assignment_submissions").select("id", { count: "exact", head: true }).eq("status", "submitted"),
           window.lmsSupabase.from("course_progress").select("completion_percent")
         ]);
@@ -748,6 +748,26 @@
         const gb = $("gradingBadge");
         const count = data.pending_grading || 0;
         if (gb) { gb.textContent = count; gb.style.display = count > 0 ? "inline-block" : "none"; }
+
+        // Map KPI card ke section tujuan
+        const kpiNavMap = [
+          { cardId: "kpiTotalStudents", section: "students" },
+          { cardId: "kpiActiveCourses", section: "courses" },
+          { cardId: "kpiPendingGrading", section: "grading" },
+          { cardId: "kpiCompletionRate", section: "reports" },
+        ];
+        kpiNavMap.forEach(({ cardId, section }) => {
+          const el = $(cardId)?.closest(".ad-kpi-card");
+          if (el) {
+            el.style.cursor = "pointer";
+            el.setAttribute("role", "button");
+            el.setAttribute("tabindex", "0");
+            el.addEventListener("click", () => window._adActivateSection?.(section));
+            el.addEventListener("keydown", (e) => {
+              if (e.key === "Enter" || e.key === " ") window._adActivateSection?.(section);
+            });
+          }
+        });
       }
     } catch (err) {
       console.warn("KPI load error:", err.message);
