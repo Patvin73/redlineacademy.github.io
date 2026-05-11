@@ -37,6 +37,7 @@
       lmsNoActivity:         "Belum ada aktivitas",
       lmsNoAssignments:      "Tidak ada tugas di sini",
       lmsNoCertificates:     "Belum ada sertifikat. Selesaikan kursus untuk mendapatkannya!",
+      lmsNoCourses:          "Belum ada kursus aktif",
       lmsNoMessages:         "Belum ada pesan",
       lmsNoResources:        "Belum ada materi tersedia",
       lmsNoNotifications:    "Tidak ada notifikasi",
@@ -107,6 +108,7 @@
       lmsNoActivity:         "No activity yet",
       lmsNoAssignments:      "No assignments here",
       lmsNoCertificates:     "No certificates yet. Complete a course to earn one!",
+      lmsNoCourses:          "No active courses",
       lmsNoMessages:         "No messages yet",
       lmsNoResources:        "No resources available",
       lmsNoNotifications:    "No notifications",
@@ -1771,7 +1773,7 @@
       data.forEach((course) => {
         const card = document.createElement("div");
         card.setAttribute("data-resource-card", "true");
-        card.dataset.category = String(course.categories?.id || course.category_id || "all").toLowerCase();
+        card.dataset.category = (course.categories?.name || "").toLowerCase().replace(/\s+/g, "-") || "all";
         card.className = "sd-course-card";
         card.innerHTML = `
           <div class="sd-course-card__thumb">
