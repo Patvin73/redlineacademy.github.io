@@ -1724,6 +1724,13 @@
       if (inboxEmpty) inboxEmpty.style.display = "none";
       inbox.querySelectorAll(".sd-inbox-item").forEach((el) => el.remove());
 
+      const unreadCount = (data || []).filter((m) => !m.is_read && m.recipient_id === userId).length;
+      const msgBadge = $("messageBadge");
+      if (msgBadge) {
+        msgBadge.textContent = unreadCount;
+        msgBadge.style.display = unreadCount > 0 ? "inline-block" : "none";
+      }
+
       data.forEach((msg) => {
         const item = document.createElement("div");
         item.className = `sd-inbox-item${msg.is_read ? "" : " unread"}`;
