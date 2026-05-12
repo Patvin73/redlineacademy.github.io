@@ -91,7 +91,28 @@ async function installSupabaseStub(page, role, options = {}) {
     avg_completion_percent: 76
   };
 
-  const schedules = [];
+  const schedules = [
+    {
+      id: "event-1",
+      title: "Trainer Live Session",
+      event_type: "live_session",
+      start_datetime: new Date(Date.now() + 86400000).toISOString(),
+      end_datetime: new Date(Date.now() + 90000000).toISOString(),
+      meeting_url: "https://example.com/trainer-live",
+      trainer_id: "e2e-trainer",
+      courses: { title: "Leadership Basics" }
+    },
+    {
+      id: "event-2",
+      title: "Admin Exam",
+      event_type: "exam",
+      start_datetime: new Date(Date.now() + 172800000).toISOString(),
+      end_datetime: new Date(Date.now() + 176400000).toISOString(),
+      meeting_url: "https://example.com/admin-exam",
+      trainer_id: "e2e-admin",
+      courses: { title: "Emergency Response" }
+    }
+  ];
 
   const assignmentSubmissions = [
     {
@@ -170,7 +191,28 @@ async function installSupabaseStub(page, role, options = {}) {
     }
   ];
 
-  const announcements = [];
+  const announcements = [
+    {
+      id: "ann-1",
+      title: "Trainer Announcement",
+      body: "Visible to the owning trainer.",
+      target_role: "student",
+      is_published: true,
+      publish_at: "2026-03-10T08:00:00.000Z",
+      expires_at: null,
+      author_id: "e2e-trainer"
+    },
+    {
+      id: "ann-2",
+      title: "Admin Announcement",
+      body: "Visible to admins.",
+      target_role: "all",
+      is_published: true,
+      publish_at: "2026-03-11T08:00:00.000Z",
+      expires_at: null,
+      author_id: "e2e-admin"
+    }
+  ];
   const certificates = [{ id: "cert-1" }, { id: "cert-2" }];
   const lessons = [];
   const enrollments = [
@@ -937,7 +979,7 @@ test("trainer can upload lesson material and save it with course lessons", async
   });
 });
 
-test("trainer sees all courses with creator IDs", async ({ page }) => {
+test("trainer sees only owned courses with creator IDs", async ({ page }) => {
   await installSupabaseStub(page, "trainer");
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
 
@@ -945,11 +987,11 @@ test("trainer sees all courses with creator IDs", async ({ page }) => {
   await expect(page.locator("#section-courses")).toHaveClass(/active/);
 
   const rows = page.locator("#adminCourseList .ad-course-row:not(.ad-skeleton-row)");
-  await expect(rows).toHaveCount(2);
+  await expect(rows).toHaveCount(1);
   await expect(page.locator("#adminCourseList")).toContainText("Leadership Basics");
-  await expect(page.locator("#adminCourseList")).toContainText("Emergency Response");
+  await expect(page.locator("#adminCourseList")).not.toContainText("Emergency Response");
   await expect(page.locator("#adminCourseList")).toContainText("Creator ID: TR-002");
-  await expect(page.locator("#adminCourseList")).toContainText("Creator ID: ADM-001");
+  await expect(page.locator("#adminCourseList")).not.toContainText("Creator ID: ADM-001");
 
   await expect(page.locator(".ad-course-row", { hasText: "Leadership Basics" }).locator("[data-action='edit']")).toBeVisible();
   await expect(page.locator(".ad-course-row", { hasText: "Emergency Response" }).locator("[data-action='edit']")).toHaveCount(0);
@@ -969,6 +1011,34 @@ test("admin sees all courses with creator IDs", async ({ page }) => {
   await expect(page.locator("#adminCourseList")).toContainText("Creator ID: TR-002");
   await expect(page.locator("#adminCourseList")).toContainText("Creator ID: ADM-001");
   await expect(rows.locator("[data-action='edit']")).toHaveCount(2);
+});
+
+test("admin sees all upcoming events and trainer sees only owned events", async ({ page }) => {
+  await installSupabaseStub(page, "admin");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='schedule']").click();
+  await expect(page.locator("#section-schedule")).toHaveClass(/active/);
+  await expect(page.locator("#adminEventsList")).toContainText("Trainer Live Session");
+  await expect(page.locator("#adminEventsList")).toContainText("Admin Exam");
+
+  await installSupabaseStub(page, "trainer");
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.locator(".ad-nav__item[data-section='schedule']").click();
+  await expect(page.locator("#section-schedule")).toHaveClass(/active/);
+  await expect(page.locator("#adminEventsList")).toContainText("Trainer Live Session");
+  await expect(page.locator("#adminEventsList")).not.toContainText("Admin Exam");
+});
+
+test("admin sees all announcements regardless of author", async ({ page }) => {
+  await installSupabaseStub(page, "admin");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='announcements']").click();
+  await expect(page.locator("#section-announcements")).toHaveClass(/active/);
+
+  await expect(page.locator("#announcementsList")).toContainText("Trainer Announcement");
+  await expect(page.locator("#announcementsList")).toContainText("Admin Announcement");
 });
 
 test("trainer can open course builder edit flow", async ({ page }) => {

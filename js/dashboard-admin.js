@@ -1258,7 +1258,7 @@
     if (!list) return;
 
     try {
-      const { data: courses } = await window.lmsSupabase
+      let query = window.lmsSupabase
         .from("courses")
         .select(`
           id, title, status, category_id, thumbnail_url, created_at, trainer_id,
@@ -1266,6 +1266,10 @@
           profiles!courses_trainer_id_fkey(admin_id, student_id)
         `)
         .order("created_at", { ascending: false });
+      if (currentRole !== "admin") {
+        query = query.eq("trainer_id", currentProfile.id);
+      }
+      const { data: courses } = await query;
 
       // Remove skeletons
       list.querySelectorAll(".ad-skeleton-row").forEach((el) => el.remove());
@@ -1952,13 +1956,16 @@
     if (!list) return;
 
     try {
-      const { data } = await window.lmsSupabase
+      let evQuery = window.lmsSupabase
         .from("schedules")
         .select("id, title, event_type, start_datetime, end_datetime, meeting_url, courses(title)")
-        .eq("trainer_id", currentProfile.id)
         .gte("start_datetime", new Date().toISOString())
         .order("start_datetime", { ascending: true })
         .limit(10);
+      if (currentRole !== "admin") {
+        evQuery = evQuery.eq("trainer_id", currentProfile.id);
+      }
+      const { data } = await evQuery;
 
       if (!data || data.length === 0) { if (empty) empty.style.display = "flex"; return; }
       if (empty) empty.style.display = "none";
@@ -3059,11 +3066,14 @@
     if (!list) return;
 
     try {
-      const { data } = await window.lmsSupabase
+      let annQuery = window.lmsSupabase
         .from("announcements")
         .select("id, title, body, target_role, is_published, publish_at, expires_at")
-        .eq("author_id", currentProfile.id)
         .order("publish_at", { ascending: false });
+      if (currentRole !== "admin") {
+        annQuery = annQuery.eq("author_id", currentProfile.id);
+      }
+      const { data } = await annQuery;
 
       if (!data || data.length === 0) { if (empty) empty.style.display = "flex"; return; }
       if (empty) empty.style.display = "none";
