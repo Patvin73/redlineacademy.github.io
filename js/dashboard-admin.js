@@ -952,6 +952,16 @@
         if (window._adActivateSection) window._adActivateSection(a.section);
       });
 
+      li.style.cursor = "pointer";
+      li.setAttribute("tabindex", "0");
+      li.addEventListener("click", (e) => {
+        if (e.target.closest("button")) return;
+        window._adActivateSection?.(a.section);
+      });
+      li.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); window._adActivateSection?.(a.section); }
+      });
+
       list.insertBefore(li, empty);
     });
   }
@@ -1689,7 +1699,7 @@
         .select(`
           id, status, submitted_at, grade, notes, file_urls,
           profiles ( id, full_name ),
-          assignments ( title, trainer_id, pass_mark )
+          assignments!inner ( title, trainer_id, pass_mark )
         `)
         .eq("assignments.trainer_id", currentProfile.id)
         .order("submitted_at", { ascending: false })

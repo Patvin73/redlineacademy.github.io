@@ -825,7 +825,9 @@
 
     // Batch (from metadata or profile — adapt field name as needed)
     if ($("welcomeBatch")) {
-      $("welcomeBatch").textContent = profile.batch || "2025";
+      const batchYear = profile.batch
+        || (profile.created_at ? new Date(profile.created_at).getFullYear() : new Date().getFullYear());
+      $("welcomeBatch").textContent = batchYear;
     }
 
     // Avatar
@@ -923,7 +925,7 @@
           completion_percent,
           last_accessed_at,
           last_lesson_id,
-          courses ( id, title, thumbnail_url, slug ),
+          courses ( id, title, thumbnail_url, slug, category_id, categories(name) ),
           enrollments ( status )
         `)
         .eq("student_id", userId)
@@ -947,7 +949,7 @@
             }
           </div>
           <div>
-            <p class="sd-continue-item__course">Caregiver Program</p>
+            <p class="sd-continue-item__course">${escHtml(data.courses?.categories?.name || data.courses?.category_id || "Program")}</p>
             <p class="sd-continue-item__title">${escHtml(course.title)}</p>
             <div class="sd-progress">
               <div class="sd-progress__bar">
