@@ -199,6 +199,17 @@ async function installSupabaseStub(page, role, options = {}) {
       courses: { id: "course-1", title: "Leadership Basics", trainer_id: "e2e-trainer" }
     }
   ];
+  const atRiskStudents = options.atRiskFixture ? [
+    {
+      student_id: "e2e-student-1",
+      full_name: "Alpha Student",
+      email: "alpha@example.com",
+      course_title: "Leadership Basics",
+      completion_percent: 20,
+      last_accessed_at: "2026-01-01T08:00:00.000Z",
+      inactive_duration: 30
+    }
+  ] : [];
 
   if (options.studentFilterFixture) {
     profiles.push({
@@ -254,7 +265,7 @@ async function installSupabaseStub(page, role, options = {}) {
     announcements,
     certificates,
     v_trainer_dashboard: [kpiRow],
-    v_students_at_risk: [],
+    v_students_at_risk: atRiskStudents,
     activity_logs: activityLogs,
     courses,
     lessons,
@@ -477,6 +488,25 @@ test("admin KPI cards navigate to their target sections and count published cour
   await page.locator(".ad-kpi-card:has(#kpiCompletionRate)").focus();
   await page.keyboard.press("Enter");
   await expect(page.locator("#section-reports")).toHaveClass(/active/);
+});
+
+test("at-risk student actions open the students section", async ({ page }) => {
+  await installSupabaseStub(page, "admin", { atRiskFixture: true });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  const riskRow = page.locator("#atRiskTableBody tr.ad-risk-row", { hasText: "Alpha Student" });
+  await expect(riskRow).toBeVisible();
+
+  await page.locator("[data-i18n='lmsViewAll']").click();
+  await expect(page.locator("#section-students")).toHaveClass(/active/);
+
+  await page.locator(".ad-nav__item[data-section='home']").click();
+  await riskRow.locator(".ad-table-user__name").click();
+  await expect(page.locator("#section-students")).toHaveClass(/active/);
+
+  await page.locator(".ad-nav__item[data-section='home']").click();
+  await riskRow.locator(".ad-risk-view-btn").click();
+  await expect(page.locator("#section-students")).toHaveClass(/active/);
 });
 
 test("admin can open Users section and toggle active", { tag: "@critical" }, async ({ page }) => {

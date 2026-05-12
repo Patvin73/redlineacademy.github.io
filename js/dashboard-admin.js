@@ -36,6 +36,7 @@
       adPendingActions:      "Aksi Tertunda",
       adAtRiskTitle:         "Student Berisiko",
       adAtRiskSub:           "Tidak aktif 7+ hari",
+      lmsViewAll:            "Lihat Semua",
       adNoActivity:          "Belum ada aktivitas",
       adNoPending:           "Semua sudah ditangani! 🎉",
       adNoAtRisk:            "Tidak ada student berisiko 🎉",
@@ -197,6 +198,7 @@
       adPendingActions:      "Pending Actions",
       adAtRiskTitle:         "Students At Risk",
       adAtRiskSub:           "Inactive 7+ days",
+      lmsViewAll:            "View All",
       adNoActivity:          "No recent activity",
       adNoPending:           "All caught up! 🎉",
       adNoAtRisk:            "No at-risk students 🎉",
@@ -1042,9 +1044,22 @@
           </td>
           <td><span class="ad-tag ad-tag--orange">${s.last_accessed_at ? timeAgo(s.last_accessed_at) : "-"}</span></td>
           <td>
-            <button class="ad-btn ad-btn--outline ad-btn--sm" data-student-id="${s.student_id}" data-i18n="adMsgToStudent">Message</button>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="ad-btn ad-btn--outline ad-btn--sm ad-risk-view-btn" title="Lihat detail student">View</button>
+              <button class="ad-btn ad-btn--outline ad-btn--sm" data-student-id="${s.student_id}" data-i18n="adMsgToStudent">Message</button>
+            </div>
           </td>`;
         tbody.appendChild(tr);
+        tr.style.cursor = "pointer";
+        tr.addEventListener("click", (e) => {
+          if (e.target.closest("button")) return;
+          window._adActivateSection?.("students");
+        });
+        const viewBtn = tr.querySelector(".ad-risk-view-btn");
+        if (viewBtn) viewBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          window._adActivateSection?.("students");
+        });
       });
 
     } catch { if (empty) empty.style.display = "table-row"; }
