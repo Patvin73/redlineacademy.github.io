@@ -69,6 +69,7 @@
       adTabModules:          "Modul & Lesson",
       adTabCourseSettings:   "Pengaturan",
       adCourseTitle:         "Judul Kursus",
+      adCourseThumbnail:     "Thumbnail Kursus",
       adCourseCategory:      "Kategori",
       adCourseDesc:          "Deskripsi",
       adCourseLevel:         "Level",
@@ -231,6 +232,7 @@
       adTabModules:          "Modules & Lessons",
       adTabCourseSettings:   "Settings",
       adCourseTitle:         "Course Title",
+      adCourseThumbnail:     "Course Thumbnail",
       adCourseCategory:      "Category",
       adCourseDesc:          "Description",
       adCourseLevel:         "Level",
@@ -1342,6 +1344,17 @@
       resetCourseBuilderForm();
       panel.hidden = true;
     });
+    const thumbInput = $("cbThumbnail");
+    thumbInput && thumbInput.addEventListener("change", () => {
+      const file = thumbInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        $("cbThumbnailImg").src = e.target.result;
+        $("cbThumbnailPreview").style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    });
     saveDraftBtn && saveDraftBtn.addEventListener("click", () => saveCourse("draft"));
     saveBtn    && saveBtn.addEventListener("click",    () => saveCourse("published"));
     panel && panel.addEventListener("keydown", (e) => {
@@ -1562,6 +1575,21 @@
         status,
       };
 
+      let thumbnailUrl = null;
+      const thumbFile = $("cbThumbnail")?.files?.[0];
+      if (thumbFile) {
+        const thumbPath = `courses/thumbnails/${Date.now()}-${safeStorageSegment(thumbFile.name)}`;
+        const { error: thumbErr } = await window.lmsSupabase.storage
+          .from(COURSE_MATERIAL_BUCKET)
+          .upload(thumbPath, thumbFile, { upsert: true, contentType: thumbFile.type });
+        if (!thumbErr) {
+          const { data: urlData } = window.lmsSupabase.storage
+            .from(COURSE_MATERIAL_BUCKET).getPublicUrl(thumbPath);
+          thumbnailUrl = urlData?.publicUrl || null;
+        }
+      }
+      if (thumbnailUrl) payload.thumbnail_url = thumbnailUrl;
+
       let error = null;
       let courseId = editingCourseId;
       if (editingCourseId) {
@@ -1619,6 +1647,8 @@
     if ($("cbPrice")) $("cbPrice").value = 0;
     if ($("cbStatus")) $("cbStatus").value = "draft";
     if ($("cbIsFeatured")) $("cbIsFeatured").value = "false";
+    if ($("cbThumbnail")) $("cbThumbnail").value = "";
+    if ($("cbThumbnailPreview")) $("cbThumbnailPreview").style.display = "none";
     document.querySelectorAll("#builderModulesList .ad-module-item").forEach((moduleEl, index) => {
       if (index > 0) {
         moduleEl.remove();

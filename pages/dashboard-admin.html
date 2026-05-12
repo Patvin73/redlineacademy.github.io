@@ -881,6 +881,26 @@
                   >
                   <input class="ad-input" type="text" id="cbTitle" />
                 </div>
+                <div class="ad-form-group">
+                  <label
+                    class="ad-label"
+                    for="cbThumbnail"
+                    data-i18n="adCourseThumbnail"
+                    >Thumbnail Kursus</label
+                  >
+                  <input
+                    type="file"
+                    id="cbThumbnail"
+                    class="ad-input"
+                    accept="image/jpeg,image/png,image/webp"
+                  />
+                  <div id="cbThumbnailPreview" style="margin-top:8px;display:none">
+                    <img
+                      id="cbThumbnailImg"
+                      style="width:120px;height:72px;object-fit:cover;border-radius:6px;border:.5px solid var(--sd-border)"
+                    />
+                  </div>
+                </div>
                 <div class="ad-field">
                   <label
                     class="ad-label"
