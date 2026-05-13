@@ -471,6 +471,9 @@
     setWelcomeDate();
 
     await loadAdminData();
+    setupAdminProfileForm();
+    setupAdminAvatarUpload();
+    setupAdminChangePassword();
   });
 
   /* ================================================================
@@ -602,6 +605,7 @@
       case "grading":     await loadSubmissionQueue(); break;
       case "schedule":    await loadEventsList(); break;
       case "messages":    await loadMessages(); break;
+      case "profile":     break;
       case "reports":     await loadReports(); break;
       case "users":       await loadUsersTable(); break;
       case "enrollments": await loadEnrollmentsTable(); break;
@@ -2678,6 +2682,138 @@
 
     brandingBtn && brandingBtn.addEventListener("click", saveSettings);
     emailBtn && emailBtn.addEventListener("click", saveSettings);
+  }
+
+  // ─── 1. SETUP ADMIN PROFILE FORM ─────────────────────────────────
+  function setupAdminProfileForm() {
+    const saveBtn = $("adSaveProfileBtn");
+    const msgEl = $("adProfileMsg");
+
+    if (!saveBtn) return;
+
+    // Pre-fill form with current profile data
+    if (currentProfile) {
+      if ($("adPfFullName")) $("adPfFullName").value = currentProfile.full_name || "";
+      if ($("adPfPhone")) $("adPfPhone").value = currentProfile.phone || "";
+      if ($("adPfBio")) $("adPfBio").value = currentProfile.bio || "";
+    }
+
+    saveBtn.addEventListener("click", async () => {
+      if (!currentProfile || !window.lmsSupabase) return;
+      saveBtn.disabled = true;
+      if (msgEl) { msgEl.textContent = ""; msgEl.style.color = ""; }
+
+      const payload = {
+        full_name: ($("adPfFullName")?.value || "").trim(),
+        phone: ($("adPfPhone")?.value || "").trim(),
+        bio: ($("adPfBio")?.value || "").trim(),
+      };
+
+      try {
+        const { error } = await window.lmsSupabase
+          .from("profiles").update(payload).eq("id", currentProfile.id);
+        if (error) throw error;
+
+        // Update in-memory profile & displayed name
+        currentProfile = { ...currentProfile, ...payload };
+        [$("sidebarName"), $("topbarName"), $("welcomeName"), $("adminName")]
+          .forEach((el) => { if (el && payload.full_name) el.textContent = payload.full_name; });
+
+        if (msgEl) { msgEl.textContent = "✓ Profile saved."; msgEl.style.color = "var(--sd-green)"; }
+      } catch (err) {
+        if (msgEl) { msgEl.textContent = "Error: " + err.message; msgEl.style.color = "var(--sd-red)"; }
+      } finally {
+        saveBtn.disabled = false;
+        setTimeout(() => { if (msgEl) msgEl.textContent = ""; }, 4000);
+      }
+    });
+  }
+
+  // ─── 2. SETUP ADMIN AVATAR UPLOAD ────────────────────────────────
+  function setupAdminAvatarUpload() {
+    const uploadBtn = $("adAvatarUploadBtn");
+    const fileInput = $("adAvatarInput");
+    const statusEl = $("adAvatarMsg");
+
+    if (!uploadBtn || !fileInput) return;
+
+    uploadBtn.addEventListener("click", () => fileInput.click());
+
+    fileInput.addEventListener("change", async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      // Local preview immediately
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = `<img src="${e.target.result}" alt="Avatar" />`;
+        document.querySelectorAll(".ad-avatar").forEach((el) => { el.innerHTML = img; });
+        const profileAvatar = $("adProfileAvatar");
+        if (profileAvatar) profileAvatar.innerHTML = img;
+      };
+      reader.readAsDataURL(file);
+
+      if (statusEl) { statusEl.textContent = "Uploading..."; statusEl.style.color = "var(--sd-text-muted)"; }
+      if (!window.lmsSupabase || !currentProfile) return;
+
+      try {
+        const ext = file.name.split(".").pop().toLowerCase();
+        const path = `avatars/${currentProfile.id}.${ext}`;
+        const { error } = await window.lmsSupabase.storage
+          .from("avatars")
+          .upload(path, file, { upsert: true, contentType: file.type });
+        if (error) throw error;
+
+        const { data: urlData } = window.lmsSupabase.storage.from("avatars").getPublicUrl(path);
+        await window.lmsSupabase.from("profiles")
+          .update({ avatar_url: urlData.publicUrl }).eq("id", currentProfile.id);
+
+        currentProfile.avatar_url = urlData.publicUrl;
+        if (statusEl) { statusEl.textContent = "✓ Photo updated."; statusEl.style.color = "var(--sd-green)"; }
+      } catch (err) {
+        if (statusEl) { statusEl.textContent = "Upload failed: " + err.message; statusEl.style.color = "var(--sd-red)"; }
+      }
+      setTimeout(() => { if (statusEl) statusEl.textContent = ""; }, 4000);
+    });
+  }
+
+  // ─── 3. SETUP ADMIN CHANGE PASSWORD ──────────────────────────────
+  function setupAdminChangePassword() {
+    const btn = $("adChangePasswordBtn");
+    const msgEl = $("adPasswordMsg");
+
+    if (!btn) return;
+    btn.addEventListener("click", async () => {
+      const current = $("adCurrentPw")?.value;
+      const newPw = $("adNewPw")?.value;
+      const confirm = $("adConfirmPw")?.value;
+      const setMsg = (txt, color) => { if (msgEl) { msgEl.textContent = txt; msgEl.style.color = color; } };
+
+      if (!current) return setMsg("Current password is required.", "var(--sd-red)");
+      if (!newPw || newPw !== confirm) return setMsg("Passwords do not match.", "var(--sd-red)");
+      if (newPw.length < 8) return setMsg("Password must be at least 8 characters.", "var(--sd-red)");
+
+      btn.disabled = true;
+      setMsg("Verifying...", "var(--sd-text-muted)");
+
+      try {
+        const { error: verifyErr } = await window.lmsSupabase.auth.signInWithPassword({
+          email: currentProfile?.email || "", password: current
+        });
+        if (verifyErr) throw new Error("Current password is incorrect.");
+
+        const { error } = await window.lmsSupabase.auth.updateUser({ password: newPw });
+        if (error) throw error;
+
+        [$("adCurrentPw"), $("adNewPw"), $("adConfirmPw")].forEach((el) => { if (el) el.value = ""; });
+        setMsg("✓ Password updated successfully.", "var(--sd-green)");
+      } catch (err) {
+        setMsg("Error: " + err.message, "var(--sd-red)");
+      } finally {
+        btn.disabled = false;
+        setTimeout(() => setMsg("", ""), 5000);
+      }
+    });
   }
 
   function setupUserManagement() {
