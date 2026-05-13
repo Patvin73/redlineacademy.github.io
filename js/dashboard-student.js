@@ -176,6 +176,7 @@
   /* ── State ──────────────────────────────────────────────────────── */
   let currentStudentProfile = null;
   let currentSection = "home";
+  const loadedStudentSections = new Set(["home"]);
   let fullScheduleCache = [];
   let studentMessageComposerBound = false;
   const ASSIGNMENT_SUBMISSIONS_BUCKET = "assignment-submissions";
@@ -308,6 +309,7 @@
 
       // Scroll to top
       window.scrollTo({ top: 0, behavior: "smooth" });
+      loadStudentSectionData(sectionId);
     }
 
     navItems.forEach((btn) => {
@@ -738,6 +740,20 @@
   /* ================================================================
      SUPABASE DATA LOADERS
   ================================================================ */
+  async function loadStudentSectionData(sectionId) {
+    if (loadedStudentSections.has(sectionId)) return;
+    loadedStudentSections.add(sectionId);
+
+    switch (sectionId) {
+      case "courses":      await loadCourseGrid(currentStudentProfile?.id); break;
+      case "assignments":  await loadAssignments(currentStudentProfile?.id); break;
+      case "schedule":     await loadFullSchedule(currentStudentProfile?.id); break;
+      case "certificates": await loadCertificates(currentStudentProfile?.id); break;
+      case "messages":     await loadMessages(currentStudentProfile?.id); break;
+      case "resources":    await loadResources(currentStudentProfile?.id); break;
+    }
+  }
+
   async function loadStudentData() {
     try {
       if (!window.lmsSupabase) {
@@ -774,17 +790,11 @@
       // 3. Populate UI
       populateProfileUI(profile);
 
-      // 4. Load dashboard stats
+      // 4. Load home dashboard data; other sections lazy-load when opened.
       await Promise.all([
         loadDashboardStats(user.id),
         loadContinueLearning(user.id),
-        loadCourseGrid(user.id),
-        loadAssignments(user.id),
         loadUpcomingSchedule(user.id),
-        loadFullSchedule(user.id),
-        loadCertificates(user.id),
-        loadMessages(user.id),
-        loadResources(user.id),
         loadActivityFeed(user.id),
         loadNotifications(user.id),
       ]);

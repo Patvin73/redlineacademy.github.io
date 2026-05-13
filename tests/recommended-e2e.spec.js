@@ -435,13 +435,17 @@ test.describe("Student and marketer flows", {
     await page.waitForURL("**/pages/login.html");
   });
 
-  test("student data renders with progress and courses", async ({ page }) => {
+  test("student home renders progress and lazy-loads courses on section open", async ({ page }) => {
     const stub = makeStudentStub("student");
     await installSupabaseStub(page, stub);
 
     await page.goto("/pages/dashboard-student.html");
     await expect(page.locator("#statCoursesEnrolled")).toHaveText("2");
     await expect(page.locator(".sd-progress__pct")).toContainText("65%");
+    await expect(page.locator("#courseGrid .sd-course-card")).toHaveCount(0);
+
+    await page.locator(".sd-nav__item[data-section='courses']").click();
+
     await expect(page.locator("#courseGrid .sd-course-card")).toHaveCount(2);
     await expect(page.locator("#courseGrid .sd-course-card[data-status='completed']")).toHaveCount(1);
   });
