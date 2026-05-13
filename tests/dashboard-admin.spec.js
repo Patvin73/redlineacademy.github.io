@@ -150,6 +150,8 @@ async function installSupabaseStub(page, role, options = {}) {
   const defaultMessages = [
     {
       id: "msg-1",
+      sender_id: "e2e-student-1",
+      recipient_id: "e2e-trainer",
       subject: "Question",
       body: "Need help with Module 2.",
       is_read: false,
@@ -158,6 +160,8 @@ async function installSupabaseStub(page, role, options = {}) {
     },
     {
       id: "msg-2",
+      sender_id: "e2e-student-2",
+      recipient_id: "e2e-trainer",
       subject: "Thanks",
       body: "All good now.",
       is_read: true,
@@ -418,7 +422,7 @@ async function installSupabaseStub(page, role, options = {}) {
           }
         };
 
-        api.then = (resolve) => {
+        const applyPendingChanges = () => {
           if (pendingUpdate) {
             rows.forEach((row) => Object.assign(row, pendingUpdate));
             pendingUpdate = null;
@@ -430,10 +434,17 @@ async function installSupabaseStub(page, role, options = {}) {
             });
             pendingDelete = false;
           }
+        };
+        api.then = (resolve) => {
+          applyPendingChanges();
           const data = limitValue ? rows.slice(0, limitValue) : rows;
           return resolve(makeResponse(data));
         };
-        api.catch = (reject) => Promise.resolve(makeResponse(rows)).catch(reject);
+        api.catch = (reject) => {
+          applyPendingChanges();
+          const data = limitValue ? rows.slice(0, limitValue) : rows;
+          return Promise.resolve(makeResponse(data)).catch(reject);
+        };
         return api;
       };
 
@@ -724,7 +735,30 @@ test("trainer can create schedule event", async ({ page }) => {
 });
 
 test("trainer sees unread messages badge", async ({ page }) => {
-  await installSupabaseStub(page, "trainer");
+  await installSupabaseStub(page, "trainer", {
+    messages: [
+      {
+        id: "msg-inbox-unread",
+        sender_id: "e2e-student-1",
+        recipient_id: "e2e-trainer",
+        subject: "Question",
+        body: "Need help with Module 2.",
+        is_read: false,
+        created_at: "2026-03-10T08:00:00.000Z",
+        profiles: { full_name: "Alpha Student", avatar_url: null }
+      },
+      {
+        id: "msg-sent-unread",
+        sender_id: "e2e-trainer",
+        recipient_id: "e2e-student-1",
+        subject: "Follow up",
+        body: "Please review Module 2.",
+        is_read: false,
+        created_at: "2026-03-09T08:00:00.000Z",
+        profiles: { full_name: "E2E Trainer", avatar_url: null }
+      }
+    ]
+  });
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
 
   await page.locator(".ad-nav__item[data-section='messages']").click();
@@ -798,7 +832,7 @@ test("admin composer lists all other users and cancel hides the form", async ({ 
   await expect(page.locator("#adMsgComposeForm")).toBeHidden();
 });
 
-test("trainer can mark message as read (simulated)", async ({ page }) => {
+test("trainer marks inbox message as read when opened", async ({ page }) => {
   await installSupabaseStub(page, "trainer");
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
 
@@ -806,23 +840,16 @@ test("trainer can mark message as read (simulated)", async ({ page }) => {
   await expect(page.locator("#section-messages")).toHaveClass(/active/);
   await expect(page.locator("#adMsgBadge")).toHaveText("1");
 
-  await page.evaluate(() => {
-    const msgs = [
-      {
-        id: "msg-1",
-        subject: "Question",
-        body: "Need help with Module 2.",
-        is_read: true,
-        created_at: "2026-03-10T08:00:00.000Z",
-        profiles: { full_name: "Alpha Student", avatar_url: null }
-      }
-    ];
-    if (window.__e2eSetMessages) window.__e2eSetMessages(msgs);
-  });
-
-  await page.reload();
-  await page.locator(".ad-nav__item[data-section='messages']").click();
+  await page.locator(".ad-inbox-item", { hasText: "Need help with Module 2." }).click();
   await expect(page.locator("#adMsgBadge")).toBeHidden();
+  await expect(page.locator(".ad-inbox-item", { hasText: "Need help with Module 2." })).not.toHaveClass(/unread/);
+
+  const messages = await page.evaluate(() => window.__e2eGetTableData().messages);
+  expect(messages.find((msg) => msg.id === "msg-1")).toEqual(expect.objectContaining({
+    is_read: true,
+    recipient_id: "e2e-trainer"
+  }));
+  expect(messages.find((msg) => msg.id === "msg-1").read_at).toEqual(expect.any(String));
 });
 
 test("trainer sees empty state when no messages", async ({ page }) => {

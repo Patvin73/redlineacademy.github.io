@@ -916,7 +916,7 @@
       // Unanswered forum posts > 24h
       const { data: posts } = await window.lmsSupabase
         .from("forum_posts")
-        .select("id, title, created_at, courses(trainer_id)")
+        .select("id, title, created_at, courses!inner(trainer_id)")
         .eq("is_resolved", false)
         .eq("courses.trainer_id", currentProfile.id)
         .lt("created_at", new Date(Date.now() - 86400000).toISOString())
@@ -1674,7 +1674,7 @@
     try {
       const { data, error } = await window.lmsSupabase
         .from("courses")
-        .select("id, title, category_id, description, level, duration_hours, pass_mark, enrollment_type, max_students, price, status, is_featured")
+        .select("id, title, category_id, description, level, duration_hours, pass_mark, enrollment_type, max_students, price, status, is_featured, thumbnail_url")
         .eq("id", courseId)
         .single();
       if (error) throw error;
@@ -1694,6 +1694,14 @@
       if ($("cbPrice")) $("cbPrice").value = data.price ?? 0;
       if ($("cbStatus")) $("cbStatus").value = data.status || "draft";
       if ($("cbIsFeatured")) $("cbIsFeatured").value = data.is_featured ? "true" : "false";
+      // Show existing thumbnail if available
+      if (data.thumbnail_url && $("cbThumbnailImg") && $("cbThumbnailPreview")) {
+        const safeUrl = toSafeUiUrl(data.thumbnail_url);
+        if (safeUrl) {
+          $("cbThumbnailImg").src = safeUrl;
+          $("cbThumbnailPreview").style.display = "block";
+        }
+      }
       $("courseBuilderPanel").scrollIntoView({ behavior: "smooth" });
     } catch (err) {
       alert("Edit failed: " + err.message);
@@ -1875,7 +1883,19 @@
       if (error) throw error;
 
       if (msg) { msg.textContent = "✓ Saved! Student notified."; msg.className = "ad-grading-msg success"; }
-      setTimeout(() => loadSubmissionQueue(currentGradingFilter), 1500);
+      setTimeout(() => {
+        loadSubmissionQueue(currentGradingFilter);
+        // Reset grading panel state
+        selectedSubmissionId = null;
+        const gradingForm = $("gradingForm");
+        const gradingPanelEmpty = $("gradingPanelEmpty");
+        if (gradingForm) gradingForm.hidden = true;
+        if (gradingPanelEmpty) gradingPanelEmpty.style.display = "flex";
+        document.querySelectorAll(".ad-submission-item").forEach((el) => el.classList.remove("active"));
+        if ($("gradeScore")) $("gradeScore").value = "";
+        if ($("gradeFeedback")) $("gradeFeedback").value = "";
+        if ($("gradeResult")) { $("gradeResult").textContent = "—"; $("gradeResult").className = "ad-grade-result"; }
+      }, 1500);
 
     } catch (err) {
       if (msg) { msg.textContent = "Error: " + (err.message || "Save failed"); msg.className = "ad-grading-msg error"; }
@@ -1893,10 +1913,14 @@
     if (!select || select.dataset.loaded === "true") return;
 
     try {
-      const { data, error } = await window.lmsSupabase
+      let courseQuery = window.lmsSupabase
         .from("courses")
         .select("id, title")
         .order("title");
+      if (currentRole !== "admin") {
+        courseQuery = courseQuery.eq("trainer_id", currentProfile.id);
+      }
+      const { data, error } = await courseQuery;
       if (error) throw error;
 
       const defaultOption = select.querySelector("option[value='']");
@@ -2210,13 +2234,13 @@
 
       inbox.querySelectorAll(".ad-inbox-item").forEach((el) => el.remove());
 
-      const unread = data.filter((m) => !m.is_read && m.profiles).length;
+      const unread = data.filter((m) => !m.is_read && m.recipient_id === currentProfile.id).length;
       const badge  = $("adMsgBadge");
       if (badge) { badge.textContent = unread; badge.style.display = unread > 0 ? "inline-block" : "none"; }
 
       data.forEach((msg) => {
         const item = document.createElement("div");
-        item.className = `ad-inbox-item${msg.is_read ? "" : " unread"}`;
+        item.className = `ad-inbox-item${!msg.is_read && msg.recipient_id === currentProfile.id ? " unread" : ""}`;
         item.innerHTML = `
           <div class="ad-avatar ad-avatar--sm">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -2226,9 +2250,21 @@
             <p class="ad-inbox-item__preview">${escHtml(msg.body?.substring(0, 60) || "—")}</p>
           </div>
           <span class="ad-inbox-item__time">${timeAgo(msg.created_at)}</span>`;
-        item.addEventListener("click", () => {
+        item.addEventListener("click", async () => {
           inbox.querySelectorAll(".ad-inbox-item").forEach((el) => el.classList.remove("active"));
           item.classList.add("active");
+          if (!msg.is_read && msg.recipient_id === currentProfile.id) {
+            item.classList.remove("unread");
+            await window.lmsSupabase
+              .from("messages")
+              .update({ is_read: true, read_at: new Date().toISOString() })
+              .eq("id", msg.id)
+              .catch(() => {});
+            // Refresh badge after marking the selected inbox message as read.
+            const remaining = inbox.querySelectorAll(".ad-inbox-item.unread").length;
+            const badge = $("adMsgBadge");
+            if (badge) { badge.textContent = remaining; badge.style.display = remaining > 0 ? "inline-block" : "none"; }
+          }
           setMessagePanelVisible(viewEmpty, false);
           setMessagePanelVisible(composeForm, false);
           if (viewDetail) {
@@ -2284,11 +2320,11 @@
       }
 
       // Metrics
-      const { data: certs } = await window.lmsSupabase
+      const { count: certsCount } = await window.lmsSupabase
         .from("certificates")
-        .select("id", { count: "exact" });
+        .select("id", { count: "exact", head: true });
 
-      if ($("metricCerts")) $("metricCerts").textContent = certs?.length || 0;
+      if ($("metricCerts")) $("metricCerts").textContent = certsCount || 0;
 
       const { data: gradedSubmissions, error: gradedErr } = await window.lmsSupabase
         .from("assignment_submissions")
@@ -2327,7 +2363,7 @@
           .select("amount")
           .eq("status", "completed");
         const total = (payments || []).reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
-        if ($("metricRevenue")) $("metricRevenue").textContent = "$" + total.toFixed(2);
+        if ($("metricRevenue")) $("metricRevenue").textContent = formatCurrency(total, "IDR");
       }
 
     } catch (err) { console.warn("Reports load error:", err.message); }

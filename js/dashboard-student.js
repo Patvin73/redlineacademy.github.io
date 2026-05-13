@@ -63,6 +63,7 @@
       lmsTabPending:         "Belum Dikerjakan",
       lmsTabSubmitted:       "Sudah Dikirim",
       lmsTabGraded:          "Sudah Dinilai",
+      lmsSubmitAssignment:   "Kumpulkan",
       lmsViewList:           "Daftar",
       lmsViewCalendar:       "Kalender",
       lmsSearchPlaceholder:  "Cari kursus...",
@@ -134,6 +135,7 @@
       lmsTabPending:         "Pending",
       lmsTabSubmitted:       "Submitted",
       lmsTabGraded:          "Graded",
+      lmsSubmitAssignment:   "Submit",
       lmsViewList:           "List",
       lmsViewCalendar:       "Calendar",
       lmsSearchPlaceholder:  "Search courses...",
@@ -1215,7 +1217,7 @@
         const actions = status === "pending"
           ? `<input class="sd-assignment-item__file" type="file" data-assignment-file="${escHtml(assignment.id)}" aria-label="Assignment submission file" />
              <button class="sd-btn sd-btn--primary sd-btn--sm" data-action="submit" data-assignment-id="${assignment.id}">
-               ${typeof t === "function" ? t("submit") : "Submit"}
+               ${typeof t === "function" ? t("lmsSubmitAssignment") : "Submit"}
              </button>`
           : `<span class="sd-status-badge ${
                status === "graded"
@@ -1246,7 +1248,10 @@
           const fileInput = btn.closest(".sd-assignment-item")?.querySelector("input[type='file']");
           const file = fileInput?.files?.[0] || null;
           btn.disabled = true;
+          const errSpan = btn.closest(".sd-assignment-item__actions")?.querySelector(".sd-assignment-err");
+          if (errSpan) errSpan.remove();
           try {
+            if (!file) throw new Error(typeof t === "function" ? t("lmsMsgRequired") : "Please select a file before submitting.");
             const fileUrl = await uploadAssignmentSubmissionFile(file, userId, assignmentId);
             await window.lmsSupabase
               .from("assignment_submissions")
@@ -1259,8 +1264,11 @@
               });
             await loadAssignments(userId);
           } catch (err) {
-            console.error("Submit assignment error:", err.message);
-          } finally {
+            const span = document.createElement("span");
+            span.className = "sd-assignment-err";
+            span.style.cssText = "font-size:11.5px;color:var(--sd-red,#E24B4A);margin-top:4px;display:block";
+            span.textContent = err.message || "Submission failed.";
+            btn.closest(".sd-assignment-item__actions")?.appendChild(span);
             btn.disabled = false;
           }
         });
@@ -1860,6 +1868,15 @@
       // Remove existing items
       list.querySelectorAll(".sd-activity-item").forEach((el) => el.remove());
 
+      const activityNavMap = {
+        lesson_completed:     "courses",
+        quiz_submitted:       "assignments",
+        quiz_passed:          "assignments",
+        assignment_submitted: "assignments",
+        course_enrolled:      "courses",
+        certificate_issued:   "certificates",
+      };
+
       data.forEach((log) => {
         const { icon, iconClass, text } = formatActivityLog(log);
         const li = document.createElement("li");
@@ -1870,14 +1887,6 @@
             <p class="sd-activity-item__text">${text}</p>
             <p class="sd-activity-item__time">${timeAgo(log.created_at)}</p>
           </div>`;
-        const activityNavMap = {
-          lesson_completed:     "courses",
-          quiz_submitted:       "assignments",
-          quiz_passed:          "assignments",
-          assignment_submitted: "assignments",
-          course_enrolled:      "courses",
-          certificate_issued:   "certificates",
-        };
         const targetSection = activityNavMap[log.action] || "home";
         li.style.cursor = "pointer";
         li.setAttribute("tabindex", "0");
