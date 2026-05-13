@@ -117,6 +117,7 @@ async function installSupabaseStub(page, role, options = {}) {
   const assignmentSubmissions = [
     {
       id: "sub-1",
+      student_id: "e2e-student-1",
       status: "submitted",
       submitted_at: "2026-03-10T10:00:00.000Z",
       grade: null,
@@ -127,6 +128,7 @@ async function installSupabaseStub(page, role, options = {}) {
     },
     {
       id: "sub-2",
+      student_id: "e2e-student-2",
       status: "graded",
       submitted_at: "2026-03-09T10:00:00.000Z",
       grade: 88,
@@ -137,6 +139,7 @@ async function installSupabaseStub(page, role, options = {}) {
     },
     {
       id: "sub-3",
+      student_id: "e2e-student-1",
       status: "resubmit_required",
       submitted_at: "2026-03-08T10:00:00.000Z",
       grade: 45,
@@ -705,6 +708,15 @@ test("trainer can open grading submission and save grade", async ({ page }) => {
   await page.click("#saveGradeBtn");
 
   await expect(page.locator("#gradingMsg")).toContainText("Saved");
+  const notifications = await page.evaluate(() => window.__e2eGetTableData().notifications);
+  expect(notifications).toEqual(expect.arrayContaining([
+    expect.objectContaining({
+      user_id: "e2e-student-1",
+      type: "assignment_graded",
+      title: 'Your assignment "Module 1 Quiz" has been graded: 85% (PASS)',
+      is_read: false
+    })
+  ]));
 });
 
 test("trainer can create schedule event", async ({ page }) => {

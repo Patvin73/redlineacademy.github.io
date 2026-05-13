@@ -1882,6 +1882,28 @@
 
       if (error) throw error;
 
+      // Fetch submission data to notify the student with the assignment result.
+      const { data: submissionData } = await window.lmsSupabase
+        .from("assignment_submissions")
+        .select("student_id, assignments(title, pass_mark)")
+        .eq("id", selectedSubmissionId)
+        .single();
+
+      if (submissionData?.student_id) {
+        const assignmentTitle = submissionData.assignments?.title || "Assignment";
+        const isPass = newStatus === "graded" && !isNaN(score) && score >= (submissionData.assignments?.pass_mark || 70);
+        const notifTitle = newStatus === "graded"
+          ? `Your assignment "${assignmentTitle}" has been graded: ${score}% (${isPass ? "PASS" : "FAIL"})`
+          : `Your assignment "${assignmentTitle}" needs resubmission.`;
+
+        await window.lmsSupabase.from("notifications").insert({
+          user_id: submissionData.student_id,
+          type: "assignment_graded",
+          title: notifTitle,
+          is_read: false,
+        }).catch(() => {});
+      }
+
       if (msg) { msg.textContent = "✓ Saved! Student notified."; msg.className = "ad-grading-msg success"; }
       setTimeout(() => {
         loadSubmissionQueue(currentGradingFilter);
