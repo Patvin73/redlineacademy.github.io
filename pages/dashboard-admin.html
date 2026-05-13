@@ -218,6 +218,21 @@
           </button>
         </li>
         <li>
+          <button class="ad-nav__item" data-section="profile">
+            <svg
+              class="ad-nav__icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
+            <span data-i18n="lmsProfile">Profile</span>
+          </button>
+        </li>
+        <li>
           <button class="ad-nav__item" data-section="reports">
             <svg
               class="ad-nav__icon"
@@ -677,6 +692,112 @@
         <!-- ══════════════════════════════
              SECTION: MY STUDENTS
         ══════════════════════════════ -->
+        <section class="ad-section" id="section-profile">
+          <div class="ad-section__header">
+            <h2 data-i18n="lmsProfile">My Profile</h2>
+          </div>
+          <div class="ad-settings-layout">
+            <!-- Profile Info Card -->
+            <div class="ad-card">
+              <h3 class="ad-card__title">Profile Information</h3>
+
+              <!-- Avatar -->
+              <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
+                <div class="ad-avatar ad-avatar--xl" id="adProfileAvatar">
+                  <svg
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  >
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                  </svg>
+                </div>
+                <div>
+                  <button
+                    class="ad-btn ad-btn--outline ad-btn--sm"
+                    id="adAvatarUploadBtn"
+                    type="button"
+                  >
+                    Change Photo
+                  </button>
+                  <input
+                    type="file"
+                    id="adAvatarInput"
+                    accept="image/jpeg,image/png,image/webp"
+                    hidden
+                  />
+                  <p
+                    id="adAvatarMsg"
+                    style="font-size:11.5px;margin-top:4px;color:var(--sd-text-muted)"
+                  ></p>
+                </div>
+              </div>
+
+              <div class="ad-field">
+                <label class="ad-label" for="adPfFullName">Full Name</label>
+                <input class="ad-input" type="text" id="adPfFullName" />
+              </div>
+              <div class="ad-field">
+                <label class="ad-label" for="adPfPhone">Phone</label>
+                <input class="ad-input" type="tel" id="adPfPhone" />
+              </div>
+              <div class="ad-field">
+                <label class="ad-label" for="adPfBio">Bio</label>
+                <textarea
+                  class="ad-input"
+                  id="adPfBio"
+                  rows="3"
+                  placeholder="Tell students about yourself..."
+                ></textarea>
+              </div>
+              <p id="adProfileMsg" style="font-size:12px;min-height:18px;margin-bottom:8px"></p>
+              <button class="ad-btn ad-btn--primary" id="adSaveProfileBtn">
+                Save Changes
+              </button>
+            </div>
+
+            <!-- Change Password Card -->
+            <div class="ad-card">
+              <h3 class="ad-card__title">Change Password</h3>
+              <div class="ad-field">
+                <label class="ad-label" for="adCurrentPw">Current Password</label>
+                <input
+                  class="ad-input"
+                  type="password"
+                  id="adCurrentPw"
+                  autocomplete="current-password"
+                />
+              </div>
+              <div class="ad-field">
+                <label class="ad-label" for="adNewPw">New Password</label>
+                <input
+                  class="ad-input"
+                  type="password"
+                  id="adNewPw"
+                  autocomplete="new-password"
+                />
+              </div>
+              <div class="ad-field">
+                <label class="ad-label" for="adConfirmPw">Confirm New Password</label>
+                <input
+                  class="ad-input"
+                  type="password"
+                  id="adConfirmPw"
+                  autocomplete="new-password"
+                />
+              </div>
+              <p id="adPasswordMsg" style="font-size:12px;min-height:18px;margin-bottom:8px"></p>
+              <button class="ad-btn ad-btn--primary" id="adChangePasswordBtn">
+                Update Password
+              </button>
+            </div>
+          </div>
+        </section>
+
         <section class="ad-section" id="section-students">
           <div class="ad-section__header">
             <h2 data-i18n="adNavStudents">My Students</h2>
