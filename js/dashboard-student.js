@@ -984,6 +984,65 @@
   }
 
   /* ── Upcoming Schedule ──────────────────────────────────────────── */
+  async function markLessonCompleted(lessonId, courseId) {
+    if (!currentStudentProfile?.id || !window.lmsSupabase) return;
+    const userId = currentStudentProfile.id;
+
+    try {
+      const { count: totalLessons } = await window.lmsSupabase
+        .from("lessons")
+        .select("id", { count: "exact", head: true })
+        .eq("course_id", courseId);
+
+      await window.lmsSupabase.from("lesson_progress").upsert({
+        student_id: userId,
+        lesson_id: lessonId,
+        course_id: courseId,
+        completed_at: new Date().toISOString()
+      }, { onConflict: "student_id,lesson_id" }).catch(() => {});
+
+      const { count: completedLessons } = await window.lmsSupabase
+        .from("lesson_progress")
+        .select("id", { count: "exact", head: true })
+        .eq("student_id", userId)
+        .eq("course_id", courseId);
+
+      const pct = totalLessons > 0
+        ? Math.round((completedLessons / totalLessons) * 100)
+        : 0;
+
+      await window.lmsSupabase.from("course_progress").update({
+        completion_percent: pct,
+        last_accessed_at: new Date().toISOString(),
+        last_lesson_id: lessonId
+      }).eq("student_id", userId).eq("course_id", courseId);
+
+      await window.lmsSupabase.from("activity_logs").insert({
+        user_id: userId,
+        action: "lesson_completed",
+        entity_type: "lesson",
+        entity_id: lessonId,
+        metadata: { course_id: courseId, lesson_id: lessonId }
+      }).catch(() => {});
+
+      if (pct >= 100) {
+        await window.lmsSupabase.from("certificates").upsert({
+          student_id: userId,
+          course_id: courseId,
+          issued_at: new Date().toISOString(),
+          certificate_no: "CERT-" + userId.substring(0, 6).toUpperCase() + "-" + courseId.substring(0, 6).toUpperCase()
+        }, { onConflict: "student_id,course_id" }).catch(() => {});
+      }
+
+      await loadDashboardStats(userId);
+      await loadContinueLearning(userId);
+    } catch (err) {
+      console.error("Progress update error:", err.message);
+    }
+  }
+
+  window.lmsMarkLessonCompleted = markLessonCompleted;
+
   async function loadCourseGrid(userId) {
     const grid = $("courseGrid");
     if (!grid) return;

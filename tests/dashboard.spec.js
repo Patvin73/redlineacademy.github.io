@@ -140,6 +140,29 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
             });
             return api;
           },
+          upsert: (payload, options = {}) => {
+            const items = Array.isArray(payload) ? payload : [payload];
+            const conflictKeys = String(options.onConflict || "id")
+              .split(",")
+              .map((key) => key.trim())
+              .filter(Boolean);
+
+            items.forEach((item) => {
+              const existing = baseRows.find((row) =>
+                conflictKeys.length > 0
+                  && conflictKeys.every((key) => row[key] === item[key])
+              );
+              if (existing) {
+                Object.assign(existing, item);
+                return;
+              }
+              if (!item.id) {
+                item.id = table + "-qa-" + Math.random().toString(36).slice(2, 10);
+              }
+              baseRows.push(item);
+            });
+            return api;
+          },
           update: (payload) => {
             rows.forEach((row) => Object.assign(row, payload));
             return api;
@@ -265,6 +288,20 @@ function makeStudentFixture() {
           student_id: studentId,
           course_id: "course-2",
           completion_percent: 100
+        }
+      ],
+      lessons: [
+        { id: "lesson-1", course_id: "course-1" },
+        { id: "lesson-2", course_id: "course-1" },
+        { id: "lesson-3", course_id: "course-2" }
+      ],
+      lesson_progress: [
+        {
+          id: "lesson-progress-1",
+          student_id: studentId,
+          lesson_id: "lesson-1",
+          course_id: "course-1",
+          completed_at: "2099-01-01T08:00:00.000Z"
         }
       ],
       enrollments: [
@@ -524,6 +561,56 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#courseGrid")).toContainText("Creator ID: TR-001");
     await expect(page.locator("#courseGrid")).toContainText("Creator ID: TR-009");
     await expect(page.locator("#courseGrid .sd-course-card[data-status='available']")).toHaveCount(1);
+  });
+
+  test("updates course progress when the lesson viewer marks a lesson complete", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html");
+    await expect(page.locator("#continueLearningContent")).toContainText("Aged Care Basics");
+
+    await page.evaluate(async () => {
+      await window.lmsMarkLessonCompleted("lesson-2", "course-1");
+    });
+
+    const progressState = await page.evaluate(() => {
+      const rows = window.__QA_TABLE_DATA__;
+      return {
+        lessonProgress: rows.lesson_progress.find((row) =>
+          row.student_id === "student-1" && row.lesson_id === "lesson-2"
+        ),
+        courseProgress: rows.course_progress.find((row) =>
+          row.student_id === "student-1" && row.course_id === "course-1"
+        ),
+        activityLog: rows.activity_logs.find((row) =>
+          row.action === "lesson_completed" && row.entity_id === "lesson-2"
+        ),
+        certificate: rows.certificates.find((row) =>
+          row.student_id === "student-1" && row.course_id === "course-1"
+        )
+      };
+    });
+
+    expect(progressState.lessonProgress).toEqual(expect.objectContaining({
+      student_id: "student-1",
+      lesson_id: "lesson-2",
+      course_id: "course-1"
+    }));
+    expect(progressState.courseProgress).toEqual(expect.objectContaining({
+      completion_percent: 100,
+      last_lesson_id: "lesson-2"
+    }));
+    expect(progressState.activityLog).toEqual(expect.objectContaining({
+      user_id: "student-1",
+      action: "lesson_completed",
+      entity_type: "lesson",
+      entity_id: "lesson-2",
+      metadata: { course_id: "course-1", lesson_id: "lesson-2" }
+    }));
+    expect(progressState.certificate).toEqual(expect.objectContaining({
+      certificate_no: "CERT-STUDEN-COURSE"
+    }));
   });
 
   test("loads assignments from enrolled courses and maps submission status", async ({ page }) => {
