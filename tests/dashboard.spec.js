@@ -8,6 +8,7 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
       let currentPassword = ${JSON.stringify(initialPassword)};
 
       window.__QA_TABLE_DATA__ = tableData;
+      window.__QA_UPLOADS__ = [];
 
       const getValue = (obj, path) => {
         if (!obj) return undefined;
@@ -210,9 +211,18 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
             on: () => ({ subscribe: () => ({}) })
           }),
           storage: {
-            from: () => ({
-              upload: async () => ({ error: null }),
-              getPublicUrl: (path) => ({ data: { publicUrl: "https://example.com/" + path } })
+            from: (bucket) => ({
+              upload: async (path, file, options = {}) => {
+                window.__QA_UPLOADS__.push({
+                  bucket,
+                  path,
+                  name: file?.name || "",
+                  type: file?.type || "",
+                  options
+                });
+                return { error: null };
+              },
+              getPublicUrl: (path) => ({ data: { publicUrl: "https://example.com/" + bucket + "/" + path } })
             })
           }
         })
@@ -522,6 +532,39 @@ test.describe("Student Dashboard", () => {
     );
     expect(profile.city).toBe("Jakarta");
     expect(profile.full_name).toBe("Alpha Student Updated");
+  });
+
+  test("uploads avatar with content type and visible status feedback", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html");
+    await page.locator(".sd-nav__item[data-section='profile']").click();
+
+    await page.setInputFiles("#avatarInput", {
+      name: "avatar.png",
+      mimeType: "image/png",
+      buffer: Buffer.from([0x89, 0x50, 0x4e, 0x47])
+    });
+
+    await expect(page.locator("#avatarUploadStatus")).toContainText("Photo updated");
+    await expect(page.locator("#avatarUploadBtn")).toBeEnabled();
+
+    const result = await page.evaluate(() => ({
+      uploads: window.__QA_UPLOADS__,
+      avatarUrl: window.__QA_TABLE_DATA__.profiles.find((row) => row.id === "student-1")?.avatar_url
+    }));
+
+    expect(result.uploads).toEqual([
+      expect.objectContaining({
+        bucket: "avatars",
+        path: "avatars/student-1.png",
+        name: "avatar.png",
+        type: "image/png",
+        options: { upsert: true, contentType: "image/png" }
+      })
+    ]);
+    expect(result.avatarUrl).toBe("https://example.com/avatars/avatars/student-1.png");
   });
 
   test("validates and updates student password from the accordion", async ({ page }) => {

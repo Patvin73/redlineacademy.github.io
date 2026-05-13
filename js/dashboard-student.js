@@ -569,6 +569,23 @@
       const file = fileInput.files[0];
       if (!file) return;
 
+      // Get or create status element
+      const statusEl = $("avatarUploadStatus") || (() => {
+        const el = document.createElement("p");
+        el.id = "avatarUploadStatus";
+        el.style.cssText = "font-size:11.5px;margin-top:6px;";
+        uploadBtn?.parentNode?.insertBefore(el, uploadBtn.nextSibling);
+        return el;
+      })();
+
+      const setStatus = (txt, color) => {
+        if (statusEl) { statusEl.textContent = txt; statusEl.style.color = color; }
+      };
+
+      // Disable button during upload
+      if (uploadBtn) uploadBtn.disabled = true;
+      setStatus("Uploading...", "var(--sd-text-muted)");
+
       // Preview
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -580,13 +597,16 @@
       reader.readAsDataURL(file);
 
       // Upload to Supabase Storage
-      if (!window.lmsSupabase || !currentStudentProfile) return;
       try {
+        if (!window.lmsSupabase || !currentStudentProfile) {
+          throw new Error("Supabase Storage is not available.");
+        }
+
         const ext  = file.name.split(".").pop();
         const path = `avatars/${currentStudentProfile.id}.${ext}`;
         const { error } = await window.lmsSupabase.storage
           .from("avatars")
-          .upload(path, file, { upsert: true });
+          .upload(path, file, { upsert: true, contentType: file.type });
 
         if (!error) {
           const { data: urlData } = window.lmsSupabase.storage
@@ -597,9 +617,16 @@
             .from("profiles")
             .update({ avatar_url: urlData.publicUrl })
             .eq("id", currentStudentProfile.id);
+          setStatus("✓ Photo updated!", "var(--sd-green)");
+        } else {
+          throw error;
         }
       } catch (err) {
+        setStatus("Upload failed: " + (err.message || "Unknown error"), "var(--sd-red)");
         console.error("Avatar upload error:", err);
+      } finally {
+        if (uploadBtn) uploadBtn.disabled = false;
+        setTimeout(() => setStatus("", ""), 4000);
       }
     });
   }
