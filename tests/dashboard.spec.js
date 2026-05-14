@@ -511,6 +511,23 @@ function makeMarketerFixture() {
 }
 
 test.describe("Student Dashboard", () => {
+  test("refreshes profile form when returning to profile section", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
+    await page.locator(".sd-nav__item[data-section='profile']").click();
+
+    await expect(page.locator("#pfFullName")).toHaveValue("Alpha Student");
+    await page.fill("#pfFullName", "Unsaved Student Name");
+
+    await page.locator(".sd-nav__item[data-section='courses']").click();
+    await expect(page.locator("#section-courses")).toHaveClass(/active/);
+
+    await page.locator(".sd-nav__item[data-section='profile']").click();
+    await expect(page.locator("#pfFullName")).toHaveValue("Alpha Student");
+  });
+
   test("saves profile changes and updates visible student name", async ({ page }) => {
     // This test covers the profile save flow that is not covered by the older dashboard tests.
     const fixture = makeStudentFixture();

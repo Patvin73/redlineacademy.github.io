@@ -770,6 +770,21 @@
      SUPABASE DATA LOADERS
   ================================================================ */
   async function loadStudentSectionData(sectionId) {
+    // Profile selalu di-refresh (tidak pakai cache guard)
+    if (sectionId === "profile") {
+      if (currentStudentProfile) {
+        if ($("pfFullName")) $("pfFullName").value = currentStudentProfile.full_name || "";
+        if ($("pfPhone"))    $("pfPhone").value    = currentStudentProfile.phone     || "";
+        if ($("pfDob"))      $("pfDob").value      = currentStudentProfile.date_of_birth || "";
+        if ($("pfBio"))      $("pfBio").value      = currentStudentProfile.bio       || "";
+        if ($("pfTimezone")) $("pfTimezone").value = currentStudentProfile.timezone  || "Australia/Sydney";
+        if ($("pfAddress"))  $("pfAddress").value  = currentStudentProfile.address   || "";
+        if ($("pfCity"))     $("pfCity").value     = currentStudentProfile.city      || "";
+        if ($("pfPostcode")) $("pfPostcode").value = currentStudentProfile.postcode  || "";
+      }
+      return; // tidak perlu cache untuk profile
+    }
+
     if (loadedStudentSections.has(sectionId)) return;
     loadedStudentSections.add(sectionId);
 
