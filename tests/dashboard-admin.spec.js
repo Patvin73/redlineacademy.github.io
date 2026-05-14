@@ -330,6 +330,7 @@ async function installSupabaseStub(page, role, options = {}) {
     (() => {
       const tableData = ${JSON.stringify(tableData)};
       const uploadedFiles = [];
+      const functionInvocations = [];
       const shouldFailOverviewTrainerId = ${JSON.stringify(Boolean(options.missingOverviewTrainerId))};
       const shouldLoadStoredMessages = ${JSON.stringify(!hasMessageFixture)};
       const storedMessages = window.localStorage.getItem("__e2eMessages");
@@ -475,6 +476,12 @@ async function installSupabaseStub(page, role, options = {}) {
             signOut: async () => ({ error: null })
           },
           from: (table) => createQuery(table),
+          functions: {
+            invoke: async (name, options = {}) => {
+              functionInvocations.push({ name, body: options.body || null });
+              return { data: { ok: true, email_sent: true }, error: null };
+            }
+          },
           storage: {
             from: (bucket) => ({
               upload: async (path, file, options) => {
@@ -498,6 +505,7 @@ async function installSupabaseStub(page, role, options = {}) {
       };
       window.__e2eGetTableData = () => tableData;
       window.__e2eGetUploadedFiles = () => uploadedFiles;
+      window.__e2eGetFunctionInvocations = () => functionInvocations;
     })();
   `;
 
@@ -748,9 +756,11 @@ test("admin can filter student table by status tabs", async ({ page }) => {
 test("student message action opens compose with selected recipient", async ({ page }) => {
   await installSupabaseStub(page, "admin");
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#sidebarName")).toHaveText("E2E Admin");
 
   await page.locator(".ad-nav__item[data-section='students']").click();
   await expect(page.locator("#section-students")).toHaveClass(/active/);
+  await expect(page.locator("#studentTableBody")).toContainText("Alpha Student");
 
   await page
     .locator("#studentTableBody tr.ad-student-row", { hasText: "Alpha Student" })
@@ -803,10 +813,10 @@ test("trainer can create schedule event", async ({ page }) => {
 
   await page.click("#createEventBtn");
   await expect(page.locator("#eventFormCard")).toBeVisible();
-  await expect(page.locator("#evCourse option")).toHaveCount(3);
+  await expect(page.locator("#evCourse option")).toHaveCount(2);
   await expect(page.locator("#evCourse option[value='']")).toHaveText("All Enrolled Students");
   await expect(page.locator("#evCourse option[value='course-1']")).toHaveText("Leadership Basics");
-  await expect(page.locator("#evCourse option[value='course-2']")).toHaveText("Emergency Response");
+  await expect(page.locator("#evCourse option[value='course-2']")).toHaveCount(0);
 
   await page.fill("#evTitle", "E2E Trainer Event");
   await page.fill("#evStart", makeLocalDateTime(2, 10));
@@ -891,12 +901,19 @@ test("trainer can compose a system message to an enrolled student", async ({ pag
 
   await expect(page.locator("#adMsgComposeMsg")).toContainText(/Message sent\.|Pesan terkirim\./);
   const sentMessages = await page.evaluate(() => window.__e2eGetTableData().messages);
-  expect(sentMessages).toEqual(expect.arrayContaining([
-    expect.objectContaining({
+  const sentMessage = sentMessages.find((msg) =>
+    msg.sender_id === "e2e-trainer" &&
+    msg.recipient_id === "e2e-student-1" &&
+    msg.body === "Please review Module 2."
+  );
+  expect(sentMessage).toEqual(expect.objectContaining({
       sender_id: "e2e-trainer",
       recipient_id: "e2e-student-1",
       body: "Please review Module 2."
-    })
+  }));
+  const emailInvocations = await page.evaluate(() => window.__e2eGetFunctionInvocations());
+  expect(emailInvocations).toEqual(expect.arrayContaining([
+    { name: "send-message-email", body: { message_id: sentMessage.id } }
   ]));
 });
 
@@ -1249,7 +1266,7 @@ test("admin sees reports analytics metrics", async ({ page }) => {
 
   await expect(page.locator("#metricAvgScore")).toHaveText("88%");
   await expect(page.locator("#metricDropout")).toHaveText("33.3%");
-  await expect(page.locator("#metricRevenue")).toHaveText("$120.00");
+  await expect(page.locator("#metricRevenue")).toHaveText("AU$120,00");
   await expect(page.locator("#metricCerts")).toHaveText("2");
 });
 

@@ -194,6 +194,23 @@
       .slice(0, 120) || fallback;
   }
 
+  function createClientId() {
+    if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+    return "10000000-1000-4000-8000-" + Math.random().toString(16).slice(2, 14).padEnd(12, "0");
+  }
+
+  async function sendMessageEmailNotification(messageId) {
+    if (!messageId || !window.lmsSupabase?.functions?.invoke) return;
+    try {
+      const { error } = await window.lmsSupabase.functions.invoke("send-message-email", {
+        body: { message_id: messageId }
+      });
+      if (error) throw error;
+    } catch (err) {
+      console.warn("Message email notification failed:", err.message || err);
+    }
+  }
+
   async function uploadAssignmentSubmissionFile(file, userId, assignmentId) {
     if (!file) throw new Error("Please choose a file before submitting.");
     if (!window.lmsSupabase?.storage) throw new Error("Supabase Storage is not available.");
@@ -1743,15 +1760,18 @@
 
     try {
       if (sendBtn) sendBtn.disabled = true;
+      const messageId = createClientId();
       const { error } = await window.lmsSupabase
         .from("messages")
         .insert({
+          id: messageId,
           sender_id: currentStudentProfile.id,
           recipient_id: recipientId,
           subject: messageSubject,
           body: messageBody
         });
       if (error) throw error;
+      await sendMessageEmailNotification(messageId);
 
       if (subject) subject.value = "";
       if (body) body.value = "";

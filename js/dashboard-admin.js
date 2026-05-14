@@ -395,6 +395,18 @@
     return "10000000-1000-4000-8000-" + Math.random().toString(16).slice(2, 14).padEnd(12, "0");
   }
 
+  async function sendMessageEmailNotification(messageId) {
+    if (!messageId || !window.lmsSupabase?.functions?.invoke) return;
+    try {
+      const { error } = await window.lmsSupabase.functions.invoke("send-message-email", {
+        body: { message_id: messageId }
+      });
+      if (error) throw error;
+    } catch (err) {
+      console.warn("Message email notification failed:", err.message || err);
+    }
+  }
+
   function safeStorageSegment(value, fallback = "material") {
     return String(value || fallback)
       .toLowerCase()
@@ -2184,15 +2196,18 @@
 
     try {
       if (sendBtn) sendBtn.disabled = true;
+      const messageId = createClientId();
       const { error } = await window.lmsSupabase
         .from("messages")
         .insert({
+          id: messageId,
           sender_id: currentProfile.id,
           recipient_id: recipientId,
           subject: null,
           body: messageBody
         });
       if (error) throw error;
+      await sendMessageEmailNotification(messageId);
       if (body) body.value = "";
       setComposerStatus(tSafe("adMsgSent", "Message sent."));
       loadedSections.delete("messages");
@@ -2406,10 +2421,11 @@
       if (currentRole === "admin") {
         const { data: payments } = await window.lmsSupabase
           .from("payments")
-          .select("amount")
+          .select("amount, currency")
           .eq("status", "completed");
         const total = (payments || []).reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
-        if ($("metricRevenue")) $("metricRevenue").textContent = formatCurrency(total, "IDR");
+        const revenueCurrency = (payments || []).find((p) => p.currency)?.currency || "IDR";
+        if ($("metricRevenue")) $("metricRevenue").textContent = formatCurrency(total, revenueCurrency);
       }
 
     } catch (err) { console.warn("Reports load error:", err.message); }

@@ -6,9 +6,11 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
       const tableData = ${JSON.stringify(tableData)};
       const currentUser = ${JSON.stringify(currentUser)};
       let currentPassword = ${JSON.stringify(initialPassword)};
+      const functionInvocations = [];
 
       window.__QA_TABLE_DATA__ = tableData;
       window.__QA_UPLOADS__ = [];
+      window.__QA_FUNCTION_INVOCATIONS__ = functionInvocations;
 
       const getValue = (obj, path) => {
         if (!obj) return undefined;
@@ -207,6 +209,12 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
             }
           },
           from: (table) => createQuery(table),
+          functions: {
+            invoke: async (name, options = {}) => {
+              functionInvocations.push({ name, body: options.body || null });
+              return { data: { ok: true, email_sent: true }, error: null };
+            }
+          },
           channel: () => ({
             on: () => ({ subscribe: () => ({}) })
           }),
@@ -755,6 +763,7 @@ test.describe("Student Dashboard", () => {
     await installSupabaseStub(page, fixture);
 
     await page.goto("/pages/dashboard-student.html");
+    await expect(page.locator("#welcomeName")).toHaveText("Alpha Student");
     await page.evaluate(() => {
       window.prompt = () => {
         throw new Error("Student compose must not use window.prompt");
@@ -779,13 +788,21 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#section-messages")).toHaveClass(/active/);
 
     const sentMessages = await page.evaluate(() => window.__QA_TABLE_DATA__.messages);
-    expect(sentMessages).toEqual(expect.arrayContaining([
-      expect.objectContaining({
+    const sentMessage = sentMessages.find((msg) =>
+      msg.sender_id === "student-1" &&
+      msg.recipient_id === "trainer-1" &&
+      msg.subject === "Question about Module 1" &&
+      msg.body === "Can you review my answer?"
+    );
+    expect(sentMessage).toEqual(expect.objectContaining({
         sender_id: "student-1",
         recipient_id: "trainer-1",
         subject: "Question about Module 1",
         body: "Can you review my answer?"
-      })
+    }));
+    const emailInvocations = await page.evaluate(() => window.__QA_FUNCTION_INVOCATIONS__);
+    expect(emailInvocations).toEqual(expect.arrayContaining([
+      { name: "send-message-email", body: { message_id: sentMessage.id } }
     ]));
   });
 });
