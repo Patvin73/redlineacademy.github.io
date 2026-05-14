@@ -653,13 +653,13 @@ where e.status = 'active'
 create or replace view public.v_course_overview with (security_invoker = true) as
 select
   c.id as course_id,
-  c.trainer_id,
   c.title,
   t.full_name as trainer_name,
   count(distinct e.student_id)::int as total_enrolled,
   count(distinct e.student_id) filter (where e.status = 'completed')::int as total_completed,
   round(coalesce(avg(cp.completion_percent),0)::numeric,1) as completion_rate_pct,
-  count(distinct cert.id)::int as certificates_issued
+  count(distinct cert.id)::int as certificates_issued,
+  c.trainer_id
 from public.courses c
 left join public.profiles t on t.id = c.trainer_id
 left join public.enrollments e on e.course_id = c.id
