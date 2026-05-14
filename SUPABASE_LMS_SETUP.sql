@@ -653,6 +653,7 @@ where e.status = 'active'
 create or replace view public.v_course_overview with (security_invoker = true) as
 select
   c.id as course_id,
+  c.trainer_id,
   c.title,
   t.full_name as trainer_name,
   count(distinct e.student_id)::int as total_enrolled,
@@ -664,7 +665,7 @@ left join public.profiles t on t.id = c.trainer_id
 left join public.enrollments e on e.course_id = c.id
 left join public.course_progress cp on cp.course_id = c.id and cp.student_id = e.student_id
 left join public.certificates cert on cert.course_id = c.id
-group by c.id, c.title, t.full_name;
+group by c.id, c.trainer_id, c.title, t.full_name;
 
 -- ==========================================================
 -- RLS POLICIES

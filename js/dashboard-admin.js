@@ -2320,8 +2320,26 @@
       let overviewQuery = window.lmsSupabase
         .from("v_course_overview")
         .select("*");
-      if (currentRole !== "admin") overviewQuery = overviewQuery.eq("trainer_name", currentProfile.full_name);
-      const { data: overview } = await overviewQuery;
+      let overviewResult;
+
+      if (currentRole !== "admin") {
+        overviewResult = await overviewQuery.eq("trainer_id", currentProfile.id);
+
+        const errorText = `${overviewResult.error?.code || ""} ${overviewResult.error?.message || ""} ${overviewResult.error?.details || ""} ${overviewResult.error?.hint || ""}`.toLowerCase();
+        const isMissingTrainerIdColumn = errorText.includes("trainer_id") && (errorText.includes("column") || errorText.includes("schema cache"));
+
+        if (isMissingTrainerIdColumn) {
+          overviewResult = await window.lmsSupabase
+            .from("v_course_overview")
+            .select("*")
+            .eq("trainer_name", currentProfile.full_name);
+        }
+      } else {
+        overviewResult = await overviewQuery;
+      }
+
+      if (overviewResult.error) throw overviewResult.error;
+      const overview = overviewResult.data || [];
 
       const tbody = $("courseOverviewBody");
       const empty = $("courseOverviewEmpty");

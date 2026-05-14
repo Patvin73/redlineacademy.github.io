@@ -321,7 +321,7 @@ async function installSupabaseStub(page, role, options = {}) {
     enrollments,
     forum_posts: [],
     notifications: [],
-    v_course_overview: []
+    v_course_overview: options.courseOverview || []
   };
 
   const profile = profiles.find((p) => p.role === role) || profiles[0];
@@ -330,6 +330,7 @@ async function installSupabaseStub(page, role, options = {}) {
     (() => {
       const tableData = ${JSON.stringify(tableData)};
       const uploadedFiles = [];
+      const shouldFailOverviewTrainerId = ${JSON.stringify(Boolean(options.missingOverviewTrainerId))};
       const shouldLoadStoredMessages = ${JSON.stringify(!hasMessageFixture)};
       const storedMessages = window.localStorage.getItem("__e2eMessages");
       if (shouldLoadStoredMessages && storedMessages) {
@@ -354,6 +355,7 @@ async function installSupabaseStub(page, role, options = {}) {
         let limitValue = null;
         let pendingUpdate = null;
         let pendingDelete = false;
+        let queryError = null;
 
         const toComparable = (value) => {
           if (!value) return value;
@@ -365,6 +367,13 @@ async function installSupabaseStub(page, role, options = {}) {
         const api = {
           select: () => api,
           eq: (col, val) => {
+            if (table === "v_course_overview" && col === "trainer_id" && shouldFailOverviewTrainerId) {
+              queryError = {
+                code: "PGRST204",
+                message: "Could not find the 'trainer_id' column of 'v_course_overview' in the schema cache"
+              };
+              return api;
+            }
             rows = rows.filter((row) => {
               const value = getValue(row, col);
               if (typeof value === "undefined") return true;
@@ -441,12 +450,13 @@ async function installSupabaseStub(page, role, options = {}) {
         api.then = (resolve) => {
           applyPendingChanges();
           const data = limitValue ? rows.slice(0, limitValue) : rows;
-          return resolve(makeResponse(data));
+          return resolve(queryError ? { data: null, error: queryError, count: 0 } : makeResponse(data));
         };
         api.catch = (reject) => {
           applyPendingChanges();
           const data = limitValue ? rows.slice(0, limitValue) : rows;
-          return Promise.resolve(makeResponse(data)).catch(reject);
+          const response = queryError ? { data: null, error: queryError, count: 0 } : makeResponse(data);
+          return Promise.resolve(response).catch(reject);
         };
         return api;
       };
@@ -544,6 +554,71 @@ test("admin KPI cards navigate to their target sections and count published cour
   await page.locator(".ad-kpi-card:has(#kpiCompletionRate)").focus();
   await page.keyboard.press("Enter");
   await expect(page.locator("#section-reports")).toHaveClass(/active/);
+});
+
+test("trainer course reports filter by trainer id instead of trainer name", async ({ page }) => {
+  await installSupabaseStub(page, "trainer", {
+    courseOverview: [
+      {
+        course_id: "course-owned",
+        trainer_id: "e2e-trainer",
+        trainer_name: "Trainer Renamed",
+        title: "Owned Report Course",
+        total_enrolled: 3,
+        total_completed: 2,
+        completion_rate_pct: 67,
+        certificates_issued: 1
+      },
+      {
+        course_id: "course-name-match",
+        trainer_id: "e2e-admin",
+        trainer_name: "E2E Trainer",
+        title: "Name Match Only",
+        total_enrolled: 5,
+        total_completed: 5,
+        completion_rate_pct: 100,
+        certificates_issued: 5
+      }
+    ]
+  });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='reports']").click();
+  await expect(page.locator("#section-reports")).toHaveClass(/active/);
+  await expect(page.locator("#courseOverviewBody")).toContainText("Owned Report Course");
+  await expect(page.locator("#courseOverviewBody")).not.toContainText("Name Match Only");
+});
+
+test("trainer course reports fall back to trainer name when overview view lacks trainer id", async ({ page }) => {
+  await installSupabaseStub(page, "trainer", {
+    missingOverviewTrainerId: true,
+    courseOverview: [
+      {
+        course_id: "course-legacy-match",
+        trainer_name: "E2E Trainer",
+        title: "Legacy Trainer Report",
+        total_enrolled: 2,
+        total_completed: 1,
+        completion_rate_pct: 50,
+        certificates_issued: 0
+      },
+      {
+        course_id: "course-legacy-other",
+        trainer_name: "E2E Admin",
+        title: "Other Legacy Report",
+        total_enrolled: 4,
+        total_completed: 4,
+        completion_rate_pct: 100,
+        certificates_issued: 4
+      }
+    ]
+  });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='reports']").click();
+  await expect(page.locator("#section-reports")).toHaveClass(/active/);
+  await expect(page.locator("#courseOverviewBody")).toContainText("Legacy Trainer Report");
+  await expect(page.locator("#courseOverviewBody")).not.toContainText("Other Legacy Report");
 });
 
 test("at-risk student actions open the students section", async ({ page }) => {
