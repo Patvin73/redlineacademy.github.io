@@ -54,6 +54,7 @@
       lmsMsgSent:            "Pesan terkirim.",
       lmsMsgNoRecipients:    "Tidak ada trainer aktif tersedia.",
       lmsMsgRequired:        "Trainer, subjek, dan isi pesan wajib diisi.",
+      lmsFileRequired:       "Pilih file sebelum mengumpulkan tugas.",
       lmsMsgFailed:          "Pesan gagal dikirim.",
       lmsCancel:             "Batal",
       lmsSendMessage:        "Kirim Pesan",
@@ -126,6 +127,7 @@
       lmsMsgSent:            "Message sent.",
       lmsMsgNoRecipients:    "No active trainer available.",
       lmsMsgRequired:        "Trainer, subject, and message are required.",
+      lmsFileRequired:       "Please select a file before submitting.",
       lmsMsgFailed:          "Message failed to send.",
       lmsCancel:             "Cancel",
       lmsSendMessage:        "Send Message",
@@ -1347,7 +1349,7 @@
           const errSpan = btn.closest(".sd-assignment-item__actions")?.querySelector(".sd-assignment-err");
           if (errSpan) errSpan.remove();
           try {
-            if (!file) throw new Error(typeof t === "function" ? t("lmsMsgRequired") : "Please select a file before submitting.");
+            if (!file) throw new Error(typeof t === "function" ? t("lmsFileRequired") : "Please select a file before submitting.");
             const fileUrl = await uploadAssignmentSubmissionFile(file, userId, assignmentId);
             await window.lmsSupabase
               .from("assignment_submissions")
