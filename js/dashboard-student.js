@@ -1340,7 +1340,7 @@
 
         const icon = assignment.type === "quiz" ? "📝" : "📘";
         const title = assignment.title || "Assignment";
-        const courseLabel = assignment.course_title || assignment.courses?.title || "Course";
+        const courseLabel = assignment.courses?.title || "Course";
         const dueLabel = assignment.due_at
           ? new Date(assignment.due_at).toLocaleDateString("en-AU")
           : "";
