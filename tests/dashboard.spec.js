@@ -523,7 +523,8 @@ test.describe("Student Dashboard", () => {
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);
 
-    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
+    await page.goto("/pages/dashboard-student.html");
+    await expect(page.locator("#sidebarName")).toHaveText("Alpha Student");
     await page.locator(".sd-nav__item[data-section='profile']").click();
 
     await expect(page.locator("#pfFullName")).toHaveValue("Alpha Student");
@@ -626,6 +627,9 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#courseGrid")).toContainText("Aged Care Basics");
     await expect(page.locator("#courseGrid")).toContainText("First Aid Essentials");
     await expect(page.locator("#courseGrid")).toContainText("Clinical Communication");
+    await expect(page.locator("#courseGrid")).toContainText("Aged Care");
+    await expect(page.locator("#courseGrid")).toContainText("First Aid");
+    await expect(page.locator("#courseGrid")).toContainText("Communication");
     await expect(page.locator("#courseGrid")).toContainText("Creator ID: TR-001");
     await expect(page.locator("#courseGrid")).toContainText("Creator ID: TR-009");
     await expect(page.locator("#courseGrid .sd-course-card[data-status='available']")).toHaveCount(1);

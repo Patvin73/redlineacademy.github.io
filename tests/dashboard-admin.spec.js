@@ -1298,7 +1298,8 @@ test("admin settings tab supports branding and email changes", async ({ page }) 
 
 test("admin can delete a course from the list", async ({ page }) => {
   await installSupabaseStub(page, "admin");
-  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+  await page.goto("/pages/dashboard-admin.html");
+  await expect(page.locator("#sidebarName")).toHaveText("E2E Admin");
 
   await page.locator(".ad-nav__item[data-section='courses']").click();
   await expect(page.locator("#section-courses")).toHaveClass(/active/);

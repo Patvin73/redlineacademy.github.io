@@ -515,7 +515,7 @@ test.describe("Student and marketer flows", {
       bucket: "assignment-submissions",
       path: "student-1/assign-1/submission.pdf",
       name: "submission.pdf",
-      options: { upsert: true }
+      options: { upsert: true, contentType: "application/pdf" }
     });
   });
 

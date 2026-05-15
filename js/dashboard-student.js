@@ -223,7 +223,7 @@
 
     const { error } = await window.lmsSupabase.storage
       .from(ASSIGNMENT_SUBMISSIONS_BUCKET)
-      .upload(path, file, { upsert: true });
+      .upload(path, file, { upsert: true, contentType: file.type });
     if (error) throw error;
 
     const { data } = window.lmsSupabase.storage
@@ -1169,6 +1169,7 @@
         .from("courses")
         .select(`
           id, title, thumbnail_url, category_id, trainer_id,
+          categories ( name ),
           profiles!courses_trainer_id_fkey(admin_id, student_id)
         `)
         .order("title", { ascending: true });
@@ -1201,7 +1202,7 @@
         const progress = Math.round(progressMap.get(course.id) || 0);
         const progressLabel = typeof t === "function" ? t("lmsProgress") : "Progress";
         const thumbSrc = toSafeUiUrl(course.thumbnail_url) || "";
-        const category = course.category_id || "Course";
+        const category = course.categories?.name || course.category_id || "Course";
         const creatorLabel = typeof t === "function" ? t("lmsCreatorId") : "Creator ID";
         const creatorId = creatorIdForCourse(course);
 
