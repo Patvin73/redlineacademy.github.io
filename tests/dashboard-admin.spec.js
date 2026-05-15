@@ -896,6 +896,7 @@ test("trainer can compose a system message to an enrolled student", async ({ pag
   expect(recipients).not.toContain("Bravo Student");
 
   await page.selectOption("#adMsgRecipient", "e2e-student-1");
+  await page.fill("#adMsgSubject", "Module 2 review");
   await page.fill("#adMsgBody", "Please review Module 2.");
   await page.locator("#adSendMsgBtn").click();
 
@@ -904,13 +905,16 @@ test("trainer can compose a system message to an enrolled student", async ({ pag
   const sentMessage = sentMessages.find((msg) =>
     msg.sender_id === "e2e-trainer" &&
     msg.recipient_id === "e2e-student-1" &&
+    msg.subject === "Module 2 review" &&
     msg.body === "Please review Module 2."
   );
   expect(sentMessage).toEqual(expect.objectContaining({
       sender_id: "e2e-trainer",
       recipient_id: "e2e-student-1",
+      subject: "Module 2 review",
       body: "Please review Module 2."
   }));
+  await expect(page.locator("#adMsgSubject")).toHaveValue("");
   const emailInvocations = await page.evaluate(() => window.__e2eGetFunctionInvocations());
   expect(emailInvocations).toEqual(expect.arrayContaining([
     { name: "send-message-email", body: { message_id: sentMessage.id } }

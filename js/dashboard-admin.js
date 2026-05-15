@@ -2203,12 +2203,14 @@
           id: messageId,
           sender_id: currentProfile.id,
           recipient_id: recipientId,
-          subject: null,
+          subject: ($("adMsgSubject")?.value.trim()) || null,
           body: messageBody
         });
       if (error) throw error;
       await sendMessageEmailNotification(messageId);
       if (body) body.value = "";
+      const subjectEl = $("adMsgSubject");
+      if (subjectEl) subjectEl.value = "";
       setComposerStatus(tSafe("adMsgSent", "Message sent."));
       loadedSections.delete("messages");
       await loadMessages();
@@ -2784,8 +2786,12 @@
       };
       reader.readAsDataURL(file);
 
+      if (!window.lmsSupabase || !currentProfile) {
+        if (statusEl) { statusEl.textContent = "Storage not available."; statusEl.style.color = "var(--sd-red)"; }
+        setTimeout(() => { if (statusEl) statusEl.textContent = ""; }, 3000);
+        return;
+      }
       if (statusEl) { statusEl.textContent = "Uploading..."; statusEl.style.color = "var(--sd-text-muted)"; }
-      if (!window.lmsSupabase || !currentProfile) return;
 
       try {
         const ext = file.name.split(".").pop().toLowerCase();
