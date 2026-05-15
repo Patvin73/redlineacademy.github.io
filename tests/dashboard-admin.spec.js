@@ -329,6 +329,8 @@ async function installSupabaseStub(page, role, options = {}) {
   const supabaseStub = `
     (() => {
       const tableData = ${JSON.stringify(tableData)};
+      const storageFiles = ${JSON.stringify(options.storageFiles || {})};
+      const storageStats = ${JSON.stringify(options.storageStats || null)};
       const uploadedFiles = [];
       const functionInvocations = [];
       const shouldFailOverviewTrainerId = ${JSON.stringify(Boolean(options.missingOverviewTrainerId))};
@@ -479,11 +481,20 @@ async function installSupabaseStub(page, role, options = {}) {
           functions: {
             invoke: async (name, options = {}) => {
               functionInvocations.push({ name, body: options.body || null });
+              if (name === "get-storage-stats") {
+                return storageStats
+                  ? { data: storageStats, error: null }
+                  : { data: null, error: { message: "Function not available" } };
+              }
               return { data: { ok: true, email_sent: true }, error: null };
             }
           },
           storage: {
             from: (bucket) => ({
+              list: async () => ({
+                data: storageFiles[bucket] || [],
+                error: null
+              }),
               upload: async (path, file, options) => {
                 uploadedFiles.push({ bucket, path, name: file.name, type: file.type, size: file.size, options });
                 return { data: { path }, error: null };
@@ -1275,7 +1286,9 @@ test("admin sees reports analytics metrics", async ({ page }) => {
 });
 
 test("admin settings tab supports branding and email changes", async ({ page }) => {
-  await installSupabaseStub(page, "admin");
+  await installSupabaseStub(page, "admin", {
+    storageStats: { db_size_mb: 125, files_size_mb: 512 }
+  });
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
 
   await page.locator(".ad-nav__item[data-section='settings']").click();
@@ -1296,8 +1309,35 @@ test("admin settings tab supports branding and email changes", async ({ page }) 
   await page.click("#saveEmailSettingsBtn");
   await expect(emailReminder).not.toBeChecked();
 
-  await expect(page.locator("#storageDB")).toContainText("/ 500 MB");
-  await expect(page.locator("#storageFiles")).toContainText("/ 1 GB");
+  await expect(page.locator("#storageDB")).toHaveText("125.0 MB / 500.0 MB");
+  await expect(page.locator("#storageFiles")).toHaveText("512.0 MB / 0.98 GB");
+  await expect(page.locator("#storageDBBar")).toHaveAttribute("style", /width:\s*25%/);
+  await expect(page.locator("#storageFilesBar")).toHaveAttribute("style", /width:\s*51%/);
+});
+
+test("admin settings storage monitor falls back to row and bucket estimates", async ({ page }) => {
+  await installSupabaseStub(page, "admin", {
+    storageFiles: {
+      avatars: [
+        { name: "admin.png", metadata: { size: 1048576 } }
+      ],
+      "course-materials": [
+        { name: "guide.pdf", metadata: { size: 2097152 } }
+      ],
+      "assignment-submissions": []
+    }
+  });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='settings']").click();
+
+  await expect(page.locator("#storageDB")).toHaveText(/ MB \/ 500\.0 MB$/);
+  await expect(page.locator("#storageDB")).not.toHaveText("— / 500 MB");
+  await expect(page.locator("#storageFiles")).toHaveText("3.0 MB / 0.98 GB");
+  await expect(page.locator("#storageFilesBar")).toHaveAttribute("style", /width:\s*0%/);
+  await expect(page.locator("#storageNote")).toHaveText(
+    "Estimated from row counts · File storage from bucket listing"
+  );
 });
 
 test("admin can delete a course from the list", async ({ page }) => {

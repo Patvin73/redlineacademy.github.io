@@ -608,8 +608,9 @@
   const loadedSections = new Set(["home"]);
 
   async function loadSectionData(sectionId) {
-    if (loadedSections.has(sectionId)) return;
-    loadedSections.add(sectionId);
+    const alwaysReload = sectionId === "settings";
+    if (loadedSections.has(sectionId) && !alwaysReload) return;
+    if (!alwaysReload) loadedSections.add(sectionId);
 
     switch (sectionId) {
       case "students":    await loadStudentsTable(); break;
@@ -619,6 +620,7 @@
       case "messages":    await loadMessages(); break;
       case "profile":     break;
       case "reports":     await loadReports(); break;
+      case "settings":    await loadStorageMonitor(); break;
       case "users":       await loadUsersTable(); break;
       case "enrollments": await loadEnrollmentsTable(); break;
       case "announcements": await loadAnnouncements(); break;
@@ -2715,6 +2717,116 @@
 
     brandingBtn && brandingBtn.addEventListener("click", saveSettings);
     emailBtn && emailBtn.addEventListener("click", saveSettings);
+  }
+
+  async function loadStorageMonitor() {
+    const dbBar      = $("storageDBBar");
+    const filesBar   = $("storageFilesBar");
+    const dbLabel    = $("storageDB");
+    const filesLabel = $("storageFiles");
+    const dbLimit    = 500;
+    const filesLimit = 1000;
+
+    const fmtMB = (mb) =>
+      mb >= 1000
+        ? (mb / 1024).toFixed(2) + " GB"
+        : mb.toFixed(1) + " MB";
+
+    const updateBar = (barEl, labelEl, usedMB, limitMB) => {
+      const safeUsed = Number(usedMB) || 0;
+      const safeLimit = Number(limitMB) || 1;
+      const pct = Math.min(100, Math.round((safeUsed / safeLimit) * 100));
+      if (barEl) {
+        barEl.style.width = pct + "%";
+        barEl.style.background =
+          pct > 90 ? "var(--sd-red, #E24B4A)"
+          : pct > 70 ? "var(--sd-orange, #EF9F27)"
+          : "var(--sd-green, #639922)";
+      }
+      if (labelEl) {
+        labelEl.textContent = `${fmtMB(safeUsed)} / ${fmtMB(safeLimit)}`;
+      }
+    };
+
+    if (window.lmsSupabase?.functions?.invoke) {
+      try {
+        const { data, error } = await window.lmsSupabase.functions.invoke(
+          "get-storage-stats"
+        );
+        const hasStats =
+          Number.isFinite(Number(data?.db_size_mb)) ||
+          Number.isFinite(Number(data?.files_size_mb));
+        if (!error && data && hasStats) {
+          updateBar(dbBar, dbLabel, data.db_size_mb || 0, dbLimit);
+          updateBar(filesBar, filesLabel, data.files_size_mb || 0, filesLimit);
+          return;
+        }
+      } catch {}
+    }
+
+    try {
+      const [
+        { count: profilesCount },
+        { count: coursesCount },
+        { count: enrollCount },
+        { count: subsCount },
+        { count: logsCount },
+        { count: messagesCount },
+        { count: notifsCount },
+      ] = await Promise.all([
+        window.lmsSupabase.from("profiles").select("id", { count: "exact", head: true }),
+        window.lmsSupabase.from("courses").select("id", { count: "exact", head: true }),
+        window.lmsSupabase.from("enrollments").select("id", { count: "exact", head: true }),
+        window.lmsSupabase.from("assignment_submissions").select("id", { count: "exact", head: true }),
+        window.lmsSupabase.from("activity_logs").select("id", { count: "exact", head: true }),
+        window.lmsSupabase.from("messages").select("id", { count: "exact", head: true }),
+        window.lmsSupabase.from("notifications").select("id", { count: "exact", head: true }),
+      ]);
+
+      const totalRows =
+        (profilesCount || 0) +
+        (coursesCount || 0) +
+        (enrollCount || 0) +
+        (subsCount || 0) +
+        (logsCount || 0) +
+        (messagesCount || 0) +
+        (notifsCount || 0);
+
+      const estimatedDbMB = Math.max(0.1, (totalRows * 2) / 1024);
+
+      const buckets = ["avatars", "course-materials", "assignment-submissions"];
+      let totalFileBytes = 0;
+
+      for (const bucket of buckets) {
+        try {
+          const { data: files } = await window.lmsSupabase.storage
+            .from(bucket)
+            .list("", { limit: 100, offset: 0 });
+
+          totalFileBytes += (files || []).reduce(
+            (sum, f) => sum + (f.metadata?.size || 0),
+            0
+          );
+        } catch {}
+      }
+
+      const totalFileMB = totalFileBytes / (1024 * 1024);
+
+      updateBar(dbBar, dbLabel, estimatedDbMB, dbLimit);
+      updateBar(filesBar, filesLabel, totalFileMB, filesLimit);
+
+      const note = $("storageNote");
+      if (note) {
+        note.textContent =
+          "Estimated from row counts · File storage from bucket listing";
+        note.style.fontSize = "11px";
+        note.style.color = "var(--sd-text-muted)";
+      }
+    } catch (err) {
+      console.warn("Storage monitor error:", err.message);
+      if (dbLabel) dbLabel.textContent = "Unable to load";
+      if (filesLabel) filesLabel.textContent = "Unable to load";
+    }
   }
 
   // ─── 1. SETUP ADMIN PROFILE FORM ─────────────────────────────────
