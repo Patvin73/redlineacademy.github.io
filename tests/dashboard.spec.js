@@ -808,6 +808,7 @@ test.describe("Student Dashboard", () => {
     expect(emailInvocations).toEqual(expect.arrayContaining([
       { name: "send-message-email", body: { message_id: sentMessage.id } }
     ]));
+    await expect(page.locator("#studentMsgComposeForm")).toBeHidden();
   });
 });
 

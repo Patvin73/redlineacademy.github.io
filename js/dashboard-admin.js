@@ -917,7 +917,7 @@
       // Pending grading
       const { data: subs } = await window.lmsSupabase
         .from("assignment_submissions")
-        .select("id, student_id, assignment_id, submitted_at, assignments(title)")
+        .select("id, student_id, assignment_id, submitted_at, assignments!inner(title, trainer_id)")
         .eq("status", "submitted")
         .eq("assignments.trainer_id", currentProfile.id)
         .limit(5);

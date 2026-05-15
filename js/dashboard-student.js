@@ -1777,6 +1777,8 @@
       if (subject) subject.value = "";
       if (body) body.value = "";
       setStudentComposerStatus(dashboardText("lmsMsgSent", "Message sent."));
+      // Tutup composer setelah 1.2 detik agar user sempat baca konfirmasi
+      setTimeout(() => closeStudentMessageComposer(), 1200);
       if (window._sdActivateSection) window._sdActivateSection("messages");
       await loadMessages(currentStudentProfile.id);
     } catch (err) {
@@ -1805,6 +1807,8 @@
 
     if (!studentMessageComposerBound) {
       composeForm.addEventListener("submit", sendStudentComposedMessage);
+      const sendBtn = $("studentSendMsgBtn");
+      sendBtn && sendBtn.addEventListener("click", sendStudentComposedMessage);
       cancelBtn && cancelBtn.addEventListener("click", closeStudentMessageComposer);
       studentMessageComposerBound = true;
     }
