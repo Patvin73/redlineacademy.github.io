@@ -2421,11 +2421,10 @@
       if (currentRole === "admin") {
         const { data: payments } = await window.lmsSupabase
           .from("payments")
-          .select("amount, currency")
+          .select("amount")
           .eq("status", "completed");
         const total = (payments || []).reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
-        const revenueCurrency = (payments || []).find((p) => p.currency)?.currency || "IDR";
-        if ($("metricRevenue")) $("metricRevenue").textContent = formatCurrency(total, revenueCurrency);
+        if ($("metricRevenue")) $("metricRevenue").textContent = formatCurrency(total, "IDR");
       }
 
     } catch (err) { console.warn("Reports load error:", err.message); }
@@ -2569,12 +2568,10 @@
 
       let totalRevenue = 0;
       let pending = 0;
-      let revenueCurrency = "IDR";
 
       data.forEach((p) => {
         if (p.status === "completed") {
           totalRevenue += parseFloat(p.amount || 0);
-          revenueCurrency = p.currency || revenueCurrency;
         }
         if (p.status === "pending")   pending++;
 
@@ -2605,7 +2602,7 @@
           <td>${escHtml(p.profiles?.full_name || "—")}</td>
           <td>${escHtml(p.courses?.title || "—")}</td>
           <td>${escHtml(p.payment_method || "Manual")}</td>
-          <td><strong>${formatCurrency(parseFloat(p.amount || 0), p.currency || "IDR")}</strong></td>
+          <td><strong>${formatCurrency(parseFloat(p.amount || 0), "IDR")}</strong></td>
           <td>${statusTag}</td>
           <td style="color:var(--sd-text-muted);font-size:.82rem">${p.paid_at ? formatDT(p.paid_at) : "—"}</td>
           <td><button class="ad-btn ad-btn--outline ad-btn--sm" data-payment-id="${p.id}">Receipt</button></td>`;
@@ -2615,7 +2612,7 @@
 
       if ($("payTotal"))   $("payTotal").textContent   = data.length;
       if ($("payPending")) $("payPending").textContent = pending;
-      if ($("payRevenue")) $("payRevenue").textContent = formatCurrency(totalRevenue, revenueCurrency);
+      if ($("payRevenue")) $("payRevenue").textContent = formatCurrency(totalRevenue, "IDR");
 
     } catch { if (empty) empty.style.display = "table-row"; }
   }
@@ -3134,7 +3131,7 @@
       const studentId = studentEl?.value;
       const courseId  = courseEl?.value;
       const amount    = parseFloat(amountEl?.value || 0);
-      const currency  = currencyEl?.value || "IDR";
+      const currency  = "IDR";
       const method    = methodEl?.value || "Manual Transfer";
       const status    = statusEl?.value || "completed";
       const plan      = planEl?.value || "full";
@@ -3377,7 +3374,7 @@
     if (!payment) return;
     const receiptWin = window.open("", "_blank", "width=720,height=820");
     if (!receiptWin) return;
-    const amount = formatCurrency(parseFloat(payment.amount || 0), payment.currency || "IDR");
+    const amount = formatCurrency(parseFloat(payment.amount || 0), "IDR");
     const paidAt = payment.paid_at ? formatDT(payment.paid_at) : "—";
     const status = payment.payment_plan === "installment"
       ? `Installment ${parseInt(payment.installment_paid || 0, 10)}/${parseInt(payment.installment_total || 0, 10)}`

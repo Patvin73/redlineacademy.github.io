@@ -301,6 +301,17 @@ create table if not exists public.payments (
 
 alter table public.payments add column if not exists payment_gateway text;
 alter table public.payments alter column currency set default 'IDR';
+update public.payments set currency = 'IDR' where currency is distinct from 'IDR';
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'payments_currency_idr_check'
+  ) then
+    alter table public.payments
+      add constraint payments_currency_idr_check check (currency = 'IDR');
+  end if;
+end $$;
 
 create unique index if not exists payments_student_course_unique on public.payments(student_id, course_id);
 create index if not exists idx_payments_student on public.payments(student_id);

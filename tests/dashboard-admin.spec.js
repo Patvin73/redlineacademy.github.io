@@ -54,7 +54,7 @@ async function installSupabaseStub(page, role, options = {}) {
     {
       id: "pay-1",
       amount: "120",
-      currency: "AUD",
+      currency: "IDR",
       payment_method: "card",
       status: "completed",
       paid_at: "2026-03-10T10:00:00.000Z",
@@ -64,7 +64,7 @@ async function installSupabaseStub(page, role, options = {}) {
     {
       id: "pay-2",
       amount: "50",
-      currency: "AUD",
+      currency: "IDR",
       payment_method: "manual",
       status: "pending",
       paid_at: "2026-03-11T10:00:00.000Z",
@@ -74,7 +74,7 @@ async function installSupabaseStub(page, role, options = {}) {
     {
       id: "pay-3",
       amount: "75",
-      currency: "AUD",
+      currency: "IDR",
       payment_method: "card",
       status: "failed",
       paid_at: "2026-03-12T10:00:00.000Z",
@@ -674,7 +674,7 @@ test("admin sees enrollments totals", async ({ page }) => {
 
   await expect(page.locator("#payTotal")).toHaveText("3");
   await expect(page.locator("#payPending")).toHaveText("1");
-  await expect(page.locator("#payRevenue")).toHaveText("AU$120,00");
+  await expect(page.locator("#payRevenue")).toHaveText("Rp\u00a0120");
 });
 
 test("trainer hides admin-only sections", { tag: "@critical" }, async ({ page }) => {
@@ -1266,7 +1266,7 @@ test("admin sees reports analytics metrics", async ({ page }) => {
 
   await expect(page.locator("#metricAvgScore")).toHaveText("88%");
   await expect(page.locator("#metricDropout")).toHaveText("33.3%");
-  await expect(page.locator("#metricRevenue")).toHaveText("AU$120,00");
+  await expect(page.locator("#metricRevenue")).toHaveText("Rp\u00a0120");
   await expect(page.locator("#metricCerts")).toHaveText("2");
 });
 
@@ -1349,9 +1349,9 @@ test("admin enrollments table renders status tags", async ({ page }) => {
   await expect(page.locator(".ad-tag", { hasText: "Failed" })).toHaveCount(1);
 
   await expect(page.locator("#enrollmentTableBody tr.ad-enroll-row")).toHaveCount(3);
-  await expect(page.locator("#enrollmentTableBody")).toContainText("AU$120,00");
-  await expect(page.locator("#enrollmentTableBody")).toContainText("AU$50,00");
-  await expect(page.locator("#enrollmentTableBody")).toContainText("AU$75,00");
+  await expect(page.locator("#enrollmentTableBody")).toContainText("Rp\u00a0120");
+  await expect(page.locator("#enrollmentTableBody")).toContainText("Rp\u00a050");
+  await expect(page.locator("#enrollmentTableBody")).toContainText("Rp\u00a075");
 });
 
 });
