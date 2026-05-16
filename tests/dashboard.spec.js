@@ -281,6 +281,14 @@ function makeStudentFixture() {
           admin_id: "TR-001",
           email: "trainer@example.com",
           created_at: "2026-03-01T08:00:00.000Z"
+        },
+        {
+          id: "admin-1",
+          full_name: "Admin One",
+          role: "admin",
+          admin_id: "ADM-001",
+          email: "admin@example.com",
+          created_at: "2026-03-01T08:00:00.000Z"
         }
       ],
       v_student_dashboard: [
@@ -762,7 +770,7 @@ test.describe("Student Dashboard", () => {
     expect(unread).toBe(0);
   });
 
-  test("student composes a message to the active enrollment trainer", async ({ page }) => {
+  test("student composes a message to multiple recipients across roles", async ({ page }) => {
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);
 
@@ -782,8 +790,10 @@ test.describe("Student Dashboard", () => {
 
     const recipients = await page.locator("#studentMsgRecipient option").allTextContents();
     expect(recipients).toContain("Trainer One");
+    expect(recipients).toContain("Admin One");
+    expect(recipients).not.toContain("Alpha Student");
 
-    await page.selectOption("#studentMsgRecipient", "trainer-1");
+    await page.selectOption("#studentMsgRecipient", ["trainer-1", "admin-1"]);
     await page.fill("#studentMsgSubject", "Question about Module 1");
     await page.fill("#studentMsgBody", "Can you review my answer?");
     await page.locator("#studentSendMsgBtn").click();
@@ -792,22 +802,31 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#section-messages")).toHaveClass(/active/);
 
     const sentMessages = await page.evaluate(() => window.__QA_TABLE_DATA__.messages);
-    const sentMessage = sentMessages.find((msg) =>
+    const sentMessagesForRecipients = sentMessages.filter((msg) =>
       msg.sender_id === "student-1" &&
-      msg.recipient_id === "trainer-1" &&
       msg.subject === "Question about Module 1" &&
       msg.body === "Can you review my answer?"
     );
-    expect(sentMessage).toEqual(expect.objectContaining({
+    expect(sentMessagesForRecipients).toEqual(expect.arrayContaining([
+      expect.objectContaining({
         sender_id: "student-1",
         recipient_id: "trainer-1",
         subject: "Question about Module 1",
         body: "Can you review my answer?"
-    }));
-    const emailInvocations = await page.evaluate(() => window.__QA_FUNCTION_INVOCATIONS__);
-    expect(emailInvocations).toEqual(expect.arrayContaining([
-      { name: "send-message-email", body: { message_id: sentMessage.id } }
+      }),
+      expect.objectContaining({
+        sender_id: "student-1",
+        recipient_id: "admin-1",
+        subject: "Question about Module 1",
+        body: "Can you review my answer?"
+      })
     ]));
+    const emailInvocations = await page.evaluate(() => window.__QA_FUNCTION_INVOCATIONS__);
+    sentMessagesForRecipients.forEach((message) => {
+      expect(emailInvocations).toEqual(expect.arrayContaining([
+        { name: "send-message-email", body: { message_id: message.id } }
+      ]));
+    });
     await expect(page.locator("#studentMsgComposeForm")).toBeHidden();
   });
 });

@@ -49,6 +49,9 @@ async function installSupabaseStub(page, role, options = {}) {
       created_at: "2026-03-04T08:00:00.000Z"
     }
   ];
+  if (Array.isArray(options.extraProfiles)) {
+    profiles.push(...options.extraProfiles);
+  }
 
   const payments = [
     {
@@ -947,7 +950,7 @@ test("trainer can open message detail", async ({ page }) => {
   await expect(page.locator("#adMsgDetail")).toContainText("Need help with Module 2.");
 });
 
-test("trainer can compose a system message to an enrolled student", async ({ page }) => {
+test("trainer can compose a system message to multiple recipients across roles", async ({ page }) => {
   await installSupabaseStub(page, "trainer");
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#sidebarRoleBadge")).toHaveText("Trainer");
@@ -960,33 +963,69 @@ test("trainer can compose a system message to an enrolled student", async ({ pag
   await expect(page.locator("#adMsgDetail")).toBeHidden();
 
   const recipients = await page.locator("#adMsgRecipient option").allTextContents();
+  expect(recipients).toContain("E2E Admin");
   expect(recipients).toContain("Alpha Student");
-  expect(recipients).not.toContain("Bravo Student");
+  expect(recipients).toContain("Bravo Student");
+  expect(recipients).not.toContain("E2E Trainer");
 
-  await page.selectOption("#adMsgRecipient", "e2e-student-1");
+  await page.selectOption("#adMsgRecipient", ["e2e-student-1", "e2e-admin"]);
   await page.fill("#adMsgSubject", "Module 2 review");
   await page.fill("#adMsgBody", "Please review Module 2.");
   await page.locator("#adSendMsgBtn").click();
 
   await expect(page.locator("#adMsgComposeMsg")).toContainText(/Message sent\.|Pesan terkirim\./);
   const sentMessages = await page.evaluate(() => window.__e2eGetTableData().messages);
-  const sentMessage = sentMessages.find((msg) =>
+  const sentMessagesForRecipients = sentMessages.filter((msg) =>
     msg.sender_id === "e2e-trainer" &&
-    msg.recipient_id === "e2e-student-1" &&
     msg.subject === "Module 2 review" &&
     msg.body === "Please review Module 2."
   );
-  expect(sentMessage).toEqual(expect.objectContaining({
+  expect(sentMessagesForRecipients).toEqual(expect.arrayContaining([
+    expect.objectContaining({
       sender_id: "e2e-trainer",
       recipient_id: "e2e-student-1",
       subject: "Module 2 review",
       body: "Please review Module 2."
-  }));
+    }),
+    expect.objectContaining({
+      sender_id: "e2e-trainer",
+      recipient_id: "e2e-admin",
+      subject: "Module 2 review",
+      body: "Please review Module 2."
+    })
+  ]));
   await expect(page.locator("#adMsgSubject")).toHaveValue("");
   const emailInvocations = await page.evaluate(() => window.__e2eGetFunctionInvocations());
-  expect(emailInvocations).toEqual(expect.arrayContaining([
-    { name: "send-message-email", body: { message_id: sentMessage.id } }
-  ]));
+  sentMessagesForRecipients.forEach((message) => {
+    expect(emailInvocations).toEqual(expect.arrayContaining([
+      { name: "send-message-email", body: { message_id: message.id } }
+    ]));
+  });
+});
+
+test("message composer caps selected recipients at 50", async ({ page }) => {
+  const extraProfiles = Array.from({ length: 51 }, (_, index) => ({
+    id: `extra-recipient-${index + 1}`,
+    full_name: `Extra Recipient ${index + 1}`,
+    role: index % 2 === 0 ? "student" : "trainer",
+    email: `extra-${index + 1}@example.com`,
+    is_active: true,
+    created_at: "2026-03-05T08:00:00.000Z"
+  }));
+
+  await installSupabaseStub(page, "admin", { extraProfiles });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#sidebarRoleBadge")).toHaveText("Admin");
+
+  await page.locator(".ad-nav__item[data-section='messages']").click();
+  await page.locator("#adNewMsgBtn").click();
+  await page.selectOption("#adMsgRecipient", extraProfiles.map((profile) => profile.id));
+
+  await expect(page.locator("#adMsgComposeMsg")).toContainText(/50/);
+  const selectedCount = await page.locator("#adMsgRecipient").evaluate((select) =>
+    Array.from(select.selectedOptions).filter((option) => option.value).length
+  );
+  expect(selectedCount).toBe(50);
 });
 
 test("admin composer lists all other users and cancel hides the form", async ({ page }) => {

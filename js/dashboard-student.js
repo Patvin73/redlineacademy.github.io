@@ -47,13 +47,14 @@
       lmsSelectMessage:      "Pilih pesan untuk dibaca",
       lmsComposeTitle:       "Pesan Baru",
       lmsMsgRecipient:       "Kirim ke",
-      lmsMsgSelectRecipient: "Pilih trainer",
+      lmsMsgSelectRecipient: "Pilih penerima (maks. 50)",
       lmsMsgSubject:         "Subjek",
       lmsMsgBody:            "Isi pesan",
       lmsMsgBodyPlaceholder: "Tulis isi pesan...",
       lmsMsgSent:            "Pesan terkirim.",
-      lmsMsgNoRecipients:    "Tidak ada trainer aktif tersedia.",
-      lmsMsgRequired:        "Trainer, subjek, dan isi pesan wajib diisi.",
+      lmsMsgNoRecipients:    "Tidak ada penerima tersedia.",
+      lmsMsgRequired:        "Pilih minimal satu penerima, subjek, dan isi pesan wajib diisi.",
+      lmsMsgTooManyRecipients:"Maksimal 50 penerima sekali kirim.",
       lmsFileRequired:       "Pilih file sebelum mengumpulkan tugas.",
       lmsMsgFailed:          "Pesan gagal dikirim.",
       lmsCancel:             "Batal",
@@ -120,13 +121,14 @@
       lmsSelectMessage:      "Select a message to view",
       lmsComposeTitle:       "New Message",
       lmsMsgRecipient:       "Send to",
-      lmsMsgSelectRecipient: "Select trainer",
+      lmsMsgSelectRecipient: "Select recipients (max 50)",
       lmsMsgSubject:         "Subject",
       lmsMsgBody:            "Message",
       lmsMsgBodyPlaceholder: "Write your message...",
       lmsMsgSent:            "Message sent.",
-      lmsMsgNoRecipients:    "No active trainer available.",
-      lmsMsgRequired:        "Trainer, subject, and message are required.",
+      lmsMsgNoRecipients:    "No recipients available.",
+      lmsMsgRequired:        "Select at least one recipient, subject, and message.",
+      lmsMsgTooManyRecipients:"You can select up to 50 recipients at once.",
       lmsFileRequired:       "Please select a file before submitting.",
       lmsMsgFailed:          "Message failed to send.",
       lmsCancel:             "Cancel",
@@ -1659,11 +1661,29 @@
     el.style.display = visible ? "" : "none";
   }
 
+  const MAX_MESSAGE_RECIPIENTS = 50;
+
   function setStudentComposerStatus(text, isError = false) {
     const msg = $("studentMsgComposeMsg");
     if (!msg) return;
     msg.textContent = text || "";
     msg.className = `sd-profile-form__msg${isError ? " error" : text ? " success" : ""}`;
+  }
+
+  function getSelectedStudentMessageRecipients(recipient) {
+    return Array.from(recipient?.selectedOptions || [])
+      .map((option) => option.value)
+      .filter(Boolean);
+  }
+
+  function enforceStudentMessageRecipientLimit() {
+    const recipient = $("studentMsgRecipient");
+    const selectedOptions = Array.from(recipient?.selectedOptions || []).filter((option) => option.value);
+    if (selectedOptions.length <= MAX_MESSAGE_RECIPIENTS) return;
+    selectedOptions.slice(MAX_MESSAGE_RECIPIENTS).forEach((option) => {
+      option.selected = false;
+    });
+    setStudentComposerStatus(dashboardText("lmsMsgTooManyRecipients", "You can select up to 50 recipients at once."), true);
   }
 
   function closeStudentMessageComposer() {
@@ -1688,54 +1708,29 @@
     recipient.innerHTML = "";
     const placeholder = document.createElement("option");
     placeholder.value = "";
-    placeholder.textContent = dashboardText("lmsMsgSelectRecipient", "Select trainer");
+    placeholder.disabled = true;
+    placeholder.textContent = dashboardText("lmsMsgSelectRecipient", "Select recipients (max 50)");
     recipient.appendChild(placeholder);
 
-    const { data: enrollments, error: enrollErr } = await window.lmsSupabase
-      .from("enrollments")
-      .select("course_id")
-      .eq("student_id", currentStudentProfile.id)
-      .eq("status", "active");
-    if (enrollErr) throw enrollErr;
-
-    const courseIds = Array.from(new Set((enrollments || []).map((row) => row.course_id).filter(Boolean)));
-    if (courseIds.length === 0) {
-      setStudentComposerStatus(dashboardText("lmsMsgNoRecipients", "No active trainer available."), true);
-      return [];
-    }
-
-    const { data: courses, error: courseErr } = await window.lmsSupabase
-      .from("courses")
-      .select("id, title, trainer_id")
-      .in("id", courseIds);
-    if (courseErr) throw courseErr;
-
-    const trainerIds = Array.from(new Set((courses || []).map((course) => course.trainer_id).filter(Boolean)));
-    if (trainerIds.length === 0) {
-      setStudentComposerStatus(dashboardText("lmsMsgNoRecipients", "No active trainer available."), true);
-      return [];
-    }
-
-    const { data: trainers, error: trainerErr } = await window.lmsSupabase
+    const { data: recipients, error } = await window.lmsSupabase
       .from("profiles")
       .select("id, full_name, email, role")
-      .in("id", trainerIds)
-      .eq("role", "trainer")
       .order("full_name", { ascending: true });
-    if (trainerErr) throw trainerErr;
+    if (error) throw error;
 
-    (trainers || []).forEach((trainer) => {
+    const availableRecipients = (recipients || []).filter((profile) => profile.id && profile.id !== currentStudentProfile.id);
+    availableRecipients.forEach((trainer) => {
       const option = document.createElement("option");
       option.value = trainer.id;
       option.textContent = trainer.full_name || trainer.email || trainer.id;
       recipient.appendChild(option);
     });
 
-    recipient.disabled = !trainers || trainers.length === 0;
-    if (!trainers || trainers.length === 0) {
-      setStudentComposerStatus(dashboardText("lmsMsgNoRecipients", "No active trainer available."), true);
+    recipient.disabled = availableRecipients.length === 0;
+    if (availableRecipients.length === 0) {
+      setStudentComposerStatus(dashboardText("lmsMsgNoRecipients", "No recipients available."), true);
     }
-    return trainers || [];
+    return availableRecipients;
   }
 
   async function sendStudentComposedMessage(e) {
@@ -1746,35 +1741,43 @@
     const subject = $("studentMsgSubject");
     const body = $("studentMsgBody");
     const sendBtn = $("studentSendMsgBtn");
-    const recipientId = recipient?.value || "";
+    if (sendBtn?.disabled) return;
+    const recipientIds = getSelectedStudentMessageRecipients(recipient);
     const messageSubject = subject?.value.trim() || "";
     const messageBody = body?.value.trim() || "";
 
-    if (!recipientId || !messageSubject || !messageBody) {
+    if (recipientIds.length === 0 || !messageSubject || !messageBody) {
       setStudentComposerStatus(
         dashboardText("lmsMsgRequired", "Trainer, subject, and message are required."),
         true
       );
       return;
     }
+    if (recipientIds.length > MAX_MESSAGE_RECIPIENTS) {
+      setStudentComposerStatus(dashboardText("lmsMsgTooManyRecipients", "You can select up to 50 recipients at once."), true);
+      return;
+    }
 
     try {
       if (sendBtn) sendBtn.disabled = true;
-      const messageId = createClientId();
+      const messageRows = recipientIds.map((recipientId) => ({
+        id: createClientId(),
+        sender_id: currentStudentProfile.id,
+        recipient_id: recipientId,
+        subject: messageSubject,
+        body: messageBody
+      }));
       const { error } = await window.lmsSupabase
         .from("messages")
-        .insert({
-          id: messageId,
-          sender_id: currentStudentProfile.id,
-          recipient_id: recipientId,
-          subject: messageSubject,
-          body: messageBody
-        });
+        .insert(messageRows);
       if (error) throw error;
-      await sendMessageEmailNotification(messageId);
+      await Promise.all(messageRows.map((message) => sendMessageEmailNotification(message.id)));
 
       if (subject) subject.value = "";
       if (body) body.value = "";
+      Array.from(recipient?.options || []).forEach((option) => {
+        option.selected = false;
+      });
       setStudentComposerStatus(dashboardText("lmsMsgSent", "Message sent."));
       // Tutup composer setelah 1.2 detik agar user sempat baca konfirmasi
       setTimeout(() => closeStudentMessageComposer(), 1200);
@@ -1809,6 +1812,7 @@
       const sendBtn = $("studentSendMsgBtn");
       sendBtn && sendBtn.addEventListener("click", sendStudentComposedMessage);
       cancelBtn && cancelBtn.addEventListener("click", closeStudentMessageComposer);
+      recipient && recipient.addEventListener("change", enforceStudentMessageRecipientLimit);
       studentMessageComposerBound = true;
     }
 

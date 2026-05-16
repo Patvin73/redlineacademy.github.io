@@ -170,12 +170,13 @@
       adMsgToStudent:        "Kirim ke student ini",
       adComposeTitle:        "Pesan Baru",
       adMsgRecipient:        "Kirim ke",
-      adMsgSelectRecipient:  "Pilih penerima",
+      adMsgSelectRecipient:  "Pilih penerima (maks. 50)",
       adMsgBody:             "Isi pesan",
       adMsgBodyPlaceholder:  "Tulis isi pesan...",
       adMsgSent:             "Pesan terkirim.",
       adMsgNoRecipients:     "Tidak ada penerima tersedia.",
-      adMsgRequired:         "Penerima dan isi pesan wajib diisi.",
+      adMsgRequired:         "Pilih minimal satu penerima dan isi pesan wajib diisi.",
+      adMsgTooManyRecipients:"Maksimal 50 penerima sekali kirim.",
     },
     en: {
       adNavDashboard:        "Dashboard",
@@ -334,12 +335,13 @@
       adMsgToStudent:        "Message this student",
       adComposeTitle:        "New Message",
       adMsgRecipient:        "Send to",
-      adMsgSelectRecipient:  "Select recipient",
+      adMsgSelectRecipient:  "Select recipients (max 50)",
       adMsgBody:             "Message",
       adMsgBodyPlaceholder:  "Write your message...",
       adMsgSent:             "Message sent.",
       adMsgNoRecipients:     "No recipients available.",
-      adMsgRequired:         "Recipient and message are required.",
+      adMsgRequired:         "Select at least one recipient and enter a message.",
+      adMsgTooManyRecipients:"You can select up to 50 recipients at once.",
     },
   };
 
@@ -2121,6 +2123,7 @@
   /* ================================================================
      MESSAGES
   ================================================================ */
+  const MAX_MESSAGE_RECIPIENTS = 50;
   let messageComposerBound = false;
 
   function setComposerStatus(text, isError = false) {
@@ -2134,6 +2137,22 @@
     if (!el) return;
     el.hidden = !visible;
     el.style.display = visible ? "" : "none";
+  }
+
+  function getSelectedMessageRecipients(recipient) {
+    return Array.from(recipient?.selectedOptions || [])
+      .map((option) => option.value)
+      .filter(Boolean);
+  }
+
+  function enforceMessageRecipientLimit() {
+    const recipient = $("adMsgRecipient");
+    const selectedOptions = Array.from(recipient?.selectedOptions || []).filter((option) => option.value);
+    if (selectedOptions.length <= MAX_MESSAGE_RECIPIENTS) return;
+    selectedOptions.slice(MAX_MESSAGE_RECIPIENTS).forEach((option) => {
+      option.selected = false;
+    });
+    setComposerStatus(tSafe("adMsgTooManyRecipients", "You can select up to 50 recipients at once."), true);
   }
 
   function closeMessageComposer() {
@@ -2157,37 +2176,16 @@
     recipient.innerHTML = "";
     const placeholder = document.createElement("option");
     placeholder.value = "";
-    placeholder.textContent = tSafe("adMsgSelectRecipient", "Select recipient");
+    placeholder.disabled = true;
+    placeholder.textContent = tSafe("adMsgSelectRecipient", "Select recipients (max 50)");
     recipient.appendChild(placeholder);
 
-    let recipients = [];
-    if (currentRole === "admin") {
-      const { data, error } = await window.lmsSupabase
-        .from("profiles")
-        .select("id, full_name, email, role")
-        .order("full_name", { ascending: true });
-      if (error) throw error;
-      recipients = (data || []).filter((profile) => profile.id && profile.id !== currentProfile.id);
-    } else {
-      const { data: enrollments, error: enrollErr } = await window.lmsSupabase
-        .from("enrollments")
-        .select("student_id, courses!inner(trainer_id)")
-        .eq("courses.trainer_id", currentProfile.id)
-        .eq("status", "active");
-      if (enrollErr) throw enrollErr;
-
-      const studentIds = Array.from(new Set((enrollments || []).map((row) => row.student_id).filter(Boolean)));
-      if (studentIds.length > 0) {
-        const { data, error } = await window.lmsSupabase
-          .from("profiles")
-          .select("id, full_name, email, role")
-          .in("id", studentIds)
-          .eq("role", "student")
-          .order("full_name", { ascending: true });
-        if (error) throw error;
-        recipients = data || [];
-      }
-    }
+    const { data, error } = await window.lmsSupabase
+      .from("profiles")
+      .select("id, full_name, email, role")
+      .order("full_name", { ascending: true });
+    if (error) throw error;
+    const recipients = (data || []).filter((profile) => profile.id && profile.id !== currentProfile.id);
 
     recipients.forEach((profile) => {
       const option = document.createElement("option");
@@ -2206,32 +2204,41 @@
     const recipient = $("adMsgRecipient");
     const body = $("adMsgBody");
     const sendBtn = $("adSendMsgBtn");
-    const recipientId = recipient?.value || "";
+    if (sendBtn?.disabled) return;
+    const recipientIds = getSelectedMessageRecipients(recipient);
     const messageBody = body?.value.trim() || "";
 
-    if (!recipientId || !messageBody) {
+    if (recipientIds.length === 0 || !messageBody) {
       setComposerStatus(tSafe("adMsgRequired", "Recipient and message are required."), true);
+      return;
+    }
+    if (recipientIds.length > MAX_MESSAGE_RECIPIENTS) {
+      setComposerStatus(tSafe("adMsgTooManyRecipients", "You can select up to 50 recipients at once."), true);
       return;
     }
     if (!window.lmsSupabase || !currentProfile?.id) return;
 
     try {
       if (sendBtn) sendBtn.disabled = true;
-      const messageId = createClientId();
+      const messageSubject = ($("adMsgSubject")?.value.trim()) || null;
+      const messageRows = recipientIds.map((recipientId) => ({
+        id: createClientId(),
+        sender_id: currentProfile.id,
+        recipient_id: recipientId,
+        subject: messageSubject,
+        body: messageBody
+      }));
       const { error } = await window.lmsSupabase
         .from("messages")
-        .insert({
-          id: messageId,
-          sender_id: currentProfile.id,
-          recipient_id: recipientId,
-          subject: ($("adMsgSubject")?.value.trim()) || null,
-          body: messageBody
-        });
+        .insert(messageRows);
       if (error) throw error;
-      await sendMessageEmailNotification(messageId);
+      await Promise.all(messageRows.map((message) => sendMessageEmailNotification(message.id)));
       if (body) body.value = "";
       const subjectEl = $("adMsgSubject");
       if (subjectEl) subjectEl.value = "";
+      Array.from(recipient?.options || []).forEach((option) => {
+        option.selected = false;
+      });
       setComposerStatus(tSafe("adMsgSent", "Message sent."));
       loadedSections.delete("messages");
       await loadMessages();
@@ -2263,6 +2270,7 @@
       composeForm.addEventListener("submit", sendComposedMessage);
       sendBtn && sendBtn.addEventListener("click", sendComposedMessage);
       cancelBtn && cancelBtn.addEventListener("click", closeMessageComposer);
+      recipient && recipient.addEventListener("change", enforceMessageRecipientLimit);
       messageComposerBound = true;
     }
 
@@ -2270,7 +2278,7 @@
       await loadMessageRecipients();
       const selectedOption = Array.from(recipient?.options || []).find((option) => option.value === selectedRecipientId);
       if (selectedOption) {
-        recipient.value = selectedRecipientId;
+        selectedOption.selected = true;
       }
     } catch (err) {
       setComposerStatus(err.message || "Recipients failed to load.", true);
