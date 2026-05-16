@@ -938,6 +938,7 @@ test("trainer sees unread messages badge", async ({ page }) => {
   await expect(page.locator("#section-messages")).toHaveClass(/active/);
 
   await expect(page.locator("#adMsgBadge")).toHaveText("1");
+  await expect(page.locator("#adNotifDot")).toBeVisible();
   await expect(page.locator(".ad-inbox-item.unread")).toHaveCount(1);
 });
 
@@ -1009,6 +1010,75 @@ test("trainer can compose a system message to multiple recipients across roles",
       { name: "send-message-email", body: { message_id: message.id } }
     ]));
   });
+
+  await expect(page.locator(".ad-inbox-item", { hasText: "Module 2 review" })).toHaveCount(1);
+  await page.locator(".ad-inbox-item", { hasText: "Module 2 review" }).click();
+  await expect(page.locator("#adMsgDetail")).toContainText("Sent to 2 recipients");
+  await expect(page.locator("#adMsgDetail")).toContainText("Alpha Student");
+  await expect(page.locator("#adMsgDetail")).toContainText("E2E Admin");
+  await expect(page.locator("#adMsgDetail")).toContainText("Please review Module 2.");
+});
+
+test("sent message history can edit, delete one recipient, and archive", async ({ page }) => {
+  await installSupabaseStub(page, "trainer", {
+    messages: [
+      {
+        id: "sent-batch-1",
+        sender_id: "e2e-trainer",
+        recipient_id: "e2e-student-1",
+        subject: "Batch note",
+        body: "Original body",
+        is_read: true,
+        created_at: "2026-03-10T08:00:00.000Z",
+        profiles: { full_name: "E2E Trainer", avatar_url: null }
+      },
+      {
+        id: "sent-batch-2",
+        sender_id: "e2e-trainer",
+        recipient_id: "e2e-admin",
+        subject: "Batch note",
+        body: "Original body",
+        is_read: true,
+        created_at: "2026-03-10T08:00:00.000Z",
+        profiles: { full_name: "E2E Trainer", avatar_url: null }
+      }
+    ]
+  });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#sidebarRoleBadge")).toHaveText("Trainer");
+
+  await page.locator(".ad-nav__item[data-section='messages']").click();
+  await expect(page.locator(".ad-inbox-item", { hasText: "Batch note" })).toHaveCount(1);
+  await page.locator(".ad-inbox-item", { hasText: "Batch note" }).click();
+  await expect(page.locator("#adMsgDetail")).toContainText("Sent to 2 recipients");
+
+  await page.locator("[data-ad-msg-edit]").click();
+  await page.fill("#adMsgEditSubject", "Updated batch note");
+  await page.fill("#adMsgEditBody", "Updated body");
+  await page.locator(".ad-message-edit-form button[type='submit']").click();
+  await expect(page.locator(".ad-inbox-item", { hasText: "Updated batch note" })).toHaveCount(1);
+  const editedMessages = await page.evaluate(() => window.__e2eGetTableData().messages);
+  expect(editedMessages.filter((msg) => msg.subject === "Updated batch note")).toHaveLength(2);
+
+  await page.locator(".ad-inbox-item", { hasText: "Updated batch note" }).click();
+  await page.locator("[data-ad-msg-delete-one='sent-batch-2']").click();
+  const afterDeleteOne = await page.evaluate(() => window.__e2eGetTableData().messages);
+  expect(afterDeleteOne.some((msg) => msg.id === "sent-batch-2")).toBe(false);
+  expect(afterDeleteOne.some((msg) => msg.id === "sent-batch-1")).toBe(true);
+
+  await page.locator(".ad-inbox-item", { hasText: "Updated batch note" }).click();
+  await page.locator("[data-ad-msg-archive]").click();
+  await expect(page.locator(".ad-inbox-item", { hasText: "Updated batch note" })).toHaveCount(0);
+
+  await page.locator("[data-message-view='archive']").click();
+  await expect(page.locator(".ad-inbox-item", { hasText: "Updated batch note" })).toHaveCount(1);
+  await page.locator(".ad-inbox-item", { hasText: "Updated batch note" }).click();
+  await expect(page.locator("#adMsgDetail")).toContainText("Restore");
+  await page.locator("[data-ad-msg-restore]").click();
+  await expect(page.locator(".ad-inbox-item", { hasText: "Updated batch note" })).toHaveCount(0);
+
+  await page.locator("[data-message-view='history']").click();
+  await expect(page.locator(".ad-inbox-item", { hasText: "Updated batch note" })).toHaveCount(1);
 });
 
 test("message composer caps selected recipients at 50", async ({ page }) => {
@@ -1072,6 +1142,7 @@ test("trainer marks inbox message as read when opened", async ({ page }) => {
 
   await page.locator(".ad-inbox-item", { hasText: "Need help with Module 2." }).click();
   await expect(page.locator("#adMsgBadge")).toBeHidden();
+  await expect(page.locator("#adNotifDot")).toBeHidden();
   await expect(page.locator(".ad-inbox-item", { hasText: "Need help with Module 2." })).not.toHaveClass(/unread/);
 
   const messages = await page.evaluate(() => window.__e2eGetTableData().messages);
@@ -1090,6 +1161,7 @@ test("trainer sees empty state when no messages", async ({ page }) => {
   await expect(page.locator("#adInboxEmpty")).toBeVisible();
   await expect(page.locator(".ad-inbox-item")).toHaveCount(0);
   await expect(page.locator("#adMsgBadge")).toBeHidden();
+  await expect(page.locator("#adNotifDot")).toBeHidden();
 });
 
 test("trainer can filter grading tabs (submitted/graded/all)", async ({ page }) => {

@@ -749,25 +749,37 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#resourceGrid [data-resource-card='true']", { hasText: "Aged Care Basics" })).toBeHidden();
   });
 
-  test("marks all notifications as read from the student notification panel", async ({ page }) => {
-    // This test covers the notification panel action and verifies the data state changes too.
+  test("marks notifications and messages read from the student indicators", async ({ page }) => {
+    // This test covers the notification panel action and verifies message unread state keeps the bell on until read.
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);
 
     await page.goto("/pages/dashboard-student.html");
     await expect(page.locator("#notifDot")).toBeVisible();
+    await expect(page.locator("#messageBadge")).toHaveText("1");
 
     await page.click("#sdNotifBtn");
     await expect(page.locator(".sd-notif-list-item.unread")).toHaveCount(2);
     await page.click("#markAllRead");
 
-    await expect(page.locator("#notifDot")).toBeHidden();
+    await expect(page.locator("#notifDot")).toBeVisible();
     await expect(page.locator(".sd-notif-list-item.unread")).toHaveCount(0);
 
     const unread = await page.evaluate(() =>
       window.__QA_TABLE_DATA__.notifications.filter((row) => !row.is_read).length
     );
     expect(unread).toBe(0);
+
+    await page.locator(".sd-nav__item[data-section='messages']").click();
+    await page.locator(".sd-inbox-item", { hasText: "Please review module one." }).click();
+    await expect(page.locator("#messageBadge")).toBeHidden();
+    await expect(page.locator("#notifDot")).toBeHidden();
+
+    const messages = await page.evaluate(() => window.__QA_TABLE_DATA__.messages);
+    expect(messages.find((msg) => msg.id === "msg-1")).toEqual(expect.objectContaining({
+      is_read: true,
+      recipient_id: "student-1"
+    }));
   });
 
   test("student composes a message to multiple recipients across roles", async ({ page }) => {

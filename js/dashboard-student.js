@@ -185,10 +185,38 @@
   const loadedStudentSections = new Set(["home"]);
   let fullScheduleCache = [];
   let studentMessageComposerBound = false;
+  let studentUnreadMessages = 0;
+  let studentUnreadNotifications = 0;
   const ASSIGNMENT_SUBMISSIONS_BUCKET = "assignment-submissions";
 
   /* ── DOM refs ───────────────────────────────────────────────────── */
   const $ = (id) => document.getElementById(id);
+
+  function updateStudentAttentionIndicators() {
+    const msgBadge = $("messageBadge");
+    if (msgBadge) {
+      msgBadge.textContent = studentUnreadMessages;
+      msgBadge.style.display = studentUnreadMessages > 0 ? "inline-block" : "none";
+    }
+    const dot = $("notifDot");
+    if (dot) dot.style.display = (studentUnreadMessages + studentUnreadNotifications) > 0 ? "block" : "none";
+  }
+
+  async function refreshStudentMessageIndicators(userId = currentStudentProfile?.id) {
+    if (!userId || !window.lmsSupabase) return;
+    try {
+      const { data, error } = await window.lmsSupabase
+        .from("messages")
+        .select("id")
+        .eq("recipient_id", userId)
+        .eq("is_read", false);
+      if (error) throw error;
+      studentUnreadMessages = (data || []).length;
+    } catch {
+      studentUnreadMessages = 0;
+    }
+    updateStudentAttentionIndicators();
+  }
 
   function safeStorageSegment(value, fallback = "file") {
     return String(value || fallback)
@@ -470,17 +498,17 @@
 
   function renderNotifications(notifications) {
     const list    = $("notifList");
-    const dot     = $("notifDot");
     if (!list) return;
 
     if (!notifications || notifications.length === 0) {
       list.innerHTML = `<li class="sd-notif-empty" data-i18n="lmsNoNotifications">No notifications</li>`;
-      if (dot) dot.style.display = "none";
+      studentUnreadNotifications = 0;
+      updateStudentAttentionIndicators();
       return;
     }
 
-    const unreadCount = notifications.filter((n) => !n.is_read).length;
-    if (dot) dot.style.display = unreadCount > 0 ? "block" : "none";
+    studentUnreadNotifications = notifications.filter((n) => !n.is_read).length;
+    updateStudentAttentionIndicators();
 
     list.innerHTML = notifications
       .slice(0, 10)
@@ -516,9 +544,8 @@
   }
 
   function updateNotifDot() {
-    const unread = document.querySelectorAll(".sd-notif-list-item.unread").length;
-    const dot = $("notifDot");
-    if (dot) dot.style.display = unread > 0 ? "block" : "none";
+    studentUnreadNotifications = document.querySelectorAll(".sd-notif-list-item.unread").length;
+    updateStudentAttentionIndicators();
   }
 
   function getNotifIcon(type) {
@@ -863,6 +890,7 @@
         loadUpcomingSchedule(user.id),
         loadActivityFeed(user.id),
         loadNotifications(user.id),
+        refreshStudentMessageIndicators(user.id),
       ]);
 
       // 5. Setup interactive forms now that profile is loaded
@@ -870,6 +898,7 @@
 
       // 6. Setup Supabase Realtime for notifications
       setupRealtimeNotifications(user.id);
+      setupRealtimeMessages(user.id);
 
     } catch (err) {
       console.error("Dashboard load error:", err);
@@ -1921,9 +1950,12 @@
       if (!msg.is_read && msg.recipient_id === userId) {
         await window.lmsSupabase
           .from("messages")
-          .update({ is_read: true })
+          .update({ is_read: true, read_at: new Date().toISOString() })
           .eq("id", msg.id)
           .catch(() => {});
+        msg.is_read = true;
+        studentUnreadMessages = inbox.querySelectorAll(".sd-inbox-item.unread").length;
+        updateStudentAttentionIndicators();
       }
     };
 
@@ -1936,21 +1968,22 @@
         .limit(20);
 
       if (error) throw error;
-      if (!data || data.length === 0) throw new Error("No messages");
+      if (!data || data.length === 0) {
+        studentUnreadMessages = 0;
+        updateStudentAttentionIndicators();
+        throw new Error("No messages");
+      }
 
       if (inboxEmpty) inboxEmpty.style.display = "none";
       inbox.querySelectorAll(".sd-inbox-item").forEach((el) => el.remove());
 
       const unreadCount = (data || []).filter((m) => !m.is_read && m.recipient_id === userId).length;
-      const msgBadge = $("messageBadge");
-      if (msgBadge) {
-        msgBadge.textContent = unreadCount;
-        msgBadge.style.display = unreadCount > 0 ? "inline-block" : "none";
-      }
+      studentUnreadMessages = unreadCount;
+      updateStudentAttentionIndicators();
 
       data.forEach((msg) => {
         const item = document.createElement("div");
-        item.className = `sd-inbox-item${msg.is_read ? "" : " unread"}`;
+        item.className = `sd-inbox-item${!msg.is_read && msg.recipient_id === userId ? " unread" : ""}`;
         item.innerHTML = `
           <div class="sd-avatar sd-avatar--sm">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -2163,6 +2196,36 @@
         () => { loadNotifications(userId); }
       )
       .subscribe();
+  }
+
+  function setupRealtimeMessages(userId) {
+    if (!window.lmsSupabase) return;
+    const channel = window.lmsSupabase.channel("student-message-channel");
+    const refreshMessages = () => {
+      refreshStudentMessageIndicators(userId);
+      if (currentSection === "messages") loadMessages(userId);
+    };
+    channel.on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+        filter: `recipient_id=eq.${userId}`,
+      },
+      refreshMessages
+    );
+    channel.on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "messages",
+        filter: `recipient_id=eq.${userId}`,
+      },
+      refreshMessages
+    );
+    channel.subscribe?.();
   }
 
   /* ================================================================
