@@ -590,7 +590,7 @@ test.describe("Student Dashboard", () => {
         options: { upsert: true, contentType: "image/png" }
       })
     ]);
-    expect(result.avatarUrl).toBe("https://example.com/avatars/avatars/student-1.png");
+    expect(result.avatarUrl).toContain("https://example.com/avatars/avatars/student-1.png?v=");
   });
 
   test("validates and updates student password from the accordion", async ({ page }) => {

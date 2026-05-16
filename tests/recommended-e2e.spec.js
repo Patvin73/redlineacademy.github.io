@@ -6,8 +6,10 @@ function buildSupabaseStub({ tableData, currentUser }) {
       const tableData = ${JSON.stringify(tableData)};
       const currentUser = ${JSON.stringify(currentUser)};
       const uploadedFiles = [];
+      const shouldFailAvatarProfileUpdate = Boolean(tableData.__failProfileAvatarUpdate);
 
       window.__QA_UPLOADED_FILES__ = uploadedFiles;
+      window.__QA_TABLE_DATA__ = tableData;
 
       const getValue = (obj, path) => {
         if (!obj) return undefined;
@@ -31,6 +33,7 @@ function buildSupabaseStub({ tableData, currentUser }) {
         const baseRows = Array.isArray(tableData[table]) ? tableData[table] : [];
         let rows = baseRows.slice();
         let limitValue = null;
+        let queryError = null;
 
         const api = {
           select: (expression = "") => {
@@ -101,6 +104,15 @@ function buildSupabaseStub({ tableData, currentUser }) {
             return api;
           },
           update: (payload) => {
+            if (
+              table === "profiles" &&
+              payload &&
+              Object.prototype.hasOwnProperty.call(payload, "avatar_url") &&
+              shouldFailAvatarProfileUpdate
+            ) {
+              queryError = { message: "Avatar profile update failed" };
+              return api;
+            }
             rows.forEach((row) => Object.assign(row, payload));
             return api;
           },
@@ -115,9 +127,9 @@ function buildSupabaseStub({ tableData, currentUser }) {
 
         api.then = (resolve) => {
           const data = limitValue ? rows.slice(0, limitValue) : rows;
-          return resolve(makeResponse(data));
+          return resolve(queryError ? { data: null, error: queryError, count: 0 } : makeResponse(data));
         };
-        api.catch = (reject) => Promise.resolve(makeResponse(rows)).catch(reject);
+        api.catch = (reject) => Promise.resolve(queryError ? { data: null, error: queryError, count: 0 } : makeResponse(rows)).catch(reject);
         return api;
       };
 
@@ -433,6 +445,52 @@ test.describe("Student and marketer flows", {
 
     await page.locator("#logoutBtn").click();
     await page.waitForURL("**/pages/login.html");
+  });
+
+  test("student avatar upload persists and keeps the crop fixed", async ({ page }) => {
+    const stub = makeStudentStub("student");
+    await installSupabaseStub(page, stub);
+
+    await page.goto("/pages/dashboard-student.html");
+    await page.locator(".sd-nav__item[data-section='profile']").click();
+    await page.locator("#avatarInput").setInputFiles({
+      name: "avatar.png",
+      mimeType: "image/png",
+      buffer: Buffer.from("avatar-image")
+    });
+
+    await expect(page.locator("#avatarUploadStatus")).toContainText("Photo updated");
+    const profile = await page.evaluate(() => (
+      window.__QA_TABLE_DATA__.profiles.find((item) => item.id === "student-1")
+    ));
+    expect(profile.avatar_url).toContain("https://example.com/avatars/avatars/student-1.png?v=");
+
+    const avatarBox = await page.locator("#profileAvatar").boundingBox();
+    expect(Math.round(avatarBox.width)).toBe(80);
+    expect(Math.round(avatarBox.height)).toBe(80);
+    await expect(page.locator("#profileAvatar img")).toHaveCSS("object-fit", "cover");
+    await expect(page.locator("#profileAvatar img")).toHaveCSS("object-position", "50% 50%");
+  });
+
+  test("student avatar upload reports profile persistence failure", async ({ page }) => {
+    const stub = makeStudentStub("student");
+    stub.tableData.__failProfileAvatarUpdate = true;
+    await installSupabaseStub(page, stub);
+
+    await page.goto("/pages/dashboard-student.html");
+    await page.locator(".sd-nav__item[data-section='profile']").click();
+    await page.locator("#avatarInput").setInputFiles({
+      name: "avatar.png",
+      mimeType: "image/png",
+      buffer: Buffer.from("avatar-image")
+    });
+
+    await expect(page.locator("#avatarUploadStatus")).toContainText("Upload failed");
+    await expect(page.locator("#profileAvatar img")).toHaveCount(0);
+    const profile = await page.evaluate(() => (
+      window.__QA_TABLE_DATA__.profiles.find((item) => item.id === "student-1")
+    ));
+    expect(profile.avatar_url).toBeUndefined();
   });
 
   test("student home renders progress and lazy-loads courses on section open", async ({ page }) => {

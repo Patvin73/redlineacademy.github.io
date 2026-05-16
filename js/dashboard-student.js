@@ -587,6 +587,8 @@
     fileInput.addEventListener("change", async () => {
       const file = fileInput.files[0];
       if (!file) return;
+      const previousAvatars = Array.from(document.querySelectorAll(".sd-avatar"))
+        .map((el) => [el, el.innerHTML]);
 
       // Get or create status element
       const statusEl = $("avatarUploadStatus") || (() => {
@@ -605,21 +607,14 @@
       if (uploadBtn) uploadBtn.disabled = true;
       setStatus("Uploading...", "var(--sd-text-muted)");
 
-      // Preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const avatarEls = document.querySelectorAll(".sd-avatar");
-        avatarEls.forEach((el) => {
-          el.innerHTML = `<img src="${e.target.result}" alt="Avatar" />`;
-        });
-      };
-      reader.readAsDataURL(file);
-
       // Upload to Supabase Storage
       try {
         if (!window.lmsSupabase || !currentStudentProfile) {
           throw new Error("Supabase Storage is not available.");
         }
+
+        const previewSrc = await readFileAsDataUrl(file);
+        renderStudentAvatar(previewSrc, currentStudentProfile.full_name || "Avatar");
 
         const ext  = file.name.split(".").pop();
         const path = `avatars/${currentStudentProfile.id}.${ext}`;
@@ -631,16 +626,22 @@
           const { data: urlData } = window.lmsSupabase.storage
             .from("avatars")
             .getPublicUrl(path);
+          const avatarUrl = withAvatarCacheBust(urlData.publicUrl);
 
-          await window.lmsSupabase
+          const { error: profileErr } = await window.lmsSupabase
             .from("profiles")
-            .update({ avatar_url: urlData.publicUrl })
+            .update({ avatar_url: avatarUrl })
             .eq("id", currentStudentProfile.id);
+          if (profileErr) throw profileErr;
+
+          currentStudentProfile = { ...currentStudentProfile, avatar_url: avatarUrl };
+          renderStudentAvatar(avatarUrl, currentStudentProfile.full_name || "Avatar");
           setStatus("✓ Photo updated!", "var(--sd-green)");
         } else {
           throw error;
         }
       } catch (err) {
+        previousAvatars.forEach(([el, html]) => { el.innerHTML = html; });
         setStatus("Upload failed: " + (err.message || "Unknown error"), "var(--sd-red)");
         console.error("Avatar upload error:", err);
       } finally {
@@ -905,9 +906,7 @@
 
     // Avatar
     if (profile.avatar_url) {
-      document.querySelectorAll(".sd-avatar").forEach((el) => {
-        el.innerHTML = `<img src="${escHtml(profile.avatar_url)}" alt="${escHtml(name)}" />`;
-      });
+      renderStudentAvatar(profile.avatar_url, name);
     }
 
     // Pre-fill form fields
@@ -2105,6 +2104,27 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
+  }
+
+  function withAvatarCacheBust(url) {
+    if (!url) return "";
+    const separator = String(url).includes("?") ? "&" : "?";
+    return `${url}${separator}v=${Date.now()}`;
+  }
+
+  function renderStudentAvatar(src, name = "Avatar") {
+    if (!src) return;
+    const img = `<img src="${escHtml(src)}" alt="${escHtml(name)}" loading="lazy" decoding="async" />`;
+    document.querySelectorAll(".sd-avatar").forEach((el) => { el.innerHTML = img; });
+  }
+
+  function readFileAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error || new Error("Could not preview image."));
+      reader.readAsDataURL(file);
+    });
   }
 
   function creatorIdForCourse(course) {

@@ -334,6 +334,7 @@ async function installSupabaseStub(page, role, options = {}) {
       const uploadedFiles = [];
       const functionInvocations = [];
       const shouldFailOverviewTrainerId = ${JSON.stringify(Boolean(options.missingOverviewTrainerId))};
+      const shouldFailAvatarProfileUpdate = ${JSON.stringify(Boolean(options.avatarProfileUpdateError))};
       const shouldLoadStoredMessages = ${JSON.stringify(!hasMessageFixture)};
       const storedMessages = window.localStorage.getItem("__e2eMessages");
       if (shouldLoadStoredMessages && storedMessages) {
@@ -428,6 +429,15 @@ async function installSupabaseStub(page, role, options = {}) {
             return api;
           },
           update: (payload) => {
+            if (
+              table === "profiles" &&
+              payload &&
+              Object.prototype.hasOwnProperty.call(payload, "avatar_url") &&
+              shouldFailAvatarProfileUpdate
+            ) {
+              queryError = { message: "Avatar profile update failed" };
+              return api;
+            }
             pendingUpdate = payload;
             return api;
           },
@@ -532,6 +542,53 @@ async function installSupabaseStub(page, role, options = {}) {
 test.describe("Admin and trainer dashboard", {
   tag: ["@lms", "@rbac"]
 }, () => {
+for (const role of ["admin", "trainer"]) {
+test(`${role} profile avatar upload persists and keeps the crop fixed`, async ({ page }) => {
+  await installSupabaseStub(page, role);
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#sidebarName")).toContainText(role === "admin" ? "E2E Admin" : "E2E Trainer");
+
+  await page.locator(".ad-nav__item[data-section='profile']").click();
+  await expect(page.locator("#section-profile")).toHaveClass(/active/);
+  await page.locator("#adAvatarInput").setInputFiles({
+    name: "avatar.png",
+    mimeType: "image/png",
+    buffer: Buffer.from("avatar-image")
+  });
+
+  await expect(page.locator("#adAvatarMsg")).toContainText("Photo updated");
+  const profile = await page.evaluate((profileRole) => (
+    window.__e2eGetTableData().profiles.find((item) => item.role === profileRole)
+  ), role);
+  expect(profile.avatar_url).toContain(`https://storage.example.com/avatars/avatars/${profile.id}.png?v=`);
+
+  const avatarBox = await page.locator("#adProfileAvatar").boundingBox();
+  expect(Math.round(avatarBox.width)).toBe(80);
+  expect(Math.round(avatarBox.height)).toBe(80);
+  await expect(page.locator("#adProfileAvatar img")).toHaveCSS("object-fit", "cover");
+  await expect(page.locator("#adProfileAvatar img")).toHaveCSS("object-position", "50% 50%");
+});
+}
+
+test("admin avatar upload reports profile persistence failure", async ({ page }) => {
+  await installSupabaseStub(page, "admin", { avatarProfileUpdateError: true });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+  await page.locator(".ad-nav__item[data-section='profile']").click();
+
+  await page.locator("#adAvatarInput").setInputFiles({
+    name: "avatar.png",
+    mimeType: "image/png",
+    buffer: Buffer.from("avatar-image")
+  });
+
+  await expect(page.locator("#adAvatarMsg")).toContainText("Upload failed");
+  await expect(page.locator("#adProfileAvatar img")).toHaveCount(0);
+  const profile = await page.evaluate(() => (
+    window.__e2eGetTableData().profiles.find((item) => item.id === "e2e-admin")
+  ));
+  expect(profile.avatar_url).toBeUndefined();
+});
+
 test("dashboard admin renders core sections", { tag: "@critical" }, async ({ page }) => {
   await installSupabaseStub(page, "admin");
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });

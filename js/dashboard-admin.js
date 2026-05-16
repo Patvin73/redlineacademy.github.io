@@ -386,6 +386,27 @@
       .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
 
+  function withAvatarCacheBust(url) {
+    if (!url) return "";
+    const separator = String(url).includes("?") ? "&" : "?";
+    return `${url}${separator}v=${Date.now()}`;
+  }
+
+  function renderAdminAvatar(src, name = "Avatar") {
+    if (!src) return;
+    const img = `<img src="${escHtml(src)}" alt="${escHtml(name)}" loading="lazy" decoding="async" />`;
+    document.querySelectorAll(".ad-avatar").forEach((el) => { el.innerHTML = img; });
+  }
+
+  function readFileAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error || new Error("Could not preview image."));
+      reader.readAsDataURL(file);
+    });
+  }
+
   function tSafe(key, fallback) {
     return typeof t === "function" ? t(key) : fallback;
   }
@@ -708,9 +729,7 @@
 
     // Avatar
     if (profile.avatar_url) {
-      document.querySelectorAll(".ad-avatar").forEach((el) => {
-        el.innerHTML = `<img src="${escHtml(profile.avatar_url)}" alt="${escHtml(name)}" />`;
-      });
+      renderAdminAvatar(profile.avatar_url, name);
     }
   }
 
@@ -2887,25 +2906,21 @@
     fileInput.addEventListener("change", async () => {
       const file = fileInput.files[0];
       if (!file) return;
-
-      // Local preview immediately
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = `<img src="${e.target.result}" alt="Avatar" />`;
-        document.querySelectorAll(".ad-avatar").forEach((el) => { el.innerHTML = img; });
-        const profileAvatar = $("adProfileAvatar");
-        if (profileAvatar) profileAvatar.innerHTML = img;
-      };
-      reader.readAsDataURL(file);
+      const previousAvatars = Array.from(document.querySelectorAll(".ad-avatar"))
+        .map((el) => [el, el.innerHTML]);
 
       if (!window.lmsSupabase || !currentProfile) {
         if (statusEl) { statusEl.textContent = "Storage not available."; statusEl.style.color = "var(--sd-red)"; }
         setTimeout(() => { if (statusEl) statusEl.textContent = ""; }, 3000);
         return;
       }
+      uploadBtn.disabled = true;
       if (statusEl) { statusEl.textContent = "Uploading..."; statusEl.style.color = "var(--sd-text-muted)"; }
 
       try {
+        const previewSrc = await readFileAsDataUrl(file);
+        renderAdminAvatar(previewSrc, currentProfile.full_name || "Avatar");
+
         const ext = file.name.split(".").pop().toLowerCase();
         const path = `avatars/${currentProfile.id}.${ext}`;
         const { error } = await window.lmsSupabase.storage
@@ -2914,13 +2929,19 @@
         if (error) throw error;
 
         const { data: urlData } = window.lmsSupabase.storage.from("avatars").getPublicUrl(path);
-        await window.lmsSupabase.from("profiles")
-          .update({ avatar_url: urlData.publicUrl }).eq("id", currentProfile.id);
+        const avatarUrl = withAvatarCacheBust(urlData.publicUrl);
+        const { error: profileErr } = await window.lmsSupabase.from("profiles")
+          .update({ avatar_url: avatarUrl }).eq("id", currentProfile.id);
+        if (profileErr) throw profileErr;
 
-        currentProfile.avatar_url = urlData.publicUrl;
+        currentProfile = { ...currentProfile, avatar_url: avatarUrl };
+        renderAdminAvatar(avatarUrl, currentProfile.full_name || "Avatar");
         if (statusEl) { statusEl.textContent = "✓ Photo updated."; statusEl.style.color = "var(--sd-green)"; }
       } catch (err) {
+        previousAvatars.forEach(([el, html]) => { el.innerHTML = html; });
         if (statusEl) { statusEl.textContent = "Upload failed: " + err.message; statusEl.style.color = "var(--sd-red)"; }
+      } finally {
+        uploadBtn.disabled = false;
       }
       setTimeout(() => { if (statusEl) statusEl.textContent = ""; }, 4000);
     });
