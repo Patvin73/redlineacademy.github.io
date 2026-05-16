@@ -895,15 +895,27 @@
                 <div class="sd-field">
                   <label
                     class="sd-label"
-                    for="studentMsgRecipient"
+                    for="studentMsgRecipientToggle"
                     data-i18n="lmsMsgRecipient"
                     >Send to</label
                   >
-                  <select class="sd-input sd-select" id="studentMsgRecipient" required multiple size="8">
-                    <option value="" data-i18n="lmsMsgSelectRecipient" disabled>
-                      Select recipients
-                    </option>
-                  </select>
+                  <div class="sd-recipient-dropdown" id="studentMsgRecipientDropdown">
+                    <button
+                      class="sd-input sd-recipient-dropdown__toggle"
+                      type="button"
+                      id="studentMsgRecipientToggle"
+                      aria-haspopup="true"
+                      aria-expanded="false"
+                    >
+                      <span id="studentMsgRecipientSummary" data-i18n="lmsMsgSelectRecipient">
+                        Select recipients
+                      </span>
+                    </button>
+                    <div class="sd-recipient-dropdown__panel" id="studentMsgRecipientPanel" hidden>
+                      <div class="sd-recipient-dropdown__list" id="studentMsgRecipientList"></div>
+                    </div>
+                    <select id="studentMsgRecipient" multiple hidden></select>
+                  </div>
                 </div>
                 <div class="sd-field">
                   <label

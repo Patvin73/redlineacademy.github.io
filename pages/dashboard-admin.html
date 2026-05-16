@@ -1700,10 +1700,22 @@
               <form class="ad-message-view__compose-panel" id="adMsgComposeForm" hidden>
                 <h3 data-i18n="adComposeTitle">New Message</h3>
                 <div class="ad-field">
-                  <label class="ad-label" for="adMsgRecipient" data-i18n="adMsgRecipient">Send to</label>
-                  <select class="ad-input ad-select" id="adMsgRecipient" required multiple size="8">
-                    <option value="" data-i18n="adMsgSelectRecipient" disabled>Select recipients</option>
-                  </select>
+                  <label class="ad-label" for="adMsgRecipientToggle" data-i18n="adMsgRecipient">Send to</label>
+                  <div class="ad-recipient-dropdown" id="adMsgRecipientDropdown">
+                    <button
+                      class="ad-input ad-recipient-dropdown__toggle"
+                      type="button"
+                      id="adMsgRecipientToggle"
+                      aria-haspopup="true"
+                      aria-expanded="false"
+                    >
+                      <span id="adMsgRecipientSummary" data-i18n="adMsgSelectRecipient">Select recipients</span>
+                    </button>
+                    <div class="ad-recipient-dropdown__panel" id="adMsgRecipientPanel" hidden>
+                      <div class="ad-recipient-dropdown__list" id="adMsgRecipientList"></div>
+                    </div>
+                    <select id="adMsgRecipient" multiple hidden></select>
+                  </div>
                 </div>
                 <div class="ad-field">
                   <label class="ad-label" for="adMsgSubject">Subject</label>

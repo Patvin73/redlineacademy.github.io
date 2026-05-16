@@ -841,7 +841,12 @@ test("student message action opens compose with selected recipient", async ({ pa
   await expect(page.locator("#section-messages")).toHaveClass(/active/);
   await expect(page.locator("#adMsgComposeForm")).toBeVisible();
   await expect(page.locator("#adMsgDetail")).toBeHidden();
-  await expect(page.locator("#adMsgRecipient")).toHaveValue("e2e-student-1");
+  await expect(page.locator("#adMsgRecipient")).toHaveValues(["e2e-student-1"]);
+  await expect(page.locator("#adMsgRecipientSummary")).toHaveText("Alpha Student");
+  await page.locator("#adMsgRecipientToggle").click();
+  await expect(
+    page.locator("#adMsgRecipientPanel label", { hasText: "Alpha Student" }).locator("input")
+  ).toBeChecked();
 });
 
 test("trainer can open grading submission and save grade", async ({ page }) => {
@@ -968,7 +973,10 @@ test("trainer can compose a system message to multiple recipients across roles",
   expect(recipients).toContain("Bravo Student");
   expect(recipients).not.toContain("E2E Trainer");
 
-  await page.selectOption("#adMsgRecipient", ["e2e-student-1", "e2e-admin"]);
+  await page.locator("#adMsgRecipientToggle").click();
+  await page.locator("#adMsgRecipientPanel label", { hasText: "Alpha Student" }).locator("input").check();
+  await page.locator("#adMsgRecipientPanel label", { hasText: "E2E Admin" }).locator("input").check();
+  await expect(page.locator("#adMsgRecipientSummary")).toHaveText(/2 (recipients selected|penerima dipilih)/);
   await page.fill("#adMsgSubject", "Module 2 review");
   await page.fill("#adMsgBody", "Please review Module 2.");
   await page.locator("#adSendMsgBtn").click();
@@ -1019,7 +1027,11 @@ test("message composer caps selected recipients at 50", async ({ page }) => {
 
   await page.locator(".ad-nav__item[data-section='messages']").click();
   await page.locator("#adNewMsgBtn").click();
-  await page.selectOption("#adMsgRecipient", extraProfiles.map((profile) => profile.id));
+  await page.locator("#adMsgRecipientToggle").click();
+  const checkboxes = page.locator("#adMsgRecipientPanel input[type='checkbox']");
+  for (let i = 0; i < extraProfiles.length; i += 1) {
+    await checkboxes.nth(i).click();
+  }
 
   await expect(page.locator("#adMsgComposeMsg")).toContainText(/50/);
   const selectedCount = await page.locator("#adMsgRecipient").evaluate((select) =>
@@ -1037,11 +1049,14 @@ test("admin composer lists all other users and cancel hides the form", async ({ 
   await page.locator("#adNewMsgBtn").click();
 
   await expect(page.locator("#adMsgComposeForm")).toBeVisible();
+  await page.locator("#adMsgRecipientToggle").click();
   const recipients = await page.locator("#adMsgRecipient option").allTextContents();
   expect(recipients).toContain("E2E Trainer");
   expect(recipients).toContain("Alpha Student");
   expect(recipients).toContain("Bravo Student");
   expect(recipients).not.toContain("E2E Admin");
+  await expect(page.locator("#adMsgRecipientPanel")).toContainText("E2E Trainer");
+  await expect(page.locator("#adMsgRecipientPanel")).toContainText("Alpha Student");
 
   await page.locator("#adCancelMsgBtn").click();
   await expect(page.locator("#adMsgComposeForm")).toBeHidden();

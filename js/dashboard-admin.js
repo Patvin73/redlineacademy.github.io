@@ -177,6 +177,7 @@
       adMsgNoRecipients:     "Tidak ada penerima tersedia.",
       adMsgRequired:         "Pilih minimal satu penerima dan isi pesan wajib diisi.",
       adMsgTooManyRecipients:"Maksimal 50 penerima sekali kirim.",
+      adMsgSelectedCount:    "{count} penerima dipilih",
     },
     en: {
       adNavDashboard:        "Dashboard",
@@ -342,6 +343,7 @@
       adMsgNoRecipients:     "No recipients available.",
       adMsgRequired:         "Select at least one recipient and enter a message.",
       adMsgTooManyRecipients:"You can select up to 50 recipients at once.",
+      adMsgSelectedCount:    "{count} recipients selected",
     },
   };
 
@@ -2139,10 +2141,45 @@
     el.style.display = visible ? "" : "none";
   }
 
-  function getSelectedMessageRecipients(recipient) {
+  function getSelectedMessageRecipients(recipient = $("adMsgRecipient")) {
     return Array.from(recipient?.selectedOptions || [])
       .map((option) => option.value)
       .filter(Boolean);
+  }
+
+  function setMessageRecipientDropdownOpen(open) {
+    const toggle = $("adMsgRecipientToggle");
+    const panel = $("adMsgRecipientPanel");
+    if (!toggle || !panel) return;
+    panel.hidden = !open;
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+
+  function updateMessageRecipientSummary() {
+    const recipient = $("adMsgRecipient");
+    const summary = $("adMsgRecipientSummary");
+    if (!summary) return;
+
+    const selected = Array.from(recipient?.selectedOptions || []);
+    if (selected.length === 0) {
+      summary.textContent = tSafe("adMsgSelectRecipient", "Select recipients (max 50)");
+    } else if (selected.length === 1) {
+      summary.textContent = selected[0].dataset.label || selected[0].textContent || selected[0].value;
+    } else {
+      summary.textContent = tSafe("adMsgSelectedCount", "{count} recipients selected").replace("{count}", selected.length);
+    }
+  }
+
+  function syncMessageRecipientCheckboxes() {
+    const recipient = $("adMsgRecipient");
+    const list = $("adMsgRecipientList");
+    if (!recipient || !list) return;
+
+    Array.from(list.querySelectorAll("input[type='checkbox'][data-recipient-id]")).forEach((checkbox) => {
+      const option = Array.from(recipient.options).find((item) => item.value === checkbox.dataset.recipientId);
+      checkbox.checked = Boolean(option?.selected);
+    });
+    updateMessageRecipientSummary();
   }
 
   function enforceMessageRecipientLimit() {
@@ -2152,6 +2189,7 @@
     selectedOptions.slice(MAX_MESSAGE_RECIPIENTS).forEach((option) => {
       option.selected = false;
     });
+    syncMessageRecipientCheckboxes();
     setComposerStatus(tSafe("adMsgTooManyRecipients", "You can select up to 50 recipients at once."), true);
   }
 
@@ -2160,6 +2198,7 @@
     const viewEmpty = $("adMsgViewEmpty");
     const viewDetail = $("adMsgDetail");
     setMessagePanelVisible(composeForm, false);
+    setMessageRecipientDropdownOpen(false);
     setComposerStatus("");
     if (viewDetail && viewDetail.innerHTML.trim()) {
       setMessagePanelVisible(viewDetail, true);
@@ -2170,15 +2209,14 @@
 
   async function loadMessageRecipients() {
     const recipient = $("adMsgRecipient");
-    if (!recipient || !window.lmsSupabase || !currentProfile?.id) return [];
+    const toggle = $("adMsgRecipientToggle");
+    const list = $("adMsgRecipientList");
+    if (!recipient || !toggle || !list || !window.lmsSupabase || !currentProfile?.id) return [];
 
-    recipient.disabled = true;
+    toggle.disabled = true;
     recipient.innerHTML = "";
-    const placeholder = document.createElement("option");
-    placeholder.value = "";
-    placeholder.disabled = true;
-    placeholder.textContent = tSafe("adMsgSelectRecipient", "Select recipients (max 50)");
-    recipient.appendChild(placeholder);
+    list.innerHTML = "";
+    updateMessageRecipientSummary();
 
     const { data, error } = await window.lmsSupabase
       .from("profiles")
@@ -2188,14 +2226,33 @@
     const recipients = (data || []).filter((profile) => profile.id && profile.id !== currentProfile.id);
 
     recipients.forEach((profile) => {
+      const labelText = profile.full_name || profile.email || profile.id;
       const option = document.createElement("option");
       option.value = profile.id;
-      option.textContent = profile.full_name || profile.email || profile.id;
+      option.dataset.label = labelText;
+      option.textContent = labelText;
       recipient.appendChild(option);
+
+      const label = document.createElement("label");
+      label.className = "ad-recipient-option";
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.dataset.recipientId = profile.id;
+      checkbox.addEventListener("change", () => {
+        option.selected = checkbox.checked;
+        enforceMessageRecipientLimit();
+        updateMessageRecipientSummary();
+      });
+      const text = document.createElement("span");
+      text.textContent = labelText;
+      label.appendChild(checkbox);
+      label.appendChild(text);
+      list.appendChild(label);
     });
 
-    recipient.disabled = recipients.length === 0;
+    toggle.disabled = recipients.length === 0;
     if (recipients.length === 0) setComposerStatus(tSafe("adMsgNoRecipients", "No recipients available."), true);
+    updateMessageRecipientSummary();
     return recipients;
   }
 
@@ -2239,6 +2296,8 @@
       Array.from(recipient?.options || []).forEach((option) => {
         option.selected = false;
       });
+      syncMessageRecipientCheckboxes();
+      setMessageRecipientDropdownOpen(false);
       setComposerStatus(tSafe("adMsgSent", "Message sent."));
       loadedSections.delete("messages");
       await loadMessages();
@@ -2271,6 +2330,14 @@
       sendBtn && sendBtn.addEventListener("click", sendComposedMessage);
       cancelBtn && cancelBtn.addEventListener("click", closeMessageComposer);
       recipient && recipient.addEventListener("change", enforceMessageRecipientLimit);
+      const toggle = $("adMsgRecipientToggle");
+      const panel = $("adMsgRecipientPanel");
+      toggle && toggle.addEventListener("click", (event) => {
+        event.stopPropagation();
+        setMessageRecipientDropdownOpen(panel?.hidden !== false);
+      });
+      panel && panel.addEventListener("click", (event) => event.stopPropagation());
+      document.addEventListener("click", () => setMessageRecipientDropdownOpen(false));
       messageComposerBound = true;
     }
 
@@ -2280,6 +2347,7 @@
       if (selectedOption) {
         selectedOption.selected = true;
       }
+      syncMessageRecipientCheckboxes();
     } catch (err) {
       setComposerStatus(err.message || "Recipients failed to load.", true);
     }

@@ -55,6 +55,7 @@
       lmsMsgNoRecipients:    "Tidak ada penerima tersedia.",
       lmsMsgRequired:        "Pilih minimal satu penerima, subjek, dan isi pesan wajib diisi.",
       lmsMsgTooManyRecipients:"Maksimal 50 penerima sekali kirim.",
+      lmsMsgSelectedCount:   "{count} penerima dipilih",
       lmsFileRequired:       "Pilih file sebelum mengumpulkan tugas.",
       lmsMsgFailed:          "Pesan gagal dikirim.",
       lmsCancel:             "Batal",
@@ -129,6 +130,7 @@
       lmsMsgNoRecipients:    "No recipients available.",
       lmsMsgRequired:        "Select at least one recipient, subject, and message.",
       lmsMsgTooManyRecipients:"You can select up to 50 recipients at once.",
+      lmsMsgSelectedCount:   "{count} recipients selected",
       lmsFileRequired:       "Please select a file before submitting.",
       lmsMsgFailed:          "Message failed to send.",
       lmsCancel:             "Cancel",
@@ -1670,10 +1672,45 @@
     msg.className = `sd-profile-form__msg${isError ? " error" : text ? " success" : ""}`;
   }
 
-  function getSelectedStudentMessageRecipients(recipient) {
+  function getSelectedStudentMessageRecipients(recipient = $("studentMsgRecipient")) {
     return Array.from(recipient?.selectedOptions || [])
       .map((option) => option.value)
       .filter(Boolean);
+  }
+
+  function setStudentRecipientDropdownOpen(open) {
+    const toggle = $("studentMsgRecipientToggle");
+    const panel = $("studentMsgRecipientPanel");
+    if (!toggle || !panel) return;
+    panel.hidden = !open;
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+
+  function updateStudentRecipientSummary() {
+    const recipient = $("studentMsgRecipient");
+    const summary = $("studentMsgRecipientSummary");
+    if (!summary) return;
+
+    const selected = Array.from(recipient?.selectedOptions || []);
+    if (selected.length === 0) {
+      summary.textContent = dashboardText("lmsMsgSelectRecipient", "Select recipients (max 50)");
+    } else if (selected.length === 1) {
+      summary.textContent = selected[0].dataset.label || selected[0].textContent || selected[0].value;
+    } else {
+      summary.textContent = dashboardText("lmsMsgSelectedCount", "{count} recipients selected").replace("{count}", selected.length);
+    }
+  }
+
+  function syncStudentRecipientCheckboxes() {
+    const recipient = $("studentMsgRecipient");
+    const list = $("studentMsgRecipientList");
+    if (!recipient || !list) return;
+
+    Array.from(list.querySelectorAll("input[type='checkbox'][data-recipient-id]")).forEach((checkbox) => {
+      const option = Array.from(recipient.options).find((item) => item.value === checkbox.dataset.recipientId);
+      checkbox.checked = Boolean(option?.selected);
+    });
+    updateStudentRecipientSummary();
   }
 
   function enforceStudentMessageRecipientLimit() {
@@ -1683,6 +1720,7 @@
     selectedOptions.slice(MAX_MESSAGE_RECIPIENTS).forEach((option) => {
       option.selected = false;
     });
+    syncStudentRecipientCheckboxes();
     setStudentComposerStatus(dashboardText("lmsMsgTooManyRecipients", "You can select up to 50 recipients at once."), true);
   }
 
@@ -1692,6 +1730,7 @@
     const detail = $("messageDetail");
 
     setMessagePanelVisible(composeForm, false);
+    setStudentRecipientDropdownOpen(false);
     setStudentComposerStatus("");
     if (detail && detail.innerHTML.trim()) {
       setMessagePanelVisible(detail, true);
@@ -1702,15 +1741,14 @@
 
   async function loadStudentMessageRecipients() {
     const recipient = $("studentMsgRecipient");
-    if (!recipient || !window.lmsSupabase || !currentStudentProfile?.id) return [];
+    const toggle = $("studentMsgRecipientToggle");
+    const list = $("studentMsgRecipientList");
+    if (!recipient || !toggle || !list || !window.lmsSupabase || !currentStudentProfile?.id) return [];
 
-    recipient.disabled = true;
+    toggle.disabled = true;
     recipient.innerHTML = "";
-    const placeholder = document.createElement("option");
-    placeholder.value = "";
-    placeholder.disabled = true;
-    placeholder.textContent = dashboardText("lmsMsgSelectRecipient", "Select recipients (max 50)");
-    recipient.appendChild(placeholder);
+    list.innerHTML = "";
+    updateStudentRecipientSummary();
 
     const { data: recipients, error } = await window.lmsSupabase
       .from("profiles")
@@ -1720,16 +1758,35 @@
 
     const availableRecipients = (recipients || []).filter((profile) => profile.id && profile.id !== currentStudentProfile.id);
     availableRecipients.forEach((trainer) => {
+      const labelText = trainer.full_name || trainer.email || trainer.id;
       const option = document.createElement("option");
       option.value = trainer.id;
-      option.textContent = trainer.full_name || trainer.email || trainer.id;
+      option.dataset.label = labelText;
+      option.textContent = labelText;
       recipient.appendChild(option);
+
+      const label = document.createElement("label");
+      label.className = "sd-recipient-option";
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.dataset.recipientId = trainer.id;
+      checkbox.addEventListener("change", () => {
+        option.selected = checkbox.checked;
+        enforceStudentMessageRecipientLimit();
+        updateStudentRecipientSummary();
+      });
+      const text = document.createElement("span");
+      text.textContent = labelText;
+      label.appendChild(checkbox);
+      label.appendChild(text);
+      list.appendChild(label);
     });
 
-    recipient.disabled = availableRecipients.length === 0;
+    toggle.disabled = availableRecipients.length === 0;
     if (availableRecipients.length === 0) {
       setStudentComposerStatus(dashboardText("lmsMsgNoRecipients", "No recipients available."), true);
     }
+    updateStudentRecipientSummary();
     return availableRecipients;
   }
 
@@ -1778,6 +1835,8 @@
       Array.from(recipient?.options || []).forEach((option) => {
         option.selected = false;
       });
+      syncStudentRecipientCheckboxes();
+      setStudentRecipientDropdownOpen(false);
       setStudentComposerStatus(dashboardText("lmsMsgSent", "Message sent."));
       // Tutup composer setelah 1.2 detik agar user sempat baca konfirmasi
       setTimeout(() => closeStudentMessageComposer(), 1200);
@@ -1813,6 +1872,14 @@
       sendBtn && sendBtn.addEventListener("click", sendStudentComposedMessage);
       cancelBtn && cancelBtn.addEventListener("click", closeStudentMessageComposer);
       recipient && recipient.addEventListener("change", enforceStudentMessageRecipientLimit);
+      const toggle = $("studentMsgRecipientToggle");
+      const panel = $("studentMsgRecipientPanel");
+      toggle && toggle.addEventListener("click", (event) => {
+        event.stopPropagation();
+        setStudentRecipientDropdownOpen(panel?.hidden !== false);
+      });
+      panel && panel.addEventListener("click", (event) => event.stopPropagation());
+      document.addEventListener("click", () => setStudentRecipientDropdownOpen(false));
       studentMessageComposerBound = true;
     }
 
@@ -1822,8 +1889,9 @@
       setStudentComposerStatus(err.message || "Recipients failed to load.", true);
     }
 
-    if (recipient && !recipient.disabled && recipient.options.length === 2) {
-      recipient.selectedIndex = 1;
+    if (recipient && recipient.options.length === 1) {
+      recipient.selectedIndex = 0;
+      syncStudentRecipientCheckboxes();
     }
     if (subject) subject.focus();
   }

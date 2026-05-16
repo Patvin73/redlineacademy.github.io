@@ -1841,6 +1841,67 @@
 .ad-input--grow   { flex: 1; min-width: 0; }
 .ad-select--xs    { width: 120px; flex-shrink: 0; }
 
+.ad-recipient-dropdown {
+  position: relative;
+}
+
+.ad-recipient-dropdown__toggle {
+  width: 100%;
+  min-height: 42px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ad-recipient-dropdown__toggle::after {
+  content: "v";
+  float: right;
+  color: var(--sd-text-muted);
+  font-size: .75rem;
+  line-height: 1.4;
+}
+
+.ad-recipient-dropdown__panel {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 260px;
+  overflow: auto;
+  border: 1px solid var(--sd-border);
+  border-radius: var(--sd-radius-sm);
+  background: #fff;
+  box-shadow: var(--sd-shadow-md);
+}
+
+.ad-recipient-dropdown__list {
+  display: flex;
+  flex-direction: column;
+  padding: .35rem;
+}
+
+.ad-recipient-option {
+  display: flex;
+  align-items: center;
+  gap: .625rem;
+  padding: .55rem .625rem;
+  border-radius: var(--sd-radius-sm);
+  color: var(--sd-text-primary);
+  font-size: .875rem;
+  cursor: pointer;
+}
+
+.ad-recipient-option:hover {
+  background: var(--sd-bg);
+}
+
+.ad-recipient-option input {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--sd-red);
+}
+
 /* ================================================================
    MODAL
    ================================================================ */

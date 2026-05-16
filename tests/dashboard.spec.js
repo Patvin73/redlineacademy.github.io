@@ -793,7 +793,10 @@ test.describe("Student Dashboard", () => {
     expect(recipients).toContain("Admin One");
     expect(recipients).not.toContain("Alpha Student");
 
-    await page.selectOption("#studentMsgRecipient", ["trainer-1", "admin-1"]);
+    await page.locator("#studentMsgRecipientToggle").click();
+    await page.locator("#studentMsgRecipientPanel label", { hasText: "Trainer One" }).locator("input").check();
+    await page.locator("#studentMsgRecipientPanel label", { hasText: "Admin One" }).locator("input").check();
+    await expect(page.locator("#studentMsgRecipientSummary")).toHaveText(/2 (recipients selected|penerima dipilih)/);
     await page.fill("#studentMsgSubject", "Question about Module 1");
     await page.fill("#studentMsgBody", "Can you review my answer?");
     await page.locator("#studentSendMsgBtn").click();
