@@ -390,6 +390,38 @@
       .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
 
+  function showConfirmModal(message, onConfirm) {
+    const overlay = document.createElement("div");
+    overlay.className = "ad-modal";
+    overlay.innerHTML = `
+       <div class="ad-modal__backdrop"></div>
+       <div class="ad-modal__card" role="dialog" aria-modal="true" style="max-width:380px">
+         <div class="ad-modal__header">
+           <h3>Konfirmasi</h3>
+         </div>
+         <div class="ad-modal__body" style="padding:16px 20px">
+           <p style="margin:0">${escHtml(message)}</p>
+         </div>
+         <div class="ad-modal__actions" style="padding:12px 20px">
+           <button class="ad-btn ad-btn--outline" id="confirmCancel">Batal</button>
+           <button class="ad-btn ad-btn--danger" id="confirmOk">Hapus</button>
+         </div>
+       </div>`;
+    document.body.appendChild(overlay);
+    overlay.hidden = false;
+    overlay.querySelector("#confirmCancel").onclick = () => overlay.remove();
+    overlay.querySelector("#confirmOk").onclick = () => { overlay.remove(); onConfirm(); };
+    overlay.querySelector(".ad-modal__backdrop").onclick = () => overlay.remove();
+  }
+
+  function showToastError(message) {
+    const toastMsg = document.createElement("div");
+    toastMsg.className = "ad-toast-error";
+    toastMsg.textContent = message;
+    document.body.appendChild(toastMsg);
+    setTimeout(() => toastMsg.remove(), 4000);
+  }
+
   function withAvatarCacheBust(url) {
     if (!url) return "";
     const separator = String(url).includes("?") ? "&" : "?";
@@ -1280,6 +1312,10 @@
             <button class="ad-btn ad-btn--outline ad-btn--sm" data-student-id="${p.id}">Message</button>
           </td>`;
         tbody.appendChild(tr);
+        tr.querySelector("[data-student-id]")?.addEventListener("click", (event) => {
+          event.stopPropagation();
+          openStudentMessage(p.id);
+        });
       });
 
       const activeFilter = document.querySelector("#section-students .ad-filter-tab.active")?.dataset.filter || "all";
@@ -1669,12 +1705,14 @@
   }
 
   async function confirmDeleteCourse(courseId, row) {
-    if (!confirm("Delete this course? This cannot be undone.")) return;
-    try {
-      const { error } = await window.lmsSupabase.from("courses").delete().eq("id", courseId);
-      if (error) throw error;
-      row.remove();
-    } catch (err) { alert("Delete failed: " + err.message); }
+    showConfirmModal("Delete this course? This cannot be undone.", async () => {
+      try {
+        const { error } = await window.lmsSupabase.from("courses").delete().eq("id", courseId);
+        if (error) throw error;
+        row.remove();
+      } catch (err) { showToastError("Delete failed: " + err.message); }
+    });
+    return;
   }
 
   function resetCourseBuilderForm() {
@@ -1749,7 +1787,7 @@
       }
       $("courseBuilderPanel").scrollIntoView({ behavior: "smooth" });
     } catch (err) {
-      alert("Edit failed: " + err.message);
+      showToastError("Edit failed: " + err.message);
     }
   }
 
@@ -2113,10 +2151,12 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
           </button>`;
 
-        row.querySelector(".ad-icon-btn--danger").addEventListener("click", async () => {
-          if (!confirm("Delete this event?")) return;
-          await window.lmsSupabase.from("schedules").delete().eq("id", ev.id).catch(() => {});
-          row.remove();
+        row.querySelector(".ad-icon-btn--danger").addEventListener("click", () => {
+          showConfirmModal("Delete this event?", async () => {
+            await window.lmsSupabase.from("schedules").delete().eq("id", ev.id).catch(() => {});
+            row.remove();
+          });
+          return;
         });
 
         list.insertBefore(row, empty);
@@ -2655,13 +2695,15 @@
             await loadMessages();
           });
         });
-        viewDetail.querySelector("[data-ad-msg-delete-all]")?.addEventListener("click", async () => {
-          if (!confirm("Hapus pesan ini dari history?")) return;
-          await window.lmsSupabase
-            .from("messages")
-            .delete()
-            .in("id", group.messages.map((msg) => msg.id));
-          await loadMessages();
+        viewDetail.querySelector("[data-ad-msg-delete-all]")?.addEventListener("click", () => {
+          showConfirmModal("Hapus pesan ini dari history?", async () => {
+            await window.lmsSupabase
+              .from("messages")
+              .delete()
+              .in("id", group.messages.map((msg) => msg.id));
+            await loadMessages();
+          });
+          return;
         });
         viewDetail.querySelectorAll("[data-ad-msg-delete-one]").forEach((button) => {
           button.addEventListener("click", async () => {
@@ -2921,29 +2963,29 @@
       const previousRole = select.dataset.prevRole || select.closest("tr")?.dataset.role || "student";
       const newRole = select.value;
 
-      if (!window.confirm(`Change role to ${newRole}? This affects their access.`)) {
-        select.value = previousRole;
-        return;
-      }
+      select.value = previousRole;
+      showConfirmModal(`Change role to ${newRole}? This affects their access.`, async () => {
+        select.value = newRole;
+        const { error } = await window.lmsSupabase
+          .from("profiles")
+          .update({ role: newRole }).eq("id", uid);
 
-      const { error } = await window.lmsSupabase
-        .from("profiles")
-        .update({ role: newRole }).eq("id", uid);
+        if (error) {
+          select.value = previousRole;
+          showToastError("Failed to change role. Please try again.");
+          return;
+        }
 
-      if (error) {
-        select.value = previousRole;
-        window.alert("Failed to change role. Please try again.");
-        return;
-      }
-
-      const row = select.closest("tr");
-      const tag = row?.querySelector(".ad-tag");
-      if (row) row.dataset.role = newRole;
-      if (tag) {
-        tag.className = `ad-tag ad-tag--${USER_ROLE_TAGS[newRole] || "gray"}`;
-        tag.textContent = newRole;
-      }
-      select.dataset.prevRole = newRole;
+        const row = select.closest("tr");
+        const tag = row?.querySelector(".ad-tag");
+        if (row) row.dataset.role = newRole;
+        if (tag) {
+          tag.className = `ad-tag ad-tag--${USER_ROLE_TAGS[newRole] || "gray"}`;
+          tag.textContent = newRole;
+        }
+        select.dataset.prevRole = newRole;
+      });
+      return;
     });
   }
 
@@ -3901,10 +3943,12 @@
             </button>
           </div>`;
 
-        item.querySelector(".ad-icon-btn--danger").addEventListener("click", async () => {
-          if (!confirm("Delete this announcement?")) return;
-          await window.lmsSupabase.from("announcements").delete().eq("id", ann.id).catch(() => {});
-          item.remove();
+        item.querySelector(".ad-icon-btn--danger").addEventListener("click", () => {
+          showConfirmModal("Delete this announcement?", async () => {
+            await window.lmsSupabase.from("announcements").delete().eq("id", ann.id).catch(() => {});
+            item.remove();
+          });
+          return;
         });
 
         list.insertBefore(item, empty);

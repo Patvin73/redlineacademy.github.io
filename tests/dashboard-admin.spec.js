@@ -740,11 +740,10 @@ test("admin can open Users section and toggle active", { tag: "@critical" }, asy
   await toggleBtn.click({ force: true });
   await expect(toggleBtn).toHaveText("Activate");
 
-  page.once("dialog", async (dialog) => {
-    expect(dialog.message()).toBe("Change role to admin? This affects their access.");
-    await dialog.accept();
-  });
   await roleSelect.selectOption("admin");
+  const confirmModal = page.getByRole("dialog");
+  await expect(confirmModal).toContainText("Change role to admin? This affects their access.");
+  await confirmModal.getByRole("button", { name: "Hapus" }).click();
   await expect(trainerRow.locator("td").nth(2)).toHaveText("admin");
   await expect(roleSelect).toHaveValue("admin");
   await expect.poll(async () => page.evaluate(() => (

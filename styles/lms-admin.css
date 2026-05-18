@@ -2025,6 +2025,13 @@
   color: var(--sd-text-secondary);
 }
 
+.ad-toast-error {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  background: var(--sd-red, #e24b4a); color: #fff;
+  padding: 12px 20px; border-radius: 8px; font-size: 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.2);
+}
+
 /* ================================================================
    NOTIFICATION PANEL
    ================================================================ */
