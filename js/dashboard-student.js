@@ -31,9 +31,11 @@
       lmsCertificatesEarned: "Sertifikat Diraih",
       lmsContinueLearning:   "Lanjut Belajar",
       lmsUpcomingSchedule:   "Jadwal Mendatang",
+      lmsAnnouncements:      "Pengumuman",
       lmsRecentActivity:     "Aktivitas Terkini",
       lmsViewAll:            "Lihat Semua",
       lmsNoSchedule:         "Tidak ada jadwal mendatang",
+      lmsNoAnnouncements:    "Tidak ada pengumuman",
       lmsNoActivity:         "Belum ada aktivitas",
       lmsNoAssignments:      "Tidak ada tugas di sini",
       lmsNoCertificates:     "Belum ada sertifikat. Selesaikan kursus untuk mendapatkannya!",
@@ -106,9 +108,11 @@
       lmsCertificatesEarned: "Certificates Earned",
       lmsContinueLearning:   "Continue Learning",
       lmsUpcomingSchedule:   "Upcoming Schedule",
+      lmsAnnouncements:      "Announcements",
       lmsRecentActivity:     "Recent Activity",
       lmsViewAll:            "View All",
       lmsNoSchedule:         "No upcoming events",
+      lmsNoAnnouncements:    "No announcements",
       lmsNoActivity:         "No activity yet",
       lmsNoAssignments:      "No assignments here",
       lmsNoCertificates:     "No certificates yet. Complete a course to earn one!",
@@ -940,6 +944,7 @@
         loadDashboardStats(user.id),
         loadContinueLearning(user.id),
         loadUpcomingSchedule(user.id),
+        loadAnnouncements(currentStudentProfile.id),
         loadActivityFeed(user.id),
         loadNotifications(user.id),
         refreshStudentMessageIndicators(user.id),
@@ -1557,6 +1562,51 @@
         list.insertBefore(li, empty);
       });
     } catch {
+      if (empty) empty.style.display = "block";
+    }
+  }
+
+  async function loadAnnouncements(userId) {
+    const list = $("studentAnnouncementList");
+    const empty = $("studentAnnouncementEmpty");
+    if (!list) return;
+
+    try {
+      const { data, error } = await window.lmsSupabase
+        .from("announcements")
+        .select("id,title,body,publish_at")
+        .lte("publish_at", new Date().toISOString())
+        .or("expires_at.is.null,expires_at.gte." + new Date().toISOString())
+        .or("target_role.eq.all,target_role.eq.student")
+        .order("publish_at", { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+
+      list.querySelectorAll(".sd-announcement-item").forEach((el) => el.remove());
+
+      if (!data || data.length === 0) {
+        if (empty) empty.style.display = "block";
+        return;
+      }
+
+      if (empty) empty.style.display = "none";
+
+      data.forEach((announcement) => {
+        const body = String(announcement.body || "");
+        const preview = body.length > 120 ? `${body.slice(0, 120)}...` : body;
+        const li = document.createElement("li");
+        li.className = "sd-announcement-item";
+        li.innerHTML = `
+          <p class="sd-announcement-item__title">${escHtml(announcement.title || "Announcement")}</p>
+          ${preview ? `<p class="sd-announcement-item__preview">${escHtml(preview)}</p>` : ""}
+          <p class="sd-announcement-item__date">${escHtml(formatDateTime(announcement.publish_at))}</p>
+        `;
+        list.insertBefore(li, empty);
+      });
+    } catch (err) {
+      console.warn("Announcements load error:", err.message);
+      list.querySelectorAll(".sd-announcement-item").forEach((el) => el.remove());
       if (empty) empty.style.display = "block";
     }
   }
