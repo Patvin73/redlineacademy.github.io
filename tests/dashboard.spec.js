@@ -759,10 +759,13 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#messageBadge")).toHaveText("1");
 
     await page.click("#sdNotifBtn");
-    await expect(page.locator(".sd-notif-list-item.unread")).toHaveCount(2);
+    await expect(page.locator(".sd-notif-list-item.unread")).toHaveCount(3);
+    await expect(page.locator("#notifList")).toContainText("Welcome");
+    await expect(page.locator("#notifList")).toContainText("Please review module one.");
     await page.click("#markAllRead");
 
-    await expect(page.locator("#notifDot")).toBeVisible();
+    await expect(page.locator("#messageBadge")).toBeHidden();
+    await expect(page.locator("#notifDot")).toBeHidden();
     await expect(page.locator(".sd-notif-list-item.unread")).toHaveCount(0);
 
     const unread = await page.evaluate(() =>
@@ -770,16 +773,38 @@ test.describe("Student Dashboard", () => {
     );
     expect(unread).toBe(0);
 
-    await page.locator(".sd-nav__item[data-section='messages']").click();
-    await page.locator(".sd-inbox-item", { hasText: "Please review module one." }).click();
-    await expect(page.locator("#messageBadge")).toBeHidden();
-    await expect(page.locator("#notifDot")).toBeHidden();
-
     const messages = await page.evaluate(() => window.__QA_TABLE_DATA__.messages);
     expect(messages.find((msg) => msg.id === "msg-1")).toEqual(expect.objectContaining({
       is_read: true,
       recipient_id: "student-1"
     }));
+
+    await page.locator(".sd-nav__item[data-section='messages']").click();
+    await page.locator(".sd-inbox-item", { hasText: "Welcome" }).click();
+    await expect(page.locator("#messageDetail")).toContainText("Reply");
+    await expect(page.locator("#messageDetail")).toContainText("Archive");
+    await expect(page.locator("#messageDetail")).toContainText("Delete");
+
+    await page.locator("[data-sd-msg-reply]").click();
+    await expect(page.locator("#studentMsgComposeForm")).toBeVisible();
+    await expect(page.locator("#studentMsgSubject")).toHaveValue("Re: Welcome");
+    await expect(page.locator("#studentMsgRecipient")).toHaveValues(["trainer-1"]);
+    await page.locator("#studentCancelMsgBtn").click();
+
+    await page.locator(".sd-inbox-item", { hasText: "Welcome" }).click();
+    await page.locator("[data-sd-msg-archive]").click();
+    await expect(page.locator(".sd-inbox-item", { hasText: "Welcome" })).toHaveCount(0);
+    await page.locator("[data-student-message-view='archive']").click();
+    await expect(page.locator(".sd-inbox-item", { hasText: "Welcome" })).toHaveCount(1);
+    await page.locator(".sd-inbox-item", { hasText: "Welcome" }).click();
+    await expect(page.locator("#messageDetail")).toContainText("Restore");
+    await page.locator("[data-sd-msg-restore]").click();
+
+    await page.locator("[data-student-message-view='inbox']").click();
+    await page.locator(".sd-inbox-item", { hasText: "Welcome" }).click();
+    await page.locator("[data-sd-msg-delete-inbox]").click();
+    const afterDelete = await page.evaluate(() => window.__QA_TABLE_DATA__.messages);
+    expect(afterDelete.some((msg) => msg.id === "msg-1")).toBe(false);
   });
 
   test("student composes a message to multiple recipients across roles", async ({ page }) => {
@@ -842,6 +867,16 @@ test.describe("Student Dashboard", () => {
         { name: "send-message-email", body: { message_id: message.id } }
       ]));
     });
+    await page.locator("[data-student-message-view='history']").click();
+    await expect(page.locator(".sd-inbox-item", { hasText: "Question about Module 1" })).toHaveCount(1);
+    await page.locator(".sd-inbox-item", { hasText: "Question about Module 1" }).click();
+    await expect(page.locator("#messageDetail")).toContainText("Sent to 2 recipients");
+    await expect(page.locator("#messageDetail")).toContainText("Trainer One");
+    await expect(page.locator("#messageDetail")).toContainText("Admin One");
+    await page.locator("[data-sd-msg-archive]").click();
+    await expect(page.locator(".sd-inbox-item", { hasText: "Question about Module 1" })).toHaveCount(0);
+    await page.locator("[data-student-message-view='archive']").click();
+    await expect(page.locator(".sd-inbox-item", { hasText: "Question about Module 1" })).toHaveCount(1);
     await expect(page.locator("#studentMsgComposeForm")).toBeHidden();
   });
 });

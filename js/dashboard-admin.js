@@ -2129,7 +2129,7 @@
   ================================================================ */
   const MAX_MESSAGE_RECIPIENTS = 50;
   let messageComposerBound = false;
-  let activeMessageView = "history";
+  let activeMessageView = "inbox";
   let adminUnreadMessages = 0;
   let adminUnreadNotifications = 0;
 
@@ -2330,6 +2330,7 @@
       syncMessageRecipientCheckboxes();
       setMessageRecipientDropdownOpen(false);
       setComposerStatus(tSafe("adMsgSent", "Message sent."));
+      activeMessageView = "history";
       loadedSections.delete("messages");
       await loadMessages();
     } catch (err) {
@@ -2339,13 +2340,19 @@
     }
   }
 
-  async function openMessageComposer(selectedRecipientId = "") {
+  function getReplySubject(subject) {
+    const value = String(subject || "Message").trim();
+    return /^re:/i.test(value) ? value : `Re: ${value}`;
+  }
+
+  async function openMessageComposer(selectedRecipientId = "", options = {}) {
     if (window._adActivateSection) window._adActivateSection("messages");
 
     const viewEmpty = $("adMsgViewEmpty");
     const viewDetail = $("adMsgDetail");
     const composeForm = $("adMsgComposeForm");
     const recipient = $("adMsgRecipient");
+    const subject = $("adMsgSubject");
     const body = $("adMsgBody");
     const sendBtn = $("adSendMsgBtn");
     const cancelBtn = $("adCancelMsgBtn");
@@ -2383,6 +2390,7 @@
       setComposerStatus(err.message || "Recipients failed to load.", true);
     }
 
+    if (subject && options.subject) subject.value = options.subject;
     if (body) body.focus();
   }
 
@@ -2419,6 +2427,9 @@
         tabs.forEach((item) => item.classList.toggle("active", item === tab));
         await loadMessages();
       });
+    });
+    tabs.forEach((tab) => {
+      tab.classList.toggle("active", (tab.dataset.messageView || "inbox") === activeMessageView);
     });
   }
 
@@ -2532,21 +2543,42 @@
 
     try {
       bindMessageViewTabs();
-      const { data } = await window.lmsSupabase
-        .from("messages")
-        .select(`id, sender_id, recipient_id, subject, body, is_read, read_at, created_at, profiles!sender_id(full_name, avatar_url)`)
-        .or(`sender_id.eq.${currentProfile.id},recipient_id.eq.${currentProfile.id}`)
-        .order("created_at", { ascending: false })
-        .limit(100);
+      const messageSelect = `id, sender_id, recipient_id, subject, body, is_read, read_at, created_at, profiles!sender_id(full_name, avatar_url)`;
+      const [{ data: receivedData }, { data: sentData }] = await Promise.all([
+        window.lmsSupabase
+          .from("messages")
+          .select(messageSelect)
+          .eq("recipient_id", currentProfile.id)
+          .order("created_at", { ascending: false })
+          .limit(100),
+        window.lmsSupabase
+          .from("messages")
+          .select(messageSelect)
+          .eq("sender_id", currentProfile.id)
+          .order("created_at", { ascending: false })
+          .limit(100)
+      ]);
+      const data = Array.from(
+        new Map([...(receivedData || []), ...(sentData || [])].map((msg) => [msg.id, msg])).values()
+      ).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 100);
 
       inbox.querySelectorAll(".ad-inbox-item").forEach((el) => el.remove());
       setMessagePanelVisible(viewDetail, false);
       setMessagePanelVisible(viewEmpty, true);
 
       const emptyText = empty?.querySelector("p");
-      if (emptyText) emptyText.textContent = activeMessageView === "archive" ? "No archived messages" : "No messages";
+      if (emptyText) {
+        const emptyByView = {
+          inbox: "No incoming messages",
+          history: "No sent history",
+          archive: "No archived messages"
+        };
+        emptyText.textContent = emptyByView[activeMessageView] || "No messages";
+      }
 
       if (!data || data.length === 0) {
+        adminUnreadMessages = 0;
+        updateAdminAttentionIndicators();
         if (empty) empty.style.display = "flex";
         return;
       }
@@ -2566,9 +2598,13 @@
       }
 
       const archived = getArchivedMessageGroups();
-      const groups = groupMessagesForHistory(data).filter((group) =>
-        activeMessageView === "archive" ? archived.has(group.key) : !archived.has(group.key)
-      );
+      const groups = groupMessagesForHistory(data).filter((group) => {
+        const isArchived = archived.has(group.key);
+        if (activeMessageView === "archive") return isArchived;
+        if (isArchived) return false;
+        if (activeMessageView === "history") return group.type === "sent";
+        return group.type === "received";
+      });
 
       if (empty) empty.style.display = groups.length === 0 ? "flex" : "none";
       if (groups.length === 0) return;
@@ -2599,9 +2635,11 @@
               <p class="ad-inbox-item__time">From: ${escHtml(sender.full_name || sender.email || "System")} - ${timeAgo(group.created_at)}</p>
               <div class="ad-message-detail__body">${escHtml(group.body || "-").replace(/\n/g, "<br>")}</div>
               <div class="ad-message-detail__actions">
+                <button class="ad-btn ad-btn--outline" type="button" data-ad-msg-reply>Reply</button>
                 ${activeMessageView === "archive"
                   ? `<button class="ad-btn ad-btn--outline" type="button" data-ad-msg-restore>Restore</button>`
                   : `<button class="ad-btn ad-btn--outline" type="button" data-ad-msg-archive>Archive</button>`}
+                <button class="ad-btn ad-btn--danger" type="button" data-ad-msg-delete-inbox="${escHtml(msg.id)}">Delete</button>
               </div>
             </div>`;
         } else {
@@ -2639,6 +2677,19 @@
         });
         viewDetail.querySelector("[data-ad-msg-restore]")?.addEventListener("click", async () => {
           removeArchivedMessageGroup(group.key);
+          await loadMessages();
+        });
+        viewDetail.querySelector("[data-ad-msg-reply]")?.addEventListener("click", async () => {
+          const msg = group.messages[0];
+          await openMessageComposer(msg.sender_id, { subject: getReplySubject(group.subject) });
+        });
+        viewDetail.querySelector("[data-ad-msg-delete-inbox]")?.addEventListener("click", async () => {
+          const messageId = group.messages[0]?.id;
+          if (!messageId) return;
+          await window.lmsSupabase
+            .from("messages")
+            .delete()
+            .eq("id", messageId);
           await loadMessages();
         });
         viewDetail.querySelector("[data-ad-msg-edit]")?.addEventListener("click", () => {
@@ -3925,7 +3976,9 @@
      NOTIFICATIONS
   ================================================================ */
   async function loadNotifications() {
-    if (!currentProfile) return;
+    if (!currentProfile || !window.lmsSupabase) return;
+    let notifications = [];
+    let unreadMessages = [];
     try {
       const { data } = await window.lmsSupabase
         .from("notifications")
@@ -3933,38 +3986,90 @@
         .eq("user_id", currentProfile.id)
         .order("created_at", { ascending: false })
         .limit(15);
-
-      renderNotifications(data || []);
-    } catch { renderNotifications([]); }
+      notifications = data || [];
+    } catch {
+      notifications = [];
+    }
+    try {
+      const { data } = await window.lmsSupabase
+        .from("messages")
+        .select("id, sender_id, recipient_id, subject, body, is_read, created_at, profiles!sender_id(full_name, email)")
+        .eq("recipient_id", currentProfile.id)
+        .eq("is_read", false)
+        .order("created_at", { ascending: false })
+        .limit(25);
+      unreadMessages = data || [];
+    } catch {
+      unreadMessages = [];
+    }
+    renderNotifications(notifications, unreadMessages);
   }
 
-  function renderNotifications(notifs) {
+  function renderNotifications(notifs, messageNotifs = []) {
     const list = $("adNotifList");
     if (!list) return;
 
     adminUnreadNotifications = notifs.filter((n) => !n.is_read).length;
+    adminUnreadMessages = messageNotifs.filter((msg) => !msg.is_read && msg.recipient_id === currentProfile?.id).length;
     updateAdminAttentionIndicators();
 
-    if (notifs.length === 0) {
+    const messageItems = messageNotifs.map((msg) => ({
+      id: msg.id,
+      kind: "message",
+      unread: true,
+      type: "new_message",
+      title: msg.subject || `New message from ${msg.profiles?.full_name || msg.profiles?.email || "User"}`,
+      created_at: msg.created_at,
+      preview: msg.body || ""
+    }));
+    const notificationItems = notifs.map((notif) => ({
+      id: notif.id,
+      kind: "notification",
+      unread: !notif.is_read,
+      type: notif.type,
+      title: notif.title,
+      created_at: notif.created_at,
+      preview: ""
+    }));
+    const items = [...messageItems, ...notificationItems]
+      .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+      .slice(0, 10);
+
+    if (items.length === 0) {
       list.innerHTML = `<li class="ad-notif-empty" data-i18n="lmsNoNotifications">No notifications</li>`;
       return;
     }
 
-    list.innerHTML = notifs.slice(0, 10).map((n) => `
-      <li class="ad-notif-list-item ${n.is_read ? "" : "unread"}" data-id="${n.id}">
-        <div class="ad-notif-list-item__icon">${getNotifIcon(n.type)}</div>
+    list.innerHTML = items.map((item) => `
+      <li class="ad-notif-list-item ${item.unread ? "unread" : ""}" data-kind="${item.kind}" ${item.kind === "message" ? `data-message-id="${escHtml(item.id)}"` : `data-id="${escHtml(item.id)}"`}>
+        <div class="ad-notif-list-item__icon">${getNotifIcon(item.type)}</div>
         <div>
-          <p class="ad-notif-list-item__title">${escHtml(n.title)}</p>
-          <p class="ad-notif-list-item__time">${timeAgo(n.created_at)}</p>
+          <p class="ad-notif-list-item__title">${escHtml(item.title || "Notification")}</p>
+          ${item.preview ? `<p class="ad-notif-list-item__time">${escHtml(String(item.preview).slice(0, 90))}</p>` : ""}
+          <p class="ad-notif-list-item__time">${timeAgo(item.created_at)}</p>
         </div>
       </li>`).join("");
 
     list.querySelectorAll(".ad-notif-list-item").forEach((item) => {
       item.addEventListener("click", async () => {
+        const kind = item.dataset.kind;
         item.classList.remove("unread");
-        adminUnreadNotifications = list.querySelectorAll(".ad-notif-list-item.unread").length;
+        if (kind === "message") {
+          const messageId = item.dataset.messageId;
+          if (messageId && window.lmsSupabase) {
+            await window.lmsSupabase
+              .from("messages")
+              .update({ is_read: true, read_at: new Date().toISOString() })
+              .eq("id", messageId)
+              .catch(() => {});
+          }
+          adminUnreadMessages = Math.max(adminUnreadMessages - 1, 0);
+          if (currentSection === "messages") await loadMessages();
+        } else {
+          adminUnreadNotifications = list.querySelectorAll(".ad-notif-list-item.unread[data-kind='notification']").length;
+          await window.lmsSupabase.from("notifications").update({ is_read: true }).eq("id", item.dataset.id).catch(() => {});
+        }
         updateAdminAttentionIndicators();
-        await window.lmsSupabase.from("notifications").update({ is_read: true }).eq("id", item.dataset.id).catch(() => {});
       });
     });
   }
@@ -3989,6 +4094,7 @@
     const channel = window.lmsSupabase.channel("admin-message-channel");
     const refreshMessages = () => {
       refreshAdminMessageIndicators(userId);
+      loadNotifications();
       if (currentSection === "messages") loadMessages();
     };
     channel.on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `recipient_id=eq.${userId}` }, refreshMessages);
@@ -4049,15 +4155,26 @@
       const unreadItems = Array.from(document.querySelectorAll(".ad-notif-list-item.unread"));
       unreadItems.forEach((el) => el.classList.remove("unread"));
       adminUnreadNotifications = 0;
+      adminUnreadMessages = 0;
       updateAdminAttentionIndicators();
       if (!window.lmsSupabase || unreadItems.length === 0) return;
-      const unreadIds = unreadItems.map((item) => item.dataset.id).filter(Boolean);
-      if (unreadIds.length === 0) return;
-      await window.lmsSupabase
-        .from("notifications")
-        .update({ is_read: true, read_at: new Date().toISOString() })
-        .in("id", unreadIds)
-        .catch(() => {});
+      const unreadNotificationIds = unreadItems.map((item) => item.dataset.id).filter(Boolean);
+      const unreadMessageIds = unreadItems.map((item) => item.dataset.messageId).filter(Boolean);
+      if (unreadNotificationIds.length > 0) {
+        await window.lmsSupabase
+          .from("notifications")
+          .update({ is_read: true, read_at: new Date().toISOString() })
+          .in("id", unreadNotificationIds)
+          .catch(() => {});
+      }
+      if (unreadMessageIds.length > 0) {
+        await window.lmsSupabase
+          .from("messages")
+          .update({ is_read: true, read_at: new Date().toISOString() })
+          .in("id", unreadMessageIds)
+          .catch(() => {});
+        if (currentSection === "messages") await loadMessages();
+      }
     });
   }
 

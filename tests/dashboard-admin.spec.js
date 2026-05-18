@@ -940,6 +940,19 @@ test("trainer sees unread messages badge", async ({ page }) => {
   await expect(page.locator("#adMsgBadge")).toHaveText("1");
   await expect(page.locator("#adNotifDot")).toBeVisible();
   await expect(page.locator(".ad-inbox-item.unread")).toHaveCount(1);
+
+  await page.locator("#adNotifBtn").click();
+  await expect(page.locator("#adNotifList")).toContainText("Question");
+  await expect(page.locator("#adNotifList")).toContainText("Need help with Module 2.");
+  await page.locator("#adMarkAllRead").click();
+  await expect(page.locator("#adMsgBadge")).toBeHidden();
+  await expect(page.locator("#adNotifDot")).toBeHidden();
+
+  const messages = await page.evaluate(() => window.__e2eGetTableData().messages);
+  expect(messages.find((msg) => msg.id === "msg-inbox-unread")).toEqual(expect.objectContaining({
+    is_read: true,
+    recipient_id: "e2e-trainer"
+  }));
 });
 
 test("trainer can open message detail", async ({ page }) => {
@@ -954,6 +967,30 @@ test("trainer can open message detail", async ({ page }) => {
   await expect(page.locator("#adMsgViewEmpty")).toBeHidden();
   await expect(page.locator("#adMsgDetail")).toBeVisible();
   await expect(page.locator("#adMsgDetail")).toContainText("Need help with Module 2.");
+  await expect(page.locator("#adMsgDetail")).toContainText("Reply");
+  await expect(page.locator("#adMsgDetail")).toContainText("Archive");
+  await expect(page.locator("#adMsgDetail")).toContainText("Delete");
+
+  await page.locator("[data-ad-msg-reply]").click();
+  await expect(page.locator("#adMsgComposeForm")).toBeVisible();
+  await expect(page.locator("#adMsgSubject")).toHaveValue("Re: Question");
+  await expect(page.locator("#adMsgRecipient")).toHaveValues(["e2e-student-1"]);
+  await page.locator("#adCancelMsgBtn").click();
+
+  await page.locator(".ad-inbox-item", { hasText: "Need help with Module 2." }).click();
+  await page.locator("[data-ad-msg-archive]").click();
+  await expect(page.locator(".ad-inbox-item", { hasText: "Need help with Module 2." })).toHaveCount(0);
+  await page.locator("[data-message-view='archive']").click();
+  await expect(page.locator(".ad-inbox-item", { hasText: "Question" })).toHaveCount(1);
+  await page.locator(".ad-inbox-item", { hasText: "Question" }).click();
+  await expect(page.locator("#adMsgDetail")).toContainText("Restore");
+  await page.locator("[data-ad-msg-restore]").click();
+
+  await page.locator("[data-message-view='inbox']").click();
+  await page.locator(".ad-inbox-item", { hasText: "Question" }).click();
+  await page.locator("[data-ad-msg-delete-inbox]").click();
+  const messages = await page.evaluate(() => window.__e2eGetTableData().messages);
+  expect(messages.some((msg) => msg.id === "msg-1")).toBe(false);
 });
 
 test("trainer can compose a system message to multiple recipients across roles", async ({ page }) => {
@@ -1048,6 +1085,7 @@ test("sent message history can edit, delete one recipient, and archive", async (
   await expect(page.locator("#sidebarRoleBadge")).toHaveText("Trainer");
 
   await page.locator(".ad-nav__item[data-section='messages']").click();
+  await page.locator("[data-message-view='history']").click();
   await expect(page.locator(".ad-inbox-item", { hasText: "Batch note" })).toHaveCount(1);
   await page.locator(".ad-inbox-item", { hasText: "Batch note" }).click();
   await expect(page.locator("#adMsgDetail")).toContainText("Sent to 2 recipients");
