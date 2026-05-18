@@ -728,12 +728,28 @@ test("admin can open Users section and toggle active", { tag: "@critical" }, asy
 
   const rows = page.locator("#userTableBody tr.ad-user-row");
   await expect(rows).toHaveCount(4);
+  await expect(rows.first().locator("select[data-action='change-role']")).toHaveCount(0);
+
+  const trainerRow = rows.filter({ hasText: "E2E Trainer" });
+  const roleSelect = trainerRow.locator("select[data-action='change-role']");
+  await expect(roleSelect).toHaveValue("trainer");
 
   const toggleBtn = rows.first().locator("button[data-action='toggle-active']");
   await expect(toggleBtn).toHaveText("Suspend");
   await toggleBtn.scrollIntoViewIfNeeded();
   await toggleBtn.click({ force: true });
   await expect(toggleBtn).toHaveText("Activate");
+
+  page.once("dialog", async (dialog) => {
+    expect(dialog.message()).toBe("Change role to admin? This affects their access.");
+    await dialog.accept();
+  });
+  await roleSelect.selectOption("admin");
+  await expect(trainerRow.locator("td").nth(2)).toHaveText("admin");
+  await expect(roleSelect).toHaveValue("admin");
+  await expect.poll(async () => page.evaluate(() => (
+    window.__e2eGetTableData().profiles.find((item) => item.id === "e2e-trainer").role
+  ))).toBe("admin");
 });
 
 test("admin sees enrollments totals", async ({ page }) => {

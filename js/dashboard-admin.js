@@ -2885,6 +2885,13 @@
           <button class="ad-btn ad-btn--outline ad-btn--sm" data-uid="${u.id}" data-action="toggle-active">
             ${u.is_active ? "Suspend" : "Activate"}
           </button>
+          ${u.id === currentProfile?.id ? "" : `
+            <select class="ad-input ad-select ad-select--xs" data-uid="${u.id}" data-action="change-role" data-prev-role="${u.role || "student"}">
+              <option value="student" ${u.role === "student" ? "selected" : ""}>Student</option>
+              <option value="trainer" ${u.role === "trainer" ? "selected" : ""}>Trainer</option>
+              <option value="admin" ${u.role === "admin" ? "selected" : ""}>Admin</option>
+            </select>
+          `}
         </td>`;
       fragment.appendChild(tr);
     });
@@ -2904,6 +2911,39 @@
     const isActive = btn.textContent.trim() === "Suspend";
       await window.lmsSupabase.from("profiles").update({ is_active: !isActive }).eq("id", uid).catch(() => {});
     btn.textContent = isActive ? "Activate" : "Suspend";
+    });
+
+    tbody.addEventListener("change", async (e) => {
+      const select = e.target.closest("[data-action='change-role']");
+      if (!select) return;
+
+      const uid = select.dataset.uid;
+      const previousRole = select.dataset.prevRole || select.closest("tr")?.dataset.role || "student";
+      const newRole = select.value;
+
+      if (!window.confirm(`Change role to ${newRole}? This affects their access.`)) {
+        select.value = previousRole;
+        return;
+      }
+
+      const { error } = await window.lmsSupabase
+        .from("profiles")
+        .update({ role: newRole }).eq("id", uid);
+
+      if (error) {
+        select.value = previousRole;
+        window.alert("Failed to change role. Please try again.");
+        return;
+      }
+
+      const row = select.closest("tr");
+      const tag = row?.querySelector(".ad-tag");
+      if (row) row.dataset.role = newRole;
+      if (tag) {
+        tag.className = `ad-tag ad-tag--${USER_ROLE_TAGS[newRole] || "gray"}`;
+        tag.textContent = newRole;
+      }
+      select.dataset.prevRole = newRole;
     });
   }
 
