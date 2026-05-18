@@ -41,7 +41,7 @@
       lmsNoCertificates:     "Belum ada sertifikat. Selesaikan kursus untuk mendapatkannya!",
       lmsNoCourses:          "Belum ada kursus aktif",
       lmsNoMessages:         "Belum ada pesan",
-      lmsNoResources:        "Belum ada materi tersedia",
+      lmsNoResources:        "Belum ada materi tersedia untuk kursus Anda.",
       lmsNoNotifications:    "Tidak ada notifikasi",
       lmsMarkAllRead:        "Tandai semua dibaca",
       lmsNotifications:      "Notifikasi",
@@ -118,7 +118,7 @@
       lmsNoCertificates:     "No certificates yet. Complete a course to earn one!",
       lmsNoCourses:          "No active courses",
       lmsNoMessages:         "No messages yet",
-      lmsNoResources:        "No resources available",
+      lmsNoResources:        "Belum ada materi tersedia untuk kursus Anda.",
       lmsNoNotifications:    "No notifications",
       lmsMarkAllRead:        "Mark all read",
       lmsNotifications:      "Notifications",
@@ -2440,11 +2440,16 @@
       const courseIds = (enrollments || []).map((e) => e.course_id).filter(Boolean);
       if (courseIds.length === 0) throw new Error("No enrollments");
 
+      // Ambil lesson materials dari kursus yang dienroll
       const { data, error } = await window.lmsSupabase
-        .from("courses")
-        .select("id, title, thumbnail_url, category_id, categories(id, name)")
-        .in("id", courseIds)
-        .order("title", { ascending: true });
+        .from("lessons")
+        .select(`
+          id, title, material_type, material_url, lesson_order,
+          courses!inner(id, title, enrollment_type)
+        `)
+        .in("courses.id", courseIds)
+        .not("material_url", "is", null)
+        .order("lesson_order", { ascending: true });
 
       if (error) throw error;
       if (!data || data.length === 0) throw new Error("No resources");
@@ -2452,21 +2457,37 @@
       if (empty) empty.style.display = "none";
       grid.querySelectorAll("[data-resource-card='true']").forEach((el) => el.remove());
 
-      data.forEach((course) => {
+      const materialIcons = {
+        video: "📹",
+        pdf: "📄",
+        text: "📝",
+        quiz: "❓"
+      };
+      const materialIconClasses = {
+        video: "sd-resource-card__icon--video",
+        pdf: "sd-resource-card__icon--pdf",
+        text: "sd-resource-card__icon--doc",
+        quiz: "sd-resource-card__icon--link"
+      };
+
+      data.forEach((lesson) => {
+        const materialType = (lesson.material_type || "text").toLowerCase();
+        const safeUrl = toSafeUiUrl(lesson.material_url);
+        const actionLabel = materialType === "pdf" ? "Download" : "Open";
         const card = document.createElement("div");
         card.setAttribute("data-resource-card", "true");
-        card.dataset.category = (course.categories?.name || "").toLowerCase().replace(/\s+/g, "-") || "all";
-        card.className = "sd-course-card";
+        card.dataset.category = materialType;
+        card.className = "sd-resource-card";
         card.innerHTML = `
-          <div class="sd-course-card__thumb">
-            ${toSafeUiUrl(course.thumbnail_url)
-              ? `<img src="${escHtml(toSafeUiUrl(course.thumbnail_url))}" alt="${escHtml(course.title || "Resource")}" loading="lazy" />`
-              : `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>`}
+          <div class="sd-resource-card__icon ${escHtml(materialIconClasses[materialType] || "sd-resource-card__icon--doc")}">
+            ${escHtml(materialIcons[materialType] || "📝")}
           </div>
-          <div class="sd-course-card__body">
-            <p class="sd-course-card__category">${escHtml(course.categories?.name || course.category_id || "Course")}</p>
-            <h3 class="sd-course-card__title">${escHtml(course.title || "Resource")}</h3>
-            <p class="sd-course-card__trainer">Redline Academy</p>
+          <div class="sd-resource-card__body">
+            <h3 class="sd-resource-card__title">${escHtml(lesson.title || "Lesson material")}</h3>
+            <p class="sd-resource-card__meta">${escHtml(lesson.courses?.title || "Course")}</p>
+            ${safeUrl
+              ? `<a href="${escHtml(safeUrl)}" target="_blank" rel="noopener" class="sd-btn sd-btn--outline sd-btn--sm">${actionLabel}</a>`
+              : `<button class="sd-btn sd-btn--outline sd-btn--sm" type="button" disabled>${actionLabel}</button>`}
           </div>`;
         grid.appendChild(card);
       });

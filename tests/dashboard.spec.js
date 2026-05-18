@@ -93,6 +93,14 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
             });
             return api;
           },
+          not: (col, operator, val) => {
+            rows = rows.filter((row) => {
+              const value = getValue(row, col);
+              if (operator === "is" && val === null) return value !== null && typeof value !== "undefined";
+              return value !== val;
+            });
+            return api;
+          },
           or: (expression) => {
             rows = applyOrFilter(rows, expression);
             return api;
@@ -317,9 +325,33 @@ function makeStudentFixture() {
         }
       ],
       lessons: [
-        { id: "lesson-1", course_id: "course-1" },
-        { id: "lesson-2", course_id: "course-1" },
-        { id: "lesson-3", course_id: "course-2" }
+        {
+          id: "lesson-1",
+          course_id: "course-1",
+          title: "Safe Transfers Video",
+          material_type: "video",
+          material_url: "https://example.com/safe-transfers.mp4",
+          lesson_order: 1,
+          courses: { id: "course-1", title: "Aged Care Basics", enrollment_type: "paid" }
+        },
+        {
+          id: "lesson-2",
+          course_id: "course-1",
+          title: "Care Plan Notes",
+          material_type: "text",
+          material_url: null,
+          lesson_order: 2,
+          courses: { id: "course-1", title: "Aged Care Basics", enrollment_type: "paid" }
+        },
+        {
+          id: "lesson-3",
+          course_id: "course-2",
+          title: "First Aid PDF",
+          material_type: "pdf",
+          material_url: "https://example.com/first-aid.pdf",
+          lesson_order: 1,
+          courses: { id: "course-2", title: "First Aid Essentials", enrollment_type: "paid" }
+        }
       ],
       lesson_progress: [
         {
@@ -729,8 +761,8 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#scheduleFullList [data-schedule-render='true']")).not.toHaveCount(0);
   });
 
-  test("filters resource cards by category and search text", async ({ page }) => {
-    // This test covers the resources filter tabs and search box together.
+  test("filters lesson material resource cards by material type and search text", async ({ page }) => {
+    // This test covers enrolled lesson materials, material-type tabs, and search together.
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);
 
@@ -739,14 +771,18 @@ test.describe("Student Dashboard", () => {
 
     await expect(page.locator("#resourceGrid [data-resource-card='true']")).toHaveCount(2);
 
-    await page.click("#resourceCategoryTabs .sd-filter-tab[data-category='aged-care']");
-    await expect(page.locator("#resourceGrid [data-resource-card='true']", { hasText: "Aged Care Basics" })).toBeVisible();
-    await expect(page.locator("#resourceGrid [data-resource-card='true']", { hasText: "First Aid Essentials" })).toBeHidden();
+    await expect(page.locator("#resourceGrid [data-resource-card='true']", { hasText: "Care Plan Notes" })).toHaveCount(0);
+
+    await page.click("#resourceCategoryTabs .sd-filter-tab[data-category='video']");
+    await expect(page.locator("#resourceGrid [data-resource-card='true']", { hasText: "Safe Transfers Video" })).toBeVisible();
+    await expect(page.locator("#resourceGrid [data-resource-card='true']", { hasText: "First Aid PDF" })).toBeHidden();
+    await expect(page.locator("#resourceGrid [data-resource-card='true'] a", { hasText: "Open" })).toHaveAttribute("href", "https://example.com/safe-transfers.mp4");
 
     await page.click("#resourceCategoryTabs .sd-filter-tab[data-category='all']");
     await page.fill("#resourceSearch", "first aid");
-    await expect(page.locator("#resourceGrid [data-resource-card='true']", { hasText: "First Aid Essentials" })).toBeVisible();
-    await expect(page.locator("#resourceGrid [data-resource-card='true']", { hasText: "Aged Care Basics" })).toBeHidden();
+    await expect(page.locator("#resourceGrid [data-resource-card='true']", { hasText: "First Aid PDF" })).toBeVisible();
+    await expect(page.locator("#resourceGrid [data-resource-card='true']", { hasText: "Safe Transfers Video" })).toBeHidden();
+    await expect(page.locator("#resourceGrid [data-resource-card='true'] a", { hasText: "Download" })).toHaveAttribute("href", "https://example.com/first-aid.pdf");
   });
 
   test("marks notifications and messages read from the student indicators", async ({ page }) => {
