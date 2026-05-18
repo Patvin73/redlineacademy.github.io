@@ -2097,7 +2097,7 @@
     try {
       const { data, error } = await window.lmsSupabase
         .from("messages")
-        .select("id, sender_id, recipient_id, subject, body, is_read, created_at, profiles!sender_id(full_name, avatar_url)")
+        .select("id, sender_id, recipient_id, subject, body, is_read, created_at")
         .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`)
         .order("created_at", { ascending: false })
         .limit(20);
@@ -2156,7 +2156,7 @@
 
     try {
       bindStudentMessageViewTabs();
-      const messageSelect = "id, sender_id, recipient_id, subject, body, is_read, created_at, profiles!sender_id(full_name, avatar_url)";
+      const messageSelect = "id, sender_id, recipient_id, subject, body, is_read, created_at";
       const [{ data: receivedData, error: receivedError }, { data: sentData, error: sentError }] = await Promise.all([
         window.lmsSupabase
           .from("messages")
@@ -2526,7 +2526,7 @@
     try {
       const { data, error } = await window.lmsSupabase
         .from("messages")
-        .select("id, sender_id, recipient_id, subject, body, is_read, created_at, profiles!sender_id(full_name, email)")
+        .select("id, sender_id, recipient_id, subject, body, is_read, created_at")
         .eq("recipient_id", userId)
         .eq("is_read", false)
         .order("created_at", { ascending: false })

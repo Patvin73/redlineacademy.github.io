@@ -754,9 +754,11 @@ create policy "lms_insert_own_forum_posts" on public.forum_posts for insert to a
 drop policy if exists "messages_select_participants_or_staff" on public.messages;
 drop policy if exists "messages_insert_sender_or_staff" on public.messages;
 drop policy if exists "messages_update_participants_or_staff" on public.messages;
+drop policy if exists "messages_delete_participants_or_staff" on public.messages;
 create policy "messages_select_participants_or_staff" on public.messages for select to authenticated using (sender_id = auth.uid() or recipient_id = auth.uid() or public.is_staff(auth.uid()));
 create policy "messages_insert_sender_or_staff" on public.messages for insert to authenticated with check (sender_id = auth.uid() or public.is_staff(auth.uid()));
 create policy "messages_update_participants_or_staff" on public.messages for update to authenticated using (sender_id = auth.uid() or recipient_id = auth.uid() or public.is_staff(auth.uid())) with check (sender_id = auth.uid() or recipient_id = auth.uid() or public.is_staff(auth.uid()));
+create policy "messages_delete_participants_or_staff" on public.messages for delete to authenticated using (sender_id = auth.uid() or recipient_id = auth.uid() or public.is_staff(auth.uid()));
 
 drop policy if exists "notifications_select_owner_or_staff" on public.notifications;
 drop policy if exists "notifications_insert_owner_or_staff" on public.notifications;

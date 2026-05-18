@@ -2463,76 +2463,6 @@
     });
   }
 
-  async function loadMessages() {
-    const inbox = $("adInboxList");
-    const empty = $("adInboxEmpty");
-    const viewEmpty = $("adMsgViewEmpty");
-    const viewDetail = $("adMsgDetail");
-    const composeForm = $("adMsgComposeForm");
-    if (!inbox) return;
-
-    try {
-      const { data } = await window.lmsSupabase
-        .from("messages")
-        .select(`id, sender_id, recipient_id, subject, body, is_read, created_at, profiles!sender_id(full_name, avatar_url)`)
-        .or(`sender_id.eq.${currentProfile.id},recipient_id.eq.${currentProfile.id}`)
-        .order("created_at", { ascending: false })
-        .limit(20);
-
-      if (!data || data.length === 0) { if (empty) empty.style.display = "flex"; return; }
-      if (empty) empty.style.display = "none";
-
-      inbox.querySelectorAll(".ad-inbox-item").forEach((el) => el.remove());
-
-      const unread = data.filter((m) => !m.is_read && m.recipient_id === currentProfile.id).length;
-      adminUnreadMessages = unread;
-      updateAdminAttentionIndicators();
-
-      data.forEach((msg) => {
-        const item = document.createElement("div");
-        item.className = `ad-inbox-item${!msg.is_read && msg.recipient_id === currentProfile.id ? " unread" : ""}`;
-        item.innerHTML = `
-          <div class="ad-avatar ad-avatar--sm">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-          </div>
-          <div class="ad-inbox-item__body">
-            <p class="ad-inbox-item__name">${escHtml(msg.profiles?.full_name || "System")}</p>
-            <p class="ad-inbox-item__preview">${escHtml(msg.body?.substring(0, 60) || "—")}</p>
-          </div>
-          <span class="ad-inbox-item__time">${timeAgo(msg.created_at)}</span>`;
-        item.addEventListener("click", async () => {
-          inbox.querySelectorAll(".ad-inbox-item").forEach((el) => el.classList.remove("active"));
-          item.classList.add("active");
-          if (!msg.is_read && msg.recipient_id === currentProfile.id) {
-            item.classList.remove("unread");
-            await window.lmsSupabase
-              .from("messages")
-              .update({ is_read: true, read_at: new Date().toISOString() })
-              .eq("id", msg.id)
-              .catch(() => {});
-            // Refresh badge after marking the selected inbox message as read.
-            const remaining = inbox.querySelectorAll(".ad-inbox-item.unread").length;
-            const badge = $("adMsgBadge");
-            if (badge) { badge.textContent = remaining; badge.style.display = remaining > 0 ? "inline-block" : "none"; }
-          }
-          setMessagePanelVisible(viewEmpty, false);
-          setMessagePanelVisible(composeForm, false);
-          if (viewDetail) {
-            setMessagePanelVisible(viewDetail, true);
-            viewDetail.innerHTML = `
-              <div class="ad-message-view__detail">
-                <p class="ad-inbox-item__name">${escHtml(msg.subject || msg.profiles?.full_name || "Message")}</p>
-                <p class="ad-inbox-item__time">${timeAgo(msg.created_at)}</p>
-                <div style="margin-top:12px;white-space:pre-wrap;">${escHtml(msg.body || "—")}</div>
-              </div>`;
-          }
-        });
-        inbox.insertBefore(item, empty);
-      });
-
-    } catch (err) { console.warn("Messages load error:", err.message); }
-  }
-
   loadMessages = async function loadMessagesGrouped() {
     const inbox = $("adInboxList");
     const empty = $("adInboxEmpty");
@@ -2543,7 +2473,8 @@
 
     try {
       bindMessageViewTabs();
-      const messageSelect = `id, sender_id, recipient_id, subject, body, is_read, read_at, created_at, profiles!sender_id(full_name, avatar_url)`;
+      const messageSelect = "id, sender_id, recipient_id, subject, body, is_read, read_at, created_at";
+      // Profiles diambil terpisah lewat profileMap di bawah — sudah benar.
       const [{ data: receivedData }, { data: sentData }] = await Promise.all([
         window.lmsSupabase
           .from("messages")
@@ -2754,7 +2685,7 @@
               return profile.full_name || profile.email || msg.recipient_id;
             })
           : [];
-        const sender = profileMap.get(group.sender_id) || group.messages[0]?.profiles || {};
+        const sender = profileMap.get(group.sender_id) || {};
         const title = group.type === "sent"
           ? group.subject || "Sent message"
           : group.subject || sender.full_name || "Message";
@@ -3993,7 +3924,7 @@
     try {
       const { data } = await window.lmsSupabase
         .from("messages")
-        .select("id, sender_id, recipient_id, subject, body, is_read, created_at, profiles!sender_id(full_name, email)")
+        .select("id, sender_id, recipient_id, subject, body, is_read, created_at")
         .eq("recipient_id", currentProfile.id)
         .eq("is_read", false)
         .order("created_at", { ascending: false })
