@@ -385,7 +385,9 @@ async function installSupabaseStub(page, role, options = {}) {
               return api;
             }
             rows = rows.filter((row) => {
-              const value = getValue(row, col);
+              const value = col === "is_archived" && typeof getValue(row, col) === "undefined"
+                ? false
+                : getValue(row, col);
               if (typeof value === "undefined") return true;
               return value === val;
             });
@@ -1004,12 +1006,20 @@ test("trainer can open message detail", async ({ page }) => {
 
   await page.locator(".ad-inbox-item", { hasText: "Need help with Module 2." }).click();
   await page.locator("[data-ad-msg-archive]").click();
+  await expect.poll(async () => {
+    const messages = await page.evaluate(() => window.__e2eGetTableData().messages);
+    return messages.find((msg) => msg.id === "msg-1")?.is_archived;
+  }).toBe(true);
   await expect(page.locator(".ad-inbox-item", { hasText: "Need help with Module 2." })).toHaveCount(0);
   await page.locator("[data-message-view='archive']").click();
   await expect(page.locator(".ad-inbox-item", { hasText: "Question" })).toHaveCount(1);
   await page.locator(".ad-inbox-item", { hasText: "Question" }).click();
   await expect(page.locator("#adMsgDetail")).toContainText("Restore");
   await page.locator("[data-ad-msg-restore]").click();
+  await expect.poll(async () => {
+    const messages = await page.evaluate(() => window.__e2eGetTableData().messages);
+    return messages.find((msg) => msg.id === "msg-1")?.is_archived;
+  }).toBeFalsy();
 
   await page.locator("[data-message-view='inbox']").click();
   await page.locator(".ad-inbox-item", { hasText: "Question" }).click();
@@ -1493,8 +1503,10 @@ test("admin can publish and delete announcement", async ({ page }) => {
   const announcements = await page.evaluate(() => window.__e2eGetTableData().announcements);
   expect(announcements.at(-1)).toMatchObject({ course_id: "course-2" });
 
-  page.once("dialog", (dialog) => dialog.accept());
   await announcementItem.locator(".ad-icon-btn--danger").click();
+  const confirmModal = page.getByRole("dialog");
+  await expect(confirmModal).toContainText("Delete this announcement?");
+  await confirmModal.getByRole("button", { name: "Hapus" }).click();
   await expect(announcementItem).toBeHidden();
 });
 
@@ -1598,8 +1610,10 @@ test("admin can delete a course from the list", async ({ page }) => {
   await expect(courseRows).toHaveCount(2);
 
   const targetRow = page.locator(".ad-course-row", { hasText: "Emergency Response" });
-  page.once("dialog", (dialog) => dialog.accept());
   await targetRow.locator("[data-action='delete']").click();
+  const confirmModal = page.getByRole("dialog");
+  await expect(confirmModal).toContainText("Delete this course?");
+  await confirmModal.getByRole("button", { name: "Hapus" }).click();
 
   await expect(targetRow).toHaveCount(0);
   await expect(courseRows).toHaveCount(1);

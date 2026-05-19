@@ -1883,27 +1883,12 @@
     return /^re:/i.test(value) ? value : `Re: ${value}`;
   }
 
-  function getStudentArchivedMessageGroups() {
-    if (!currentStudentProfile?.id) return new Set();
-    try {
-      return new Set(JSON.parse(localStorage.getItem(`sdArchivedMessageGroups:${currentStudentProfile.id}`) || "[]"));
-    } catch {
-      return new Set();
-    }
-  }
-
-  function saveStudentArchivedMessageGroup(groupKey) {
-    if (!currentStudentProfile?.id || !groupKey) return;
-    const archived = getStudentArchivedMessageGroups();
-    archived.add(groupKey);
-    localStorage.setItem(`sdArchivedMessageGroups:${currentStudentProfile.id}`, JSON.stringify(Array.from(archived)));
-  }
-
-  function removeStudentArchivedMessageGroup(groupKey) {
-    if (!currentStudentProfile?.id || !groupKey) return;
-    const archived = getStudentArchivedMessageGroups();
-    archived.delete(groupKey);
-    localStorage.setItem(`sdArchivedMessageGroups:${currentStudentProfile.id}`, JSON.stringify(Array.from(archived)));
+  async function archiveMessage(messageIds, archived = true) {
+    if (!messageIds?.length || !window.lmsSupabase) return;
+    await window.lmsSupabase.from("messages")
+      .update({ is_archived: archived })
+      .in("id", messageIds)
+      .catch(() => {});
   }
 
   function bindStudentMessageViewTabs() {
@@ -2130,18 +2115,20 @@
 
     try {
       bindStudentMessageViewTabs();
-      const messageSelect = "id, sender_id, recipient_id, subject, body, is_read, created_at";
+      const messageSelect = "id, sender_id, recipient_id, subject, body, is_read, is_archived, created_at";
       const [{ data: receivedData, error: receivedError }, { data: sentData, error: sentError }] = await Promise.all([
         window.lmsSupabase
           .from("messages")
           .select(messageSelect)
           .eq("recipient_id", userId)
+          .eq("is_archived", activeStudentMessageView === "archive")
           .order("created_at", { ascending: false })
           .limit(100),
         window.lmsSupabase
           .from("messages")
           .select(messageSelect)
           .eq("sender_id", userId)
+          .eq("is_archived", activeStudentMessageView === "archive")
           .order("created_at", { ascending: false })
           .limit(100)
       ]);
@@ -2185,11 +2172,8 @@
         (profiles || []).forEach((profile) => profileMap.set(profile.id, profile));
       }
 
-      const archived = getStudentArchivedMessageGroups();
       const groups = groupStudentMessages(data, profileMap).filter((group) => {
-        const isArchived = archived.has(group.key);
-        if (activeStudentMessageView === "archive") return isArchived;
-        if (isArchived) return false;
+        if (activeStudentMessageView === "archive") return true;
         if (activeStudentMessageView === "history") return group.type === "sent";
         return group.type === "received";
       });
@@ -2261,11 +2245,11 @@
           await openStudentMessageComposer(msg.sender_id, { subject: getStudentReplySubject(group.subject) });
         });
         detail.querySelector("[data-sd-msg-archive]")?.addEventListener("click", async () => {
-          saveStudentArchivedMessageGroup(group.key);
+          await archiveMessage(group.messages.map((msg) => msg.id), true);
           await loadMessages(userId);
         });
         detail.querySelector("[data-sd-msg-restore]")?.addEventListener("click", async () => {
-          removeStudentArchivedMessageGroup(group.key);
+          await archiveMessage(group.messages.map((msg) => msg.id), false);
           await loadMessages(userId);
         });
         detail.querySelector("[data-sd-msg-delete-inbox]")?.addEventListener("click", async () => {

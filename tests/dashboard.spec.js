@@ -60,6 +60,7 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
         const baseRows = tableData[table];
         let rows = baseRows.slice();
         let limitValue = null;
+        let pendingUpdate = null;
         let queryError = missingViews.includes(table)
           ? { code: "42P01", message: 'relation "' + table + '" does not exist' }
           : null;
@@ -83,7 +84,9 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
                   .filter((submission) => getValue(submission, nestedCol) === val);
                 return true;
               }
-              const value = getValue(row, col);
+              const value = col === "is_archived" && typeof getValue(row, col) === "undefined"
+                ? false
+                : getValue(row, col);
               if (typeof value === "undefined") return true;
               return value === val;
             });
@@ -179,7 +182,7 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
             return api;
           },
           update: (payload) => {
-            rows.forEach((row) => Object.assign(row, payload));
+            pendingUpdate = payload;
             return api;
           },
           delete: () => {
@@ -192,10 +195,18 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
         };
 
         api.then = (resolve) => {
+          if (pendingUpdate) {
+            rows.forEach((row) => Object.assign(row, pendingUpdate));
+            pendingUpdate = null;
+          }
           const data = limitValue ? rows.slice(0, limitValue) : rows;
           return resolve(queryError ? { data: null, error: queryError, count: 0 } : makeResponse(data));
         };
         api.catch = (reject) => {
+          if (pendingUpdate) {
+            rows.forEach((row) => Object.assign(row, pendingUpdate));
+            pendingUpdate = null;
+          }
           const data = limitValue ? rows.slice(0, limitValue) : rows;
           const response = queryError ? { data: null, error: queryError, count: 0 } : makeResponse(data);
           return Promise.resolve(response).catch(reject);
@@ -851,12 +862,20 @@ test.describe("Student Dashboard", () => {
 
     await page.locator(".sd-inbox-item", { hasText: "Welcome" }).click();
     await page.locator("[data-sd-msg-archive]").click();
+    await expect.poll(async () => {
+      const messages = await page.evaluate(() => window.__QA_TABLE_DATA__.messages);
+      return messages.find((msg) => msg.id === "msg-1")?.is_archived;
+    }).toBe(true);
     await expect(page.locator(".sd-inbox-item", { hasText: "Welcome" })).toHaveCount(0);
     await page.locator("[data-student-message-view='archive']").click();
     await expect(page.locator(".sd-inbox-item", { hasText: "Welcome" })).toHaveCount(1);
     await page.locator(".sd-inbox-item", { hasText: "Welcome" }).click();
     await expect(page.locator("#messageDetail")).toContainText("Restore");
     await page.locator("[data-sd-msg-restore]").click();
+    await expect.poll(async () => {
+      const messages = await page.evaluate(() => window.__QA_TABLE_DATA__.messages);
+      return messages.find((msg) => msg.id === "msg-1")?.is_archived;
+    }).toBeFalsy();
 
     await page.locator("[data-student-message-view='inbox']").click();
     await page.locator(".sd-inbox-item", { hasText: "Welcome" }).click();
@@ -932,6 +951,12 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#messageDetail")).toContainText("Trainer One");
     await expect(page.locator("#messageDetail")).toContainText("Admin One");
     await page.locator("[data-sd-msg-archive]").click();
+    await expect.poll(async () => {
+      const messages = await page.evaluate(() => window.__QA_TABLE_DATA__.messages);
+      return messages
+        .filter((msg) => msg.sender_id === "student-1" && msg.subject === "Question about Module 1")
+        .every((msg) => msg.is_archived === true);
+    }).toBe(true);
     await expect(page.locator(".sd-inbox-item", { hasText: "Question about Module 1" })).toHaveCount(0);
     await page.locator("[data-student-message-view='archive']").click();
     await expect(page.locator(".sd-inbox-item", { hasText: "Question about Module 1" })).toHaveCount(1);

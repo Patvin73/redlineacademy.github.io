@@ -2459,27 +2459,12 @@
     if (body) body.focus();
   }
 
-  function getArchivedMessageGroups() {
-    if (!currentProfile?.id) return new Set();
-    try {
-      return new Set(JSON.parse(localStorage.getItem(`adArchivedMessageGroups:${currentProfile.id}`) || "[]"));
-    } catch {
-      return new Set();
-    }
-  }
-
-  function saveArchivedMessageGroup(groupKey) {
-    if (!currentProfile?.id || !groupKey) return;
-    const archived = getArchivedMessageGroups();
-    archived.add(groupKey);
-    localStorage.setItem(`adArchivedMessageGroups:${currentProfile.id}`, JSON.stringify(Array.from(archived)));
-  }
-
-  function removeArchivedMessageGroup(groupKey) {
-    if (!currentProfile?.id || !groupKey) return;
-    const archived = getArchivedMessageGroups();
-    archived.delete(groupKey);
-    localStorage.setItem(`adArchivedMessageGroups:${currentProfile.id}`, JSON.stringify(Array.from(archived)));
+  async function archiveMessage(messageIds, archived = true) {
+    if (!messageIds?.length || !window.lmsSupabase) return;
+    await window.lmsSupabase.from("messages")
+      .update({ is_archived: archived })
+      .in("id", messageIds)
+      .catch(() => {});
   }
 
   function bindMessageViewTabs() {
@@ -2538,19 +2523,21 @@
 
     try {
       bindMessageViewTabs();
-      const messageSelect = "id, sender_id, recipient_id, subject, body, is_read, read_at, created_at";
+      const messageSelect = "id, sender_id, recipient_id, subject, body, is_read, read_at, is_archived, created_at";
       // Profiles diambil terpisah lewat profileMap di bawah — sudah benar.
       const [{ data: receivedData }, { data: sentData }] = await Promise.all([
         window.lmsSupabase
           .from("messages")
           .select(messageSelect)
           .eq("recipient_id", currentProfile.id)
+          .eq("is_archived", activeMessageView === "archive")
           .order("created_at", { ascending: false })
           .limit(100),
         window.lmsSupabase
           .from("messages")
           .select(messageSelect)
           .eq("sender_id", currentProfile.id)
+          .eq("is_archived", activeMessageView === "archive")
           .order("created_at", { ascending: false })
           .limit(100)
       ]);
@@ -2593,11 +2580,8 @@
         (profiles || []).forEach((profile) => profileMap.set(profile.id, profile));
       }
 
-      const archived = getArchivedMessageGroups();
       const groups = groupMessagesForHistory(data).filter((group) => {
-        const isArchived = archived.has(group.key);
-        if (activeMessageView === "archive") return isArchived;
-        if (isArchived) return false;
+        if (activeMessageView === "archive") return true;
         if (activeMessageView === "history") return group.type === "sent";
         return group.type === "received";
       });
@@ -2668,11 +2652,11 @@
         }
 
         viewDetail.querySelector("[data-ad-msg-archive]")?.addEventListener("click", async () => {
-          saveArchivedMessageGroup(group.key);
+          await archiveMessage(group.messages.map((msg) => msg.id), true);
           await loadMessages();
         });
         viewDetail.querySelector("[data-ad-msg-restore]")?.addEventListener("click", async () => {
-          removeArchivedMessageGroup(group.key);
+          await archiveMessage(group.messages.map((msg) => msg.id), false);
           await loadMessages();
         });
         viewDetail.querySelector("[data-ad-msg-reply]")?.addEventListener("click", async () => {
