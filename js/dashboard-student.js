@@ -118,7 +118,7 @@
       lmsNoCertificates:     "No certificates yet. Complete a course to earn one!",
       lmsNoCourses:          "No active courses",
       lmsNoMessages:         "No messages yet",
-      lmsNoResources:        "Belum ada materi tersedia untuk kursus Anda.",
+      lmsNoResources:        "No materials available for your enrolled courses.",
       lmsNoNotifications:    "No notifications",
       lmsMarkAllRead:        "Mark all read",
       lmsNotifications:      "Notifications",
@@ -2117,18 +2117,26 @@
       bindStudentMessageViewTabs();
       const messageSelect = "id, sender_id, recipient_id, subject, body, is_read, is_archived, created_at";
       const [{ data: receivedData, error: receivedError }, { data: sentData, error: sentError }] = await Promise.all([
-        window.lmsSupabase
-          .from("messages")
-          .select(messageSelect)
-          .eq("recipient_id", userId)
-          .eq("is_archived", activeStudentMessageView === "archive")
+        (() => {
+          const q = window.lmsSupabase
+            .from("messages")
+            .select(messageSelect)
+            .eq("recipient_id", userId);
+          return activeStudentMessageView === "archive"
+            ? q.eq("is_archived", true)
+            : q.or("is_archived.eq.false,is_archived.is.null");
+        })()
           .order("created_at", { ascending: false })
           .limit(100),
-        window.lmsSupabase
-          .from("messages")
-          .select(messageSelect)
-          .eq("sender_id", userId)
-          .eq("is_archived", activeStudentMessageView === "archive")
+        (() => {
+          const q = window.lmsSupabase
+            .from("messages")
+            .select(messageSelect)
+            .eq("sender_id", userId);
+          return activeStudentMessageView === "archive"
+            ? q.eq("is_archived", true)
+            : q.or("is_archived.eq.false,is_archived.is.null");
+        })()
           .order("created_at", { ascending: false })
           .limit(100)
       ]);
@@ -2355,7 +2363,7 @@
           id, title, material_type, material_url, lesson_order,
           courses!inner(id, title, enrollment_type)
         `)
-        .in("courses.id", courseIds)
+        .in("course_id", courseIds)
         .not("material_url", "is", null)
         .order("lesson_order", { ascending: true });
 

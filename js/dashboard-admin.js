@@ -717,7 +717,8 @@
         ];
 
         for (const view of requiredViews) {
-          if (view.role !== "admin" && currentRole !== view.role) continue;
+          // Hanya cek view yang relevan untuk role saat ini
+          if (currentRole !== view.role) continue;
           const { error } = await window.lmsSupabase
             .from(view.name)
             .select("*")
@@ -2526,18 +2527,26 @@
       const messageSelect = "id, sender_id, recipient_id, subject, body, is_read, read_at, is_archived, created_at";
       // Profiles diambil terpisah lewat profileMap di bawah — sudah benar.
       const [{ data: receivedData }, { data: sentData }] = await Promise.all([
-        window.lmsSupabase
-          .from("messages")
-          .select(messageSelect)
-          .eq("recipient_id", currentProfile.id)
-          .eq("is_archived", activeMessageView === "archive")
+        (() => {
+          const q = window.lmsSupabase
+            .from("messages")
+            .select(messageSelect)
+            .eq("recipient_id", currentProfile.id);
+          return activeMessageView === "archive"
+            ? q.eq("is_archived", true)
+            : q.or("is_archived.eq.false,is_archived.is.null");
+        })()
           .order("created_at", { ascending: false })
           .limit(100),
-        window.lmsSupabase
-          .from("messages")
-          .select(messageSelect)
-          .eq("sender_id", currentProfile.id)
-          .eq("is_archived", activeMessageView === "archive")
+        (() => {
+          const q = window.lmsSupabase
+            .from("messages")
+            .select(messageSelect)
+            .eq("sender_id", currentProfile.id);
+          return activeMessageView === "archive"
+            ? q.eq("is_archived", true)
+            : q.or("is_archived.eq.false,is_archived.is.null");
+        })()
           .order("created_at", { ascending: false })
           .limit(100)
       ]);

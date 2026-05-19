@@ -336,6 +336,7 @@ async function installSupabaseStub(page, role, options = {}) {
       const storageStats = ${JSON.stringify(options.storageStats || null)};
       const uploadedFiles = [];
       const functionInvocations = [];
+      const queryLog = [];
       const shouldFailOverviewTrainerId = ${JSON.stringify(Boolean(options.missingOverviewTrainerId))};
       const shouldFailAvatarProfileUpdate = ${JSON.stringify(Boolean(options.avatarProfileUpdateError))};
       const missingViews = ${JSON.stringify(options.missingViews || [])};
@@ -495,7 +496,10 @@ async function installSupabaseStub(page, role, options = {}) {
             }),
             signOut: async () => ({ error: null })
           },
-          from: (table) => createQuery(table),
+          from: (table) => {
+            queryLog.push(table);
+            return createQuery(table);
+          },
           functions: {
             invoke: async (name, options = {}) => {
               functionInvocations.push({ name, body: options.body || null });
@@ -535,6 +539,7 @@ async function installSupabaseStub(page, role, options = {}) {
       window.__e2eGetTableData = () => tableData;
       window.__e2eGetUploadedFiles = () => uploadedFiles;
       window.__e2eGetFunctionInvocations = () => functionInvocations;
+      window.__e2eGetQueryLog = () => queryLog;
     })();
   `;
 
@@ -616,6 +621,15 @@ test("admin warns when a required database view is missing", async ({ page }) =>
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
 
   await expect(page.locator(".ad-main").getByText('Database view "v_course_overview" belum dibuat')).toBeVisible();
+});
+
+test("trainer does not check admin-only required views", async ({ page }) => {
+  await installSupabaseStub(page, "trainer", { missingViews: ["v_students_at_risk", "v_course_overview"] });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await expect(page.locator(".ad-main").getByText("Database view")).toHaveCount(0);
+  await expect.poll(async () => page.evaluate(() => window.__e2eGetQueryLog())).not.toContain("v_students_at_risk");
+  await expect.poll(async () => page.evaluate(() => window.__e2eGetQueryLog())).not.toContain("v_course_overview");
 });
 
 test("admin KPI cards navigate to their target sections and count published courses only", async ({ page }) => {
