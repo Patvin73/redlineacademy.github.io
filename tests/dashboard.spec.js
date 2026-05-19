@@ -1,10 +1,11 @@
 const { test, expect } = require("@playwright/test");
 
-function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectPass123!" }) {
+function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectPass123!", missingViews = [] }) {
   return `
     (() => {
       const tableData = ${JSON.stringify(tableData)};
       const currentUser = ${JSON.stringify(currentUser)};
+      const missingViews = ${JSON.stringify(missingViews)};
       let currentPassword = ${JSON.stringify(initialPassword)};
       const functionInvocations = [];
 
@@ -59,6 +60,9 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
         const baseRows = tableData[table];
         let rows = baseRows.slice();
         let limitValue = null;
+        let queryError = missingViews.includes(table)
+          ? { code: "42P01", message: 'relation "' + table + '" does not exist' }
+          : null;
 
         const api = {
           select: (expression = "") => {
@@ -139,8 +143,8 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
             limitValue = n;
             return api;
           },
-          single: () => Promise.resolve({ data: rows[0] || null, error: null }),
-          maybeSingle: () => Promise.resolve({ data: rows[0] || null, error: null }),
+          single: () => Promise.resolve(queryError ? { data: null, error: queryError } : { data: rows[0] || null, error: null }),
+          maybeSingle: () => Promise.resolve(queryError ? { data: null, error: queryError } : { data: rows[0] || null, error: null }),
           insert: (payload) => {
             const items = Array.isArray(payload) ? payload : [payload];
             items.forEach((item) => {
@@ -189,9 +193,13 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
 
         api.then = (resolve) => {
           const data = limitValue ? rows.slice(0, limitValue) : rows;
-          return resolve(makeResponse(data));
+          return resolve(queryError ? { data: null, error: queryError, count: 0 } : makeResponse(data));
         };
-        api.catch = (reject) => Promise.resolve(makeResponse(rows)).catch(reject);
+        api.catch = (reject) => {
+          const data = limitValue ? rows.slice(0, limitValue) : rows;
+          const response = queryError ? { data: null, error: queryError, count: 0 } : makeResponse(data);
+          return Promise.resolve(response).catch(reject);
+        };
         return api;
       };
 
@@ -559,6 +567,20 @@ function makeMarketerFixture() {
 }
 
 test.describe("Student Dashboard", () => {
+  test("logs SQL guidance when the student dashboard view is missing", async ({ page }) => {
+    const consoleMessages = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") consoleMessages.push(message.text());
+    });
+
+    const fixture = makeStudentFixture();
+    fixture.missingViews = ["v_student_dashboard"];
+    await installSupabaseStub(page, fixture);
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
+
+    await expect.poll(() => consoleMessages.join("\n")).toContain("Run SQL to create public.v_student_dashboard");
+  });
+
   test("refreshes profile form when returning to profile section", async ({ page }) => {
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);

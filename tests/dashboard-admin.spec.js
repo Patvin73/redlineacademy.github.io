@@ -338,6 +338,7 @@ async function installSupabaseStub(page, role, options = {}) {
       const functionInvocations = [];
       const shouldFailOverviewTrainerId = ${JSON.stringify(Boolean(options.missingOverviewTrainerId))};
       const shouldFailAvatarProfileUpdate = ${JSON.stringify(Boolean(options.avatarProfileUpdateError))};
+      const missingViews = ${JSON.stringify(options.missingViews || [])};
       const shouldLoadStoredMessages = ${JSON.stringify(!hasMessageFixture)};
       const storedMessages = window.localStorage.getItem("__e2eMessages");
       if (shouldLoadStoredMessages && storedMessages) {
@@ -362,7 +363,9 @@ async function installSupabaseStub(page, role, options = {}) {
         let limitValue = null;
         let pendingUpdate = null;
         let pendingDelete = false;
-        let queryError = null;
+        let queryError = missingViews.includes(table)
+          ? { code: "42P01", message: 'relation "' + table + '" does not exist' }
+          : null;
 
         const toComparable = (value) => {
           if (!value) return value;
@@ -604,6 +607,13 @@ test("dashboard admin renders core sections", { tag: "@critical" }, async ({ pag
   await expect(page.locator("#kpiActiveCourses")).toBeVisible();
   await expect(page.locator("#kpiPendingGrading")).toBeVisible();
   await expect(page.locator("#kpiCompletionRate")).toBeVisible();
+});
+
+test("admin warns when a required database view is missing", async ({ page }) => {
+  await installSupabaseStub(page, "admin", { missingViews: ["v_course_overview"] });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await expect(page.locator(".ad-main").getByText('Database view "v_course_overview" belum dibuat')).toBeVisible();
 });
 
 test("admin KPI cards navigate to their target sections and count published courses only", async ({ page }) => {

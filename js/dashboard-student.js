@@ -1028,7 +1028,15 @@
         .eq("student_id", userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === "42P01") {
+          console.error(
+            "[LMS] View missing: v_student_dashboard. Run SQL to create public.v_student_dashboard with student_id, courses_enrolled, lessons_completed, pending_submissions, and certificates_earned columns.",
+            error
+          );
+        }
+        throw error;
+      }
 
       if ($("statCoursesEnrolled"))    $("statCoursesEnrolled").textContent    = data.courses_enrolled    || 0;
       if ($("statLessonsCompleted"))   $("statLessonsCompleted").textContent   = data.lessons_completed   || 0;

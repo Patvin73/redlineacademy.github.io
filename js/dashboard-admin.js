@@ -709,6 +709,31 @@
       currentProfile = profile;
       currentRole    = profile.role; // "trainer" or "admin"
 
+      async function checkRequiredViews() {
+        const requiredViews = [
+          { name: "v_trainer_dashboard", role: "trainer" },
+          { name: "v_students_at_risk", role: "admin" },
+          { name: "v_course_overview", role: "admin" },
+        ];
+
+        for (const view of requiredViews) {
+          if (view.role !== "admin" && currentRole !== view.role) continue;
+          const { error } = await window.lmsSupabase
+            .from(view.name)
+            .select("*")
+            .limit(1);
+          if (error?.code === "42P01") {
+            console.error(`[LMS] View missing: ${view.name}. Run migration SQL.`);
+            const banner = document.createElement("div");
+            banner.style.cssText = "background:#fff3cd;color:#856404;padding:10px 16px;font-size:13px;";
+            banner.textContent = `⚠️ Database view "${view.name}" belum dibuat. Beberapa fitur mungkin tidak berfungsi.`;
+            document.querySelector(".ad-main")?.prepend(banner);
+          }
+        }
+      }
+
+      await checkRequiredViews();
+
       populateUI(profile);
       await loadSystemSettings();
 
