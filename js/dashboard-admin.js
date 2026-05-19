@@ -2503,7 +2503,7 @@
     });
   }
 
-  loadMessages = async function loadMessagesGrouped() {
+  async function loadMessages(...args) {
     const inbox = $("adInboxList");
     const empty = $("adInboxEmpty");
     const viewEmpty = $("adMsgViewEmpty");
@@ -2752,7 +2752,7 @@
         inbox.insertBefore(item, empty);
       });
     } catch (err) { console.warn("Messages load error:", err.message); }
-  };
+  }
 
   /* ================================================================
      REPORTS

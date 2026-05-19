@@ -2110,92 +2110,8 @@
     if (subject) subject.focus();
   }
 
-  async function loadMessages(userId) {
-    const inbox = $("inboxList");
-    const inboxEmpty = $("inboxEmpty");
-    const view = $("messageView");
-    const viewEmpty = $("messageViewEmpty");
-    const detail = $("messageDetail");
-    const composeForm = $("studentMsgComposeForm");
-    if (!inbox || !view) return;
-
-    const openMessage = async (msg) => {
-      setMessagePanelVisible(viewEmpty, false);
-      setMessagePanelVisible(composeForm, false);
-      const target = detail || view;
-      target.innerHTML = `
-        <div class="sd-message-view__body">
-          <p class="sd-inbox-item__name">${escHtml(msg.profiles?.full_name || "System")}</p>
-          <p class="sd-inbox-item__time">${formatDateTime(msg.created_at)}</p>
-          <h3>${escHtml(msg.subject || "Message")}</h3>
-          <p>${escHtml(msg.body || "-").replace(/\n/g, "<br>")}</p>
-        </div>`;
-      if (detail) setMessagePanelVisible(detail, true);
-
-      if (!msg.is_read && msg.recipient_id === userId) {
-        await window.lmsSupabase
-          .from("messages")
-          .update({ is_read: true, read_at: new Date().toISOString() })
-          .eq("id", msg.id)
-          .catch(() => {});
-        msg.is_read = true;
-        studentUnreadMessages = inbox.querySelectorAll(".sd-inbox-item.unread").length;
-        updateStudentAttentionIndicators();
-      }
-    };
-
-    try {
-      const { data, error } = await window.lmsSupabase
-        .from("messages")
-        .select("id, sender_id, recipient_id, subject, body, is_read, created_at")
-        .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`)
-        .order("created_at", { ascending: false })
-        .limit(20);
-
-      if (error) throw error;
-      if (!data || data.length === 0) {
-        studentUnreadMessages = 0;
-        updateStudentAttentionIndicators();
-        throw new Error("No messages");
-      }
-
-      if (inboxEmpty) inboxEmpty.style.display = "none";
-      inbox.querySelectorAll(".sd-inbox-item").forEach((el) => el.remove());
-
-      const unreadCount = (data || []).filter((m) => !m.is_read && m.recipient_id === userId).length;
-      studentUnreadMessages = unreadCount;
-      updateStudentAttentionIndicators();
-
-      data.forEach((msg) => {
-        const item = document.createElement("div");
-        item.className = `sd-inbox-item${!msg.is_read && msg.recipient_id === userId ? " unread" : ""}`;
-        item.innerHTML = `
-          <div class="sd-avatar sd-avatar--sm">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-          </div>
-          <div class="sd-inbox-item__body">
-            <p class="sd-inbox-item__name">${escHtml(msg.profiles?.full_name || "System")}</p>
-            <p class="sd-inbox-item__preview">${escHtml(msg.body?.substring(0, 60) || "—")}</p>
-          </div>
-          <span class="sd-inbox-item__time">${timeAgo(msg.created_at)}</span>`;
-        item.addEventListener("click", async () => {
-          inbox.querySelectorAll(".sd-inbox-item").forEach((el) => el.classList.remove("active"));
-          item.classList.add("active");
-          item.classList.remove("unread");
-          await openMessage(msg);
-        });
-        inbox.insertBefore(item, inboxEmpty);
-      });
-    } catch {
-      if (inboxEmpty) inboxEmpty.style.display = "flex";
-      if (composeForm?.hidden) {
-        setMessagePanelVisible(detail, false);
-        setMessagePanelVisible(viewEmpty, true);
-      }
-    }
-  }
-
-  loadMessages = async function loadStudentMessagesGrouped(userId) {
+  async function loadMessages(...args) {
+    const [userId] = args;
     const inbox = $("inboxList");
     const inboxEmpty = $("inboxEmpty");
     const view = $("messageView");
@@ -2401,7 +2317,7 @@
         setMessagePanelVisible(viewEmpty, true);
       }
     }
-  };
+  }
 
   async function loadResources(userId) {
     const grid = $("resourceGrid");
