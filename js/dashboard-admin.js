@@ -608,15 +608,13 @@
     const exportReportBtn = $("exportReportBtn");
     const exportPaymentsBtn = $("exportPaymentsBtn");
 
-    const openSettings = () => {
-      if (currentRole === "admin" && window._adActivateSection) window._adActivateSection("settings");
-    };
-
-    profileBtn && profileBtn.addEventListener("click", openSettings);
+    profileBtn && profileBtn.addEventListener("click", () => {
+      if (window._adActivateSection) window._adActivateSection("profile");
+    });
     profileBtn && profileBtn.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        openSettings();
+        if (window._adActivateSection) window._adActivateSection("profile");
       }
     });
 
