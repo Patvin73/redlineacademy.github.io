@@ -1716,7 +1716,6 @@
       setTimeout(() => {
         resetCourseBuilderForm();
         $("courseBuilderPanel").hidden = true;
-        loadSectionData("courses");
         loadedSections.delete("courses");
         loadCoursesList();
       }, 1200);

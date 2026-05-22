@@ -2269,12 +2269,14 @@
             .eq("id", messageId);
           await loadMessages(userId);
         });
-        detail.querySelector("[data-sd-msg-delete-all]")?.addEventListener("click", async () => {
-          await window.lmsSupabase
-            .from("messages")
-            .delete()
-            .in("id", group.messages.map((msg) => msg.id));
-          await loadMessages(userId);
+        detail.querySelector("[data-sd-msg-delete-all]")?.addEventListener("click", () => {
+          showStudentConfirmModal("Hapus pesan yang sudah dikirim?", async () => {
+            await window.lmsSupabase
+              .from("messages")
+              .delete()
+              .in("id", group.messages.map((msg) => msg.id));
+            await loadMessages(userId);
+          });
         });
       };
 
@@ -2586,6 +2588,26 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
+  }
+
+  function showStudentConfirmModal(message, onConfirm) {
+    const overlay = document.createElement("div");
+    overlay.className = "sd-modal-overlay";
+    overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;";
+    overlay.innerHTML = `
+      <div style="background:var(--sd-bg,#fff);border-radius:12px;padding:24px;max-width:360px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.18);">
+        <p style="margin:0 0 20px;font-size:.95rem;">${escHtml(message)}</p>
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button class="sd-btn sd-btn--outline" id="sdConfirmCancel">Batal</button>
+          <button class="sd-btn sd-btn--danger" id="sdConfirmOk">Hapus</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector("#sdConfirmCancel").onclick = () => overlay.remove();
+    overlay.querySelector("#sdConfirmOk").onclick = () => {
+      overlay.remove();
+      onConfirm();
+    };
   }
 
   function withAvatarCacheBust(url) {
