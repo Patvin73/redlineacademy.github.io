@@ -66,6 +66,7 @@
       adSearchUsers:         "Cari user...",
       adSearchPlaceholder:   "Cari student, kursus...",
       adCreateCourse:        "Buat Kursus",
+      adCreateAssignment:    "Buat Tugas",
       adTabCourseInfo:       "Info Kursus",
       adTabModules:          "Modul & Lesson",
       adTabCourseSettings:   "Pengaturan",
@@ -232,6 +233,7 @@
       adSearchUsers:         "Search users...",
       adSearchPlaceholder:   "Search students, courses...",
       adCreateCourse:        "Create Course",
+      adCreateAssignment:    "Create Assignment",
       adTabCourseInfo:       "Course Info",
       adTabModules:          "Modules & Lessons",
       adTabCourseSettings:   "Settings",
@@ -530,6 +532,7 @@
     setupTopbarNotifications();
     setupCourseBuilder();
     setupGradingPanel();
+    setupAssignmentForm();
     setupScheduleForm();
     setupAnnouncementForm();
     setupManualPaymentForm();
@@ -2035,6 +2038,100 @@
     // Request resubmit
     const resubBtn = $("reqResubmitBtn");
     resubBtn && resubBtn.addEventListener("click", () => submitGrade("resubmit_required"));
+  }
+
+  function setupAssignmentForm() {
+    const createBtn = $("createAssignmentBtn");
+    const card = $("assignmentFormCard");
+    const closeBtn = $("closeAssignmentForm");
+    const cancelBtn = $("cancelAssignmentBtn");
+    const saveBtn = $("saveAssignmentBtn");
+    const msg = $("assignmentFormMsg");
+
+    const setMsg = (text, isErr = false) => {
+      if (!msg) return;
+      msg.textContent = text || "";
+      msg.style.color = isErr ? "var(--sd-red)" : "var(--sd-green)";
+    };
+
+    const resetForm = () => {
+      if ($("atTitle")) $("atTitle").value = "";
+      if ($("atDesc")) $("atDesc").value = "";
+      if ($("atCourse")) $("atCourse").value = "";
+      if ($("atType")) $("atType").value = "assignment";
+      if ($("atDueAt")) $("atDueAt").value = "";
+      if ($("atPassMark")) $("atPassMark").value = 70;
+      if ($("atMaxScore")) $("atMaxScore").value = 100;
+      setMsg("");
+    };
+
+    const openForm = async () => {
+      resetForm();
+      card.hidden = false;
+      await populateCourseSelect("atCourse");
+      card.scrollIntoView({ behavior: "smooth" });
+    };
+
+    const closeForm = () => {
+      resetForm();
+      card.hidden = true;
+    };
+
+    createBtn && createBtn.addEventListener("click", openForm);
+    closeBtn && closeBtn.addEventListener("click", closeForm);
+    cancelBtn && cancelBtn.addEventListener("click", closeForm);
+    saveBtn && saveBtn.addEventListener("click", saveAssignment);
+  }
+
+  async function saveAssignment() {
+    const msg = $("assignmentFormMsg");
+    const saveBtn = $("saveAssignmentBtn");
+    const title = $("atTitle")?.value.trim();
+    const courseId = $("atCourse")?.value;
+    const dueAt = $("atDueAt")?.value;
+    const setMsg = (text, isErr = false) => {
+      if (!msg) return;
+      msg.textContent = text || "";
+      msg.style.color = isErr ? "var(--sd-red)" : "var(--sd-green)";
+    };
+    const closeForm = () => {
+      if ($("atTitle")) $("atTitle").value = "";
+      if ($("atDesc")) $("atDesc").value = "";
+      if ($("atCourse")) $("atCourse").value = "";
+      if ($("atType")) $("atType").value = "assignment";
+      if ($("atDueAt")) $("atDueAt").value = "";
+      if ($("atPassMark")) $("atPassMark").value = 70;
+      if ($("atMaxScore")) $("atMaxScore").value = 100;
+      setMsg("");
+      if ($("assignmentFormCard")) $("assignmentFormCard").hidden = true;
+    };
+
+    if (!title || !courseId || !dueAt) {
+      setMsg("Judul, kursus, dan deadline wajib diisi.", true);
+      return;
+    }
+    if (saveBtn) saveBtn.disabled = true;
+    try {
+      const payload = {
+        trainer_id: currentProfile.id,
+        course_id: courseId,
+        title,
+        description: $("atDesc")?.value.trim() || null,
+        type: $("atType")?.value || "assignment",
+        due_at: new Date(dueAt).toISOString(),
+        pass_mark: parseInt($("atPassMark")?.value || 70, 10),
+        max_score: parseInt($("atMaxScore")?.value || 100, 10),
+        is_published: true,
+      };
+      const { error } = await window.lmsSupabase.from("assignments").insert(payload);
+      if (error) throw error;
+      setMsg("✓ Tugas berhasil dibuat!");
+      setTimeout(() => { closeForm(); loadSubmissionQueue(currentGradingFilter); }, 1200);
+    } catch (err) {
+      setMsg("Error: " + (err.message || "Gagal menyimpan"), true);
+    } finally {
+      if (saveBtn) saveBtn.disabled = false;
+    }
   }
 
   async function submitGrade(newStatus) {

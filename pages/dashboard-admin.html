@@ -1355,6 +1355,64 @@
                 All
               </button>
             </div>
+            <button
+              class="ad-btn ad-btn--primary"
+              id="createAssignmentBtn"
+              data-i18n="adCreateAssignment"
+            >
+              + Buat Tugas
+            </button>
+          </div>
+
+          <div class="ad-card" id="assignmentFormCard" hidden>
+            <div class="ad-card__header">
+              <h3 id="assignmentFormTitle">Buat Tugas Baru</h3>
+              <button class="ad-icon-btn" id="closeAssignmentForm" aria-label="Tutup">✕</button>
+            </div>
+            <div class="ad-card__body" style="display:grid;gap:16px;">
+              <div class="ad-field">
+                <label class="ad-label" for="atTitle">Judul Tugas *</label>
+                <input class="ad-input" id="atTitle" type="text" placeholder="Contoh: Studi Kasus Perawatan Lanjut Usia" required />
+              </div>
+              <div class="ad-field">
+                <label class="ad-label" for="atDesc">Deskripsi / Instruksi</label>
+                <textarea class="ad-input ad-textarea" id="atDesc" rows="4" placeholder="Jelaskan apa yang harus dikerjakan student..."></textarea>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="ad-field">
+                  <label class="ad-label" for="atCourse">Kursus *</label>
+                  <select class="ad-input ad-select" id="atCourse" required>
+                    <option value="">Pilih kursus...</option>
+                  </select>
+                </div>
+                <div class="ad-field">
+                  <label class="ad-label" for="atType">Tipe</label>
+                  <select class="ad-input ad-select" id="atType">
+                    <option value="assignment">📋 Assignment (Upload File)</option>
+                    <option value="quiz">📝 Quiz (Teks + Upload)</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                <div class="ad-field">
+                  <label class="ad-label" for="atDueAt">Deadline *</label>
+                  <input class="ad-input" id="atDueAt" type="datetime-local" required />
+                </div>
+                <div class="ad-field">
+                  <label class="ad-label" for="atPassMark">Nilai Lulus (%)</label>
+                  <input class="ad-input" id="atPassMark" type="number" min="0" max="100" value="70" />
+                </div>
+                <div class="ad-field">
+                  <label class="ad-label" for="atMaxScore">Nilai Maksimal</label>
+                  <input class="ad-input" id="atMaxScore" type="number" min="1" value="100" />
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center;">
+                <p class="ad-grading-msg" id="assignmentFormMsg" aria-live="polite"></p>
+                <button class="ad-btn ad-btn--outline" id="cancelAssignmentBtn" type="button">Batal</button>
+                <button class="ad-btn ad-btn--primary" id="saveAssignmentBtn" type="button">Simpan & Terbitkan</button>
+              </div>
+            </div>
           </div>
 
           <div class="ad-grading-layout" id="gradingLayout">
