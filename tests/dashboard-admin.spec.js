@@ -224,7 +224,7 @@ async function installSupabaseStub(page, role, options = {}) {
     }
   ];
   const certificates = [{ id: "cert-1" }, { id: "cert-2" }];
-  const lessons = [];
+  const lessons = options.lessons ? options.lessons.map((lesson) => ({ ...lesson })) : [];
   const enrollments = [
     {
       id: "enroll-1",
@@ -1470,6 +1470,60 @@ test("trainer can open course builder edit flow", async ({ page }) => {
 
   await expect(page.locator("#courseBuilderPanel")).toBeVisible();
   await expect(page.locator("#builderTitle")).toHaveText("Edit Course");
+});
+
+test("trainer can edit existing course lessons without reuploading materials", async ({ page }) => {
+  await installSupabaseStub(page, "trainer", {
+    lessons: [
+      {
+        id: "lesson-1",
+        course_id: "course-1",
+        title: "Orientation Video",
+        material_type: "video",
+        module_title: "Orientation",
+        module_order: 1,
+        lesson_order: 1,
+        material_url: "https://storage.example.com/course-materials/courses/course-1/module-1/orientation.mp4"
+      },
+      {
+        id: "lesson-2",
+        course_id: "course-1",
+        title: "Care Guide",
+        material_type: "pdf",
+        module_title: "Care Materials",
+        module_order: 2,
+        lesson_order: 2,
+        material_url: "https://storage.example.com/course-materials/courses/course-1/module-2/care-guide.pdf"
+      }
+    ]
+  });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='courses']").click();
+  const courseRow = page.locator(".ad-course-row", { hasText: "Leadership Basics" });
+  await courseRow.locator("[data-action='edit']").click();
+  await page.click(".ad-builder-tab[data-tab='modules']");
+
+  const modules = page.locator("#builderModulesList .ad-module-item");
+  await expect(modules).toHaveCount(2);
+  await expect(modules.nth(0).locator(".ad-module-item__header input")).toHaveValue("Orientation");
+  await expect(modules.nth(0).locator(".ad-input--grow")).toHaveValue("Orientation Video");
+  await expect(modules.nth(0).locator(".ad-material-file")).toHaveText("orientation.mp4");
+  await expect(modules.nth(1).locator(".ad-module-item__header input")).toHaveValue("Care Materials");
+  await expect(modules.nth(1).locator(".ad-input--grow")).toHaveValue("Care Guide");
+  await expect(modules.nth(1).locator(".ad-material-file")).toHaveText("care-guide.pdf");
+
+  await page.click("#saveDraftBtn");
+  await expect(page.locator("#builderMsg")).toContainText("Course saved");
+
+  const uploadedFiles = await page.evaluate(() => window.__e2eGetUploadedFiles());
+  expect(uploadedFiles).toHaveLength(0);
+  const lessons = await page.evaluate(() => window.__e2eGetTableData().lessons);
+  expect(lessons).toHaveLength(2);
+  expect(lessons.map((lesson) => lesson.material_url)).toEqual([
+    "https://storage.example.com/course-materials/courses/course-1/module-1/orientation.mp4",
+    "https://storage.example.com/course-materials/courses/course-1/module-2/care-guide.pdf"
+  ]);
 });
 
 test("trainer sees empty activity feed state", async ({ page }) => {

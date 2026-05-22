@@ -1554,7 +1554,10 @@
     const fileInput = lessonItem.querySelector(".ad-material-input");
     const label = lessonItem.querySelector(".ad-material-file");
     if (!label) return;
-    label.textContent = fileInput?.files?.[0]?.name || "No file selected";
+    const fileName = fileInput?.files?.[0]?.name || "";
+    label.textContent = fileName || "No file selected";
+    label.style.color = "";
+    delete label.dataset.existingUrl;
   }
 
   function collectCourseModules() {
@@ -1569,7 +1572,8 @@
             const title = lessonEl.querySelector(".ad-input--grow")?.value.trim() || "";
             const materialType = lessonEl.querySelector(".ad-lesson-type")?.value || "video";
             const file = lessonEl.querySelector(".ad-material-input")?.files?.[0] || null;
-            return { title, materialType, file };
+            const existingUrl = lessonEl.querySelector(".ad-material-file")?.dataset.existingUrl || null;
+            return { title, materialType, file, existingUrl };
           })
           .filter((lesson) => lesson.title || lesson.file);
 
@@ -1626,7 +1630,9 @@
     let lessonOrder = 1;
     for (const module of modules) {
       for (const lesson of module.lessons) {
-        const material = await uploadLessonMaterial(lesson.file, courseId, module.order, lessonOrder, lesson.materialType);
+        const material = lesson.file
+          ? await uploadLessonMaterial(lesson.file, courseId, module.order, lessonOrder, lesson.materialType)
+          : { materialPath: null, materialUrl: lesson.existingUrl || null };
         rows.push({
           course_id: courseId,
           title: lesson.title || lesson.file?.name || "Untitled lesson",
@@ -1809,6 +1815,74 @@
         }
       }
       $("courseBuilderPanel").scrollIntoView({ behavior: "smooth" });
+
+      // Load existing lessons ke builder
+      try {
+        const { data: existingLessons } = await window.lmsSupabase
+          .from("lessons")
+          .select("id, title, material_type, module_title, module_order, lesson_order, material_url")
+          .eq("course_id", courseId)
+          .order("lesson_order", { ascending: true });
+
+        if (existingLessons && existingLessons.length > 0) {
+          // Group by module
+          const moduleMap = new Map();
+          existingLessons.forEach((lesson) => {
+            const key = lesson.module_order || 1;
+            if (!moduleMap.has(key)) {
+              moduleMap.set(key, {
+                title: lesson.module_title || `Module ${key}`,
+                lessons: []
+              });
+            }
+            moduleMap.get(key).lessons.push(lesson);
+          });
+
+          // Clear existing modules, keep the template module available for addModule().
+          const modulesList = $("builderModulesList");
+          if (!modulesList) return;
+          const templateModule = modulesList.querySelector("#moduleTemplate") || modulesList.querySelector(".ad-module-item");
+          const lessonTemplate = modulesList.querySelector(".ad-lesson-item")?.cloneNode(true);
+          modulesList.querySelectorAll(".ad-module-item").forEach((el) => {
+            if (el !== templateModule) el.remove();
+          });
+
+          const sortedModules = [...moduleMap.entries()].sort((a, b) => a[0] - b[0]);
+          for (const [index, [, moduleData]] of sortedModules.entries()) {
+            if (index > 0) addModule(); // tambah module baru
+            const moduleEls = modulesList.querySelectorAll(".ad-module-item");
+            const lastModule = index === 0 && templateModule
+              ? templateModule
+              : moduleEls[moduleEls.length - 1];
+            if (!lastModule) continue;
+            const titleInput = lastModule.querySelector(".ad-module-item__header input");
+            if (titleInput) titleInput.value = moduleData.title;
+
+            // Hapus lesson template pertama, tambah per lesson
+            lastModule.querySelectorAll(".ad-lesson-item").forEach((el) => el.remove());
+            for (const lesson of moduleData.lessons) {
+              const lastLesson = lessonTemplate?.cloneNode(true);
+              if (!lastLesson) continue;
+              const fileInput = lastLesson.querySelector(".ad-material-input");
+              if (fileInput) fileInput.value = "";
+              lastModule.querySelector(".ad-lessons-list")?.appendChild(lastLesson);
+              const typeSelect = lastLesson.querySelector(".ad-lesson-type");
+              const titleEl = lastLesson.querySelector(".ad-input--grow");
+              const fileLabel = lastLesson.querySelector(".ad-material-file");
+              if (typeSelect) typeSelect.value = lesson.material_type || "video";
+              if (titleEl) titleEl.value = lesson.title || "";
+              if (fileLabel && lesson.material_url) {
+                const filename = lesson.material_url.split("/").pop();
+                fileLabel.textContent = filename || "Existing file";
+                fileLabel.style.color = "var(--sd-green)";
+                fileLabel.dataset.existingUrl = lesson.material_url;
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("Could not load existing lessons for edit:", err.message);
+      }
     } catch (err) {
       showToastError("Edit failed: " + err.message);
     }
