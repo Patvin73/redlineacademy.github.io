@@ -34,6 +34,7 @@ function buildSupabaseStub({ tableData, currentUser }) {
         let rows = baseRows.slice();
         let limitValue = null;
         let queryError = null;
+        let pendingUpdatePayload = null;
 
         const api = {
           select: (expression = "") => {
@@ -93,6 +94,7 @@ function buildSupabaseStub({ tableData, currentUser }) {
             return api;
           },
           single: () => Promise.resolve({ data: rows[0] || null, error: null }),
+          maybeSingle: () => Promise.resolve({ data: rows[0] || null, error: null }),
           insert: (payload) => {
             const items = Array.isArray(payload) ? payload : [payload];
             items.forEach((item) => {
@@ -113,7 +115,7 @@ function buildSupabaseStub({ tableData, currentUser }) {
               queryError = { message: "Avatar profile update failed" };
               return api;
             }
-            rows.forEach((row) => Object.assign(row, payload));
+            pendingUpdatePayload = payload;
             return api;
           },
           delete: () => {
@@ -126,6 +128,10 @@ function buildSupabaseStub({ tableData, currentUser }) {
         };
 
         api.then = (resolve) => {
+          if (pendingUpdatePayload && !queryError) {
+            rows.forEach((row) => Object.assign(row, pendingUpdatePayload));
+            pendingUpdatePayload = null;
+          }
           const data = limitValue ? rows.slice(0, limitValue) : rows;
           return resolve(queryError ? { data: null, error: queryError, count: 0 } : makeResponse(data));
         };
@@ -574,6 +580,63 @@ test.describe("Student and marketer flows", {
       path: "student-1/assign-1/submission.pdf",
       name: "submission.pdf",
       options: { upsert: true, contentType: "application/pdf" }
+    });
+  });
+
+  test("student assignment resubmit updates existing submission", async ({ page }) => {
+    const stub = makeStudentStub("student");
+    stub.tableData.assignments.push({
+      id: "assign-3",
+      course_id: "course-1",
+      title: "Care Plan Rewrite",
+      type: "assignment",
+      course_title: "Caregiver Basics",
+      due_at: "2026-03-27"
+    });
+    stub.tableData.assignment_submissions.push({
+      id: "sub-3",
+      assignment_id: "assign-3",
+      student_id: "student-1",
+      status: "resubmit_required",
+      submitted_at: "2026-03-10T08:00:00.000Z",
+      notes: "Please revise the patient plan.",
+      file_urls: ["https://example.com/old-submission.pdf"]
+    });
+    await installSupabaseStub(page, stub);
+
+    await page.goto("/pages/dashboard-student.html");
+    await page.locator(".sd-nav__item[data-section='assignments']").click();
+
+    const resubmitItem = page.locator(".sd-assignment-item[data-status='resubmit_required']");
+    await expect(resubmitItem).toHaveCount(1);
+    await resubmitItem.locator("input[type='file']").setInputFiles({
+      name: "rewrite.pdf",
+      mimeType: "application/pdf",
+      buffer: Buffer.from("%PDF-1.4 revised student submission")
+    });
+    await resubmitItem.locator("button[data-action='submit']").click();
+
+    await page.locator(".sd-filter-tab[data-filter='submitted']").click();
+    await expect(
+      page.locator(".sd-assignment-item[data-status='submitted']").filter({ hasText: "Care Plan Rewrite" })
+    ).toHaveCount(1);
+
+    const submissions = await page.evaluate(async () => {
+      const { data } = await window.lmsSupabase
+        .from("assignment_submissions")
+        .select("*")
+        .eq("assignment_id", "assign-3");
+      return data || [];
+    });
+
+    expect(submissions).toHaveLength(1);
+    expect(submissions[0]).toMatchObject({
+      id: "sub-3",
+      assignment_id: "assign-3",
+      student_id: "student-1",
+      status: "submitted",
+      notes: null,
+      file_urls: ["https://example.com/assignment-submissions/student-1/assign-3/rewrite.pdf"]
     });
   });
 

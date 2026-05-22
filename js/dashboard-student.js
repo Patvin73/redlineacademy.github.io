@@ -1351,7 +1351,7 @@
       const items = list.querySelectorAll(".sd-assignment-item");
       items.forEach((item) => {
         const status = (item.dataset.status || "pending").toLowerCase();
-        const isVisible = activeFilter === status;
+        const isVisible = activeFilter === status || (activeFilter === "pending" && status === "resubmit_required");
         item.style.display = isVisible ? "" : "none";
       });
     };
@@ -1503,15 +1503,41 @@
           try {
             if (!file) throw new Error(typeof t === "function" ? t("lmsFileRequired") : "Please select a file before submitting.");
             const fileUrl = await uploadAssignmentSubmissionFile(file, userId, assignmentId);
-            await window.lmsSupabase
+            // Cek apakah sudah ada submission sebelumnya
+            const { data: existing } = await window.lmsSupabase
               .from("assignment_submissions")
-              .insert({
-                student_id: userId,
-                assignment_id: assignmentId,
-                status: "submitted",
-                submitted_at: new Date().toISOString(),
-                file_urls: [fileUrl]
-              });
+              .select("id, status")
+              .eq("student_id", userId)
+              .eq("assignment_id", assignmentId)
+              .maybeSingle();
+
+            if (existing?.status === "submitted" || existing?.status === "graded") {
+              throw new Error("Tugas ini sudah dikumpulkan dan tidak bisa disubmit ulang.");
+            }
+
+            if (existing?.id) {
+              // Update existing submission (untuk kasus resubmit_required)
+              await window.lmsSupabase
+                .from("assignment_submissions")
+                .update({
+                  status: "submitted",
+                  submitted_at: new Date().toISOString(),
+                  file_urls: [fileUrl],
+                  notes: null
+                })
+                .eq("id", existing.id);
+            } else {
+              // Insert baru
+              await window.lmsSupabase
+                .from("assignment_submissions")
+                .insert({
+                  student_id: userId,
+                  assignment_id: assignmentId,
+                  status: "submitted",
+                  submitted_at: new Date().toISOString(),
+                  file_urls: [fileUrl]
+                });
+            }
             await loadAssignments(userId);
           } catch (err) {
             const span = document.createElement("span");
