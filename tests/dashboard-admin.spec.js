@@ -358,6 +358,36 @@ async function installSupabaseStub(page, role, options = {}) {
         count: Array.isArray(rows) ? rows.length : 0
       });
 
+      const applyOrFilter = (rows, expression) => {
+        if (!expression) return rows;
+        const conditions = String(expression)
+          .split(",")
+          .map((part) => part.trim())
+          .filter(Boolean)
+          .map((part) => {
+            const pieces = part.split(".");
+            return {
+              column: pieces[0],
+              operator: pieces[1],
+              value: pieces.slice(2).join(".")
+            };
+          });
+
+        return rows.filter((row) =>
+          conditions.some((condition) => {
+            const rawValue = getValue(row, condition.column);
+            const value = condition.column === "is_archived" && typeof rawValue === "undefined"
+              ? false
+              : rawValue;
+            if (condition.operator === "eq") return String(value) === condition.value;
+            if (condition.operator === "is" && condition.value === "null") {
+              return rawValue === null || typeof rawValue === "undefined";
+            }
+            return false;
+          })
+        );
+      };
+
       const createQuery = (table) => {
         const baseRows = Array.isArray(tableData[table]) ? tableData[table] : [];
         let rows = baseRows.slice();
@@ -402,7 +432,10 @@ async function installSupabaseStub(page, role, options = {}) {
             });
             return api;
           },
-          or: () => api,
+          or: (expression) => {
+            rows = applyOrFilter(rows, expression);
+            return api;
+          },
           order: () => api,
           lt: (col, val) => {
             const target = toComparable(val);

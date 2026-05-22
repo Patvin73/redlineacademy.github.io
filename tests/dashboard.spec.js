@@ -48,8 +48,14 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
 
         return rows.filter((row) =>
           conditions.some((condition) => {
-            const value = getValue(row, condition.column);
+            const rawValue = getValue(row, condition.column);
+            const value = condition.column === "is_archived" && typeof rawValue === "undefined"
+              ? false
+              : rawValue;
             if (condition.operator === "eq") return String(value) === condition.value;
+            if (condition.operator === "is" && condition.value === "null") {
+              return rawValue === null || typeof rawValue === "undefined";
+            }
             return false;
           })
         );
@@ -429,7 +435,16 @@ function makeStudentFixture() {
           title: "Final Assignment",
           type: "assignment",
           course_title: "First Aid Essentials",
+          pass_mark: 70,
           due_at: "2099-01-06"
+        },
+        {
+          id: "assign-4",
+          course_id: "course-1",
+          title: "Care Plan Rewrite",
+          type: "assignment",
+          course_title: "Aged Care Basics",
+          due_at: "2099-01-08"
         },
         {
           id: "assign-3",
@@ -446,7 +461,16 @@ function makeStudentFixture() {
           assignment_id: "assign-2",
           student_id: studentId,
           status: "graded",
+          grade: 88,
+          feedback: "Strong practical reasoning.",
           submitted_at: "2099-01-02T09:00:00.000Z"
+        },
+        {
+          id: "sub-2",
+          assignment_id: "assign-4",
+          student_id: studentId,
+          status: "resubmit_required",
+          submitted_at: "2099-01-04T09:00:00.000Z"
         }
       ],
       schedules: [
@@ -765,15 +789,24 @@ test.describe("Student Dashboard", () => {
     await page.goto("/pages/dashboard-student.html");
     await page.locator(".sd-nav__item[data-section='assignments']").click();
 
-    await expect(page.locator("#assignmentList .sd-assignment-item")).toHaveCount(2);
+    await expect(page.locator("#assignmentList .sd-assignment-item")).toHaveCount(3);
     await expect(page.locator("#assignmentList")).toContainText("Module 1 Quiz");
     await expect(page.locator("#assignmentList")).toContainText("Final Assignment");
+    await expect(page.locator("#assignmentList")).toContainText("Care Plan Rewrite");
     await expect(page.locator("#assignmentList")).not.toContainText("Unenrolled Course Quiz");
     await expect(page.locator(".sd-assignment-item[data-status='pending']")).toHaveCount(1);
 
     await page.locator(".sd-filter-tab[data-filter='graded']").click();
     await expect(page.locator(".sd-assignment-item[data-status='graded']")).toBeVisible();
     await expect(page.locator(".sd-assignment-item[data-status='graded']")).toContainText("Final Assignment");
+    await expect(page.locator(".sd-assignment-item[data-status='graded']")).toContainText(/88%.*LULUS/);
+    await expect(page.locator(".sd-assignment-item[data-status='graded']")).toContainText("Strong practical reasoning.");
+
+    const resubmitItem = page.locator(".sd-assignment-item[data-status='resubmit_required']");
+    await expect(resubmitItem).toHaveCount(1);
+    await expect(resubmitItem).toContainText("Trainer meminta kamu mengumpulkan ulang tugas ini.");
+    await expect(resubmitItem).toContainText("Kumpulkan Ulang");
+    await expect(resubmitItem.locator("input[type='file']")).toHaveAttribute("accept", /video\/\*/);
   });
 
   test("switches schedule view from list to calendar using real dashboard controls", async ({ page }) => {

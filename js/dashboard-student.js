@@ -1421,7 +1421,7 @@
           : [];
         const submission = joinedSubmissions.find((item) => item.student_id === userId);
         const statusRaw = submission?.status || "pending";
-        const status = ["pending", "submitted", "graded"].includes(statusRaw)
+        const status = ["pending", "submitted", "graded", "resubmit_required"].includes(statusRaw)
           ? statusRaw
           : "pending";
 
@@ -1442,16 +1442,38 @@
           ? new Date(assignment.due_at).toLocaleDateString("en-AU")
           : "";
 
-        const actions = status === "pending"
-          ? `<input class="sd-assignment-item__file" type="file" data-assignment-file="${escHtml(assignment.id)}" aria-label="Assignment submission file" />
-             <button class="sd-btn sd-btn--primary sd-btn--sm" data-action="submit" data-assignment-id="${assignment.id}">
-               ${typeof t === "function" ? t("lmsSubmitAssignment") : "Submit"}
-             </button>`
-          : `<span class="sd-status-badge ${
-               status === "graded"
-                 ? "sd-status-badge--completed"
-                 : "sd-status-badge--active"
-             }">${statusLabel}</span>`;
+        let actions;
+        if (status === "pending" || status === "resubmit_required") {
+          const resubmitNote = status === "resubmit_required"
+            ? `<p style="font-size:11.5px;color:var(--sd-red);margin-bottom:6px;">⚠️ Trainer meminta kamu mengumpulkan ulang tugas ini.</p>`
+            : "";
+          actions = `
+            ${resubmitNote}
+            <input
+              class="sd-assignment-item__file"
+              type="file"
+              data-assignment-file="${escHtml(assignment.id)}"
+              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,video/*,audio/*"
+              aria-label="Assignment submission file"
+            />
+            <button class="sd-btn sd-btn--primary sd-btn--sm" data-action="submit" data-assignment-id="${assignment.id}">
+              ${status === "resubmit_required" ? "Kumpulkan Ulang" : (typeof t === "function" ? t("lmsSubmitAssignment") : "Submit")}
+            </button>`;
+        } else if (status === "graded") {
+          const gradeScore = submission?.grade !== null && submission?.grade !== undefined ? `${submission.grade}%` : "-";
+          const passMark = assignment.pass_mark || 70;
+          const isPassed = submission?.grade !== null && parseFloat(submission?.grade || 0) >= passMark;
+          const feedbackText = submission?.feedback ? escHtml(submission.feedback) : "";
+          actions = `
+            <div class="sd-grade-result" style="text-align:right;">
+              <span class="sd-status-badge ${isPassed ? "sd-status-badge--completed" : "sd-status-badge--inactive"}" style="font-size:1rem;">
+                ${gradeScore} ${isPassed ? "✓ LULUS" : "✗ TIDAK LULUS"}
+              </span>
+              ${feedbackText ? `<p style="font-size:11.5px;color:var(--sd-text-secondary);margin-top:6px;max-width:220px;">"${feedbackText}"</p>` : ""}
+            </div>`;
+        } else {
+          actions = `<span class="sd-status-badge sd-status-badge--active">${statusLabel}</span>`;
+        }
 
         const item = document.createElement("div");
         item.className = "sd-assignment-item";
