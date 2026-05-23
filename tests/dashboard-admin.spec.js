@@ -954,6 +954,29 @@ test("trainer can open grading submission and save grade", async ({ page }) => {
   ]));
 });
 
+test("trainer assignment form rejects past deadlines", async ({ page }) => {
+  await installSupabaseStub(page, "trainer");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await expect(page.locator("#sidebarName")).toHaveText("E2E Trainer");
+  await page.locator(".ad-nav__item[data-section='grading']").click();
+  await page.click("#createAssignmentBtn");
+
+  await expect(page.locator("#assignmentFormCard")).toBeVisible();
+  await expect(page.locator("#atCourse option[value='course-1']")).toHaveText("Leadership Basics");
+  await expect(page.locator("#atDueAt")).toHaveAttribute("min", /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
+
+  await page.fill("#atTitle", "Past Deadline Assignment");
+  await page.selectOption("#atCourse", "course-1");
+  await page.fill("#atDueAt", makeLocalDateTime(-1, 9));
+  await page.click("#saveAssignmentBtn");
+
+  await expect(page.locator("#assignmentFormMsg")).toContainText("Deadline harus di masa mendatang.");
+  await expect(page.locator("#assignmentFormCard")).toBeVisible();
+  const queryLog = await page.evaluate(() => window.__e2eGetQueryLog());
+  expect(queryLog).not.toContain("assignments");
+});
+
 test("trainer can create schedule event", async ({ page }) => {
   await installSupabaseStub(page, "trainer");
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });

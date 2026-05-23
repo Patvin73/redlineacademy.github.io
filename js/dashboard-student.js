@@ -68,6 +68,7 @@
       lmsTabPending:         "Belum Dikerjakan",
       lmsTabSubmitted:       "Sudah Dikirim",
       lmsTabGraded:          "Sudah Dinilai",
+      lmsTabResubmit:        "Perlu Dikumpulkan Ulang",
       lmsSubmitAssignment:   "Kumpulkan",
       lmsViewList:           "Daftar",
       lmsViewCalendar:       "Kalender",
@@ -145,6 +146,7 @@
       lmsTabPending:         "Pending",
       lmsTabSubmitted:       "Submitted",
       lmsTabGraded:          "Graded",
+      lmsTabResubmit:        "Resubmit Required",
       lmsSubmitAssignment:   "Submit",
       lmsViewList:           "List",
       lmsViewCalendar:       "Calendar",
@@ -890,6 +892,12 @@
       return; // tidak perlu cache untuk profile
     }
 
+    // Sections yang harus selalu reload agar data terbaru terlihat
+    const alwaysReload = ["assignments", "messages"];
+    if (alwaysReload.includes(sectionId)) {
+      loadedStudentSections.delete(sectionId);
+    }
+
     if (loadedStudentSections.has(sectionId)) return;
     loadedStudentSections.add(sectionId);
 
@@ -1431,6 +1439,8 @@
                 ? "lmsTabGraded"
                 : status === "submitted"
                 ? "lmsTabSubmitted"
+                : status === "resubmit_required"
+                ? "lmsTabResubmit"
                 : "lmsTabPending"
             )
           : status;
@@ -2590,6 +2600,26 @@
           filter: `user_id=eq.${userId}`,
         },
         () => { loadNotifications(userId); }
+      )
+      .subscribe();
+
+    // Realtime: listen untuk assignment baru di kursus yang dienroll student
+    // Gunakan notifications table sebagai trigger (trainer akan insert notif saat buat tugas - lihat Prompt 5)
+    window.lmsSupabase
+      .channel("student-assignment-notif")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          loadedStudentSections.delete("assignments");
+          loadNotifications(userId);
+          if (currentSection === "assignments") loadAssignments(userId);
+        }
       )
       .subscribe();
   }

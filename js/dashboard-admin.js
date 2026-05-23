@@ -2068,6 +2068,13 @@
     const openForm = async () => {
       resetForm();
       card.hidden = false;
+      const nowLocal = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 16);
+      if ($("atDueAt")) $("atDueAt").min = nowLocal;
+      // Reset cache agar kursus baru terlihat
+      const atCourse = $("atCourse");
+      if (atCourse) atCourse.dataset.loaded = "";
       await populateCourseSelect("atCourse");
       card.scrollIntoView({ behavior: "smooth" });
     };
@@ -2108,6 +2115,12 @@
 
     if (!title || !courseId || !dueAt) {
       setMsg("Judul, kursus, dan deadline wajib diisi.", true);
+      return;
+    }
+    // Validasi deadline tidak boleh di masa lalu
+    const dueAtDate = new Date(dueAt);
+    if (isNaN(dueAtDate.getTime()) || dueAtDate <= new Date()) {
+      setMsg("Deadline harus di masa mendatang.", true);
       return;
     }
     if (saveBtn) saveBtn.disabled = true;
@@ -2249,6 +2262,8 @@
 
     createBtn && createBtn.addEventListener("click", async () => {
       card.hidden = false;
+      const evCourse = $("evCourse");
+      if (evCourse) evCourse.dataset.loaded = "";
       await populateCourseSelect("evCourse");
       card.scrollIntoView({ behavior: "smooth" });
     });
@@ -3284,6 +3299,8 @@
 
     createBtn && createBtn.addEventListener("click", async () => {
       card.hidden = false;
+      const anCourse = $("anCourse");
+      if (anCourse) anCourse.dataset.loaded = "";
       await populateCourseSelect("anCourse");
       card.scrollIntoView({ behavior: "smooth" });
     });
