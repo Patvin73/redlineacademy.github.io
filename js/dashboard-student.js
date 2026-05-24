@@ -1177,18 +1177,41 @@
         ? Math.round((completedLessons / totalLessons) * 100)
         : 0;
 
-      await window.lmsSupabase.from("course_progress").update({
+      // Ambil enrollment_id dulu
+      const { data: enrollment } = await window.lmsSupabase
+        .from("enrollments")
+        .select("id")
+        .eq("student_id", userId)
+        .eq("course_id", courseId)
+        .maybeSingle();
+
+      await window.lmsSupabase.from("course_progress").upsert({
+        student_id: userId,
+        course_id: courseId,
+        enrollment_id: enrollment?.id || null,
         completion_percent: pct,
         last_accessed_at: new Date().toISOString(),
         last_lesson_id: lessonId
-      }).eq("student_id", userId).eq("course_id", courseId);
+      }, { onConflict: "student_id,course_id" });
+
+      // Ambil judul lesson untuk activity log
+      const { data: lessonData } = await window.lmsSupabase
+        .from("lessons")
+        .select("title")
+        .eq("id", lessonId)
+        .single()
+        .catch(() => ({ data: null }));
 
       await window.lmsSupabase.from("activity_logs").insert({
         user_id: userId,
         action: "lesson_completed",
         entity_type: "lesson",
         entity_id: lessonId,
-        metadata: { course_id: courseId, lesson_id: lessonId }
+        metadata: {
+          course_id: courseId,
+          lesson_id: lessonId,
+          lesson_title: lessonData?.title || "Lesson"
+        }
       }).catch(() => {});
 
       if (pct >= 100) {
@@ -1277,6 +1300,7 @@
           categories ( name ),
           profiles!courses_trainer_id_fkey(admin_id, student_id)
         `)
+        .eq("status", "published")
         .order("title", { ascending: true });
 
       if (courseErr) throw courseErr;
@@ -2627,20 +2651,6 @@
   /* ── Realtime: subscribe to new notifications ───────────────────── */
   function setupRealtimeNotifications(userId) {
     if (!window.lmsSupabase) return;
-    window.lmsSupabase
-      .channel("notifications-channel")
-      .on(
-        "postgres_changes",
-        {
-          event:  "INSERT",
-          schema: "public",
-          table:  "notifications",
-          filter: `user_id=eq.${userId}`,
-        },
-        () => { loadNotifications(userId); }
-      )
-      .subscribe();
-
     // Realtime: listen untuk assignment baru di kursus yang dienroll student
     // Gunakan notifications table sebagai trigger (trainer akan insert notif saat buat tugas - lihat Prompt 5)
     window.lmsSupabase

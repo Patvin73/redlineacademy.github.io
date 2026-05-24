@@ -782,6 +782,41 @@ test.describe("Student Dashboard", () => {
     }));
   });
 
+  test("creates course progress when lesson completion has no existing row", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    fixture.tableData.enrollments.push({ id: "enroll-3", student_id: "student-1", course_id: "course-3", status: "active" });
+    fixture.tableData.lessons.push({
+      id: "lesson-4",
+      course_id: "course-3",
+      title: "New Course Intro",
+      material_type: "text",
+      material_url: null,
+      lesson_order: 1
+    });
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("#sidebarName")).toHaveText("Alpha Student");
+    await page.evaluate(async () => {
+      await window.lmsMarkLessonCompleted("lesson-4", "course-3");
+    });
+
+    const courseProgress = await page.evaluate(() => {
+      const rows = window.__QA_TABLE_DATA__;
+      return rows.course_progress.find((row) =>
+        row.student_id === "student-1" && row.course_id === "course-3"
+      );
+    });
+
+    expect(courseProgress).toEqual(expect.objectContaining({
+      student_id: "student-1",
+      course_id: "course-3",
+      enrollment_id: "enroll-3",
+      completion_percent: 100,
+      last_lesson_id: "lesson-4"
+    }));
+  });
+
   test("loads assignments from enrolled courses and maps submission status", async ({ page }) => {
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);

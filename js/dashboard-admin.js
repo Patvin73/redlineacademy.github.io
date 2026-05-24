@@ -782,10 +782,10 @@
 
     const topbarProfileBtn = $("adTopbarProfileBtn");
     if (topbarProfileBtn) {
-      const isAdmin = role === "admin";
-      topbarProfileBtn.hidden = !isAdmin;
-      topbarProfileBtn.setAttribute("aria-hidden", isAdmin ? "false" : "true");
-      topbarProfileBtn.tabIndex = isAdmin ? 0 : -1;
+      // Tampilkan untuk semua role (admin dan trainer) — navigasi ke Profile
+      topbarProfileBtn.hidden = false;
+      topbarProfileBtn.setAttribute("aria-hidden", "false");
+      topbarProfileBtn.tabIndex = 0;
     }
 
     // data-lms-role on body (for guard.js)
@@ -1384,8 +1384,9 @@
       }
       const { data: courses } = await query;
 
-      // Remove skeletons
+      // Remove skeletons dan existing rows sebelum re-render
       list.querySelectorAll(".ad-skeleton-row").forEach((el) => el.remove());
+      list.querySelectorAll(".ad-course-row").forEach((el) => el.remove());
 
       if (!courses || courses.length === 0) {
         list.innerHTML = `<div class="ad-empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><p>No courses yet. Create your first course!</p></div>`;
