@@ -1448,8 +1448,16 @@
         const icon = assignment.type === "quiz" ? "📝" : "📘";
         const title = assignment.title || "Assignment";
         const courseLabel = assignment.courses?.title || "Course";
-        const dueLabel = assignment.due_at
-          ? new Date(assignment.due_at).toLocaleDateString("en-AU")
+        const dueDate = assignment.due_at ? new Date(assignment.due_at) : null;
+        const isOverdue = dueDate && dueDate < new Date()
+          && (status === "pending" || status === "resubmit_required");
+        const dueLabel = dueDate
+          ? dueDate.toLocaleDateString("en-AU")
+          : "";
+        const dueLabelHtml = dueDate
+          ? `<span style="color:${isOverdue ? "var(--sd-red)" : "var(--sd-text-muted)"};">
+              ${isOverdue ? "⚠️ Overdue: " : "Due: "}${escHtml(dueLabel)}
+             </span>`
           : "";
 
         let actions;
@@ -1492,7 +1500,7 @@
           <div class="sd-assignment-item__icon">${icon}</div>
           <div class="sd-assignment-item__body">
             <p class="sd-assignment-item__title">${escHtml(title)}</p>
-            <p class="sd-assignment-item__meta">${escHtml(courseLabel)}${dueLabel ? ` • ${dueLabel}` : ""}</p>
+            <p class="sd-assignment-item__meta">${escHtml(courseLabel)}${dueLabelHtml ? ` • ` : ""}${dueLabelHtml}</p>
           </div>
           <div class="sd-assignment-item__actions">
             ${actions}
@@ -1549,6 +1557,36 @@
                 });
             }
             await loadAssignments(userId);
+
+            // Tulis activity log
+            await window.lmsSupabase.from("activity_logs").insert({
+              user_id: userId,
+              action: "assignment_submitted",
+              entity_type: "assignment_submission",
+              entity_id: assignmentId,
+              metadata: {
+                assignment_title: btn.closest(".sd-assignment-item")
+                  ?.querySelector(".sd-assignment-item__title")?.textContent || "Assignment",
+                assignment_id: assignmentId
+              }
+            }).catch(() => {});
+
+            // Ambil trainer_id dari assignment untuk notifikasi
+            const { data: assignmentData } = await window.lmsSupabase
+              .from("assignments")
+              .select("trainer_id, title")
+              .eq("id", assignmentId)
+              .single()
+              .catch(() => ({ data: null }));
+
+            if (assignmentData?.trainer_id) {
+              await window.lmsSupabase.from("notifications").insert({
+                user_id: assignmentData.trainer_id,
+                type: "submission_received",
+                title: `New submission for "${assignmentData.title || "Assignment"}"`,
+                is_read: false,
+              }).catch(() => {});
+            }
           } catch (err) {
             const span = document.createElement("span");
             span.className = "sd-assignment-err";

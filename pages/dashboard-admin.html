@@ -1415,6 +1415,18 @@
             </div>
           </div>
 
+          <div class="ad-card" id="myAssignmentsCard" style="margin-bottom:16px;">
+            <div class="ad-card__header" style="display:flex;align-items:center;justify-content:space-between;">
+              <h3>Tugas yang Sudah Dibuat</h3>
+              <button class="ad-btn ad-btn--outline ad-btn--sm" id="refreshAssignmentsBtn">Refresh</button>
+            </div>
+            <div id="myAssignmentsList" style="display:grid;gap:8px;padding:12px 16px;">
+              <p id="myAssignmentsEmpty" style="color:var(--sd-text-muted);font-size:.875rem;">
+                Belum ada tugas yang dibuat.
+              </p>
+            </div>
+          </div>
+
           <div class="ad-grading-layout" id="gradingLayout">
             <!-- Submission Queue (left) -->
             <div class="ad-submission-queue" id="submissionQueue">

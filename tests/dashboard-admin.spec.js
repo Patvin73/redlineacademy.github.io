@@ -322,6 +322,7 @@ async function installSupabaseStub(page, role, options = {}) {
     courses,
     lessons,
     enrollments,
+    assignments: options.assignments || [],
     forum_posts: [],
     notifications: [],
     v_course_overview: options.courseOverview || []
@@ -965,6 +966,7 @@ test("trainer assignment form rejects past deadlines", async ({ page }) => {
   await expect(page.locator("#assignmentFormCard")).toBeVisible();
   await expect(page.locator("#atCourse option[value='course-1']")).toHaveText("Leadership Basics");
   await expect(page.locator("#atDueAt")).toHaveAttribute("min", /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
+  const initialAssignments = await page.evaluate(() => window.__e2eGetTableData().assignments.length);
 
   await page.fill("#atTitle", "Past Deadline Assignment");
   await page.selectOption("#atCourse", "course-1");
@@ -973,8 +975,11 @@ test("trainer assignment form rejects past deadlines", async ({ page }) => {
 
   await expect(page.locator("#assignmentFormMsg")).toContainText("Deadline harus di masa mendatang.");
   await expect(page.locator("#assignmentFormCard")).toBeVisible();
-  const queryLog = await page.evaluate(() => window.__e2eGetQueryLog());
-  expect(queryLog).not.toContain("assignments");
+  const assignments = await page.evaluate(() => window.__e2eGetTableData().assignments);
+  expect(assignments).toHaveLength(initialAssignments);
+  expect(assignments).not.toEqual(expect.arrayContaining([
+    expect.objectContaining({ title: "Past Deadline Assignment" })
+  ]));
 });
 
 test("trainer can create schedule event", async ({ page }) => {

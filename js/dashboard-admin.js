@@ -179,6 +179,7 @@
       adMsgRequired:         "Pilih minimal satu penerima dan isi pesan wajib diisi.",
       adMsgTooManyRecipients:"Maksimal 50 penerima sekali kirim.",
       adMsgSelectedCount:    "{count} penerima dipilih",
+      adNotifNewAssignment:  "Tugas baru",
     },
     en: {
       adNavDashboard:        "Dashboard",
@@ -346,6 +347,7 @@
       adMsgRequired:         "Select at least one recipient and enter a message.",
       adMsgTooManyRecipients:"You can select up to 50 recipients at once.",
       adMsgSelectedCount:    "{count} recipients selected",
+      adNotifNewAssignment:  "New assignment",
     },
   };
 
@@ -533,6 +535,7 @@
     setupCourseBuilder();
     setupGradingPanel();
     setupAssignmentForm();
+    $("refreshAssignmentsBtn")?.addEventListener("click", loadMyAssignments);
     setupScheduleForm();
     setupAnnouncementForm();
     setupManualPaymentForm();
@@ -673,7 +676,7 @@
     switch (sectionId) {
       case "students":    await loadStudentsTable(); break;
       case "courses":     await loadCoursesList(); break;
-      case "grading":     await loadSubmissionQueue(); break;
+      case "grading":     await Promise.all([loadSubmissionQueue(), loadMyAssignments()]); break;
       case "schedule":    await loadEventsList(); break;
       case "messages":    await loadMessages(); break;
       case "profile":     break;
@@ -2000,6 +2003,72 @@
     }
   }
 
+  async function loadMyAssignments() {
+    const list = $("myAssignmentsList");
+    const empty = $("myAssignmentsEmpty");
+    if (!list || !window.lmsSupabase || !currentProfile?.id) return;
+
+    try {
+      const { data, error } = await window.lmsSupabase
+        .from("assignments")
+        .select("id, title, type, due_at, pass_mark, max_score, is_published, courses(title)")
+        .eq("trainer_id", currentProfile.id)
+        .order("due_at", { ascending: true });
+
+      list.querySelectorAll(".ad-assignment-row").forEach((el) => el.remove());
+
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        if (empty) empty.style.display = "block";
+        return;
+      }
+      if (empty) empty.style.display = "none";
+
+      data.forEach((assignment) => {
+        const isOverdue = assignment.due_at && new Date(assignment.due_at) < new Date();
+        const dueLabel = assignment.due_at
+          ? new Date(assignment.due_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })
+          : "—";
+        const row = document.createElement("div");
+        row.className = "ad-assignment-row";
+        row.style.cssText = "display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--sd-border);";
+        row.innerHTML = `
+          <div style="flex:1;min-width:0;">
+            <p style="font-weight:600;margin:0;font-size:.875rem;">${escHtml(assignment.title)}</p>
+            <p style="margin:2px 0 0;font-size:.78rem;color:var(--sd-text-muted);">
+              ${escHtml(assignment.courses?.title || "—")} &nbsp;·&nbsp;
+              <span style="color:${isOverdue ? "var(--sd-red)" : "inherit"};">
+                Deadline: ${escHtml(dueLabel)}${isOverdue ? " ⚠️" : ""}
+              </span>
+            </p>
+          </div>
+          <span class="ad-tag ${assignment.is_published ? "ad-tag--green" : "ad-tag--gray"}" style="white-space:nowrap;">
+            ${assignment.is_published ? "Published" : "Draft"}
+          </span>
+          <button class="ad-icon-btn ad-icon-btn--danger" data-delete-assignment="${assignment.id}" aria-label="Hapus tugas">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+              <path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+            </svg>
+          </button>`;
+
+        row.querySelector("[data-delete-assignment]")?.addEventListener("click", () => {
+          showConfirmModal("Hapus tugas ini? Semua submission yang ada akan ikut terhapus.", async () => {
+            await window.lmsSupabase.from("assignments").delete().eq("id", assignment.id).catch(() => {});
+            row.remove();
+            loadMyAssignments();
+            loadSubmissionQueue(currentGradingFilter);
+          });
+          return;
+        });
+
+        list.appendChild(row);
+      });
+    } catch (err) {
+      console.warn("loadMyAssignments error:", err.message);
+    }
+  }
+
   function updateGradeResult(score, passMark = 70) {
     const el = $("gradeResult");
     if (!el) return;
@@ -2138,8 +2207,37 @@
       };
       const { error } = await window.lmsSupabase.from("assignments").insert(payload);
       if (error) throw error;
+
+      // Ambil semua student yang enroll di kursus ini
+      try {
+        const { data: enrollments } = await window.lmsSupabase
+          .from("enrollments")
+          .select("student_id")
+          .eq("course_id", courseId)
+          .eq("status", "active");
+
+        const studentIds = (enrollments || [])
+          .map((e) => e.student_id)
+          .filter(Boolean);
+
+        if (studentIds.length > 0) {
+          const dueDate = new Date(dueAt).toLocaleDateString("id-ID", {
+            day: "numeric", month: "long", year: "numeric"
+          });
+          const notifRows = studentIds.map((studentId) => ({
+            user_id: studentId,
+            type: "assignment_new",
+            title: `Tugas baru: "${title}" — Deadline ${dueDate}`,
+            is_read: false,
+          }));
+          await window.lmsSupabase.from("notifications").insert(notifRows).catch(() => {});
+        }
+      } catch {
+        // Notifikasi non-blocking — jangan throw
+      }
+
       setMsg("✓ Tugas berhasil dibuat!");
-      setTimeout(() => { closeForm(); loadSubmissionQueue(currentGradingFilter); }, 1200);
+      setTimeout(() => { closeForm(); loadSubmissionQueue(currentGradingFilter); loadMyAssignments(); }, 1200);
     } catch (err) {
       setMsg("Error: " + (err.message || "Gagal menyimpan"), true);
     } finally {
@@ -4293,7 +4391,7 @@
   }
 
   function getNotifIcon(type) {
-    return { assignment_graded: "📝", quiz_result: "✅", new_message: "💬",
+    return { assignment_new: "📋", assignment_graded: "📝", quiz_result: "✅", new_message: "💬",
       course_enrolled: "🎓", certificate_issued: "🏆", submission_received: "📤",
       session_reminder: "📅", announcement: "📢" }[type] || "🔔";
   }
