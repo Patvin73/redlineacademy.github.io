@@ -223,6 +223,9 @@ async function installSupabaseStub(page, role, options = {}) {
       author_id: "e2e-admin"
     }
   ];
+  if (Array.isArray(options.extraAnnouncements)) {
+    announcements.push(...options.extraAnnouncements);
+  }
   const certificates = [{ id: "cert-1" }, { id: "cert-2" }];
   const lessons = options.lessons ? options.lessons.map((lesson) => ({ ...lesson })) : [];
   const enrollments = [
@@ -521,7 +524,7 @@ async function installSupabaseStub(page, role, options = {}) {
         createClient: () => ({
           auth: {
             getSession: async () => ({
-              data: { session: { user: currentUser } },
+              data: { session: { user: currentUser, access_token: "e2e-access-token" } },
               error: null
             }),
             getUser: async () => ({
@@ -809,6 +812,50 @@ test("admin can open Users section and toggle active", { tag: "@critical" }, asy
   await expect.poll(async () => page.evaluate(() => (
     window.__e2eGetTableData().profiles.find((item) => item.id === "e2e-trainer").role
   ))).toBe("admin");
+});
+
+test("admin temp password is masked and can be revealed or copied", async ({ page }) => {
+  const tempPassword = `Temp123"><img src=x onerror="window.__tempPwXss=true">`;
+  await page.addInitScript(() => {
+    Object.defineProperty(window.navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (text) => {
+          window.__copiedTempPassword = text;
+        }
+      }
+    });
+  });
+  await installSupabaseStub(page, "admin");
+  await page.route("**/functions/v1/admin-create-user", (route) => {
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ temp_password: tempPassword })
+    });
+  });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='users']").click();
+  await page.locator("#addUserBtn").click();
+  await page.fill("#addUserName", "Secure Student");
+  await page.fill("#addUserEmail", "secure.student@example.com");
+  await page.selectOption("#addUserRole", "student");
+  await page.locator("#addUserSubmit").click();
+
+  await expect(page.locator("#addUserMessage")).toContainText("User created successfully.");
+  await expect(page.locator("#tempPwField")).toHaveAttribute("type", "password");
+  await expect(page.locator("#tempPwField")).toHaveValue(tempPassword);
+  await expect(page.locator("#addUserMessage img")).toHaveCount(0);
+  await expect(page.evaluate(() => window.__tempPwXss)).resolves.toBeUndefined();
+
+  await page.locator("#tempPwToggle").click();
+  await expect(page.locator("#tempPwField")).toHaveAttribute("type", "text");
+  await expect(page.locator("#tempPwToggle")).toHaveText("Hide");
+
+  await page.locator("#tempPwCopy").click();
+  await expect(page.locator("#tempPwCopy")).toHaveText("Copied!");
+  await expect(page.evaluate(() => window.__copiedTempPassword)).resolves.toBe(tempPassword);
 });
 
 test("admin sees enrollments totals", async ({ page }) => {
@@ -1516,6 +1563,31 @@ test("admin sees all announcements regardless of author", async ({ page }) => {
 
   await expect(page.locator("#announcementsList")).toContainText("Trainer Announcement");
   await expect(page.locator("#announcementsList")).toContainText("Admin Announcement");
+});
+
+test("announcement target role is escaped before rendering", async ({ page }) => {
+  await installSupabaseStub(page, "admin", {
+    extraAnnouncements: [
+      {
+        id: "ann-xss-target",
+        title: "Unsafe Target",
+        body: "Target role should render as text.",
+        target_role: `<img src=x onerror="window.__annTargetXss=true">`,
+        is_published: true,
+        publish_at: "2026-03-12T08:00:00.000Z",
+        expires_at: null,
+        author_id: "e2e-admin"
+      }
+    ]
+  });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='announcements']").click();
+  const unsafeItem = page.locator(".ad-announcement-item", { hasText: "Unsafe Target" });
+  await expect(unsafeItem).toBeVisible();
+  await expect(unsafeItem.locator(".ad-announcement-item__meta")).toContainText('Target: <img src=x onerror="window.__annTargetXss=true">');
+  await expect(unsafeItem.locator("img")).toHaveCount(0);
+  await expect(page.evaluate(() => window.__annTargetXss)).resolves.toBeUndefined();
 });
 
 test("trainer can open course builder edit flow", async ({ page }) => {

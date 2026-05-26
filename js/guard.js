@@ -83,26 +83,6 @@
       if (nameEl)  nameEl.textContent  = profile.full_name || "-";
       if (emailEl) emailEl.textContent = profile.email || user.email || "-";
 
-      if (profile.role === "admin") {
-        const { data, error } = await window.lmsSupabase
-          .from("profiles")
-          .select("full_name, student_id, email")
-          .eq("role", "student")
-          .order("full_name", { ascending: true });
-
-        const tableBody = document.getElementById("studentTableBody");
-        if (tableBody) {
-          if (error) {
-            tableBody.innerHTML = `<tr><td colspan="7">${tt(
-              "lmsErrLoadStudents", "Gagal memuat data student."
-            )}</td></tr>`;
-          } else if (!data || data.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="7">${tt(
-              "lmsNoStudents", "Belum ada student."
-            )}</td></tr>`;
-          }
-        }
-      }
     }
 
     // ── MARKETER / STAFF dashboard ──

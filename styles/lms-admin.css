@@ -2030,6 +2030,47 @@
   background: var(--sd-red, #e24b4a); color: #fff;
   padding: 12px 20px; border-radius: 8px; font-size: 14px;
   box-shadow: 0 4px 16px rgba(0,0,0,.2);
+  animation: adToastIn 0.2s ease;
+}
+
+@keyframes adToastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ================================================================
+   ASSIGNMENT ROW — Daftar tugas yang sudah dibuat trainer
+   ================================================================ */
+.ad-assignment-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--sd-border);
+}
+
+.ad-assignment-row:last-child {
+  border-bottom: none;
+}
+
+.ad-assignment-row__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ad-assignment-row__title {
+  font-weight: 600;
+  margin: 0 0 2px;
+  font-size: .875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ad-assignment-row__meta {
+  margin: 0;
+  font-size: .78rem;
+  color: var(--sd-text-muted);
 }
 
 /* ================================================================

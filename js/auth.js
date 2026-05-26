@@ -34,7 +34,7 @@
       }
 
       if (window.__lmsSupabaseReady__) {
-        return window.__lmsSupabaseReady__;
+        return await window.__lmsSupabaseReady__;
       }
 
       await new Promise((resolve) => window.setTimeout(resolve, 100));
@@ -86,7 +86,7 @@
     const supabase = await getClient();
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, full_name, role, student_id, admin_id, email")
+      .select("id, full_name, role, student_id, admin_id, email, avatar_url, is_active")
       .eq("id", userId)
       .single();
 

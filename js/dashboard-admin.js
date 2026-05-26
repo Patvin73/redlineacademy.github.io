@@ -8,360 +8,6 @@
   "use strict";
 
   /* ================================================================
-     NEW i18n KEYS — inject into script.js translations
-     Copy the contents of NEW_I18N_KEYS into both
-     translations.id and translations.en in js/script.js
-  ================================================================ */
-  const NEW_I18N_KEYS = {
-    id: {
-      adNavDashboard:        "Dashboard",
-      adNavStudents:         "Student Saya",
-      adNavCourses:          "Manajemen Kursus",
-      adNavGrading:          "Tugas & Penilaian",
-      adNavSchedule:         "Jadwal",
-      adNavMessages:         "Pesan",
-      adNavReports:          "Laporan & Analitik",
-      adNavGroupMain:        "Menu Utama",
-      adNavGroupAdmin:       "Administrasi",
-      adNavUsers:            "Manajemen User",
-      adNavEnrollments:      "Pendaftaran & Pembayaran",
-      adNavAnnouncements:    "Pengumuman",
-      adNavSettings:         "Pengaturan Sistem",
-      adWelcomeBack:         "Selamat datang kembali,",
-      adKpiStudents:         "Total Student",
-      adKpiCourses:          "Kursus Aktif",
-      adKpiGrading:          "Tugas Menunggu Nilai",
-      adKpiCompletion:       "Rata-rata Penyelesaian",
-      adActivityFeed:        "Feed Aktivitas",
-      adPendingActions:      "Aksi Tertunda",
-      adAtRiskTitle:         "Student Berisiko",
-      adAtRiskSub:           "Tidak aktif 7+ hari",
-      lmsViewAll:            "Lihat Semua",
-      lmsProfile:            "Profil",
-      adNoActivity:          "Belum ada aktivitas",
-      adNoPending:           "Semua sudah ditangani! 🎉",
-      adNoAtRisk:            "Tidak ada student berisiko 🎉",
-      adColStudent:          "Student",
-      adColCourse:           "Kursus",
-      adColProgress:         "Progres",
-      adColLastActive:       "Terakhir Aktif",
-      adColAction:           "Aksi",
-      adColStatus:           "Status",
-      adColEnrolled:         "Terdaftar",
-      adColCompleted:        "Selesai",
-      adColCompletionRate:   "Tingkat Penyelesaian",
-      adColCerts:            "Sertifikat",
-      adColUser:             "User",
-      adColRole:             "Role",
-      adColJoined:           "Bergabung",
-      adColPayMethod:        "Metode",
-      adFilterAll:           "Semua",
-      adFilterActive:        "Aktif",
-      adFilterCompleted:     "Selesai",
-      adFilterAtRisk:        "Berisiko",
-      adFilterStudents:      "Student",
-      adFilterTrainers:      "Trainer",
-      adFilterAdmins:        "Admin",
-      adSearchStudents:      "Cari student...",
-      adSearchUsers:         "Cari user...",
-      adSearchPlaceholder:   "Cari student, kursus...",
-      adCreateCourse:        "Buat Kursus",
-      adCreateAssignment:    "Buat Tugas",
-      adTabCourseInfo:       "Info Kursus",
-      adTabModules:          "Modul & Lesson",
-      adTabCourseSettings:   "Pengaturan",
-      adCourseTitle:         "Judul Kursus",
-      adCourseThumbnail:     "Thumbnail Kursus",
-      adCourseCategory:      "Kategori",
-      adCourseDesc:          "Deskripsi",
-      adCourseLevel:         "Level",
-      adCourseDuration:      "Durasi (jam)",
-      adPassMark:            "Nilai Lulus (%)",
-      adEnrollmentType:      "Tipe Pendaftaran",
-      adEnrollOpen:          "Terbuka",
-      adEnrollInvite:        "Undangan",
-      adEnrollPaid:          "Berbayar",
-      adMaxStudents:         "Maks. Student",
-      adPrice:               "Harga (IDR)",
-      adCourseStatus:        "Status Kursus",
-      adStatusDraft:         "Draft",
-      adStatusPublished:     "Diterbitkan",
-      adStatusArchived:      "Diarsipkan",
-      adFeatured:            "Kursus Unggulan",
-      adAddModule:           "+ Tambah Modul",
-      adAddLesson:           "+ Tambah Lesson",
-      adSaveDraft:           "Simpan sebagai Draft",
-      adSaveCourse:          "Simpan & Terbitkan",
-      adEditCourse:          "Edit Kursus",
-      adDeleteCourse:        "Hapus",
-      adGradeTabPending:     "Perlu Dinilai",
-      adGradeTabGraded:      "Sudah Dinilai",
-      adGradeTabResubmit:    "Perlu Revisi",
-      adNoSubmissions:       "Tidak ada tugas untuk dinilai",
-      adSelectSubmission:    "Pilih submission untuk dinilai",
-      adSubmittedFiles:      "File yang Dikirim",
-      adStudentNotes:        "Catatan Student",
-      adGrade:               "Nilai (%)",
-      adPassFail:            "Hasil",
-      adFeedback:            "Feedback ke Student",
-      adFeedbackPlaceholder: "Tulis feedback Anda...",
-      adReqResubmit:         "Minta Kumpul Ulang",
-      adSaveGrade:           "Simpan & Notifikasi Student",
-      adCreateEvent:         "Buat Event",
-      adEventTitle:          "Judul Event",
-      adEventType:           "Tipe",
-      adEventStart:          "Tanggal & Waktu Mulai",
-      adEventEnd:            "Tanggal & Waktu Selesai",
-      adMeetingUrl:          "Link Meeting (Zoom / Teams)",
-      adMandatory:           "Wajib Hadir",
-      adUpcomingEvents:      "Event Mendatang",
-      adNoEvents:            "Tidak ada event mendatang",
-      adSaveEvent:           "Simpan Event",
-      adCancel:              "Batal",
-      adExportCSV:           "Export CSV",
-      adMetricAvgScore:      "Rata-rata Nilai Kuis",
-      adMetricDropout:       "Tingkat Dropout",
-      adMetricCerts:         "Sertifikat Diterbitkan",
-      adMetricRevenue:       "Total Pendapatan (IDR)",
-      adCourseOverview:      "Ringkasan Kursus",
-      adNoData:              "Tidak ada data",
-      adAddUser:             "Tambah User",
-      adNoUsers:             "Tidak ada user",
-      adPayTotal:            "Total Pembayaran",
-      adPayPending:          "Menunggu",
-      adPayRevenue:          "Pendapatan (IDR)",
-      adPayMethod:           "Metode",
-      adPayAmount:           "Jumlah",
-      adPayDate:             "Tanggal",
-      adNoPayments:          "Tidak ada data pembayaran",
-      adPaymentPlan:         "Cara Pembayaran",
-      adPaymentPlanFull:     "Full payment",
-      adPaymentPlanInstallment: "Cicilan",
-      adPaymentNextDue:      "Jatuh tempo berikutnya",
-      adPaymentInstallmentPaid: "Cicilan ke",
-      adPaymentInstallmentTotal: "Total cicilan (2-4x)",
-      adPaymentSelectStudent: "Pilih student",
-      adPaymentSelectCourse: "Pilih kursus",
-      adPaymentNoStudents:   "Belum ada student",
-      adPaymentNoCourses:    "Belum ada kursus",
-      adCreateAnnouncement:  "Buat Pengumuman",
-      adAnnouncementTitle:   "Judul",
-      adAnnouncementTarget:  "Target Audiens",
-      adAnnouncementBody:    "Konten",
-      adAnnouncementCourse:  "Target Kursus (opsional)",
-      adPublishAt:           "Waktu Publish",
-      adExpiresAt:           "Waktu Berakhir (opsional)",
-      adPublish:             "Terbitkan",
-      adNoAnnouncements:     "Belum ada pengumuman",
-      adSettingsBranding:    "Branding Platform",
-      adSettingsEmail:       "Notifikasi Email",
-      adSettingsStorage:     "Monitor Storage",
-      adPlatformName:        "Nama Platform",
-      adDefaultLanguage:     "Bahasa Default",
-      adSaveSettings:        "Simpan Pengaturan",
-      adEmailNewEnroll:      "Pendaftaran baru",
-      adEmailSubmission:     "Tugas dikirim",
-      adEmailGraded:         "Tugas dinilai",
-      adEmailCertificate:    "Sertifikat diterbitkan",
-      adEmailReminder:       "Pengingat sesi (24 jam sebelum)",
-      adStorageDB:           "Database",
-      adStorageFiles:        "Penyimpanan File",
-      adStorageNote:         "Batas Supabase Free Tier",
-      adSendMessage:         "Kirim Pesan",
-      adMsgToStudent:        "Kirim ke student ini",
-      adComposeTitle:        "Pesan Baru",
-      adMsgRecipient:        "Kirim ke",
-      adMsgSelectRecipient:  "Pilih penerima (maks. 50)",
-      adMsgBody:             "Isi pesan",
-      adMsgBodyPlaceholder:  "Tulis isi pesan...",
-      adMsgSent:             "Pesan terkirim.",
-      adMsgNoRecipients:     "Tidak ada penerima tersedia.",
-      adMsgRequired:         "Pilih minimal satu penerima dan isi pesan wajib diisi.",
-      adMsgTooManyRecipients:"Maksimal 50 penerima sekali kirim.",
-      adMsgSelectedCount:    "{count} penerima dipilih",
-      adNotifNewAssignment:  "Tugas baru",
-    },
-    en: {
-      adNavDashboard:        "Dashboard",
-      adNavStudents:         "My Students",
-      adNavCourses:          "Course Management",
-      adNavGrading:          "Assignments & Grading",
-      adNavSchedule:         "Schedule",
-      adNavMessages:         "Messages",
-      adNavReports:          "Reports & Analytics",
-      adNavGroupMain:        "Main Menu",
-      adNavGroupAdmin:       "Administration",
-      adNavUsers:            "User Management",
-      adNavEnrollments:      "Enrollments & Payments",
-      adNavAnnouncements:    "Announcements",
-      adNavSettings:         "System Settings",
-      adWelcomeBack:         "Welcome back,",
-      adKpiStudents:         "Total Students",
-      adKpiCourses:          "Active Courses",
-      adKpiGrading:          "Pending Grading",
-      adKpiCompletion:       "Avg. Completion Rate",
-      adActivityFeed:        "Activity Feed",
-      adPendingActions:      "Pending Actions",
-      adAtRiskTitle:         "Students At Risk",
-      adAtRiskSub:           "Inactive 7+ days",
-      lmsViewAll:            "View All",
-      lmsProfile:            "Profile",
-      adNoActivity:          "No recent activity",
-      adNoPending:           "All caught up! 🎉",
-      adNoAtRisk:            "No at-risk students 🎉",
-      adColStudent:          "Student",
-      adColCourse:           "Course",
-      adColProgress:         "Progress",
-      adColLastActive:       "Last Active",
-      adColAction:           "Action",
-      adColStatus:           "Status",
-      adColEnrolled:         "Enrolled",
-      adColCompleted:        "Completed",
-      adColCompletionRate:   "Completion Rate",
-      adColCerts:            "Certs",
-      adColUser:             "User",
-      adColRole:             "Role",
-      adColJoined:           "Joined",
-      adColPayMethod:        "Method",
-      adFilterAll:           "All",
-      adFilterActive:        "Active",
-      adFilterCompleted:     "Completed",
-      adFilterAtRisk:        "At Risk",
-      adFilterStudents:      "Students",
-      adFilterTrainers:      "Trainers",
-      adFilterAdmins:        "Admins",
-      adSearchStudents:      "Search students...",
-      adSearchUsers:         "Search users...",
-      adSearchPlaceholder:   "Search students, courses...",
-      adCreateCourse:        "Create Course",
-      adCreateAssignment:    "Create Assignment",
-      adTabCourseInfo:       "Course Info",
-      adTabModules:          "Modules & Lessons",
-      adTabCourseSettings:   "Settings",
-      adCourseTitle:         "Course Title",
-      adCourseThumbnail:     "Course Thumbnail",
-      adCourseCategory:      "Category",
-      adCourseDesc:          "Description",
-      adCourseLevel:         "Level",
-      adCourseDuration:      "Duration (hours)",
-      adPassMark:            "Pass Mark (%)",
-      adEnrollmentType:      "Enrollment Type",
-      adEnrollOpen:          "Open",
-      adEnrollInvite:        "Invite Only",
-      adEnrollPaid:          "Paid",
-      adMaxStudents:         "Max Students",
-      adPrice:               "Price (IDR)",
-      adCourseStatus:        "Course Status",
-      adStatusDraft:         "Draft",
-      adStatusPublished:     "Published",
-      adStatusArchived:      "Archived",
-      adFeatured:            "Featured Course",
-      adAddModule:           "+ Add Module",
-      adAddLesson:           "+ Add Lesson",
-      adSaveDraft:           "Save as Draft",
-      adSaveCourse:          "Save & Publish",
-      adEditCourse:          "Edit Course",
-      adDeleteCourse:        "Delete",
-      adGradeTabPending:     "Needs Grading",
-      adGradeTabGraded:      "Graded",
-      adGradeTabResubmit:    "Needs Resubmit",
-      adNoSubmissions:       "No submissions to grade",
-      adSelectSubmission:    "Select a submission to grade",
-      adSubmittedFiles:      "Submitted Files",
-      adStudentNotes:        "Student Notes",
-      adGrade:               "Grade (%)",
-      adPassFail:            "Result",
-      adFeedback:            "Feedback to Student",
-      adFeedbackPlaceholder: "Write your feedback here...",
-      adReqResubmit:         "Request Resubmit",
-      adSaveGrade:           "Save & Notify Student",
-      adCreateEvent:         "Create Event",
-      adEventTitle:          "Event Title",
-      adEventType:           "Type",
-      adEventStart:          "Start Date & Time",
-      adEventEnd:            "End Date & Time",
-      adMeetingUrl:          "Meeting URL (Zoom / Teams)",
-      adMandatory:           "Mandatory",
-      adUpcomingEvents:      "Upcoming Events",
-      adNoEvents:            "No upcoming events",
-      adSaveEvent:           "Save Event",
-      adCancel:              "Cancel",
-      adExportCSV:           "Export CSV",
-      adMetricAvgScore:      "Avg. Quiz Score",
-      adMetricDropout:       "Dropout Rate",
-      adMetricCerts:         "Certificates Issued",
-      adMetricRevenue:       "Total Revenue (IDR)",
-      adCourseOverview:      "Course Overview",
-      adNoData:              "No data available",
-      adAddUser:             "Add User",
-      adNoUsers:             "No users found",
-      adPayTotal:            "Total Payments",
-      adPayPending:          "Pending",
-      adPayRevenue:          "Revenue (IDR)",
-      adPayMethod:           "Method",
-      adPayAmount:           "Amount",
-      adPayDate:             "Date",
-      adNoPayments:          "No payment data",
-      adPaymentPlan:         "Payment Plan",
-      adPaymentPlanFull:     "Full payment",
-      adPaymentPlanInstallment: "Installment",
-      adPaymentNextDue:      "Next due date",
-      adPaymentInstallmentPaid: "Installment #",
-      adPaymentInstallmentTotal: "Total installments (2-4x)",
-      adPaymentSelectStudent: "Select student",
-      adPaymentSelectCourse: "Select course",
-      adPaymentNoStudents:   "No students found",
-      adPaymentNoCourses:    "No courses found",
-      adCreateAnnouncement:  "Create Announcement",
-      adAnnouncementTitle:   "Title",
-      adAnnouncementTarget:  "Target Audience",
-      adAnnouncementBody:    "Content",
-      adAnnouncementCourse:  "Target Course (optional)",
-      adPublishAt:           "Publish At",
-      adExpiresAt:           "Expires At (optional)",
-      adPublish:             "Publish",
-      adNoAnnouncements:     "No announcements yet",
-      adSettingsBranding:    "Platform Branding",
-      adSettingsEmail:       "Email Notifications",
-      adSettingsStorage:     "Storage Monitor",
-      adPlatformName:        "Platform Name",
-      adDefaultLanguage:     "Default Language",
-      adSaveSettings:        "Save Settings",
-      adEmailNewEnroll:      "New enrollment",
-      adEmailSubmission:     "Assignment submitted",
-      adEmailGraded:         "Assignment graded",
-      adEmailCertificate:    "Certificate issued",
-      adEmailReminder:       "Session reminders (24h before)",
-      adStorageDB:           "Database",
-      adStorageFiles:        "File Storage",
-      adStorageNote:         "Supabase Free Tier limits",
-      adSendMessage:         "Send Message",
-      adMsgToStudent:        "Message this student",
-      adComposeTitle:        "New Message",
-      adMsgRecipient:        "Send to",
-      adMsgSelectRecipient:  "Select recipients (max 50)",
-      adMsgBody:             "Message",
-      adMsgBodyPlaceholder:  "Write your message...",
-      adMsgSent:             "Message sent.",
-      adMsgNoRecipients:     "No recipients available.",
-      adMsgRequired:         "Select at least one recipient and enter a message.",
-      adMsgTooManyRecipients:"You can select up to 50 recipients at once.",
-      adMsgSelectedCount:    "{count} recipients selected",
-      adNotifNewAssignment:  "New assignment",
-    },
-  };
-
-  /* Auto-inject keys into script.js translations at runtime */
-  if (window.translations) {
-    Object.entries(NEW_I18N_KEYS).forEach(([lang, keys]) => {
-      if (window.translations[lang]) {
-        Object.assign(window.translations[lang], keys);
-      }
-    });
-    if (typeof updatePageLanguage === "function") updatePageLanguage();
-  }
-
-  /* ================================================================
      STATE
   ================================================================ */
   let currentProfile   = null;
@@ -1592,6 +1238,9 @@
   async function uploadLessonMaterial(file, courseId, moduleOrder, lessonOrder, materialType) {
     if (!file) return { materialPath: null, materialUrl: null };
     if (!window.lmsSupabase?.storage) throw new Error("Supabase Storage is not available.");
+    if (file.size > 500 * 1024 * 1024) {
+      throw new Error("File terlalu besar. Maksimum ukuran file adalah 500 MB.");
+    }
 
     const fileName = safeStorageSegment(file.name);
     const path = [
@@ -2255,6 +1904,10 @@
     if (!selectedSubmissionId) return;
     if (newStatus === "graded" && isNaN(score)) {
       if (msg) { msg.textContent = "Please enter a grade"; msg.className = "ad-grading-msg error"; }
+      return;
+    }
+    if (score < 0 || score > 100) {
+      if (msg) { msg.textContent = "Grade harus antara 0–100"; msg.className = "ad-grading-msg error"; }
       return;
     }
 
@@ -3653,6 +3306,10 @@
     fileInput.addEventListener("change", async () => {
       const file = fileInput.files[0];
       if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        showToastError("Ukuran foto maksimum 2 MB");
+        return;
+      }
       const previousAvatars = Array.from(document.querySelectorAll(".ad-avatar"))
         .map((el) => [el, el.innerHTML]);
 
@@ -3810,10 +3467,32 @@
         }
 
         const tempPassword = data?.temp_password;
+        setMessage("User created successfully.", "var(--sd-green)");
         if (tempPassword) {
-          setMessage(`User created. Temporary password: ${tempPassword}`, "var(--sd-green)");
-        } else {
-          setMessage("User created.", "var(--sd-green)");
+          const pwContainer = document.createElement("div");
+          pwContainer.style.cssText = "margin-top:8px;display:flex;align-items:center;gap:8px;";
+          pwContainer.innerHTML = `
+            <span style="font-size:.85rem;color:var(--sd-text-secondary)">Temp password:</span>
+            <input type="password" id="tempPwField" value="${escHtml(tempPassword)}" readonly
+              style="font-size:.85rem;border:1px solid var(--sd-border);border-radius:4px;padding:2px 6px;background:var(--sd-bg-secondary);flex:1;" />
+            <button type="button" id="tempPwToggle" style="font-size:.75rem;padding:2px 6px;border:1px solid var(--sd-border);border-radius:4px;cursor:pointer;">Show</button>
+            <button type="button" id="tempPwCopy" style="font-size:.75rem;padding:2px 6px;border:1px solid var(--sd-border);border-radius:4px;cursor:pointer;">Copy</button>
+          `;
+          msg?.appendChild(pwContainer);
+
+          pwContainer.querySelector("#tempPwToggle")?.addEventListener("click", () => {
+            const input = pwContainer.querySelector("#tempPwField");
+            if (input) {
+              input.type = input.type === "password" ? "text" : "password";
+              pwContainer.querySelector("#tempPwToggle").textContent = input.type === "password" ? "Show" : "Hide";
+            }
+          });
+          pwContainer.querySelector("#tempPwCopy")?.addEventListener("click", () => {
+            navigator.clipboard.writeText(tempPassword).then(() => {
+              pwContainer.querySelector("#tempPwCopy").textContent = "Copied!";
+              setTimeout(() => { pwContainer.querySelector("#tempPwCopy").textContent = "Copy"; }, 2000);
+            });
+          });
         }
 
         await loadUsersTable();
@@ -4234,7 +3913,7 @@
             <p class="ad-announcement-item__preview">${escHtml(ann.body?.substring(0, 120) || "")}${(ann.body?.length || 0) > 120 ? "…" : ""}</p>
             <div class="ad-announcement-item__meta">
               <span class="ad-tag ${isPublished ? "ad-tag--green" : "ad-tag--orange"}">${isPublished ? "Published" : "Scheduled"}</span>
-              <span>Target: ${ann.target_role}</span>
+              <span>Target: ${escHtml(ann.target_role || "—")}</span>
               <span>${formatDT(ann.publish_at)}</span>
               ${ann.expires_at ? `<span>Expires: ${formatDT(ann.expires_at)}</span>` : ""}
             </div>

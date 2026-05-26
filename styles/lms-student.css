@@ -1986,6 +1986,104 @@
 }
 
 /* ================================================================
+   GRADE RESULT — Tampilan nilai setelah assignment dinilai
+   ================================================================ */
+.sd-grade-result {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.sd-grade-result p {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--sd-text-secondary);
+  max-width: 220px;
+  text-align: right;
+  font-style: italic;
+}
+
+/* Status badge: tidak lulus */
+.sd-status-badge--inactive {
+  background: var(--sd-red-light);
+  color: var(--sd-red);
+}
+
+/* ================================================================
+   ANNOUNCEMENTS — Widget pengumuman di home student
+   ================================================================ */
+.sd-announcements-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sd-announcement-item {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--sd-border);
+}
+
+.sd-announcement-item:last-child { border-bottom: none; }
+
+.sd-announcement-item__title {
+  font-weight: 700;
+  font-size: .875rem;
+  margin: 0 0 4px;
+  color: var(--sd-text-primary);
+}
+
+.sd-announcement-item__preview {
+  font-size: .8rem;
+  color: var(--sd-text-secondary);
+  margin: 0 0 4px;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sd-announcement-item__date {
+  font-size: .72rem;
+  color: var(--sd-text-muted);
+  margin: 0;
+}
+
+.sd-empty-announcement {
+  color: var(--sd-text-muted);
+  font-size: .875rem;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+/* ================================================================
+   ASSIGNMENT ERROR
+   ================================================================ */
+.sd-assignment-err {
+  display: block;
+  font-size: 11.5px;
+  color: var(--sd-red);
+  margin-top: 4px;
+}
+
+/* ================================================================
+   STUDENT MODAL OVERLAY (confirm hapus pesan)
+   ================================================================ */
+.sd-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ================================================================
    UTILITY
    ================================================================ */
 .sr-only {
