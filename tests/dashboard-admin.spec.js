@@ -1104,6 +1104,25 @@ test("trainer sees unread messages badge", async ({ page }) => {
   }));
 });
 
+test("message notification opens the selected admin message", async ({ page }) => {
+  await installSupabaseStub(page, "trainer");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator("#adNotifBtn").click();
+  await page.locator(".ad-notif-list-item", { hasText: "Question" }).click();
+
+  await expect(page.locator("#section-messages")).toHaveClass(/active/);
+  await expect(page.locator(".ad-inbox-item.active", { hasText: "Question" })).toBeVisible();
+  await expect(page.locator("#adMsgDetail")).toBeVisible();
+  await expect(page.locator("#adMsgDetail")).toContainText("Need help with Module 2.");
+
+  const messages = await page.evaluate(() => window.__e2eGetTableData().messages);
+  expect(messages.find((msg) => msg.id === "msg-1")).toEqual(expect.objectContaining({
+    is_read: true,
+    recipient_id: "e2e-trainer"
+  }));
+});
+
 test("trainer can open message detail", async ({ page }) => {
   await installSupabaseStub(page, "trainer");
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
@@ -1535,6 +1554,44 @@ test("admin sees all courses with creator IDs", async ({ page }) => {
   await expect(page.locator("#adminCourseList")).toContainText("Creator ID: TR-002");
   await expect(page.locator("#adminCourseList")).toContainText("Creator ID: ADM-001");
   await expect(rows.locator("[data-action='edit']")).toHaveCount(2);
+});
+
+test("admin opens course contents from the course row", async ({ page }) => {
+  await installSupabaseStub(page, "admin", {
+    lessons: [
+      {
+        id: "lesson-1",
+        course_id: "course-1",
+        title: "Leadership Intro",
+        material_type: "video",
+        material_url: "https://example.com/leadership-intro.mp4",
+        module_title: "Orientation",
+        module_order: 1,
+        lesson_order: 1
+      },
+      {
+        id: "lesson-2",
+        course_id: "course-1",
+        title: "Leadership Checklist",
+        material_type: "pdf",
+        material_url: null,
+        module_title: "Orientation",
+        module_order: 1,
+        lesson_order: 2
+      }
+    ]
+  });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='courses']").click();
+  await page.locator(".ad-course-row", { hasText: "Leadership Basics" }).click();
+
+  await expect(page.locator("#adminCourseDetail")).toBeVisible();
+  await expect(page.locator("#adminCourseDetail")).toContainText("Leadership Basics");
+  await expect(page.locator("#adminCourseDetail")).toContainText("Orientation");
+  await expect(page.locator("#adminCourseDetail")).toContainText("Leadership Intro");
+  await expect(page.locator("#adminCourseDetail")).toContainText("Leadership Checklist");
+  await expect(page.locator("#adminCourseDetail a", { hasText: "Open material" })).toHaveAttribute("href", "https://example.com/leadership-intro.mp4");
 });
 
 test("admin sees all upcoming events and trainer sees only owned events", async ({ page }) => {

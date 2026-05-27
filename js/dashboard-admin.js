@@ -1012,6 +1012,87 @@
   /* ================================================================
      COURSE LIST
   ================================================================ */
+  function ensureAdminCourseDetailPanel() {
+    const section = $("section-courses");
+    if (!section) return null;
+    let panel = $("adminCourseDetail");
+    if (!panel) {
+      panel = document.createElement("div");
+      panel.id = "adminCourseDetail";
+      panel.className = "ad-message-view ad-course-detail";
+      panel.hidden = true;
+      section.appendChild(panel);
+    }
+    return panel;
+  }
+
+  function renderAdminLessonModules(lessons) {
+    if (!lessons?.length) {
+      return `<p class="ad-message-detail__body">Belum ada materi tersedia untuk kursus ini.</p>`;
+    }
+    const modules = new Map();
+    lessons.forEach((lesson) => {
+      const key = String(lesson.module_order || 1);
+      if (!modules.has(key)) {
+        modules.set(key, { title: lesson.module_title || `Module ${key}`, lessons: [] });
+      }
+      modules.get(key).lessons.push(lesson);
+    });
+    return Array.from(modules.values()).map((module) => `
+      <div class="ad-message-detail__recipients">
+        <p class="ad-message-detail__label">${escHtml(module.title)}</p>
+        ${module.lessons.map((lesson) => {
+          const safeUrl = toSafeUiUrl(lesson.material_url);
+          return `
+            <div class="ad-message-recipient">
+              <span>${escHtml(lesson.title || "Lesson")}</span>
+              ${safeUrl
+                ? `<a class="ad-btn ad-btn--outline ad-btn--sm" href="${escHtml(safeUrl)}" target="_blank" rel="noopener">Open material</a>`
+                : `<span class="ad-inbox-item__time">${escHtml(lesson.material_type || "Material")}</span>`}
+            </div>`;
+        }).join("")}
+      </div>`).join("");
+  }
+
+  async function openAdminCourseDetail(course) {
+    const panel = ensureAdminCourseDetailPanel();
+    if (!panel || !course?.id || !window.lmsSupabase) return;
+
+    panel.hidden = false;
+    panel.innerHTML = `
+      <div class="ad-message-view__detail">
+        <div class="ad-message-detail__actions">
+          <div>
+            <p class="ad-inbox-item__name">${escHtml(course.title || "Course")}</p>
+            <p class="ad-inbox-item__time">${escHtml(course.category || "Course")} - Creator ID: ${escHtml(course.creatorId || "-")}${course.createdAt ? ` - Created ${formatDT(course.createdAt)}` : ""}</p>
+          </div>
+          <button class="ad-btn ad-btn--outline ad-btn--sm" type="button" data-admin-course-close>Close</button>
+        </div>
+        <div class="ad-message-view__compose">
+          <p class="ad-message-detail__body">Loading course contents...</p>
+        </div>
+      </div>`;
+    panel.querySelector("[data-admin-course-close]")?.addEventListener("click", () => {
+      panel.hidden = true;
+    });
+    panel.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    try {
+      const { data: lessons, error } = await window.lmsSupabase
+        .from("lessons")
+        .select("id, title, material_type, material_url, module_title, module_order, lesson_order")
+        .eq("course_id", course.id)
+        .order("module_order", { ascending: true })
+        .order("lesson_order", { ascending: true });
+      if (error) throw error;
+      const body = panel.querySelector(".ad-message-view__compose");
+      if (body) body.innerHTML = renderAdminLessonModules(lessons || []);
+    } catch (err) {
+      const body = panel.querySelector(".ad-message-view__compose");
+      if (body) body.innerHTML = `<p class="ad-message-detail__body">${escHtml(err.message || "Course contents failed to load.")}</p>`;
+    }
+  }
+
   async function loadCoursesList() {
     const list = $("adminCourseList");
     if (!list) return;
@@ -1051,6 +1132,13 @@
         const row = document.createElement("div");
         row.className = "ad-course-row";
         row.dataset.courseId = course.id;
+        row.dataset.courseTitle = course.title || "Course";
+        row.dataset.courseCategory = course.categories?.name || course.category_id || "Course";
+        row.dataset.courseCreatorId = creatorId;
+        row.dataset.courseCreatedAt = course.created_at || "";
+        row.tabIndex = 0;
+        row.setAttribute("role", "button");
+        row.setAttribute("aria-label", `View ${course.title || "course"}`);
         row.innerHTML = `
           <div class="ad-course-row__thumb">
             ${toSafeUiUrl(course.thumbnail_url)
@@ -1155,6 +1243,29 @@
       if (!row) return;
       if (deleteBtn) confirmDeleteCourse(row.dataset.courseId, row);
       if (editBtn)   openEditCourse(row.dataset.courseId);
+      if (!deleteBtn && !editBtn) {
+        openAdminCourseDetail({
+          id: row.dataset.courseId,
+          title: row.dataset.courseTitle,
+          category: row.dataset.courseCategory,
+          creatorId: row.dataset.courseCreatorId,
+          createdAt: row.dataset.courseCreatedAt
+        });
+      }
+    });
+    list && list.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      if (e.target.closest("button,a")) return;
+      const row = e.target.closest(".ad-course-row");
+      if (!row) return;
+      e.preventDefault();
+      openAdminCourseDetail({
+        id: row.dataset.courseId,
+        title: row.dataset.courseTitle,
+        category: row.dataset.courseCategory,
+        creatorId: row.dataset.courseCreatorId,
+        createdAt: row.dataset.courseCreatedAt
+      });
     });
   }
 
@@ -2450,6 +2561,8 @@
   }
 
   async function loadMessages(...args) {
+    const [options = {}] = args;
+    const selectedMessageId = options?.selectedMessageId ? String(options.selectedMessageId) : "";
     const inbox = $("adInboxList");
     const empty = $("adInboxEmpty");
     const viewEmpty = $("adMsgViewEmpty");
@@ -2671,6 +2784,9 @@
         });
       };
 
+      let selectedMessageItem = null;
+      let selectedMessageGroup = null;
+
       groups.forEach((group) => {
         const item = document.createElement("div");
         item.className = `ad-inbox-item${group.isUnread ? " unread" : ""}`;
@@ -2702,8 +2818,19 @@
           item.classList.remove("unread");
           await renderDetail(group);
         });
+        if (selectedMessageId && group.messages.some((msg) => String(msg.id) === selectedMessageId)) {
+          selectedMessageItem = item;
+          selectedMessageGroup = group;
+        }
         inbox.insertBefore(item, empty);
       });
+      if (selectedMessageItem && selectedMessageGroup) {
+        inbox.querySelectorAll(".ad-inbox-item").forEach((el) => el.classList.remove("active"));
+        selectedMessageItem.classList.add("active");
+        selectedMessageItem.classList.remove("unread");
+        await renderDetail(selectedMessageGroup);
+        selectedMessageItem.scrollIntoView({ block: "nearest" });
+      }
     } catch (err) { console.warn("Messages load error:", err.message); }
   }
 
@@ -4060,7 +4187,11 @@
               .catch(() => {});
           }
           adminUnreadMessages = Math.max(adminUnreadMessages - 1, 0);
-          if (currentSection === "messages") await loadMessages();
+          activeMessageView = "inbox";
+          const notifPanel = $("adNotifPanel");
+          if (notifPanel) notifPanel.hidden = true;
+          if (window._adActivateSection) window._adActivateSection("messages");
+          await loadMessages({ selectedMessageId: messageId });
         } else {
           adminUnreadNotifications = list.querySelectorAll(".ad-notif-list-item.unread[data-kind='notification']").length;
           await window.lmsSupabase.from("notifications").update({ is_read: true }).eq("id", item.dataset.id).catch(() => {});

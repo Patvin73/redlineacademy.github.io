@@ -732,6 +732,23 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#courseGrid .sd-course-card[data-status='available']")).toHaveCount(1);
   });
 
+  test("opens student course contents from the course card", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
+    await page.locator(".sd-nav__item[data-section='courses']").click();
+    const courseCard = page.locator("#courseGrid .sd-course-card", { hasText: "Aged Care Basics" });
+    await expect(courseCard).toBeVisible();
+    await courseCard.click();
+
+    await expect(page.locator("#studentCourseDetail")).toBeVisible();
+    await expect(page.locator("#studentCourseDetail")).toContainText("Aged Care Basics");
+    await expect(page.locator("#studentCourseDetail")).toContainText("Safe Transfers Video");
+    await expect(page.locator("#studentCourseDetail")).toContainText("Care Plan Notes");
+    await expect(page.locator("#studentCourseDetail a", { hasText: "Open material" })).toHaveAttribute("href", "https://example.com/safe-transfers.mp4");
+  });
+
   test("updates course progress when the lesson viewer marks a lesson complete", async ({ page }) => {
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);
@@ -950,6 +967,26 @@ test.describe("Student Dashboard", () => {
     await page.locator("[data-sd-msg-delete-inbox]").click();
     const afterDelete = await page.evaluate(() => window.__QA_TABLE_DATA__.messages);
     expect(afterDelete.some((msg) => msg.id === "msg-1")).toBe(false);
+  });
+
+  test("message notification opens the selected student message", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html");
+    await page.click("#sdNotifBtn");
+    await page.locator(".sd-notif-list-item", { hasText: "Welcome" }).click();
+
+    await expect(page.locator("#section-messages")).toHaveClass(/active/);
+    await expect(page.locator(".sd-inbox-item.active", { hasText: "Welcome" })).toBeVisible();
+    await expect(page.locator("#messageDetail")).toBeVisible();
+    await expect(page.locator("#messageDetail")).toContainText("Please review module one.");
+
+    const messages = await page.evaluate(() => window.__QA_TABLE_DATA__.messages);
+    expect(messages.find((msg) => msg.id === "msg-1")).toEqual(expect.objectContaining({
+      is_read: true,
+      recipient_id: "student-1"
+    }));
   });
 
   test("student composes a message to multiple recipients across roles", async ({ page }) => {

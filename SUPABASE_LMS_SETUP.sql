@@ -252,9 +252,14 @@ create table if not exists public.messages (
   subject text,
   body text not null,
   is_read boolean not null default false,
+  read_at timestamptz,
+  is_archived boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.messages add column if not exists read_at timestamptz;
+alter table public.messages add column if not exists is_archived boolean not null default false;
 
 create table if not exists public.notifications (
   id uuid primary key default gen_random_uuid(),

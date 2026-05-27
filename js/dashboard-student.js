@@ -409,7 +409,11 @@
               .catch(() => {});
           }
           studentUnreadMessages = Math.max(studentUnreadMessages - 1, 0);
-          if (currentSection === "messages") await loadMessages(currentStudentProfile?.id);
+          activeStudentMessageView = "inbox";
+          const notifPanel = $("notifPanel");
+          if (notifPanel) notifPanel.hidden = true;
+          if (window._sdActivateSection) window._sdActivateSection("messages");
+          await loadMessages(currentStudentProfile?.id, { selectedMessageId: messageId });
         } else {
           const id = item.dataset.id;
           studentUnreadNotifications = list.querySelectorAll(".sd-notif-list-item.unread[data-kind='notification']").length;
@@ -1057,6 +1061,88 @@
 
   window.lmsMarkLessonCompleted = markLessonCompleted;
 
+  function ensureStudentCourseDetailPanel() {
+    const section = $("section-courses");
+    if (!section) return null;
+    let panel = $("studentCourseDetail");
+    if (!panel) {
+      panel = document.createElement("div");
+      panel.id = "studentCourseDetail";
+      panel.className = "sd-message-view sd-course-detail";
+      panel.hidden = true;
+      section.appendChild(panel);
+    }
+    return panel;
+  }
+
+  function renderStudentLessonModules(lessons) {
+    if (!lessons?.length) {
+      return `<p class="sd-message-detail__body">Belum ada materi tersedia untuk kursus ini.</p>`;
+    }
+    const modules = new Map();
+    lessons.forEach((lesson) => {
+      const key = String(lesson.module_order || 1);
+      if (!modules.has(key)) {
+        modules.set(key, {
+          title: lesson.module_title || `Module ${key}`,
+          lessons: []
+        });
+      }
+      modules.get(key).lessons.push(lesson);
+    });
+    return Array.from(modules.values()).map((module) => `
+      <div class="sd-message-detail__recipients">
+        <p class="sd-message-detail__label">${escHtml(module.title)}</p>
+        ${module.lessons.map((lesson) => {
+          const safeUrl = toSafeUiUrl(lesson.material_url);
+          return `
+            <div class="sd-message-recipient">
+              <span>${escHtml(lesson.title || "Lesson")}</span>
+              ${safeUrl
+                ? `<a class="sd-btn sd-btn--outline sd-btn--sm" href="${escHtml(safeUrl)}" target="_blank" rel="noopener">Open material</a>`
+                : `<span class="sd-course-card__trainer">${escHtml(lesson.material_type || "Material")}</span>`}
+            </div>`;
+        }).join("")}
+      </div>`).join("");
+  }
+
+  async function openStudentCourseDetail(course) {
+    const panel = ensureStudentCourseDetailPanel();
+    if (!panel || !course?.id || !window.lmsSupabase) return;
+
+    panel.hidden = false;
+    panel.innerHTML = `
+      <div class="sd-message-view__header">
+        <div>
+          <p class="sd-message-view__subject">${escHtml(course.title || "Course")}</p>
+          <p class="sd-inbox-item__time">${escHtml(course.categories?.name || course.category_id || "Course")}</p>
+        </div>
+        <button class="sd-btn sd-btn--outline sd-btn--sm" type="button" data-student-course-close>Close</button>
+      </div>
+      <div class="sd-message-view__body">
+        <p class="sd-message-detail__body">Loading course contents...</p>
+      </div>`;
+    panel.querySelector("[data-student-course-close]")?.addEventListener("click", () => {
+      panel.hidden = true;
+    });
+    panel.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    try {
+      const { data: lessons, error } = await window.lmsSupabase
+        .from("lessons")
+        .select("id, title, material_type, material_url, module_title, module_order, lesson_order")
+        .eq("course_id", course.id)
+        .order("module_order", { ascending: true })
+        .order("lesson_order", { ascending: true });
+      if (error) throw error;
+      const body = panel.querySelector(".sd-message-view__body");
+      if (body) body.innerHTML = renderStudentLessonModules(lessons || []);
+    } catch (err) {
+      const body = panel.querySelector(".sd-message-view__body");
+      if (body) body.innerHTML = `<p class="sd-message-detail__body">${escHtml(err.message || "Course contents failed to load.")}</p>`;
+    }
+  }
+
   async function loadCourseGrid(userId) {
     const grid = $("courseGrid");
     if (!grid) return;
@@ -1161,7 +1247,7 @@
         const creatorId = creatorIdForCourse(course);
 
         return `
-          <div class="sd-course-card" data-status="${status}">
+          <div class="sd-course-card" data-status="${status}" data-course-id="${escHtml(course.id)}" role="button" tabindex="0" aria-label="View ${escHtml(course.title || "course")}">
             <div class="sd-course-card__thumb">
               ${thumbSrc
                 ? `<img src="${escHtml(thumbSrc)}" alt="${escHtml(course.title || "Course")}" loading="lazy" />`
@@ -1181,6 +1267,20 @@
       }).join("");
 
       grid.insertAdjacentHTML("beforeend", cards);
+      grid.querySelectorAll(".sd-course-card[data-course-id]").forEach((card) => {
+        const course = courses.find((item) => item.id === card.dataset.courseId);
+        if (!course) return;
+        const openDetail = () => openStudentCourseDetail(course);
+        card.addEventListener("click", (event) => {
+          if (event.target.closest("a,button")) return;
+          openDetail();
+        });
+        card.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          openDetail();
+        });
+      });
       setupFilterHandler();
     } catch (err) {
       console.warn("Course load error:", err.message);
@@ -2049,7 +2149,8 @@
   }
 
   async function loadMessages(...args) {
-    const [userId] = args;
+    const [userId, options = {}] = args;
+    const selectedMessageId = options?.selectedMessageId ? String(options.selectedMessageId) : "";
     const inbox = $("inboxList");
     const inboxEmpty = $("inboxEmpty");
     const view = $("messageView");
@@ -2225,6 +2326,9 @@
         });
       };
 
+      let selectedMessageItem = null;
+      let selectedMessageGroup = null;
+
       groups.forEach((group) => {
         const item = document.createElement("div");
         item.className = `sd-inbox-item${group.isUnread ? " unread" : ""}`;
@@ -2255,8 +2359,19 @@
           item.classList.remove("unread");
           await renderDetail(group);
         });
+        if (selectedMessageId && group.messages.some((msg) => String(msg.id) === selectedMessageId)) {
+          selectedMessageItem = item;
+          selectedMessageGroup = group;
+        }
         inbox.insertBefore(item, inboxEmpty);
       });
+      if (selectedMessageItem && selectedMessageGroup) {
+        inbox.querySelectorAll(".sd-inbox-item").forEach((el) => el.classList.remove("active"));
+        selectedMessageItem.classList.add("active");
+        selectedMessageItem.classList.remove("unread");
+        await renderDetail(selectedMessageGroup);
+        selectedMessageItem.scrollIntoView({ block: "nearest" });
+      }
     } catch {
       if (inboxEmpty) inboxEmpty.style.display = "flex";
       if (composeForm?.hidden) {
