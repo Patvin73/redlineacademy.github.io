@@ -399,7 +399,10 @@ create table if not exists public.activity_logs (
 -- ==========================================================
 -- HELPERS + TRIGGERS
 -- ==========================================================
-create or replace function public.is_admin(user_id uuid)
+create schema if not exists private;
+grant usage on schema private to authenticated, service_role;
+
+create or replace function private.is_admin(user_id uuid)
 returns boolean
 language plpgsql
 stable
@@ -422,7 +425,7 @@ exception
 end;
 $$;
 
-create or replace function public.is_staff(user_id uuid)
+create or replace function private.is_staff(user_id uuid)
 returns boolean
 language plpgsql
 stable
@@ -586,7 +589,7 @@ begin
     raise exception 'Not authenticated.';
   end if;
 
-  if public.is_admin(v_uid) then
+  if private.is_admin(v_uid) then
     return new;
   end if;
 
@@ -611,10 +614,10 @@ create trigger trg_profiles_guard_update
   before update on public.profiles
   for each row execute procedure public.guard_profile_update();
 
-revoke all on function public.is_admin(uuid) from public;
-revoke all on function public.is_staff(uuid) from public;
-grant execute on function public.is_admin(uuid) to authenticated;
-grant execute on function public.is_staff(uuid) to authenticated;
+revoke all on function private.is_admin(uuid) from public;
+revoke all on function private.is_staff(uuid) from public;
+grant execute on function private.is_admin(uuid) to authenticated, service_role;
+grant execute on function private.is_staff(uuid) to authenticated, service_role;
 
 -- ==========================================================
 -- VIEWS USED BY DASHBOARD JS
@@ -711,8 +714,8 @@ alter table public.activity_logs enable row level security;
 
 drop policy if exists "profiles_select_self_or_staff" on public.profiles;
 drop policy if exists "profiles_update_self_or_admin" on public.profiles;
-create policy "profiles_select_self_or_staff" on public.profiles for select to authenticated using (auth.uid() = id or public.is_staff(auth.uid()));
-create policy "profiles_update_self_or_admin" on public.profiles for update to authenticated using (auth.uid() = id or public.is_admin(auth.uid())) with check (auth.uid() = id or public.is_admin(auth.uid()));
+create policy "profiles_select_self_or_staff" on public.profiles for select to authenticated using (auth.uid() = id or private.is_staff(auth.uid()));
+create policy "profiles_update_self_or_admin" on public.profiles for update to authenticated using (auth.uid() = id or private.is_admin(auth.uid())) with check (auth.uid() = id or private.is_admin(auth.uid()));
 
 drop policy if exists "categories_select_all" on public.categories;
 create policy "categories_select_all" on public.categories for select to authenticated using (true);
@@ -720,98 +723,98 @@ create policy "categories_select_all" on public.categories for select to authent
 drop policy if exists "lms_select_all_courses" on public.courses;
 drop policy if exists "lms_write_staff_courses" on public.courses;
 create policy "lms_select_all_courses" on public.courses for select to authenticated using (true);
-create policy "lms_write_staff_courses" on public.courses for all to authenticated using (public.is_staff(auth.uid())) with check (public.is_staff(auth.uid()));
+create policy "lms_write_staff_courses" on public.courses for all to authenticated using (private.is_staff(auth.uid())) with check (private.is_staff(auth.uid()));
 
 drop policy if exists "lms_select_all_enrollments" on public.enrollments;
 drop policy if exists "lms_write_staff_enrollments" on public.enrollments;
 create policy "lms_select_all_enrollments" on public.enrollments for select to authenticated using (true);
-create policy "lms_write_staff_enrollments" on public.enrollments for all to authenticated using (public.is_staff(auth.uid())) with check (public.is_staff(auth.uid()));
+create policy "lms_write_staff_enrollments" on public.enrollments for all to authenticated using (private.is_staff(auth.uid())) with check (private.is_staff(auth.uid()));
 
 drop policy if exists "lms_select_all_course_progress" on public.course_progress;
 drop policy if exists "lms_write_staff_course_progress" on public.course_progress;
 create policy "lms_select_all_course_progress" on public.course_progress for select to authenticated using (true);
-create policy "lms_write_staff_course_progress" on public.course_progress for all to authenticated using (public.is_staff(auth.uid())) with check (public.is_staff(auth.uid()));
+create policy "lms_write_staff_course_progress" on public.course_progress for all to authenticated using (private.is_staff(auth.uid())) with check (private.is_staff(auth.uid()));
 
 drop policy if exists "lms_select_all_assignments" on public.assignments;
 drop policy if exists "lms_write_staff_assignments" on public.assignments;
 create policy "lms_select_all_assignments" on public.assignments for select to authenticated using (true);
-create policy "lms_write_staff_assignments" on public.assignments for all to authenticated using (public.is_staff(auth.uid())) with check (public.is_staff(auth.uid()));
+create policy "lms_write_staff_assignments" on public.assignments for all to authenticated using (private.is_staff(auth.uid())) with check (private.is_staff(auth.uid()));
 
 drop policy if exists "lms_select_all_submissions" on public.assignment_submissions;
 drop policy if exists "lms_write_staff_submissions" on public.assignment_submissions;
 drop policy if exists "lms_student_insert_own_submission" on public.assignment_submissions;
 create policy "lms_select_all_submissions" on public.assignment_submissions for select to authenticated using (true);
-create policy "lms_write_staff_submissions" on public.assignment_submissions for update to authenticated using (public.is_staff(auth.uid())) with check (public.is_staff(auth.uid()));
-create policy "lms_student_insert_own_submission" on public.assignment_submissions for insert to authenticated with check (student_id = auth.uid() or public.is_staff(auth.uid()));
+create policy "lms_write_staff_submissions" on public.assignment_submissions for update to authenticated using (private.is_staff(auth.uid())) with check (private.is_staff(auth.uid()));
+create policy "lms_student_insert_own_submission" on public.assignment_submissions for insert to authenticated with check (student_id = auth.uid() or private.is_staff(auth.uid()));
 
 drop policy if exists "lms_select_all_schedules" on public.schedules;
 drop policy if exists "lms_write_staff_schedules" on public.schedules;
 create policy "lms_select_all_schedules" on public.schedules for select to authenticated using (true);
-create policy "lms_write_staff_schedules" on public.schedules for all to authenticated using (public.is_staff(auth.uid())) with check (public.is_staff(auth.uid()));
+create policy "lms_write_staff_schedules" on public.schedules for all to authenticated using (private.is_staff(auth.uid())) with check (private.is_staff(auth.uid()));
 
 drop policy if exists "lms_select_all_forum_posts" on public.forum_posts;
 drop policy if exists "lms_write_staff_forum_posts" on public.forum_posts;
 drop policy if exists "lms_insert_own_forum_posts" on public.forum_posts;
 create policy "lms_select_all_forum_posts" on public.forum_posts for select to authenticated using (true);
-create policy "lms_write_staff_forum_posts" on public.forum_posts for update to authenticated using (public.is_staff(auth.uid())) with check (public.is_staff(auth.uid()));
-create policy "lms_insert_own_forum_posts" on public.forum_posts for insert to authenticated with check (author_id = auth.uid() or public.is_staff(auth.uid()));
+create policy "lms_write_staff_forum_posts" on public.forum_posts for update to authenticated using (private.is_staff(auth.uid())) with check (private.is_staff(auth.uid()));
+create policy "lms_insert_own_forum_posts" on public.forum_posts for insert to authenticated with check (author_id = auth.uid() or private.is_staff(auth.uid()));
 
 drop policy if exists "messages_select_participants_or_staff" on public.messages;
 drop policy if exists "messages_insert_sender_or_staff" on public.messages;
 drop policy if exists "messages_update_participants_or_staff" on public.messages;
 drop policy if exists "messages_delete_participants_or_staff" on public.messages;
-create policy "messages_select_participants_or_staff" on public.messages for select to authenticated using (sender_id = auth.uid() or recipient_id = auth.uid() or public.is_staff(auth.uid()));
-create policy "messages_insert_sender_or_staff" on public.messages for insert to authenticated with check (sender_id = auth.uid() or public.is_staff(auth.uid()));
-create policy "messages_update_participants_or_staff" on public.messages for update to authenticated using (sender_id = auth.uid() or recipient_id = auth.uid() or public.is_staff(auth.uid())) with check (sender_id = auth.uid() or recipient_id = auth.uid() or public.is_staff(auth.uid()));
-create policy "messages_delete_participants_or_staff" on public.messages for delete to authenticated using (sender_id = auth.uid() or recipient_id = auth.uid() or public.is_staff(auth.uid()));
+create policy "messages_select_participants_or_staff" on public.messages for select to authenticated using (sender_id = auth.uid() or recipient_id = auth.uid() or private.is_staff(auth.uid()));
+create policy "messages_insert_sender_or_staff" on public.messages for insert to authenticated with check (sender_id = auth.uid() or private.is_staff(auth.uid()));
+create policy "messages_update_participants_or_staff" on public.messages for update to authenticated using (sender_id = auth.uid() or recipient_id = auth.uid() or private.is_staff(auth.uid())) with check (sender_id = auth.uid() or recipient_id = auth.uid() or private.is_staff(auth.uid()));
+create policy "messages_delete_participants_or_staff" on public.messages for delete to authenticated using (sender_id = auth.uid() or recipient_id = auth.uid() or private.is_staff(auth.uid()));
 
 drop policy if exists "notifications_select_owner_or_staff" on public.notifications;
 drop policy if exists "notifications_insert_owner_or_staff" on public.notifications;
 drop policy if exists "notifications_update_owner_or_staff" on public.notifications;
-create policy "notifications_select_owner_or_staff" on public.notifications for select to authenticated using (user_id = auth.uid() or public.is_staff(auth.uid()));
-create policy "notifications_insert_owner_or_staff" on public.notifications for insert to authenticated with check (user_id = auth.uid() or public.is_staff(auth.uid()));
-create policy "notifications_update_owner_or_staff" on public.notifications for update to authenticated using (user_id = auth.uid() or public.is_staff(auth.uid())) with check (user_id = auth.uid() or public.is_staff(auth.uid()));
+create policy "notifications_select_owner_or_staff" on public.notifications for select to authenticated using (user_id = auth.uid() or private.is_staff(auth.uid()));
+create policy "notifications_insert_owner_or_staff" on public.notifications for insert to authenticated with check (user_id = auth.uid() or private.is_staff(auth.uid()));
+create policy "notifications_update_owner_or_staff" on public.notifications for update to authenticated using (user_id = auth.uid() or private.is_staff(auth.uid())) with check (user_id = auth.uid() or private.is_staff(auth.uid()));
 
 drop policy if exists "lms_select_all_announcements" on public.announcements;
 drop policy if exists "lms_write_staff_announcements" on public.announcements;
 create policy "lms_select_all_announcements" on public.announcements for select to authenticated using (true);
-create policy "lms_write_staff_announcements" on public.announcements for all to authenticated using (public.is_staff(auth.uid())) with check (public.is_staff(auth.uid()));
+create policy "lms_write_staff_announcements" on public.announcements for all to authenticated using (private.is_staff(auth.uid())) with check (private.is_staff(auth.uid()));
 
 drop policy if exists "lms_select_all_payments" on public.payments;
 drop policy if exists "lms_write_staff_payments" on public.payments;
 create policy "lms_select_all_payments" on public.payments for select to authenticated using (true);
-create policy "lms_write_staff_payments" on public.payments for all to authenticated using (public.is_staff(auth.uid())) with check (public.is_staff(auth.uid()));
+create policy "lms_write_staff_payments" on public.payments for all to authenticated using (private.is_staff(auth.uid())) with check (private.is_staff(auth.uid()));
 
 drop policy if exists "lms_select_all_certificates" on public.certificates;
 drop policy if exists "lms_write_staff_certificates" on public.certificates;
 create policy "lms_select_all_certificates" on public.certificates for select to authenticated using (true);
-create policy "lms_write_staff_certificates" on public.certificates for all to authenticated using (public.is_staff(auth.uid())) with check (public.is_staff(auth.uid()));
+create policy "lms_write_staff_certificates" on public.certificates for all to authenticated using (private.is_staff(auth.uid())) with check (private.is_staff(auth.uid()));
 
 drop policy if exists "lms_select_all_activity_logs" on public.activity_logs;
 drop policy if exists "lms_insert_own_or_staff_activity_logs" on public.activity_logs;
 create policy "lms_select_all_activity_logs" on public.activity_logs for select to authenticated using (true);
-create policy "lms_insert_own_or_staff_activity_logs" on public.activity_logs for insert to authenticated with check (user_id = auth.uid() or public.is_staff(auth.uid()));
+create policy "lms_insert_own_or_staff_activity_logs" on public.activity_logs for insert to authenticated with check (user_id = auth.uid() or private.is_staff(auth.uid()));
 
 drop policy if exists "lms_select_all_lessons" on public.lessons;
 drop policy if exists "lms_write_staff_lessons" on public.lessons;
 create policy "lms_select_all_lessons" on public.lessons for select to authenticated using (true);
-create policy "lms_write_staff_lessons" on public.lessons for all to authenticated using (public.is_staff(auth.uid())) with check (public.is_staff(auth.uid()));
+create policy "lms_write_staff_lessons" on public.lessons for all to authenticated using (private.is_staff(auth.uid())) with check (private.is_staff(auth.uid()));
 
 drop policy if exists "lms_select_own_progress" on public.progress;
 drop policy if exists "lms_write_own_progress" on public.progress;
-create policy "lms_select_own_progress" on public.progress for select to authenticated using (student_id = auth.uid() or public.is_staff(auth.uid()));
-create policy "lms_write_own_progress" on public.progress for all to authenticated using (student_id = auth.uid() or public.is_staff(auth.uid())) with check (student_id = auth.uid() or public.is_staff(auth.uid()));
+create policy "lms_select_own_progress" on public.progress for select to authenticated using (student_id = auth.uid() or private.is_staff(auth.uid()));
+create policy "lms_write_own_progress" on public.progress for all to authenticated using (student_id = auth.uid() or private.is_staff(auth.uid())) with check (student_id = auth.uid() or private.is_staff(auth.uid()));
 
 drop policy if exists "lms_select_own_marketers" on public.marketers;
 drop policy if exists "lms_write_staff_marketers" on public.marketers;
-create policy "lms_select_own_marketers" on public.marketers for select to authenticated using (user_id = auth.uid() or public.is_admin(auth.uid()) or public.is_staff(auth.uid()));
-create policy "lms_write_staff_marketers" on public.marketers for all to authenticated using (public.is_admin(auth.uid()) or public.is_staff(auth.uid())) with check (public.is_admin(auth.uid()) or public.is_staff(auth.uid()));
+create policy "lms_select_own_marketers" on public.marketers for select to authenticated using (user_id = auth.uid() or private.is_admin(auth.uid()) or private.is_staff(auth.uid()));
+create policy "lms_write_staff_marketers" on public.marketers for all to authenticated using (private.is_admin(auth.uid()) or private.is_staff(auth.uid())) with check (private.is_admin(auth.uid()) or private.is_staff(auth.uid()));
 
 drop policy if exists "lms_select_own_referrals" on public.referrals;
 drop policy if exists "lms_write_staff_referrals" on public.referrals;
 create policy "lms_select_own_referrals" on public.referrals for select to authenticated using (
-  public.is_admin(auth.uid())
-  or public.is_staff(auth.uid())
+  private.is_admin(auth.uid())
+  or private.is_staff(auth.uid())
   or exists (
     select 1
     from public.marketers m
@@ -819,12 +822,12 @@ create policy "lms_select_own_referrals" on public.referrals for select to authe
       and m.user_id = auth.uid()
   )
 );
-create policy "lms_write_staff_referrals" on public.referrals for all to authenticated using (public.is_admin(auth.uid()) or public.is_staff(auth.uid())) with check (public.is_admin(auth.uid()) or public.is_staff(auth.uid()));
+create policy "lms_write_staff_referrals" on public.referrals for all to authenticated using (private.is_admin(auth.uid()) or private.is_staff(auth.uid())) with check (private.is_admin(auth.uid()) or private.is_staff(auth.uid()));
 
 drop policy if exists "lms_select_staff_audit_logs" on public.audit_logs;
 drop policy if exists "lms_write_staff_audit_logs" on public.audit_logs;
-create policy "lms_select_staff_audit_logs" on public.audit_logs for select to authenticated using (public.is_admin(auth.uid()) or public.is_staff(auth.uid()));
-create policy "lms_write_staff_audit_logs" on public.audit_logs for insert to authenticated with check (public.is_admin(auth.uid()) or public.is_staff(auth.uid()));
+create policy "lms_select_staff_audit_logs" on public.audit_logs for select to authenticated using (private.is_admin(auth.uid()) or private.is_staff(auth.uid()));
+create policy "lms_write_staff_audit_logs" on public.audit_logs for insert to authenticated with check (private.is_admin(auth.uid()) or private.is_staff(auth.uid()));
 
 -- ==========================================================
 -- GRANTS
@@ -859,7 +862,7 @@ grant select on public.v_course_overview to authenticated;
 -- ==========================================================
 -- STORAGE BUCKET FOR AVATARS
 -- ==========================================================
--- Uses helper function public.is_staff(...) defined in HELPERS + TRIGGERS.
+-- Uses helper function private.is_staff(...) defined in HELPERS + TRIGGERS.
 
 insert into storage.buckets (id, name, public)
 values ('avatars', 'avatars', true)
@@ -868,14 +871,15 @@ set name = excluded.name,
     public = excluded.public;
 
 drop policy if exists "avatars_public_read" on storage.objects;
+drop policy if exists "avatars_staff_read" on storage.objects;
 drop policy if exists "avatars_insert_own_or_staff" on storage.objects;
 drop policy if exists "avatars_update_own_or_staff" on storage.objects;
 drop policy if exists "avatars_delete_own_or_staff" on storage.objects;
 
-create policy "avatars_public_read" on storage.objects for select to public using (bucket_id = 'avatars');
-create policy "avatars_insert_own_or_staff" on storage.objects for insert to authenticated with check (bucket_id = 'avatars' and (name like (auth.uid()::text || '.%') or name like ('avatars/' || auth.uid()::text || '.%') or public.is_staff(auth.uid())));
-create policy "avatars_update_own_or_staff" on storage.objects for update to authenticated using (bucket_id = 'avatars' and (name like (auth.uid()::text || '.%') or name like ('avatars/' || auth.uid()::text || '.%') or public.is_staff(auth.uid()))) with check (bucket_id = 'avatars' and (name like (auth.uid()::text || '.%') or name like ('avatars/' || auth.uid()::text || '.%') or public.is_staff(auth.uid())));
-create policy "avatars_delete_own_or_staff" on storage.objects for delete to authenticated using (bucket_id = 'avatars' and (name like (auth.uid()::text || '.%') or name like ('avatars/' || auth.uid()::text || '.%') or public.is_staff(auth.uid())));
+create policy "avatars_staff_read" on storage.objects for select to authenticated using (bucket_id = 'avatars' and private.is_staff(auth.uid()));
+create policy "avatars_insert_own_or_staff" on storage.objects for insert to authenticated with check (bucket_id = 'avatars' and (name like (auth.uid()::text || '.%') or name like ('avatars/' || auth.uid()::text || '.%') or private.is_staff(auth.uid())));
+create policy "avatars_update_own_or_staff" on storage.objects for update to authenticated using (bucket_id = 'avatars' and (name like (auth.uid()::text || '.%') or name like ('avatars/' || auth.uid()::text || '.%') or private.is_staff(auth.uid()))) with check (bucket_id = 'avatars' and (name like (auth.uid()::text || '.%') or name like ('avatars/' || auth.uid()::text || '.%') or private.is_staff(auth.uid())));
+create policy "avatars_delete_own_or_staff" on storage.objects for delete to authenticated using (bucket_id = 'avatars' and (name like (auth.uid()::text || '.%') or name like ('avatars/' || auth.uid()::text || '.%') or private.is_staff(auth.uid())));
 
 -- ==========================================================
 -- STORAGE BUCKET FOR COURSE MATERIALS
@@ -893,9 +897,9 @@ drop policy if exists "course_materials_staff_update" on storage.objects;
 drop policy if exists "course_materials_staff_delete" on storage.objects;
 
 create policy "course_materials_authenticated_read" on storage.objects for select to authenticated using (bucket_id = 'course-materials');
-create policy "course_materials_staff_insert" on storage.objects for insert to authenticated with check (bucket_id = 'course-materials' and public.is_staff(auth.uid()));
-create policy "course_materials_staff_update" on storage.objects for update to authenticated using (bucket_id = 'course-materials' and public.is_staff(auth.uid())) with check (bucket_id = 'course-materials' and public.is_staff(auth.uid()));
-create policy "course_materials_staff_delete" on storage.objects for delete to authenticated using (bucket_id = 'course-materials' and public.is_staff(auth.uid()));
+create policy "course_materials_staff_insert" on storage.objects for insert to authenticated with check (bucket_id = 'course-materials' and private.is_staff(auth.uid()));
+create policy "course_materials_staff_update" on storage.objects for update to authenticated using (bucket_id = 'course-materials' and private.is_staff(auth.uid())) with check (bucket_id = 'course-materials' and private.is_staff(auth.uid()));
+create policy "course_materials_staff_delete" on storage.objects for delete to authenticated using (bucket_id = 'course-materials' and private.is_staff(auth.uid()));
 
 -- ==========================================================
 -- STORAGE BUCKET FOR ASSIGNMENT SUBMISSIONS
@@ -908,14 +912,15 @@ set name = excluded.name,
     public = excluded.public;
 
 drop policy if exists "assignment_submissions_public_read" on storage.objects;
+drop policy if exists "assignment_submissions_staff_read" on storage.objects;
 drop policy if exists "assignment_submissions_insert_own_or_staff" on storage.objects;
 drop policy if exists "assignment_submissions_update_own_or_staff" on storage.objects;
 drop policy if exists "assignment_submissions_delete_own_or_staff" on storage.objects;
 
-create policy "assignment_submissions_public_read" on storage.objects for select to public using (bucket_id = 'assignment-submissions');
-create policy "assignment_submissions_insert_own_or_staff" on storage.objects for insert to authenticated with check (bucket_id = 'assignment-submissions' and (name like (auth.uid()::text || '/%') or public.is_staff(auth.uid())));
-create policy "assignment_submissions_update_own_or_staff" on storage.objects for update to authenticated using (bucket_id = 'assignment-submissions' and (name like (auth.uid()::text || '/%') or public.is_staff(auth.uid()))) with check (bucket_id = 'assignment-submissions' and (name like (auth.uid()::text || '/%') or public.is_staff(auth.uid())));
-create policy "assignment_submissions_delete_own_or_staff" on storage.objects for delete to authenticated using (bucket_id = 'assignment-submissions' and (name like (auth.uid()::text || '/%') or public.is_staff(auth.uid())));
+create policy "assignment_submissions_staff_read" on storage.objects for select to authenticated using (bucket_id = 'assignment-submissions' and private.is_staff(auth.uid()));
+create policy "assignment_submissions_insert_own_or_staff" on storage.objects for insert to authenticated with check (bucket_id = 'assignment-submissions' and (name like (auth.uid()::text || '/%') or private.is_staff(auth.uid())));
+create policy "assignment_submissions_update_own_or_staff" on storage.objects for update to authenticated using (bucket_id = 'assignment-submissions' and (name like (auth.uid()::text || '/%') or private.is_staff(auth.uid()))) with check (bucket_id = 'assignment-submissions' and (name like (auth.uid()::text || '/%') or private.is_staff(auth.uid())));
+create policy "assignment_submissions_delete_own_or_staff" on storage.objects for delete to authenticated using (bucket_id = 'assignment-submissions' and (name like (auth.uid()::text || '/%') or private.is_staff(auth.uid())));
 
 -- Bootstrap example:
 -- update public.profiles set role = 'admin', admin_id = 'ADM-001'

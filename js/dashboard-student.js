@@ -2192,8 +2192,10 @@
       ).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 100);
 
       inbox.querySelectorAll(".sd-inbox-item").forEach((el) => el.remove());
-      setMessagePanelVisible(detail, false);
-      setMessagePanelVisible(viewEmpty, true);
+      if (composeForm?.hidden) {
+        setMessagePanelVisible(detail, false);
+        setMessagePanelVisible(viewEmpty, true);
+      }
 
       const emptyText = inboxEmpty?.querySelector("p");
       if (emptyText) {

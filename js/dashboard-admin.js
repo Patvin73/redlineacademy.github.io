@@ -4091,7 +4091,25 @@
 
   async function openStudentMessage(studentId) {
     if (!studentId) return;
+
+    // Aktifkan section messages
     if (window._adActivateSection) window._adActivateSection("messages");
+
+    // Tunggu hingga elemen composer tersedia (max 2 detik)
+    let attempts = 0;
+    while (!$("adMsgComposeForm") && attempts < 20) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      attempts++;
+    }
+
+    if (!$("adMsgComposeForm")) {
+      console.warn("[openStudentMessage] adMsgComposeForm not found after wait");
+      return;
+    }
+
+    // Reset bound flag agar handler ter-bind ulang dengan recipient baru
+    messageComposerBound = false;
+
     await openMessageComposer(studentId);
   }
 
@@ -4194,7 +4212,11 @@
           await loadMessages({ selectedMessageId: messageId });
         } else {
           adminUnreadNotifications = list.querySelectorAll(".ad-notif-list-item.unread[data-kind='notification']").length;
-          await window.lmsSupabase.from("notifications").update({ is_read: true }).eq("id", item.dataset.id).catch(() => {});
+          await window.lmsSupabase
+            .from("notifications")
+            .update({ is_read: true, read_at: new Date().toISOString() })
+            .eq("id", item.dataset.id)
+            .catch(() => {});
         }
         updateAdminAttentionIndicators();
       });

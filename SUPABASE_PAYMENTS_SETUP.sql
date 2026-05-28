@@ -216,13 +216,13 @@ drop policy if exists "payments_select_staff_registrations" on public.registrati
 create policy "payments_select_staff_registrations"
   on public.registrations for select
   to authenticated
-  using (public.is_admin(auth.uid()) or public.is_staff(auth.uid()));
+  using (private.is_admin(auth.uid()) or private.is_staff(auth.uid()));
 
 drop policy if exists "payments_select_staff_payment_events" on public.payment_events;
 create policy "payments_select_staff_payment_events"
   on public.payment_events for select
   to authenticated
-  using (public.is_admin(auth.uid()) or public.is_staff(auth.uid()));
+  using (private.is_admin(auth.uid()) or private.is_staff(auth.uid()));
 
 drop trigger if exists trg_registrations_updated on public.registrations;
 create trigger trg_registrations_updated

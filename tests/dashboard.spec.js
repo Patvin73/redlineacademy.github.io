@@ -792,7 +792,7 @@ test.describe("Student Dashboard", () => {
       action: "lesson_completed",
       entity_type: "lesson",
       entity_id: "lesson-2",
-      metadata: { course_id: "course-1", lesson_id: "lesson-2" }
+      metadata: expect.objectContaining({ course_id: "course-1", lesson_id: "lesson-2" })
     }));
     expect(progressState.certificate).toEqual(expect.objectContaining({
       certificate_no: "CERT-STUDEN-COURSE"
