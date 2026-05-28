@@ -18,6 +18,10 @@
   let selectedSubmissionId = null;
   let currentGradingFilter = "submitted";
   let editingCourseId  = null;
+  let adminNotificationChannel = null;
+  let adminNotificationChannelUserId = null;
+  let adminMessageChannel = null;
+  let adminMessageChannelUserId = null;
   const USER_ROLE_TAGS = { admin: "red", trainer: "purple", student: "blue" };
   const COURSE_MATERIAL_BUCKET = "course-materials";
   const LESSON_MATERIAL_ACCEPT = {
@@ -32,6 +36,15 @@
      HELPERS
   ================================================================ */
   const $ = (id) => document.getElementById(id);
+
+  function removeRealtimeChannel(channel) {
+    if (!channel) return;
+    if (window.lmsSupabase?.removeChannel) {
+      window.lmsSupabase.removeChannel(channel);
+    } else {
+      channel.unsubscribe?.();
+    }
+  }
 
   function escHtml(str) {
     if (!str) return "";
@@ -4231,7 +4244,10 @@
 
   function setupRealtimeNotifications(userId) {
     if (!window.lmsSupabase) return;
-    window.lmsSupabase
+    if (adminNotificationChannel && adminNotificationChannelUserId === userId) return;
+    removeRealtimeChannel(adminNotificationChannel);
+    adminNotificationChannelUserId = userId;
+    adminNotificationChannel = window.lmsSupabase
       .channel("admin-notif-channel")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
         () => loadNotifications())
@@ -4240,7 +4256,11 @@
 
   function setupRealtimeMessages(userId) {
     if (!window.lmsSupabase) return;
+    if (adminMessageChannel && adminMessageChannelUserId === userId) return;
+    removeRealtimeChannel(adminMessageChannel);
+    adminMessageChannelUserId = userId;
     const channel = window.lmsSupabase.channel("admin-message-channel");
+    adminMessageChannel = channel;
     const refreshMessages = () => {
       refreshAdminMessageIndicators(userId);
       loadNotifications();

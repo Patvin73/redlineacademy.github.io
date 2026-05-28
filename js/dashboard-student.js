@@ -16,10 +16,23 @@
   let activeStudentMessageView = "inbox";
   let studentUnreadMessages = 0;
   let studentUnreadNotifications = 0;
+  let studentNotificationChannel = null;
+  let studentNotificationChannelUserId = null;
+  let studentMessageChannel = null;
+  let studentMessageChannelUserId = null;
   const ASSIGNMENT_SUBMISSIONS_BUCKET = "assignment-submissions";
 
   /* ── DOM refs ───────────────────────────────────────────────────── */
   const $ = (id) => document.getElementById(id);
+
+  function removeRealtimeChannel(channel) {
+    if (!channel) return;
+    if (window.lmsSupabase?.removeChannel) {
+      window.lmsSupabase.removeChannel(channel);
+    } else {
+      channel.unsubscribe?.();
+    }
+  }
 
   function updateStudentAttentionIndicators() {
     const msgBadge = $("messageBadge");
@@ -2593,9 +2606,12 @@
   /* ── Realtime: subscribe to new notifications ───────────────────── */
   function setupRealtimeNotifications(userId) {
     if (!window.lmsSupabase) return;
+    if (studentNotificationChannel && studentNotificationChannelUserId === userId) return;
+    removeRealtimeChannel(studentNotificationChannel);
+    studentNotificationChannelUserId = userId;
     // Realtime: listen untuk assignment baru di kursus yang dienroll student
     // Gunakan notifications table sebagai trigger (trainer akan insert notif saat buat tugas - lihat Prompt 5)
-    window.lmsSupabase
+    studentNotificationChannel = window.lmsSupabase
       .channel("student-assignment-notif")
       .on(
         "postgres_changes",
@@ -2616,7 +2632,11 @@
 
   function setupRealtimeMessages(userId) {
     if (!window.lmsSupabase) return;
+    if (studentMessageChannel && studentMessageChannelUserId === userId) return;
+    removeRealtimeChannel(studentMessageChannel);
+    studentMessageChannelUserId = userId;
     const channel = window.lmsSupabase.channel("student-message-channel");
+    studentMessageChannel = channel;
     const refreshMessages = () => {
       refreshStudentMessageIndicators(userId);
       loadNotifications(userId);
