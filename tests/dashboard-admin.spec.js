@@ -1123,6 +1123,36 @@ test("message notification opens the selected admin message", async ({ page }) =
   }));
 });
 
+test("archived unread messages do not keep trainer indicators active", async ({ page }) => {
+  await installSupabaseStub(page, "trainer", {
+    messages: [
+      {
+        id: "msg-archived-unread",
+        sender_id: "e2e-student-1",
+        recipient_id: "e2e-trainer",
+        subject: "Archived question",
+        body: "This message is already archived.",
+        is_read: false,
+        is_archived: true,
+        created_at: "2026-03-10T08:00:00.000Z",
+        profiles: { full_name: "Alpha Student", avatar_url: null }
+      }
+    ]
+  });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await expect(page.locator("#adMsgBadge")).toBeHidden();
+  await expect(page.locator("#adNotifDot")).toBeHidden();
+
+  await page.locator("#adNotifBtn").click();
+  await expect(page.locator("#adNotifList")).not.toContainText("Archived question");
+
+  await page.locator(".ad-nav__item[data-section='messages']").click();
+  await expect(page.locator(".ad-inbox-item", { hasText: "Archived question" })).toHaveCount(0);
+  await page.locator("[data-message-view='archive']").click();
+  await expect(page.locator(".ad-inbox-item", { hasText: "Archived question" })).toHaveCount(1);
+});
+
 test("trainer can open message detail", async ({ page }) => {
   await installSupabaseStub(page, "trainer");
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });

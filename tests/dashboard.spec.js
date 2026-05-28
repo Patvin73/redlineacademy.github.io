@@ -989,6 +989,29 @@ test.describe("Student Dashboard", () => {
     }));
   });
 
+  test("archived unread messages do not keep student indicators active", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    fixture.tableData.notifications = [];
+    fixture.tableData.messages = fixture.tableData.messages.map((message) =>
+      message.id === "msg-1"
+        ? { ...message, is_archived: true }
+        : message
+    );
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html");
+    await expect(page.locator("#messageBadge")).toBeHidden();
+    await expect(page.locator("#notifDot")).toBeHidden();
+
+    await page.click("#sdNotifBtn");
+    await expect(page.locator("#notifList")).not.toContainText("Welcome");
+
+    await page.locator(".sd-nav__item[data-section='messages']").click();
+    await expect(page.locator(".sd-inbox-item", { hasText: "Welcome" })).toHaveCount(0);
+    await page.locator("[data-student-message-view='archive']").click();
+    await expect(page.locator(".sd-inbox-item", { hasText: "Welcome" })).toHaveCount(1);
+  });
+
   test("student composes a message to multiple recipients across roles", async ({ page }) => {
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);

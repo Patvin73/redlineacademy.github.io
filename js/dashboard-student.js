@@ -51,7 +51,8 @@
         .from("messages")
         .select("id")
         .eq("recipient_id", userId)
-        .eq("is_read", false);
+        .eq("is_read", false)
+        .or("is_archived.eq.false,is_archived.is.null");
       if (error) throw error;
       studentUnreadMessages = (data || []).length;
     } catch {
@@ -2593,6 +2594,7 @@
         .select("id, sender_id, recipient_id, subject, body, is_read, created_at")
         .eq("recipient_id", userId)
         .eq("is_read", false)
+        .or("is_archived.eq.false,is_archived.is.null")
         .order("created_at", { ascending: false })
         .limit(25);
       if (error) throw error;
