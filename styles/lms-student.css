@@ -1422,6 +1422,13 @@
   overflow-y: auto;
 }
 
+.sd-message-view__detail {
+  flex: 1;
+  overflow-y: auto;
+  min-width: 0;
+  padding: 1.25rem;
+}
+
 .sd-message-detail__body {
   margin-top: .875rem;
   white-space: pre-wrap;

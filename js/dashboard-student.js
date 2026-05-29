@@ -2390,12 +2390,24 @@
         }
         inbox.insertBefore(item, inboxEmpty);
       });
-      });
-
-      if (empty && grid.querySelectorAll("[data-resource-card='true']").length) {
-        empty.style.display = visible ? "none" : "flex";
+      
+      // Auto-render detail for selected message (after loop)
+      if (selectedMessageItem && selectedMessageGroup) {
+        inbox.querySelectorAll(".sd-inbox-item").forEach((el) => el.classList.remove("active"));
+        selectedMessageItem.classList.add("active");
+        selectedMessageItem.classList.remove("unread");
+        await renderDetail(selectedMessageGroup);
+        selectedMessageItem.scrollIntoView({ block: "nearest" });
       }
-    };
+    } catch (err) {
+      console.warn("Messages load error:", err.message);
+    }
+  }
+
+  async function loadResources(userId) {
+    const grid = $("resourceGrid");
+    const empty = $("resourceEmpty");
+    if (!grid) return;
 
     try {
       const { data: enrollments, error: enrollErr } = await window.lmsSupabase
