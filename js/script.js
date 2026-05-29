@@ -325,15 +325,10 @@ const translations = {
     learningMode1: "Kelas tatap muka.",
     learningMode2: "Pembelajaran campuran (blended learning).",
     learningMode3: "Online dengan dukungan trainer.",
-    programsOverview: "Ringkasan Program",
-    programsOverview1:
-      "Durasi: 12 Minggu Online + 3.5 Minggu Praktik Lapangan.",
-    programsOverview2:
-      "Tipe Studi: Hybrid (Fleksibilitas Online & Tatap Muka).",
-    programsOverview3:
-      "Sertifikat: Ya (Diberikan setelah penyelesaian seluruh modul).",
-    programsOverview4:
-      "Prasyarat: Semangat untuk merawat dan komitmen untuk belajar (Tidak memerlukan pengalaman medis sebelumnya).",
+    programsOverview: "Pelatihan & Penilaian Online",
+    programsOverview1: "Memfasilitasi Pembelajaran Online.",
+    programsOverview2: "Penilaian Pembelajaran Online.",
+    programsOverview3: "Durasi - 3 Bulan.",
     scoreMethode: "Metode Penilaian",
     yourScore: "Anda akan dinilai melalui:",
     scoreMethode1:
@@ -1060,15 +1055,10 @@ const translations = {
     learningMode1: "Face-to-face classroom.",
     learningMode2: "Blended learning.",
     learningMode3: "Online with trainer support.",
-    programsOverview: "Program Overview",
-    programsOverview1:
-      "Duration: 12 weeks online + 3.5 weeks practical placement.",
-    programsOverview2:
-      "Study Type: Hybrid (Online & Face-to-face flexibility).",
-    programsOverview3:
-      "Certificate: Yes (awarded upon completion of all modules).",
-    programsOverview4:
-      "Prerequisites: Passion for caregiving and commitment to learning (No prior medical experience required).",
+    programsOverview: "Online Training & Assessment",
+    programsOverview1: "Facilitate online learning.",
+    programsOverview2: "Assess online learning.",
+    programsOverview3: "Duration - 3 months.",
     scoreMethode: "Assessment Methods",
     yourScore: "You will be assessed through:",
     scoreMethode1: "Written assessments (case studies, MCQs, essays).",
