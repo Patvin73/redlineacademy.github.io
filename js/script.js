@@ -528,7 +528,7 @@ const translations = {
     // About Page
     aboutUs: "Tentang Kami",
     aboutContent:
-      "Program pelatihan ini dirancang khusus untuk membangun kompetensi unggul di bidang perawatan lansia secara komprehensif. Keterampilan yang Anda kuasai akan membuka gerbang karier di sektor pelayanan komunitas, pengabdian bagi keluarga, hingga peran strategis sebagai relawan dan pekerja sosial profesional.\n\nMelalui kurikulum terakreditasi yang menggabungkan metode klasikal, pembelajaran mandiri, dan praktik intensif, kami mengundang Anda untuk bergabung. Mari bersama Redline Academy, membentuk insan peduli yang berdaya saing global.\n\nProgram ini mencakup 6 Australian Accredited Training Units serta 120 jam asesmen praktik, yang mencerminkan standar industri dan praktik perawatan terkini.",
+      "Program pelatihan ini dirancang khusus untuk membangun kompetensi unggul di bidang perawatan lansia secara komprehensif. Keterampilan yang Anda kuasai akan membuka gerbang karier di sektor pelayanan komunitas, pengabdian bagi keluarga, hingga peran strategis sebagai relawan dan pekerja sosial profesional.\n\nMelalui kurikulum terakreditasi yang menggabungkan metode klasikal, pembelajaran mandiri, dan praktik intensif, kami mengundang Anda untuk bergabung. Mari bersama Redline Academy, membentuk insan peduli yang berdaya saing global.",
 
     visionTitle: "Visi Kami",
     visionContent:
@@ -1258,7 +1258,7 @@ const translations = {
     // About Page
     aboutUs: "About Us",
     aboutContent:
-      "This training program is specifically designed to build outstanding competencies in aged care comprehensively. The skills you acquire will open pathways to careers in the community services sector, family caregiving, as well as strategic roles as volunteers and professional social workers.\n\nThrough an accredited curriculum that integrates classroom-based learning, self-directed study, and intensive practical training, we invite you to join us. Together with Redline Academy, let us shape compassionate professionals with global competitiveness.\n\nThis program comprises 6 Australian Accredited Training Units and 120 hours of practical assessment, reflecting current industry standards and best practices in care provision.",
+      "This training program is specifically designed to build outstanding competencies in aged care comprehensively. The skills you acquire will open pathways to careers in the community services sector, family caregiving, as well as strategic roles as volunteers and professional social workers.\n\nThrough an accredited curriculum that integrates classroom-based learning, self-directed study, and intensive practical training, we invite you to join us. Together with Redline Academy, let us shape compassionate professionals with global competitiveness.",
 
     visionTitle: "Our Vision",
     visionContent:

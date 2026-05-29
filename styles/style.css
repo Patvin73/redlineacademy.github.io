@@ -184,6 +184,22 @@ a:hover {
   padding: 2.5rem 0;
 }
 
+.about-page .section-padding {
+  padding: 2rem 0;
+}
+
+.about-content {
+  width: 100%;
+  margin: 0 0 2rem;
+}
+
+.about-page .aboutContent {
+  text-align: justify;
+  white-space: pre-line;
+  line-height: 1.8;
+  color: var(--text-light);
+}
+
 .text-center  { text-align: center; }
 .text-primary { color: var(--primary-color); }
 
