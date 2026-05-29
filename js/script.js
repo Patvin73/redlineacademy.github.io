@@ -607,7 +607,7 @@ const translations = {
     certificationInternational: "Sertifikasi: Internasional",
     whyChooseOurProgram: "Mengapa Memilih Program Kami?",
     programsIntro:
-      "Pendampingan Perawatan (Unit Pelatihan Terakreditasi Australia).\n\nKita mungkin tidak bisa mengubah seluruh dunia, namun jika Anda memiliki rasa kasih sayang, Anda dapat mengubah kehidupan orang-orang di sekitar Anda yang membutuhkan bantuan.\n\nApakah Anda baru saja akan menyelesaikan pendidikan dan bingung memilih jalur karier? Atau mungkin pekerjaan Anda saat ini terasa membosankan dan tidak memberikan kepuasan batin yang nyata?\n\nHanya dalam enam belas minggu pelatihan berkualitas standar Australia yang diakui secara internasional, Anda dapat mengubah segalanya. Pelatihan yang kami tawarkan dirancang untuk membuka pintu peluang nyata menuju karier yang bermakna, di mana Anda dapat memberikan dampak yang nyata.\n\nKursus ini terdiri dari dua belas minggu pelatihan daring (online) ditambah 3 Â½ minggu praktik kerja lapangan untuk mendapatkan pengalaman langsung.\n\nDengan bekal pelatihan ini, Anda siap untuk mengubah dunia Anda.",
+      "Program kami dirancang untuk memberikan pelatihan yang diakui secara internasional dan selaras dengan Australian Microcredential Framework (Kerangka Kerja Kredensial Mikro Australia).\n\nProgram ini terdiri dari pelatihan berbasis hasil yang dikembangkan menggunakan unit-unit terakreditasi yang disesuaikan untuk mendukung pembelajaran jangka panjang.",
 
     // Enrollment / Enroll form translations (ID)
     enrollTitle: "Formulir Pendaftaran Program",
@@ -1335,7 +1335,7 @@ const translations = {
     certificationInternational: "Certification: International",
     whyChooseOurProgram: "Why Choose Our Program?",
     programsIntro:
-      "Care Support (Australian Accredited Training Units).\n\nWe may not be able to change the whole world, but if you have compassion, you can change the lives of those around you who need support.\n\nAre you about to complete your studies and feeling uncertain about your career path? Or perhaps your current job feels unfulfilling and lacks genuine purpose?\n\nIn just sixteen weeks of high-quality, Australian-standard training that is internationally recognized, you can transform your future. The training we offer is designed to open real opportunities for a meaningful careerâ€”one where you can make a tangible and lasting impact.\n\nThis course consists of twelve weeks of online training followed by 3Â½ weeks of workplace practicum, providing hands-on, real-world experience.\n\nWith this training, you will be equipped and ready to change your world.",
+      "Our programs are designed to provide internationally recognised training aligned with the Australian Microcredential Framework.\n\nThey comprise of outcome-based training developed using accredited units tailored to support lifelong learning.",
 
     // Enrollment / Enroll form translations (EN)
     enrollTitle: "Program Enrollment Form",
