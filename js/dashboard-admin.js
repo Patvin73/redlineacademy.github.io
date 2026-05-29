@@ -2295,7 +2295,11 @@
   function setMessagePanelVisible(el, visible) {
     if (!el) return;
     el.hidden = !visible;
-    el.style.display = visible ? "" : "none";
+    el.style.display = visible ? "block" : "none";
+    // Ensure the element is visible when shown
+    if (visible) {
+      el.style.visibility = "visible";
+    }
   }
 
   function getSelectedMessageRecipients(recipient = $("adMsgRecipient")) {
@@ -2825,11 +2829,19 @@
             <p class="ad-inbox-item__name">${escHtml(title)}</p>
             <p class="ad-inbox-item__preview">${escHtml(preview)}</p>
           </div>
-          <span class="ad-inbox-item__time">${group.type === "sent" ? "Sent" : timeAgo(group.created_at)}</span>`;
+          <span class="ad-inbox-item__time">${group.type === "sent" ? "Sent" : timeAgo(group.created_at)}</p>`;
         item.addEventListener("click", async () => {
+          console.log("Admin inbox item clicked, group:", group);
           inbox.querySelectorAll(".ad-inbox-item").forEach((el) => el.classList.remove("active"));
           item.classList.add("active");
           item.classList.remove("unread");
+          // Add debugging to ensure group has required properties
+          console.log("Group properties:", {
+            subject: group.subject,
+            body: group.body,
+            messages: group.messages,
+            isUnread: group.isUnread
+          });
           await renderDetail(group);
         });
         if (selectedMessageId && group.messages.some((msg) => String(msg.id) === selectedMessageId)) {

@@ -1858,7 +1858,11 @@
   function setMessagePanelVisible(el, visible) {
     if (!el) return;
     el.hidden = !visible;
-    el.style.display = visible ? "" : "none";
+    el.style.display = visible ? "block" : "none";
+    // Ensure the element is visible when shown
+    if (visible) {
+      el.style.visibility = "visible";
+    }
   }
 
   const MAX_MESSAGE_RECIPIENTS = 50;
@@ -1936,9 +1940,6 @@
     }
     setMessagePanelVisible(viewEmpty, true);
   }
-
-  function getStudentReplySubject(subject) {
-    const value = String(subject || "Message").trim();
     return /^re:/i.test(value) ? value : `Re: ${value}`;
   }
 
@@ -2370,9 +2371,17 @@
           </div>
           <span class="sd-inbox-item__time">${group.type === "sent" ? "Sent" : timeAgo(group.created_at)}</span>`;
         item.addEventListener("click", async () => {
+          console.log("Inbox item clicked, group:", group);
           inbox.querySelectorAll(".sd-inbox-item").forEach((el) => el.classList.remove("active"));
           item.classList.add("active");
           item.classList.remove("unread");
+          // Add debugging to ensure group has required properties
+          console.log("Group properties:", {
+            subject: group.subject,
+            body: group.body,
+            messages: group.messages,
+            isUnread: group.isUnread
+          });
           await renderDetail(group);
         });
         if (selectedMessageId && group.messages.some((msg) => String(msg.id) === selectedMessageId)) {
@@ -2381,42 +2390,6 @@
         }
         inbox.insertBefore(item, inboxEmpty);
       });
-      if (selectedMessageItem && selectedMessageGroup) {
-        inbox.querySelectorAll(".sd-inbox-item").forEach((el) => el.classList.remove("active"));
-        selectedMessageItem.classList.add("active");
-        selectedMessageItem.classList.remove("unread");
-        await renderDetail(selectedMessageGroup);
-        selectedMessageItem.scrollIntoView({ block: "nearest" });
-      }
-    } catch {
-      if (inboxEmpty) inboxEmpty.style.display = "flex";
-      if (composeForm?.hidden) {
-        setMessagePanelVisible(detail, false);
-        setMessagePanelVisible(viewEmpty, true);
-      }
-    }
-  }
-
-  async function loadResources(userId) {
-    const grid = $("resourceGrid");
-    const empty = $("resourceEmpty");
-    const tabs = $("resourceCategoryTabs");
-    if (!grid) return;
-
-    const applyResourceFilter = () => {
-      const query = ($("resourceSearch")?.value || "").trim().toLowerCase();
-      const activeTab = tabs?.querySelector(".sd-filter-tab.active");
-      const activeCategory = activeTab?.dataset.category || "all";
-      let visible = 0;
-
-      grid.querySelectorAll("[data-resource-card='true']").forEach((card) => {
-        const text = (card.textContent || "").toLowerCase();
-        const category = card.dataset.category || "";
-        const matchesQuery = !query || text.includes(query);
-        const matchesCategory = activeCategory === "all" || category === activeCategory;
-        const show = matchesQuery && matchesCategory;
-        card.style.display = show ? "" : "none";
-        if (show) visible++;
       });
 
       if (empty && grid.querySelectorAll("[data-resource-card='true']").length) {

@@ -9,5 +9,7 @@
                 "copilotcli/gpt-5-mini"
             ]
         }
-    }
+    },
+    "QoderCN.aI Chat.mcpToolsInAgentMode": true,
+    "QoderCN.localMachineModel": true
 }
