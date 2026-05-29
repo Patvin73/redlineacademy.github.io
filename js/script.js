@@ -594,6 +594,13 @@ const translations = {
 
     // Programs Page
     whatYouWillLearn: "Apa yang akan Anda pelajari:",
+    careSupport: "Dukungan Perawatan",
+    programsSupport1: "Komunikasi Efektif dalam Layanan Kesehatan",
+    programsSupport2: "Standar Keselamatan Klien dan Pengendalian Infeksi",
+    programsSupport3: "Strategi Pemberdayaan Klien",
+    programsSupport4: "Memberikan Dukungan yang Dipersonalisasi",
+    programsSupport5: "Pencegahan Cedera dan Manajemen Risiko",
+    programsSupport6: "Durasi: 12 minggu daring (online) + 3,5 minggu praktik kerja",
     careGiverLearn1: "Keterampilan Perawatan Lansia.",
     careGiverLearn2: "Komunikasi Efektif di Layanan Kesehatan.",
     careGiverLearn3: "Standar Keselamatan Klien dan Pengendalian Infeksi.",
@@ -1322,6 +1329,13 @@ const translations = {
 
     // Programs Page
     whatYouWillLearn: "What You Will Learn:",
+    careSupport: "Care Support",
+    programsSupport1: "Effective Communication in Healthcare Services",
+    programsSupport2: "Client Safety Standards and Infection Control",
+    programsSupport3: "Client Empowerment Strategies",
+    programsSupport4: "Provide Individualised Support",
+    programsSupport5: "Injury Prevention and Risk Management",
+    programsSupport6: "Duration - 12 weeks online + 3.5 weeks practical placement",
     careGiverLearn1: "Elderly Care Skills.",
     careGiverLearn2: "Effective Communication in Healthcare Services.",
     careGiverLearn3: "Client Safety Standards and Infection Control.",
