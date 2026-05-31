@@ -1529,44 +1529,29 @@
 }
 
 .ad-message-view {
+  display: block;
+  position: relative;
+  height: 100%;
+  overflow-y: auto;
   background: var(--sd-card-bg);
   border: 1px solid var(--sd-border);
   border-radius: var(--sd-radius-md);
-  display: flex;
-  flex-direction: row;
-  min-height: 480px;
-  overflow: hidden;
-}
-
-/* Inbox sidebar kiri */
-#adInboxList {
-  width: 300px;
-  min-width: 240px;
-  flex-shrink: 0;
-  border-right: 1px solid var(--sd-border);
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
 }
 
 /* Panel kanan: detail / compose / empty */
 #adMsgDetail,
 #adMsgViewEmpty,
 #adMsgComposeForm {
-  flex: 1;
+  width: 100%;
   overflow-y: auto;
-  min-width: 0;
-}
-
-/* Responsive: di layar kecil kembali ke column */
-@media (max-width: 680px) {
-  .ad-message-view { flex-direction: column; min-height: auto; }
-  #adInboxList { width: 100%; border-right: none; border-bottom: 1px solid var(--sd-border); }
+  padding: 1.25rem;
+  box-sizing: border-box;
 }
 
 .ad-message-view__empty {
-  flex: 1;
   display: flex;
+  width: 100%;
+  min-height: 300px;
   flex-direction: column;
   align-items: center;
   justify-content: center;

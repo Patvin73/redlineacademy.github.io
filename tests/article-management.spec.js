@@ -252,7 +252,7 @@ async function seedAdminSession(page, initialArticles = []) {
 }
 
 async function openEditor(page) {
-  await page.goto("/pages/create-article.html");
+  await page.goto("/pages/create-article.html", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#editorModeLabel")).toContainText("Buat Artikel Baru");
 }
 

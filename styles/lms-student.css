@@ -1358,43 +1358,29 @@
 }
 
 .sd-message-view {
+  display: block;
+  position: relative;
+  height: 100%;
+  overflow-y: auto;
   background: var(--sd-card-bg);
   border: 1px solid var(--sd-border);
   border-radius: var(--sd-radius-md);
-  display: flex;
-  flex-direction: row;
-  min-height: 480px;
-  overflow: hidden;
-}
-
-/* Inbox sidebar kiri */
-#sdInboxList {
-  width: 280px;
-  min-width: 220px;
-  flex-shrink: 0;
-  border-right: 1px solid var(--sd-border);
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
 }
 
 /* Panel kanan */
 #messageDetail,
-#sdMsgViewEmpty,
+#messageViewEmpty,
 #studentMsgComposeForm {
-  flex: 1;
+  width: 100%;
   overflow-y: auto;
-  min-width: 0;
-}
-
-@media (max-width: 680px) {
-  .sd-message-view { flex-direction: column; min-height: auto; }
-  #sdInboxList { width: 100%; border-right: none; border-bottom: 1px solid var(--sd-border); }
+  padding: 1.25rem;
+  box-sizing: border-box;
 }
 
 .sd-message-view__empty {
-  flex: 1;
   display: flex;
+  width: 100%;
+  min-height: 300px;
   flex-direction: column;
   align-items: center;
   justify-content: center;

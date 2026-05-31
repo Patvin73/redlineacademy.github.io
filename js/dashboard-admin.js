@@ -2584,7 +2584,8 @@
     const inbox = $("adInboxList");
     const empty = $("adInboxEmpty");
     const viewEmpty = $("adMsgViewEmpty");
-    const viewDetail = $("adMsgDetail");
+    // adMsgDetail should exist; fallback to adMessageView container if missing
+    const viewDetail = $("adMsgDetail") || $("adMessageView");
     const composeForm = $("adMsgComposeForm");
     if (!inbox) return;
 
@@ -2666,132 +2667,81 @@
 
       const renderDetail = async (group) => {
         if (!viewDetail) return;
-        setMessagePanelVisible(viewEmpty, false);
-        setMessagePanelVisible(composeForm, false);
-        setMessagePanelVisible(viewDetail, true);
+        try {
+          setMessagePanelVisible(viewEmpty, false);
+          setMessagePanelVisible(composeForm, false);
+          setMessagePanelVisible(viewDetail, true);
 
-        if (group.type === "received") {
-          const msg = group.messages[0];
-          if (!msg.is_read && msg.recipient_id === currentProfile.id) {
-            await window.lmsSupabase
-              .from("messages")
-              .update({ is_read: true, read_at: new Date().toISOString() })
-              .eq("id", msg.id)
-              .catch(() => {});
-            msg.is_read = true;
-            const remaining = inbox.querySelectorAll(".ad-inbox-item.unread").length;
-            adminUnreadMessages = Math.max(remaining, 0);
-            updateAdminAttentionIndicators();
-          }
-          const sender = profileMap.get(msg.sender_id) || msg.profiles || {};
-          viewDetail.innerHTML = `
-            <div class="ad-message-view__detail">
-              <p class="ad-inbox-item__name">${escHtml(group.subject)}</p>
-              <p class="ad-inbox-item__time">From: ${escHtml(sender.full_name || sender.email || "System")} - ${timeAgo(group.created_at)}</p>
-              <div class="ad-message-detail__body">${escHtml(group.body || "-").replace(/\n/g, "<br>")}</div>
-              <div class="ad-message-detail__actions">
-                <button class="ad-btn ad-btn--outline" type="button" data-ad-msg-reply>Reply</button>
-                ${activeMessageView === "archive"
-                  ? `<button class="ad-btn ad-btn--outline" type="button" data-ad-msg-restore>Restore</button>`
-                  : `<button class="ad-btn ad-btn--outline" type="button" data-ad-msg-archive>Archive</button>`}
-                <button class="ad-btn ad-btn--danger" type="button" data-ad-msg-delete-inbox="${escHtml(msg.id)}">Delete</button>
-              </div>
-            </div>`;
-        } else {
-          const recipients = group.messages.map((msg) => ({
-            message: msg,
-            profile: profileMap.get(msg.recipient_id) || {}
-          }));
-          viewDetail.innerHTML = `
-            <div class="ad-message-view__detail">
-              <p class="ad-inbox-item__name">${escHtml(group.subject)}</p>
-              <p class="ad-inbox-item__time">Sent to ${recipients.length} recipient${recipients.length === 1 ? "" : "s"} - ${timeAgo(group.created_at)}</p>
-              <div class="ad-message-detail__body">${escHtml(group.body || "-").replace(/\n/g, "<br>")}</div>
-              <div class="ad-message-detail__recipients">
-                <p class="ad-message-detail__label">Dikirim ke</p>
-                ${recipients.map(({ message, profile }) => `
-                  <div class="ad-message-recipient" data-message-id="${escHtml(message.id)}">
-                    <span>${escHtml(profile.full_name || profile.email || message.recipient_id)}</span>
-                    <button class="ad-btn ad-btn--outline ad-btn--xs" type="button" data-ad-msg-delete-one="${escHtml(message.id)}">Hapus penerima</button>
-                  </div>
-                `).join("")}
-              </div>
-              <div class="ad-message-detail__actions">
-                <button class="ad-btn ad-btn--outline" type="button" data-ad-msg-edit>Edit</button>
-                ${activeMessageView === "archive"
-                  ? `<button class="ad-btn ad-btn--outline" type="button" data-ad-msg-restore>Restore</button>`
-                  : `<button class="ad-btn ad-btn--outline" type="button" data-ad-msg-archive>Archive</button>`}
-                <button class="ad-btn ad-btn--danger" type="button" data-ad-msg-delete-all>Hapus pesan</button>
-              </div>
-            </div>`;
-        }
-
-        viewDetail.querySelector("[data-ad-msg-archive]")?.addEventListener("click", async () => {
-          await archiveMessage(group.messages.map((msg) => msg.id), true);
-          await loadMessages();
-        });
-        viewDetail.querySelector("[data-ad-msg-restore]")?.addEventListener("click", async () => {
-          await archiveMessage(group.messages.map((msg) => msg.id), false);
-          await loadMessages();
-        });
-        viewDetail.querySelector("[data-ad-msg-reply]")?.addEventListener("click", async () => {
-          const msg = group.messages[0];
-          await openMessageComposer(msg.sender_id, { subject: getReplySubject(group.subject) });
-        });
-        viewDetail.querySelector("[data-ad-msg-delete-inbox]")?.addEventListener("click", async () => {
-          const messageId = group.messages[0]?.id;
-          if (!messageId) return;
-          await window.lmsSupabase
-            .from("messages")
-            .delete()
-            .eq("id", messageId);
-          await loadMessages();
-        });
-        viewDetail.querySelector("[data-ad-msg-edit]")?.addEventListener("click", () => {
-          viewDetail.innerHTML = `
-            <form class="ad-message-edit-form">
-              <div class="ad-field">
-                <label class="ad-label" for="adMsgEditSubject">Subject</label>
-                <input class="ad-input" id="adMsgEditSubject" value="${escHtml(group.subject)}" />
-              </div>
-              <div class="ad-field">
-                <label class="ad-label" for="adMsgEditBody">Isi pesan</label>
-                <textarea class="ad-input ad-textarea" id="adMsgEditBody" rows="7">${escHtml(group.body || "")}</textarea>
-              </div>
-              <div class="ad-message-detail__actions">
-                <button class="ad-btn ad-btn--outline" type="button" data-ad-msg-edit-cancel>Batal</button>
-                <button class="ad-btn ad-btn--primary" type="submit">Simpan</button>
-              </div>
-            </form>`;
-          viewDetail.querySelector("[data-ad-msg-edit-cancel]")?.addEventListener("click", () => renderDetail(group));
-          viewDetail.querySelector(".ad-message-edit-form")?.addEventListener("submit", async (event) => {
-            event.preventDefault();
-            const subject = $("adMsgEditSubject")?.value.trim() || null;
-            const body = $("adMsgEditBody")?.value.trim() || "";
-            const { error } = await window.lmsSupabase
-              .from("messages")
-              .update({ subject, body })
-              .in("id", group.messages.map((msg) => msg.id));
-            if (error) {
-              setComposerStatus(error.message || "Message update failed.", true);
-              return;
+          if (group.type === "received") {
+            const msg = group.messages[0];
+            if (!msg.is_read && msg.recipient_id === currentProfile.id) {
+              await window.lmsSupabase
+                .from("messages")
+                .update({ is_read: true, read_at: new Date().toISOString() })
+                .eq("id", msg.id)
+                .catch(() => {});
+              msg.is_read = true;
+              const remaining = inbox.querySelectorAll(".ad-inbox-item.unread").length;
+              adminUnreadMessages = Math.max(remaining, 0);
+              updateAdminAttentionIndicators();
             }
+            const sender = profileMap.get(msg.sender_id) || msg.profiles || {};
+            viewDetail.innerHTML = `
+              <div class="ad-message-view__detail">
+                <p class="ad-inbox-item__name">${escHtml(group.subject)}</p>
+                <p class="ad-inbox-item__time">From: ${escHtml(sender.full_name || sender.email || "System")} - ${timeAgo(group.created_at)}</p>
+                <div class="ad-message-detail__body">${escHtml(group.body || "-").replace(/\n/g, "<br>")}</div>
+                <div class="ad-message-detail__actions">
+                  <button class="ad-btn ad-btn--outline" type="button" data-ad-msg-reply>Reply</button>
+                  ${activeMessageView === "archive"
+                    ? `<button class="ad-btn ad-btn--outline" type="button" data-ad-msg-restore>Restore</button>`
+                    : `<button class="ad-btn ad-btn--outline" type="button" data-ad-msg-archive>Archive</button>`}
+                  <button class="ad-btn ad-btn--danger" type="button" data-ad-msg-delete-inbox="${escHtml(msg.id)}">Delete</button>
+                </div>
+              </div>`;
+          } else {
+            const recipients = group.messages.map((msg) => ({
+              message: msg,
+              profile: profileMap.get(msg.recipient_id) || {}
+            }));
+            viewDetail.innerHTML = `
+              <div class="ad-message-view__detail">
+                <p class="ad-inbox-item__name">${escHtml(group.subject)}</p>
+                <p class="ad-inbox-item__time">Sent to ${recipients.length} recipient${recipients.length === 1 ? "" : "s"} - ${timeAgo(group.created_at)}</p>
+                <div class="ad-message-detail__body">${escHtml(group.body || "-").replace(/\n/g, "<br>")}</div>
+                <div class="ad-message-detail__recipients">
+                  <p class="ad-message-detail__label">Dikirim ke</p>
+                  ${recipients.map(({ message, profile }) => `
+                    <div class="ad-message-recipient" data-message-id="${escHtml(message.id)}">
+                      <span>${escHtml(profile.full_name || profile.email || message.recipient_id)}</span>
+                      <button class="ad-btn ad-btn--outline ad-btn--xs" type="button" data-ad-msg-delete-one="${escHtml(message.id)}">Hapus penerima</button>
+                    </div>
+                  `).join("")}
+                </div>
+                <div class="ad-message-detail__actions">
+                  <button class="ad-btn ad-btn--outline" type="button" data-ad-msg-edit>Edit</button>
+                  ${activeMessageView === "archive"
+                    ? `<button class="ad-btn ad-btn--outline" type="button" data-ad-msg-restore>Restore</button>`
+                    : `<button class="ad-btn ad-btn--outline" type="button" data-ad-msg-archive>Archive</button>`}
+                  <button class="ad-btn ad-btn--danger" type="button" data-ad-msg-delete-all>Hapus pesan</button>
+                </div>
+              </div>`;
+          }
+
+          viewDetail.querySelector("[data-ad-msg-archive]")?.addEventListener("click", async () => {
+            await archiveMessage(group.messages.map((msg) => msg.id), true);
             await loadMessages();
           });
-        });
-        viewDetail.querySelector("[data-ad-msg-delete-all]")?.addEventListener("click", () => {
-          showConfirmModal("Hapus pesan ini dari history?", async () => {
-            await window.lmsSupabase
-              .from("messages")
-              .delete()
-              .in("id", group.messages.map((msg) => msg.id));
+          viewDetail.querySelector("[data-ad-msg-restore]")?.addEventListener("click", async () => {
+            await archiveMessage(group.messages.map((msg) => msg.id), false);
             await loadMessages();
           });
-          return;
-        });
-        viewDetail.querySelectorAll("[data-ad-msg-delete-one]").forEach((button) => {
-          button.addEventListener("click", async () => {
-            const messageId = button.getAttribute("data-ad-msg-delete-one");
+          viewDetail.querySelector("[data-ad-msg-reply]")?.addEventListener("click", async () => {
+            const msg = group.messages[0];
+            await openMessageComposer(msg.sender_id, { subject: getReplySubject(group.subject) });
+          });
+          viewDetail.querySelector("[data-ad-msg-delete-inbox]")?.addEventListener("click", async () => {
+            const messageId = group.messages[0]?.id;
             if (!messageId) return;
             await window.lmsSupabase
               .from("messages")
@@ -2799,7 +2749,63 @@
               .eq("id", messageId);
             await loadMessages();
           });
-        });
+          viewDetail.querySelector("[data-ad-msg-edit]")?.addEventListener("click", () => {
+            viewDetail.innerHTML = `
+              <form class="ad-message-edit-form">
+                <div class="ad-field">
+                  <label class="ad-label" for="adMsgEditSubject">Subject</label>
+                  <input class="ad-input" id="adMsgEditSubject" value="${escHtml(group.subject)}" />
+                </div>
+                <div class="ad-field">
+                  <label class="ad-label" for="adMsgEditBody">Isi pesan</label>
+                  <textarea class="ad-input ad-textarea" id="adMsgEditBody" rows="7">${escHtml(group.body || "")}</textarea>
+                </div>
+                <div class="ad-message-detail__actions">
+                  <button class="ad-btn ad-btn--outline" type="button" data-ad-msg-edit-cancel>Batal</button>
+                  <button class="ad-btn ad-btn--primary" type="submit">Simpan</button>
+                </div>
+              </form>`;
+            viewDetail.querySelector("[data-ad-msg-edit-cancel]")?.addEventListener("click", () => renderDetail(group));
+            viewDetail.querySelector(".ad-message-edit-form")?.addEventListener("submit", async (event) => {
+              event.preventDefault();
+              const subject = $("adMsgEditSubject")?.value.trim() || null;
+              const body = $("adMsgEditBody")?.value.trim() || "";
+              const { error } = await window.lmsSupabase
+                .from("messages")
+                .update({ subject, body })
+                .in("id", group.messages.map((msg) => msg.id));
+              if (error) {
+                setComposerStatus(error.message || "Message update failed.", true);
+                return;
+              }
+              await loadMessages();
+            });
+          });
+          viewDetail.querySelector("[data-ad-msg-delete-all]")?.addEventListener("click", () => {
+            showConfirmModal("Hapus pesan ini dari history?", async () => {
+              await window.lmsSupabase
+                .from("messages")
+                .delete()
+                .in("id", group.messages.map((msg) => msg.id));
+              await loadMessages();
+            });
+            return;
+          });
+          viewDetail.querySelectorAll("[data-ad-msg-delete-one]").forEach((button) => {
+            button.addEventListener("click", async () => {
+              const messageId = button.getAttribute("data-ad-msg-delete-one");
+              if (!messageId) return;
+              await window.lmsSupabase
+                .from("messages")
+                .delete()
+                .eq("id", messageId);
+              await loadMessages();
+            });
+          });
+        } catch (err) {
+          console.error("renderDetail error:", err);
+          try { viewDetail.innerHTML = '<div class="ad-message-view__empty"><p>Error loading message</p></div>'; } catch (e) {}
+        }
       };
 
       let selectedMessageItem = null;
@@ -4264,7 +4270,10 @@
     adminNotificationChannel = window.lmsSupabase
       .channel("admin-notif-channel")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
-        () => loadNotifications())
+        async () => {
+          await loadNotifications();
+          await loadKPIs();
+        })
       .subscribe();
   }
 
@@ -4275,9 +4284,9 @@
     adminMessageChannelUserId = userId;
     const channel = window.lmsSupabase.channel("admin-message-channel");
     adminMessageChannel = channel;
-    const refreshMessages = () => {
-      refreshAdminMessageIndicators(userId);
-      loadNotifications();
+    const refreshMessages = async () => {
+      await refreshAdminMessageIndicators(userId);
+      await loadNotifications();
       if (currentSection === "messages") loadMessages();
     };
     channel.on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `recipient_id=eq.${userId}` }, refreshMessages);
@@ -4289,9 +4298,24 @@
     const needle = String(query || "").trim().toLowerCase();
     if (!needle) return;
 
-    const sections = Array.from(document.querySelectorAll(".ad-section"));
+    // Kecualikan section yang mengandung data personal (email, profile, messages)
+    const EXCLUDED_SEARCH_SECTIONS = ["profile", "messages"];
+    const sections = Array.from(document.querySelectorAll(".ad-section"))
+      .filter((section) => {
+        const sectionId = section.id.replace(/^section-/, "");
+        return !EXCLUDED_SEARCH_SECTIONS.includes(sectionId);
+      });
     const matchSection = sections.find((section) => (section.textContent || "").toLowerCase().includes(needle));
-    if (!matchSection) return;
+
+    if (!matchSection) {
+      // Tampilkan feedback ke user bahwa tidak ditemukan
+      const searchInput = $("adSearchInput");
+      if (searchInput) {
+        searchInput.style.outline = "2px solid var(--sd-red)";
+        setTimeout(() => { searchInput.style.outline = ""; }, 1500);
+      }
+      return;
+    }
 
     const sectionId = matchSection.id.replace(/^section-/, "");
     if (window._adActivateSection) window._adActivateSection(sectionId);
@@ -4358,6 +4382,9 @@
           .catch(() => {});
         if (currentSection === "messages") await loadMessages();
       }
+      // Re-fetch dari DB untuk pastikan state akurat
+      await loadNotifications();
+      $("adNotifPanel") && ($("adNotifPanel").hidden = true);
     });
   }
 
@@ -4385,5 +4412,3 @@
   });
 
 })();
-
-

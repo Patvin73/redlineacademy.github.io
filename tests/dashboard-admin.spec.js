@@ -341,6 +341,7 @@ async function installSupabaseStub(page, role, options = {}) {
       const uploadedFiles = [];
       const functionInvocations = [];
       const queryLog = [];
+      const channelHandlers = [];
       const shouldFailOverviewTrainerId = ${JSON.stringify(Boolean(options.missingOverviewTrainerId))};
       const shouldFailAvatarProfileUpdate = ${JSON.stringify(Boolean(options.avatarProfileUpdateError))};
       const missingViews = ${JSON.stringify(options.missingViews || [])};
@@ -350,6 +351,15 @@ async function installSupabaseStub(page, role, options = {}) {
         try { tableData.messages = JSON.parse(storedMessages); } catch {}
       }
       const currentUser = ${JSON.stringify({ id: profile.id, email: profile.email })};
+      window.__e2eTriggerChannel = async (channelName, tableName, eventName) => {
+        const matches = channelHandlers.filter((entry) =>
+          entry.channelName === channelName &&
+          (!tableName || entry.filter?.table === tableName) &&
+          (!eventName || entry.filter?.event === eventName)
+        );
+        for (const entry of matches) await entry.callback({});
+        return matches.length;
+      };
 
       const getValue = (obj, path) => {
         if (!obj) return undefined;
@@ -563,9 +573,16 @@ async function installSupabaseStub(page, role, options = {}) {
               })
             })
           },
-          channel: () => ({
-            on: () => ({ subscribe: () => ({}) })
-          })
+          channel: (channelName) => {
+            const channelApi = {
+              on: (eventName, filter, callback) => {
+                channelHandlers.push({ channelName, eventName, filter, callback });
+                return channelApi;
+              },
+              subscribe: () => channelApi
+            };
+            return channelApi;
+          }
         })
       };
 
@@ -696,6 +713,41 @@ test("admin KPI cards navigate to their target sections and count published cour
   await page.locator(".ad-kpi-card:has(#kpiCompletionRate)").focus();
   await page.keyboard.press("Enter");
   await expect(page.locator("#section-reports")).toHaveClass(/active/);
+});
+
+test("admin realtime notification refreshes KPI cards", async ({ page }) => {
+  await installSupabaseStub(page, "admin");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await expect(page.locator("#kpiPendingGrading")).toHaveText("1");
+
+  const triggered = await page.evaluate(async () => {
+    const rows = window.__e2eGetTableData();
+    rows.assignment_submissions.push({
+      id: "sub-realtime",
+      student_id: "e2e-student-2",
+      status: "submitted",
+      submitted_at: "2026-03-13T10:00:00.000Z",
+      grade: null,
+      profiles: { id: "e2e-student-2", full_name: "Bravo Student" },
+      assignments: { title: "Realtime Review", trainer_id: "e2e-admin", pass_mark: 70 },
+      notes: "",
+      file_urls: []
+    });
+    rows.notifications.push({
+      id: "notif-realtime",
+      user_id: "e2e-admin",
+      title: "New submission",
+      body: "Realtime Review is ready to grade.",
+      type: "submission_received",
+      is_read: false,
+      created_at: "2026-03-13T10:05:00.000Z"
+    });
+    return window.__e2eTriggerChannel("admin-notif-channel", "notifications", "INSERT");
+  });
+
+  expect(triggered).toBe(1);
+  await expect(page.locator("#kpiPendingGrading")).toHaveText("2");
 });
 
 test("trainer course reports filter by trainer id instead of trainer name", async ({ page }) => {
@@ -1094,6 +1146,7 @@ test("trainer sees unread messages badge", async ({ page }) => {
   await expect(page.locator("#adNotifList")).toContainText("Question");
   await expect(page.locator("#adNotifList")).toContainText("Need help with Module 2.");
   await page.locator("#adMarkAllRead").click();
+  await expect(page.locator("#adNotifPanel")).toBeHidden();
   await expect(page.locator("#adMsgBadge")).toBeHidden();
   await expect(page.locator("#adNotifDot")).toBeHidden();
 
@@ -1627,6 +1680,7 @@ test("admin opens course contents from the course row", async ({ page }) => {
 test("admin sees all upcoming events and trainer sees only owned events", async ({ page }) => {
   await installSupabaseStub(page, "admin");
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#sidebarName")).toHaveText("E2E Admin");
 
   await page.locator(".ad-nav__item[data-section='schedule']").click();
   await expect(page.locator("#section-schedule")).toHaveClass(/active/);
@@ -1635,6 +1689,7 @@ test("admin sees all upcoming events and trainer sees only owned events", async 
 
   await installSupabaseStub(page, "trainer");
   await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.locator("#sidebarName")).toHaveText("E2E Trainer");
   await page.locator(".ad-nav__item[data-section='schedule']").click();
   await expect(page.locator("#section-schedule")).toHaveClass(/active/);
   await expect(page.locator("#adminEventsList")).toContainText("Trainer Live Session");

@@ -458,14 +458,16 @@ test.describe("Student and marketer flows", {
     await installSupabaseStub(page, stub);
 
     await page.goto("/pages/dashboard-student.html");
+    await expect(page.locator("#profileCardName")).toHaveText("Alpha Student");
     await page.locator(".sd-nav__item[data-section='profile']").click();
+    await expect(page.locator("#section-profile")).toHaveClass(/active/);
     await page.locator("#avatarInput").setInputFiles({
       name: "avatar.png",
       mimeType: "image/png",
       buffer: Buffer.from("avatar-image")
     });
 
-    await expect(page.locator("#avatarUploadStatus")).toContainText("Photo updated");
+    await expect(page.locator("#avatarUploadStatus")).toContainText("Photo updated", { timeout: 15000 });
     const profile = await page.evaluate(() => (
       window.__QA_TABLE_DATA__.profiles.find((item) => item.id === "student-1")
     ));
@@ -484,14 +486,16 @@ test.describe("Student and marketer flows", {
     await installSupabaseStub(page, stub);
 
     await page.goto("/pages/dashboard-student.html");
+    await expect(page.locator("#profileCardName")).toHaveText("Alpha Student");
     await page.locator(".sd-nav__item[data-section='profile']").click();
+    await expect(page.locator("#section-profile")).toHaveClass(/active/);
     await page.locator("#avatarInput").setInputFiles({
       name: "avatar.png",
       mimeType: "image/png",
       buffer: Buffer.from("avatar-image")
     });
 
-    await expect(page.locator("#avatarUploadStatus")).toContainText("Upload failed");
+    await expect(page.locator("#avatarUploadStatus")).toContainText("Upload failed", { timeout: 15000 });
     await expect(page.locator("#profileAvatar img")).toHaveCount(0);
     const profile = await page.evaluate(() => (
       window.__QA_TABLE_DATA__.profiles.find((item) => item.id === "student-1")

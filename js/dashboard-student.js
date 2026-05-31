@@ -350,6 +350,9 @@
             .catch(() => {});
           if (currentSection === "messages") await loadMessages(currentStudentProfile?.id);
         }
+        // Re-fetch dari DB untuk pastikan state akurat
+        await loadNotifications(currentStudentProfile?.id);
+        $("notifPanel") && ($("notifPanel").hidden = true);
       });
     }
   }
@@ -1940,6 +1943,8 @@
     }
     setMessagePanelVisible(viewEmpty, true);
   }
+
+  function getStudentReplySubject(value) {
     return /^re:/i.test(value) ? value : `Re: ${value}`;
   }
 
@@ -2471,9 +2476,24 @@
         grid.appendChild(card);
       });
 
-      if (tabs && !tabs.dataset.bound) {
-        tabs.dataset.bound = "true";
-        tabs.addEventListener("sd:filter-change", applyResourceFilter);
+      // ── Filter resources berdasarkan tab kategori ──
+      function applyResourceFilter() {
+        const section = $("section-resources");
+        if (!section) return;
+        const activeTab = section.querySelector(".sd-filter-tab.active");
+        const activeCategory = (activeTab?.dataset?.category || "all").toLowerCase();
+        grid.querySelectorAll("[data-resource-card='true']").forEach((card) => {
+          const category = (card.dataset.category || "text").toLowerCase();
+          card.style.display =
+            activeCategory === "all" || category === activeCategory ? "" : "none";
+        });
+      }
+
+      // ── Bind filter tabs ──
+      const resourceSection = $("section-resources");
+      if (resourceSection && !resourceSection.dataset.resourceFilterBound) {
+        resourceSection.dataset.resourceFilterBound = "true";
+        resourceSection.addEventListener("sd:filter-change", applyResourceFilter);
       }
       applyResourceFilter();
     } catch {
@@ -2608,10 +2628,17 @@
           table: "notifications",
           filter: `user_id=eq.${userId}`,
         },
-        () => {
+        async () => {
           loadedStudentSections.delete("assignments");
-          loadNotifications(userId);
+          await loadNotifications(userId);
+          // Refresh stat cards di home saat ada notifikasi baru (kursus/tugas baru)
+          await loadDashboardStats(userId);
+          await loadContinueLearning(userId);
           if (currentSection === "assignments") loadAssignments(userId);
+          if (currentSection === "courses") {
+            loadedStudentSections.delete("courses");
+            await loadCourseGrid(userId);
+          }
         }
       )
       .subscribe();
@@ -2624,9 +2651,10 @@
     studentMessageChannelUserId = userId;
     const channel = window.lmsSupabase.channel("student-message-channel");
     studentMessageChannel = channel;
-    const refreshMessages = () => {
-      refreshStudentMessageIndicators(userId);
-      loadNotifications(userId);
+    const refreshMessages = async () => {
+      await refreshStudentMessageIndicators(userId);
+      await loadNotifications(userId);
+      await loadDashboardStats(userId);
       if (currentSection === "messages") loadMessages(userId);
     };
     channel.on(
@@ -2739,9 +2767,24 @@
     const needle = String(query || "").trim().toLowerCase();
     if (!needle) return;
 
-    const sections = Array.from(document.querySelectorAll(".sd-section"));
+    // Kecualikan section yang mengandung data personal (email, profile, messages)
+    const EXCLUDED_SEARCH_SECTIONS = ["profile", "messages"];
+    const sections = Array.from(document.querySelectorAll(".sd-section"))
+      .filter((section) => {
+        const sectionId = section.id.replace(/^section-/, "");
+        return !EXCLUDED_SEARCH_SECTIONS.includes(sectionId);
+      });
     const matchSection = sections.find((section) => (section.textContent || "").toLowerCase().includes(needle));
-    if (!matchSection) return;
+
+    if (!matchSection) {
+      // Tampilkan feedback ke user bahwa tidak ditemukan
+      const searchInput = $("sdSearchInput");
+      if (searchInput) {
+        searchInput.style.outline = "2px solid var(--sd-red)";
+        setTimeout(() => { searchInput.style.outline = ""; }, 1500);
+      }
+      return;
+    }
 
     const sectionId = matchSection.id.replace(/^section-/, "");
     if (window._sdActivateSection) window._sdActivateSection(sectionId);

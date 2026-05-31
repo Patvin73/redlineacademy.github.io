@@ -8,10 +8,21 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
       const missingViews = ${JSON.stringify(missingViews)};
       let currentPassword = ${JSON.stringify(initialPassword)};
       const functionInvocations = [];
+      const channelHandlers = [];
 
       window.__QA_TABLE_DATA__ = tableData;
       window.__QA_UPLOADS__ = [];
       window.__QA_FUNCTION_INVOCATIONS__ = functionInvocations;
+      window.__QA_CHANNEL_HANDLERS__ = channelHandlers;
+      window.__QA_TRIGGER_CHANNEL = async (channelName, tableName, eventName) => {
+        const matches = channelHandlers.filter((entry) =>
+          entry.channelName === channelName &&
+          (!tableName || entry.filter?.table === tableName) &&
+          (!eventName || entry.filter?.event === eventName)
+        );
+        for (const entry of matches) await entry.callback({});
+        return matches.length;
+      };
 
       const getValue = (obj, path) => {
         if (!obj) return undefined;
@@ -248,9 +259,16 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
               return { data: { ok: true, email_sent: true }, error: null };
             }
           },
-          channel: () => ({
-            on: () => ({ subscribe: () => ({}) })
-          }),
+          channel: (channelName) => {
+            const channelApi = {
+              on: (eventName, filter, callback) => {
+                channelHandlers.push({ channelName, eventName, filter, callback });
+                return channelApi;
+              },
+              subscribe: () => channelApi
+            };
+            return channelApi;
+          },
           storage: {
             from: (bucket) => ({
               upload: async (path, file, options = {}) => {
@@ -620,7 +638,7 @@ test.describe("Student Dashboard", () => {
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);
 
-    await page.goto("/pages/dashboard-student.html");
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
     await expect(page.locator("#sidebarName")).toHaveText("Alpha Student");
     await page.locator(".sd-nav__item[data-section='profile']").click();
 
@@ -639,7 +657,7 @@ test.describe("Student Dashboard", () => {
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);
 
-    await page.goto("/pages/dashboard-student.html");
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
     await page.locator(".sd-nav__item[data-section='profile']").click();
 
     await page.fill("#pfFullName", "Alpha Student Updated");
@@ -661,7 +679,7 @@ test.describe("Student Dashboard", () => {
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);
 
-    await page.goto("/pages/dashboard-student.html");
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
     await page.locator(".sd-nav__item[data-section='profile']").click();
 
     await page.setInputFiles("#avatarInput", {
@@ -730,6 +748,43 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#courseGrid")).toContainText("Creator ID: TR-001");
     await expect(page.locator("#courseGrid")).toContainText("Creator ID: TR-009");
     await expect(page.locator("#courseGrid .sd-course-card[data-status='available']")).toHaveCount(1);
+  });
+
+  test("realtime notification refreshes student stats and active course grid", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html");
+    await expect(page.locator("#statCoursesEnrolled")).toHaveText("2");
+    await page.locator(".sd-nav__item[data-section='courses']").click();
+    await expect(page.locator("#courseGrid .sd-course-card")).toHaveCount(3);
+    await expect(page.locator("#courseGrid")).not.toContainText("Realtime Care");
+
+    const triggered = await page.evaluate(async () => {
+      const rows = window.__QA_TABLE_DATA__;
+      rows.v_student_dashboard[0].courses_enrolled = 3;
+      rows.enrollments.push({
+        id: "enroll-realtime",
+        student_id: "student-1",
+        course_id: "course-realtime",
+        status: "active"
+      });
+      rows.courses.push({
+        id: "course-realtime",
+        title: "Realtime Care",
+        status: "published",
+        thumbnail_url: "",
+        category_id: "aged-care",
+        trainer_id: "trainer-1",
+        profiles: { admin_id: "TR-001" },
+        categories: { id: "aged-care", name: "Aged Care" }
+      });
+      return window.__QA_TRIGGER_CHANNEL("student-assignment-notif", "notifications", "INSERT");
+    });
+
+    expect(triggered).toBe(1);
+    await expect(page.locator("#statCoursesEnrolled")).toHaveText("3");
+    await expect(page.locator("#courseGrid")).toContainText("Realtime Care");
   });
 
   test("opens student course contents from the course card", async ({ page }) => {
@@ -918,6 +973,7 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#notifList")).toContainText("Please review module one.");
     await page.click("#markAllRead");
 
+    await expect(page.locator("#notifPanel")).toBeHidden();
     await expect(page.locator("#messageBadge")).toBeHidden();
     await expect(page.locator("#notifDot")).toBeHidden();
     await expect(page.locator(".sd-notif-list-item.unread")).toHaveCount(0);
@@ -987,6 +1043,35 @@ test.describe("Student Dashboard", () => {
       is_read: true,
       recipient_id: "student-1"
     }));
+  });
+
+  test("realtime message refreshes student indicators and home stats", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html");
+    await expect(page.locator("#messageBadge")).toHaveText("1");
+    await expect(page.locator("#statPendingAssignments")).toHaveText("1");
+
+    const triggered = await page.evaluate(async () => {
+      const rows = window.__QA_TABLE_DATA__;
+      rows.v_student_dashboard[0].pending_submissions = 2;
+      rows.messages.push({
+        id: "msg-realtime",
+        sender_id: "trainer-1",
+        recipient_id: "student-1",
+        subject: "Realtime message",
+        body: "New unread message.",
+        is_read: false,
+        created_at: "2099-01-07T08:00:00.000Z",
+        profiles: { full_name: "Trainer One", avatar_url: null }
+      });
+      return window.__QA_TRIGGER_CHANNEL("student-message-channel", "messages", "INSERT");
+    });
+
+    expect(triggered).toBe(1);
+    await expect(page.locator("#messageBadge")).toHaveText("2");
+    await expect(page.locator("#statPendingAssignments")).toHaveText("2");
   });
 
   test("archived unread messages do not keep student indicators active", async ({ page }) => {
