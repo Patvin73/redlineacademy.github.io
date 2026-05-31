@@ -1877,6 +1877,22 @@
     msg.className = `sd-profile-form__msg${isError ? " error" : text ? " success" : ""}`;
   }
 
+  function setStudentMessageStatus(text, isError = false) {
+    const detail = $("messageDetail");
+    if (!detail) {
+      setStudentComposerStatus(text, isError);
+      return;
+    }
+    let status = detail.querySelector("[data-sd-message-status]");
+    if (!status) {
+      status = document.createElement("p");
+      status.setAttribute("data-sd-message-status", "true");
+      detail.prepend(status);
+    }
+    status.textContent = text || "";
+    status.className = `sd-profile-form__msg${isError ? " error" : text ? " success" : ""}`;
+  }
+
   function getSelectedStudentMessageRecipients(recipient = $("studentMsgRecipient")) {
     return Array.from(recipient?.selectedOptions || [])
       .map((option) => option.value)
@@ -1950,10 +1966,10 @@
 
   async function archiveMessage(messageIds, archived = true) {
     if (!messageIds?.length || !window.lmsSupabase) return;
-    await window.lmsSupabase.from("messages")
+    const { error } = await window.lmsSupabase.from("messages")
       .update({ is_archived: archived })
-      .in("id", messageIds)
-      .catch(() => {});
+      .in("id", messageIds);
+    if (error) throw error;
   }
 
   function bindStudentMessageViewTabs() {
@@ -2123,6 +2139,7 @@
     const composeForm = $("studentMsgComposeForm");
     const recipient = $("studentMsgRecipient");
     const subject = $("studentMsgSubject");
+    const body = $("studentMsgBody");
     const cancelBtn = $("studentCancelMsgBtn");
     if (!composeForm) return;
 
@@ -2165,7 +2182,8 @@
       syncStudentRecipientCheckboxes();
     }
     if (subject && options.subject) subject.value = options.subject;
-    if (subject) subject.focus();
+    if (options.focusBody && body) body.focus();
+    else if (subject) subject.focus();
   }
 
   async function loadMessages(...args) {
@@ -2257,23 +2275,32 @@
       if (inboxEmpty) inboxEmpty.style.display = groups.length === 0 ? "flex" : "none";
       if (groups.length === 0) return;
 
-      const renderDetail = async (group) => {
+      const refreshMessageBadges = () => {
+        studentUnreadMessages = data.filter((m) => !m.is_read && m.recipient_id === userId && !m.is_archived).length;
+        updateStudentAttentionIndicators();
+      };
+
+      const renderMessageDetail = async (group) => {
         if (!detail) return;
         setMessagePanelVisible(viewEmpty, false);
         setMessagePanelVisible(composeForm, false);
         setMessagePanelVisible(detail, true);
+        setStudentMessageStatus("");
+        let detailStatus = "";
 
         if (group.type === "received") {
           const msg = group.messages[0];
           if (!msg.is_read && msg.recipient_id === userId) {
-            await window.lmsSupabase
+            const { error } = await window.lmsSupabase
               .from("messages")
               .update({ is_read: true, read_at: new Date().toISOString() })
-              .eq("id", msg.id)
-              .catch(() => {});
-            msg.is_read = true;
-            studentUnreadMessages = inbox.querySelectorAll(".sd-inbox-item.unread").length;
-            updateStudentAttentionIndicators();
+              .eq("id", msg.id);
+            if (error) {
+              detailStatus = error.message || "Message read status failed.";
+            } else {
+              msg.is_read = true;
+              refreshMessageBadges();
+            }
           }
           const sender = profileMap.get(msg.sender_id) || msg.profiles || {};
           detail.innerHTML = `
@@ -2315,34 +2342,51 @@
               </div>
             </div>`;
         }
+        if (detailStatus) setStudentMessageStatus(detailStatus, true);
 
         detail.querySelector("[data-sd-msg-reply]")?.addEventListener("click", async () => {
           const msg = group.messages[0];
-          await openStudentMessageComposer(msg.sender_id, { subject: getStudentReplySubject(group.subject) });
+          await openStudentMessageComposer(msg.sender_id, { subject: getStudentReplySubject(group.subject), focusBody: true });
         });
         detail.querySelector("[data-sd-msg-archive]")?.addEventListener("click", async () => {
-          await archiveMessage(group.messages.map((msg) => msg.id), true);
-          await loadMessages(userId);
+          try {
+            await archiveMessage(group.messages.map((msg) => msg.id), true);
+            await loadMessages(userId);
+          } catch (err) {
+            setStudentMessageStatus(err.message || "Message archive failed.", true);
+          }
         });
         detail.querySelector("[data-sd-msg-restore]")?.addEventListener("click", async () => {
-          await archiveMessage(group.messages.map((msg) => msg.id), false);
-          await loadMessages(userId);
+          try {
+            await archiveMessage(group.messages.map((msg) => msg.id), false);
+            await loadMessages(userId);
+          } catch (err) {
+            setStudentMessageStatus(err.message || "Message restore failed.", true);
+          }
         });
         detail.querySelector("[data-sd-msg-delete-inbox]")?.addEventListener("click", async () => {
           const messageId = group.messages[0]?.id;
           if (!messageId) return;
-          await window.lmsSupabase
+          const { error } = await window.lmsSupabase
             .from("messages")
             .delete()
             .eq("id", messageId);
+          if (error) {
+            setStudentMessageStatus(error.message || "Message delete failed.", true);
+            return;
+          }
           await loadMessages(userId);
         });
         detail.querySelector("[data-sd-msg-delete-all]")?.addEventListener("click", () => {
           showStudentConfirmModal("Hapus pesan yang sudah dikirim?", async () => {
-            await window.lmsSupabase
+            const { error } = await window.lmsSupabase
               .from("messages")
               .delete()
               .in("id", group.messages.map((msg) => msg.id));
+            if (error) {
+              setStudentMessageStatus(error.message || "Message delete failed.", true);
+              return;
+            }
             await loadMessages(userId);
           });
         });
@@ -2351,9 +2395,23 @@
       let selectedMessageItem = null;
       let selectedMessageGroup = null;
 
-      groups.forEach((group) => {
+      const setActiveMessage = async (item, group) => {
+        inbox.querySelectorAll(".sd-inbox-item").forEach((el) => {
+          el.classList.remove("active");
+          el.setAttribute("aria-selected", "false");
+        });
+        item.classList.add("active");
+        item.setAttribute("aria-selected", "true");
+        item.classList.remove("unread");
+        await renderMessageDetail(group);
+      };
+
+      const renderMessageList = () => groups.forEach((group) => {
         const item = document.createElement("div");
         item.className = `sd-inbox-item${group.isUnread ? " unread" : ""}`;
+        item.setAttribute("role", "button");
+        item.setAttribute("tabindex", "0");
+        item.setAttribute("aria-selected", "false");
         const recipientNames = group.type === "sent"
           ? group.messages.map((msg) => {
               const profile = profileMap.get(msg.recipient_id) || {};
@@ -2376,18 +2434,12 @@
           </div>
           <span class="sd-inbox-item__time">${group.type === "sent" ? "Sent" : timeAgo(group.created_at)}</span>`;
         item.addEventListener("click", async () => {
-          console.log("Inbox item clicked, group:", group);
-          inbox.querySelectorAll(".sd-inbox-item").forEach((el) => el.classList.remove("active"));
-          item.classList.add("active");
-          item.classList.remove("unread");
-          // Add debugging to ensure group has required properties
-          console.log("Group properties:", {
-            subject: group.subject,
-            body: group.body,
-            messages: group.messages,
-            isUnread: group.isUnread
-          });
-          await renderDetail(group);
+          await setActiveMessage(item, group);
+        });
+        item.addEventListener("keydown", async (event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          await setActiveMessage(item, group);
         });
         if (selectedMessageId && group.messages.some((msg) => String(msg.id) === selectedMessageId)) {
           selectedMessageItem = item;
@@ -2395,13 +2447,11 @@
         }
         inbox.insertBefore(item, inboxEmpty);
       });
-      
-      // Auto-render detail for selected message (after loop)
+
+      renderMessageList();
+
       if (selectedMessageItem && selectedMessageGroup) {
-        inbox.querySelectorAll(".sd-inbox-item").forEach((el) => el.classList.remove("active"));
-        selectedMessageItem.classList.add("active");
-        selectedMessageItem.classList.remove("unread");
-        await renderDetail(selectedMessageGroup);
+        await setActiveMessage(selectedMessageItem, selectedMessageGroup);
         selectedMessageItem.scrollIntoView({ block: "nearest" });
       }
     } catch (err) {

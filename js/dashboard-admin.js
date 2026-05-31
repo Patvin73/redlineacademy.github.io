@@ -2526,10 +2526,10 @@
 
   async function archiveMessage(messageIds, archived = true) {
     if (!messageIds?.length || !window.lmsSupabase) return;
-    await window.lmsSupabase.from("messages")
+    const { error } = await window.lmsSupabase.from("messages")
       .update({ is_archived: archived })
-      .in("id", messageIds)
-      .catch(() => {});
+      .in("id", messageIds);
+    if (error) throw error;
   }
 
   function bindMessageViewTabs() {
@@ -2593,7 +2593,7 @@
       bindMessageViewTabs();
       const messageSelect = "id, sender_id, recipient_id, subject, body, is_read, read_at, is_archived, created_at";
       // Profiles diambil terpisah lewat profileMap di bawah — sudah benar.
-      const [{ data: receivedData }, { data: sentData }] = await Promise.all([
+      const [{ data: receivedData, error: receivedError }, { data: sentData, error: sentError }] = await Promise.all([
         (() => {
           const q = window.lmsSupabase
             .from("messages")
@@ -2617,6 +2617,7 @@
           .order("created_at", { ascending: false })
           .limit(100)
       ]);
+      if (receivedError || sentError) throw receivedError || sentError;
       const data = Array.from(
         new Map([...(receivedData || []), ...(sentData || [])].map((msg) => [msg.id, msg])).values()
       ).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 100);
@@ -2665,7 +2666,12 @@
       if (empty) empty.style.display = groups.length === 0 ? "flex" : "none";
       if (groups.length === 0) return;
 
-      const renderDetail = async (group) => {
+      const refreshMessageBadges = () => {
+        adminUnreadMessages = data.filter((m) => !m.is_read && m.recipient_id === currentProfile.id && !m.is_archived).length;
+        updateAdminAttentionIndicators();
+      };
+
+      const renderMessageDetail = async (group) => {
         if (!viewDetail) return;
         try {
           setMessagePanelVisible(viewEmpty, false);
@@ -2675,15 +2681,16 @@
           if (group.type === "received") {
             const msg = group.messages[0];
             if (!msg.is_read && msg.recipient_id === currentProfile.id) {
-              await window.lmsSupabase
+              const { error } = await window.lmsSupabase
                 .from("messages")
                 .update({ is_read: true, read_at: new Date().toISOString() })
-                .eq("id", msg.id)
-                .catch(() => {});
-              msg.is_read = true;
-              const remaining = inbox.querySelectorAll(".ad-inbox-item.unread").length;
-              adminUnreadMessages = Math.max(remaining, 0);
-              updateAdminAttentionIndicators();
+                .eq("id", msg.id);
+              if (error) {
+                showToastError(error.message || "Message read status failed.");
+              } else {
+                msg.is_read = true;
+                refreshMessageBadges();
+              }
             }
             const sender = profileMap.get(msg.sender_id) || msg.profiles || {};
             viewDetail.innerHTML = `
@@ -2729,12 +2736,20 @@
           }
 
           viewDetail.querySelector("[data-ad-msg-archive]")?.addEventListener("click", async () => {
-            await archiveMessage(group.messages.map((msg) => msg.id), true);
-            await loadMessages();
+            try {
+              await archiveMessage(group.messages.map((msg) => msg.id), true);
+              await loadMessages();
+            } catch (err) {
+              showToastError(err.message || "Message archive failed.");
+            }
           });
           viewDetail.querySelector("[data-ad-msg-restore]")?.addEventListener("click", async () => {
-            await archiveMessage(group.messages.map((msg) => msg.id), false);
-            await loadMessages();
+            try {
+              await archiveMessage(group.messages.map((msg) => msg.id), false);
+              await loadMessages();
+            } catch (err) {
+              showToastError(err.message || "Message restore failed.");
+            }
           });
           viewDetail.querySelector("[data-ad-msg-reply]")?.addEventListener("click", async () => {
             const msg = group.messages[0];
@@ -2743,10 +2758,14 @@
           viewDetail.querySelector("[data-ad-msg-delete-inbox]")?.addEventListener("click", async () => {
             const messageId = group.messages[0]?.id;
             if (!messageId) return;
-            await window.lmsSupabase
+            const { error } = await window.lmsSupabase
               .from("messages")
               .delete()
               .eq("id", messageId);
+            if (error) {
+              showToastError(error.message || "Message delete failed.");
+              return;
+            }
             await loadMessages();
           });
           viewDetail.querySelector("[data-ad-msg-edit]")?.addEventListener("click", () => {
@@ -2765,7 +2784,7 @@
                   <button class="ad-btn ad-btn--primary" type="submit">Simpan</button>
                 </div>
               </form>`;
-            viewDetail.querySelector("[data-ad-msg-edit-cancel]")?.addEventListener("click", () => renderDetail(group));
+            viewDetail.querySelector("[data-ad-msg-edit-cancel]")?.addEventListener("click", () => renderMessageDetail(group));
             viewDetail.querySelector(".ad-message-edit-form")?.addEventListener("submit", async (event) => {
               event.preventDefault();
               const subject = $("adMsgEditSubject")?.value.trim() || null;
@@ -2783,10 +2802,14 @@
           });
           viewDetail.querySelector("[data-ad-msg-delete-all]")?.addEventListener("click", () => {
             showConfirmModal("Hapus pesan ini dari history?", async () => {
-              await window.lmsSupabase
+              const { error } = await window.lmsSupabase
                 .from("messages")
                 .delete()
                 .in("id", group.messages.map((msg) => msg.id));
+              if (error) {
+                showToastError(error.message || "Message delete failed.");
+                return;
+              }
               await loadMessages();
             });
             return;
@@ -2795,15 +2818,19 @@
             button.addEventListener("click", async () => {
               const messageId = button.getAttribute("data-ad-msg-delete-one");
               if (!messageId) return;
-              await window.lmsSupabase
+              const { error } = await window.lmsSupabase
                 .from("messages")
                 .delete()
                 .eq("id", messageId);
+              if (error) {
+                showToastError(error.message || "Message delete failed.");
+                return;
+              }
               await loadMessages();
             });
           });
         } catch (err) {
-          console.error("renderDetail error:", err);
+          console.error("renderMessageDetail error:", err);
           try { viewDetail.innerHTML = '<div class="ad-message-view__empty"><p>Error loading message</p></div>'; } catch (e) {}
         }
       };
@@ -2811,9 +2838,23 @@
       let selectedMessageItem = null;
       let selectedMessageGroup = null;
 
-      groups.forEach((group) => {
+      const setActiveMessage = async (item, group) => {
+        inbox.querySelectorAll(".ad-inbox-item").forEach((el) => {
+          el.classList.remove("active");
+          el.setAttribute("aria-selected", "false");
+        });
+        item.classList.add("active");
+        item.setAttribute("aria-selected", "true");
+        item.classList.remove("unread");
+        await renderMessageDetail(group);
+      };
+
+      const renderMessageList = () => groups.forEach((group) => {
         const item = document.createElement("div");
         item.className = `ad-inbox-item${group.isUnread ? " unread" : ""}`;
+        item.setAttribute("role", "button");
+        item.setAttribute("tabindex", "0");
+        item.setAttribute("aria-selected", "false");
         const recipientNames = group.type === "sent"
           ? group.messages.map((msg) => {
               const profile = profileMap.get(msg.recipient_id) || {};
@@ -2835,20 +2876,14 @@
             <p class="ad-inbox-item__name">${escHtml(title)}</p>
             <p class="ad-inbox-item__preview">${escHtml(preview)}</p>
           </div>
-          <span class="ad-inbox-item__time">${group.type === "sent" ? "Sent" : timeAgo(group.created_at)}</p>`;
+          <span class="ad-inbox-item__time">${group.type === "sent" ? "Sent" : timeAgo(group.created_at)}</span>`;
         item.addEventListener("click", async () => {
-          console.log("Admin inbox item clicked, group:", group);
-          inbox.querySelectorAll(".ad-inbox-item").forEach((el) => el.classList.remove("active"));
-          item.classList.add("active");
-          item.classList.remove("unread");
-          // Add debugging to ensure group has required properties
-          console.log("Group properties:", {
-            subject: group.subject,
-            body: group.body,
-            messages: group.messages,
-            isUnread: group.isUnread
-          });
-          await renderDetail(group);
+          await setActiveMessage(item, group);
+        });
+        item.addEventListener("keydown", async (event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          await setActiveMessage(item, group);
         });
         if (selectedMessageId && group.messages.some((msg) => String(msg.id) === selectedMessageId)) {
           selectedMessageItem = item;
@@ -2856,11 +2891,9 @@
         }
         inbox.insertBefore(item, empty);
       });
+      renderMessageList();
       if (selectedMessageItem && selectedMessageGroup) {
-        inbox.querySelectorAll(".ad-inbox-item").forEach((el) => el.classList.remove("active"));
-        selectedMessageItem.classList.add("active");
-        selectedMessageItem.classList.remove("unread");
-        await renderDetail(selectedMessageGroup);
+        await setActiveMessage(selectedMessageItem, selectedMessageGroup);
         selectedMessageItem.scrollIntoView({ block: "nearest" });
       }
     } catch (err) { console.warn("Messages load error:", err.message); }

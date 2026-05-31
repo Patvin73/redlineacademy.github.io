@@ -990,7 +990,13 @@ test.describe("Student Dashboard", () => {
     }));
 
     await page.locator(".sd-nav__item[data-section='messages']").click();
-    await page.locator(".sd-inbox-item", { hasText: "Welcome" }).click();
+    const welcomeMessage = page.locator(".sd-inbox-item", { hasText: "Welcome" });
+    await expect(welcomeMessage).toHaveAttribute("role", "button");
+    await expect(welcomeMessage).toHaveAttribute("tabindex", "0");
+    await welcomeMessage.focus();
+    await page.keyboard.press("Enter");
+    await expect(welcomeMessage).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#messageDetail")).toContainText("Please review module one.");
     await expect(page.locator("#messageDetail")).toContainText("Reply");
     await expect(page.locator("#messageDetail")).toContainText("Archive");
     await expect(page.locator("#messageDetail")).toContainText("Delete");
@@ -999,6 +1005,7 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#studentMsgComposeForm")).toBeVisible();
     await expect(page.locator("#studentMsgSubject")).toHaveValue("Re: Welcome");
     await expect(page.locator("#studentMsgRecipient")).toHaveValues(["trainer-1"]);
+    await expect(page.locator("#studentMsgBody")).toBeFocused();
     await page.locator("#studentCancelMsgBtn").click();
 
     await page.locator(".sd-inbox-item", { hasText: "Welcome" }).click();

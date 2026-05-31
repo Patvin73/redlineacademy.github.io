@@ -1214,7 +1214,12 @@ test("trainer can open message detail", async ({ page }) => {
   await page.locator(".ad-nav__item[data-section='messages']").click();
   await expect(page.locator("#section-messages")).toHaveClass(/active/);
 
-  await page.locator(".ad-inbox-item", { hasText: "Need help with Module 2." }).click();
+  const inboxMessage = page.locator(".ad-inbox-item", { hasText: "Need help with Module 2." });
+  await expect(inboxMessage).toHaveAttribute("role", "button");
+  await expect(inboxMessage).toHaveAttribute("tabindex", "0");
+  await inboxMessage.focus();
+  await page.keyboard.press("Enter");
+  await expect(inboxMessage).toHaveAttribute("aria-selected", "true");
   await expect(page.locator("#adMsgViewEmpty")).toBeHidden();
   await expect(page.locator("#adMsgDetail")).toBeVisible();
   await expect(page.locator("#adMsgDetail")).toContainText("Need help with Module 2.");
@@ -1226,6 +1231,7 @@ test("trainer can open message detail", async ({ page }) => {
   await expect(page.locator("#adMsgComposeForm")).toBeVisible();
   await expect(page.locator("#adMsgSubject")).toHaveValue("Re: Question");
   await expect(page.locator("#adMsgRecipient")).toHaveValues(["e2e-student-1"]);
+  await expect(page.locator("#adMsgBody")).toBeFocused();
   await page.locator("#adCancelMsgBtn").click();
 
   await page.locator(".ad-inbox-item", { hasText: "Need help with Module 2." }).click();
