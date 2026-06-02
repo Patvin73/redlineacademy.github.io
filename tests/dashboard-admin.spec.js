@@ -699,6 +699,10 @@ async function installSupabaseStub(page, role, options = {}) {
                 uploadedFiles.push({ bucket, path, name: file.name, type: file.type, size: file.size, options });
                 return { data: { path }, error: null };
               },
+              createSignedUrl: async (path) => ({
+                data: { signedUrl: "https://storage.example.com/signed/" + bucket + "/" + path },
+                error: null
+              }),
               getPublicUrl: (path) => ({
                 data: { publicUrl: "https://storage.example.com/" + bucket + "/" + path }
               })
@@ -1874,7 +1878,8 @@ test("admin opens course contents from the course row", async ({ page }) => {
         course_id: "course-1",
         title: "Leadership Intro",
         material_type: "video",
-        material_url: "https://example.com/leadership-intro.mp4",
+        material_url: "https://storage.example.com/course-materials/courses/course-1/module-1/leadership-intro.mp4",
+        material_path: "courses/course-1/module-1/leadership-intro.mp4",
         module_title: "Orientation",
         module_order: 1,
         lesson_order: 1
@@ -1901,7 +1906,7 @@ test("admin opens course contents from the course row", async ({ page }) => {
   await expect(page.locator("#adminCourseDetail")).toContainText("Orientation");
   await expect(page.locator("#adminCourseDetail")).toContainText("Leadership Intro");
   await expect(page.locator("#adminCourseDetail")).toContainText("Leadership Checklist");
-  await expect(page.locator("#adminCourseDetail a", { hasText: "Open material" })).toHaveAttribute("href", "https://example.com/leadership-intro.mp4");
+  await expect(page.locator("#adminCourseDetail a", { hasText: "Open material" })).toHaveAttribute("href", "https://storage.example.com/signed/course-materials/courses/course-1/module-1/leadership-intro.mp4");
 });
 
 test("admin sees all upcoming events and trainer sees only owned events", async ({ page }) => {
@@ -1985,7 +1990,8 @@ test("trainer can edit existing course lessons without reuploading materials", a
         module_title: "Orientation",
         module_order: 1,
         lesson_order: 1,
-        material_url: "https://storage.example.com/course-materials/courses/course-1/module-1/orientation.mp4"
+        material_url: "https://storage.example.com/course-materials/courses/course-1/module-1/orientation.mp4",
+        material_path: "courses/course-1/module-1/orientation.mp4"
       },
       {
         id: "lesson-2",
@@ -1995,7 +2001,8 @@ test("trainer can edit existing course lessons without reuploading materials", a
         module_title: "Care Materials",
         module_order: 2,
         lesson_order: 2,
-        material_url: "https://storage.example.com/course-materials/courses/course-1/module-2/care-guide.pdf"
+        material_url: "https://storage.example.com/course-materials/courses/course-1/module-2/care-guide.pdf",
+        material_path: "courses/course-1/module-2/care-guide.pdf"
       }
     ]
   });
@@ -2025,6 +2032,10 @@ test("trainer can edit existing course lessons without reuploading materials", a
   expect(lessons.map((lesson) => lesson.material_url)).toEqual([
     "https://storage.example.com/course-materials/courses/course-1/module-1/orientation.mp4",
     "https://storage.example.com/course-materials/courses/course-1/module-2/care-guide.pdf"
+  ]);
+  expect(lessons.map((lesson) => lesson.material_path)).toEqual([
+    "courses/course-1/module-1/orientation.mp4",
+    "courses/course-1/module-2/care-guide.pdf"
   ]);
 });
 

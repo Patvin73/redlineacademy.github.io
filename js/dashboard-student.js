@@ -20,6 +20,7 @@
   let studentNotificationChannelUserId = null;
   let studentMessageChannel = null;
   let studentMessageChannelUserId = null;
+  const COURSE_MATERIAL_BUCKET = "course-materials";
   const ASSIGNMENT_SUBMISSIONS_BUCKET = "assignment-submissions";
 
   /* ── DOM refs ───────────────────────────────────────────────────── */
@@ -1097,7 +1098,7 @@
       <div class="sd-message-detail__recipients">
         <p class="sd-message-detail__label">${escHtml(module.title)}</p>
         ${module.lessons.map((lesson) => {
-          const safeUrl = toSafeUiUrl(lesson.material_url);
+          const safeUrl = toSafeUiUrl(lesson.material_display_url);
           return `
             <div class="sd-message-recipient">
               <span>${escHtml(lesson.title || "Lesson")}</span>
@@ -1133,13 +1134,14 @@
     try {
       const { data: lessons, error } = await window.lmsSupabase
         .from("lessons")
-        .select("id, title, material_type, material_url, module_title, module_order, lesson_order")
+        .select("id, title, material_type, material_url, material_path, module_title, module_order, lesson_order")
         .eq("course_id", course.id)
         .order("module_order", { ascending: true })
         .order("lesson_order", { ascending: true });
       if (error) throw error;
+      const lessonsWithUrls = await prepareCourseMaterialUrls(lessons || []);
       const body = panel.querySelector(".sd-message-view__body");
-      if (body) body.innerHTML = renderStudentLessonModules(lessons || []);
+      if (body) body.innerHTML = renderStudentLessonModules(lessonsWithUrls);
     } catch (err) {
       const body = panel.querySelector(".sd-message-view__body");
       if (body) body.innerHTML = `<p class="sd-message-detail__body">${escHtml(err.message || "Course contents failed to load.")}</p>`;
@@ -2464,7 +2466,7 @@
       const { data, error } = await window.lmsSupabase
         .from("lessons")
         .select(`
-          id, title, material_type, material_url, lesson_order,
+          id, title, material_type, material_url, material_path, lesson_order,
           courses!inner(id, title, enrollment_type)
         `)
         .in("course_id", courseIds)
@@ -2473,6 +2475,7 @@
 
       if (error) throw error;
       if (!data || data.length === 0) throw new Error("No resources");
+      const lessonsWithUrls = await prepareCourseMaterialUrls(data);
 
       if (empty) empty.style.display = "none";
       grid.querySelectorAll("[data-resource-card='true']").forEach((el) => el.remove());
@@ -2490,9 +2493,9 @@
         quiz: "sd-resource-card__icon--link"
       };
 
-      data.forEach((lesson) => {
+      lessonsWithUrls.forEach((lesson) => {
         const materialType = (lesson.material_type || "text").toLowerCase();
-        const safeUrl = toSafeUiUrl(lesson.material_url);
+        const safeUrl = toSafeUiUrl(lesson.material_display_url);
         const actionLabel = materialType === "pdf" ? "Download" : "Open";
         const card = document.createElement("div");
         card.setAttribute("data-resource-card", "true");
@@ -2842,6 +2845,46 @@
     } catch {
       return "";
     }
+  }
+
+  function extractCourseMaterialPath(value) {
+    if (!value) return "";
+    const raw = String(value).trim();
+    if (!raw) return "";
+    if (raw.startsWith("courses/")) return raw;
+    try {
+      const parsed = new URL(raw, window.location.origin);
+      const marker = `/${COURSE_MATERIAL_BUCKET}/`;
+      const markerIndex = parsed.pathname.indexOf(marker);
+      if (markerIndex === -1) return "";
+      return decodeURIComponent(parsed.pathname.slice(markerIndex + marker.length));
+    } catch {
+      return "";
+    }
+  }
+
+  async function resolveCourseMaterialUrl(lesson) {
+    const materialPath = lesson?.material_path || extractCourseMaterialPath(lesson?.material_url);
+    if (materialPath) {
+      try {
+        const bucket = window.lmsSupabase?.storage?.from?.(COURSE_MATERIAL_BUCKET);
+        if (!bucket?.createSignedUrl) return "";
+        const { data, error } = await bucket.createSignedUrl(materialPath, 60 * 60);
+        if (error) throw error;
+        return toSafeUiUrl(data?.signedUrl);
+      } catch (err) {
+        console.warn("Could not create signed course material URL:", err.message || err);
+        return "";
+      }
+    }
+    return toSafeUiUrl(lesson?.material_url);
+  }
+
+  async function prepareCourseMaterialUrls(lessons) {
+    return Promise.all((lessons || []).map(async (lesson) => ({
+      ...lesson,
+      material_display_url: await resolveCourseMaterialUrl(lesson)
+    })));
   }
 
 })();

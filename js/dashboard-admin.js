@@ -1055,7 +1055,7 @@
       <div class="ad-message-detail__recipients">
         <p class="ad-message-detail__label">${escHtml(module.title)}</p>
         ${module.lessons.map((lesson) => {
-          const safeUrl = toSafeUiUrl(lesson.material_url);
+          const safeUrl = toSafeUiUrl(lesson.material_display_url);
           return `
             <div class="ad-message-recipient">
               <span>${escHtml(lesson.title || "Lesson")}</span>
@@ -1093,13 +1093,14 @@
     try {
       const { data: lessons, error } = await window.lmsSupabase
         .from("lessons")
-        .select("id, title, material_type, material_url, module_title, module_order, lesson_order")
+        .select("id, title, material_type, material_url, material_path, module_title, module_order, lesson_order")
         .eq("course_id", course.id)
         .order("module_order", { ascending: true })
         .order("lesson_order", { ascending: true });
       if (error) throw error;
+      const lessonsWithUrls = await prepareCourseMaterialUrls(lessons || []);
       const body = panel.querySelector(".ad-message-view__compose");
-      if (body) body.innerHTML = renderAdminLessonModules(lessons || []);
+      if (body) body.innerHTML = renderAdminLessonModules(lessonsWithUrls);
     } catch (err) {
       const body = panel.querySelector(".ad-message-view__compose");
       if (body) body.innerHTML = `<p class="ad-message-detail__body">${escHtml(err.message || "Course contents failed to load.")}</p>`;
@@ -1335,6 +1336,7 @@
     label.textContent = fileName || "No file selected";
     label.style.color = "";
     delete label.dataset.existingUrl;
+    delete label.dataset.existingPath;
   }
 
   function collectCourseModules() {
@@ -1349,8 +1351,10 @@
             const title = lessonEl.querySelector(".ad-input--grow")?.value.trim() || "";
             const materialType = lessonEl.querySelector(".ad-lesson-type")?.value || "video";
             const file = lessonEl.querySelector(".ad-material-input")?.files?.[0] || null;
-            const existingUrl = lessonEl.querySelector(".ad-material-file")?.dataset.existingUrl || null;
-            return { title, materialType, file, existingUrl };
+            const fileLabel = lessonEl.querySelector(".ad-material-file");
+            const existingUrl = fileLabel?.dataset.existingUrl || null;
+            const existingPath = fileLabel?.dataset.existingPath || null;
+            return { title, materialType, file, existingUrl, existingPath };
           })
           .filter((lesson) => lesson.title || lesson.file);
 
@@ -1412,7 +1416,10 @@
       for (const lesson of module.lessons) {
         const material = lesson.file
           ? await uploadLessonMaterial(lesson.file, courseId, module.order, lessonOrder, lesson.materialType)
-          : { materialPath: null, materialUrl: lesson.existingUrl || null };
+          : {
+              materialPath: lesson.existingPath || extractCourseMaterialPath(lesson.existingUrl) || null,
+              materialUrl: lesson.existingUrl || null
+            };
         rows.push({
           course_id: courseId,
           title: lesson.title || lesson.file?.name || "Untitled lesson",
@@ -1600,7 +1607,7 @@
       try {
         const { data: existingLessons } = await window.lmsSupabase
           .from("lessons")
-          .select("id, title, material_type, module_title, module_order, lesson_order, material_url")
+          .select("id, title, material_type, module_title, module_order, lesson_order, material_url, material_path")
           .eq("course_id", courseId)
           .order("lesson_order", { ascending: true });
 
@@ -1656,6 +1663,7 @@
                 fileLabel.textContent = filename || "Existing file";
                 fileLabel.style.color = "var(--sd-green)";
                 fileLabel.dataset.existingUrl = lesson.material_url;
+                if (lesson.material_path) fileLabel.dataset.existingPath = lesson.material_path;
               }
             }
           }
@@ -4373,6 +4381,46 @@
     } catch {
       return "";
     }
+  }
+
+  function extractCourseMaterialPath(value) {
+    if (!value) return "";
+    const raw = String(value).trim();
+    if (!raw) return "";
+    if (raw.startsWith("courses/")) return raw;
+    try {
+      const parsed = new URL(raw, window.location.origin);
+      const marker = `/${COURSE_MATERIAL_BUCKET}/`;
+      const markerIndex = parsed.pathname.indexOf(marker);
+      if (markerIndex === -1) return "";
+      return decodeURIComponent(parsed.pathname.slice(markerIndex + marker.length));
+    } catch {
+      return "";
+    }
+  }
+
+  async function resolveCourseMaterialUrl(lesson) {
+    const materialPath = lesson?.material_path || extractCourseMaterialPath(lesson?.material_url);
+    if (materialPath) {
+      try {
+        const bucket = window.lmsSupabase?.storage?.from?.(COURSE_MATERIAL_BUCKET);
+        if (!bucket?.createSignedUrl) return "";
+        const { data, error } = await bucket.createSignedUrl(materialPath, 60 * 60);
+        if (error) throw error;
+        return toSafeUiUrl(data?.signedUrl);
+      } catch (err) {
+        console.warn("Could not create signed course material URL:", err.message || err);
+        return "";
+      }
+    }
+    return toSafeUiUrl(lesson?.material_url);
+  }
+
+  async function prepareCourseMaterialUrls(lessons) {
+    return Promise.all((lessons || []).map(async (lesson) => ({
+      ...lesson,
+      material_display_url: await resolveCourseMaterialUrl(lesson)
+    })));
   }
 
   /* ================================================================
