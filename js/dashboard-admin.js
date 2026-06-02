@@ -2019,6 +2019,17 @@
     }
   }
 
+  async function recalculateCourseProgressForStudent(studentId, courseId) {
+    if (!studentId || !courseId || !window.lmsSupabase) return null;
+    const { data, error } = await window.lmsSupabase.rpc("recalculate_course_progress", {
+      p_student_id: studentId,
+      p_course_id: courseId,
+      p_last_lesson_id: null
+    });
+    if (error) throw error;
+    return data?.completion_percent ?? null;
+  }
+
   async function submitGrade(newStatus) {
     const msg      = $("gradingMsg");
     const saveBtn  = $("saveGradeBtn");
@@ -2051,16 +2062,21 @@
       // Fetch submission data to notify the student with the assignment result.
       const { data: submissionData } = await window.lmsSupabase
         .from("assignment_submissions")
-        .select("student_id, assignments(title, pass_mark)")
+        .select("assignment_id, student_id, assignments(title, course_id, pass_mark)")
         .eq("id", selectedSubmissionId)
         .single();
 
       if (submissionData?.student_id) {
-        const assignmentTitle = submissionData.assignments?.title || "Assignment";
-        const isPass = newStatus === "graded" && !isNaN(score) && score >= (submissionData.assignments?.pass_mark || 70);
+        const assignmentData = Array.isArray(submissionData.assignments)
+          ? submissionData.assignments[0]
+          : submissionData.assignments;
+        const assignmentTitle = assignmentData?.title || "Assignment";
+        const isPass = newStatus === "graded" && !isNaN(score) && score >= (assignmentData?.pass_mark || 70);
         const notifTitle = newStatus === "graded"
           ? `Your assignment "${assignmentTitle}" has been graded: ${score}% (${isPass ? "PASS" : "FAIL"})`
           : `Your assignment "${assignmentTitle}" needs resubmission.`;
+
+        await recalculateCourseProgressForStudent(submissionData.student_id, assignmentData?.course_id);
 
         await window.lmsSupabase.from("notifications").insert({
           user_id: submissionData.student_id,
@@ -4004,20 +4020,7 @@
           }
 
           if (enrollmentId) {
-            const { data: prog, error: progErr } = await window.lmsSupabase
-              .from("course_progress")
-              .select("id")
-              .eq("student_id", studentId)
-              .eq("course_id", courseId)
-              .maybeSingle();
-            if (progErr) throw progErr;
-
-            if (!prog) {
-              const { error: progressInsertErr } = await window.lmsSupabase
-                .from("course_progress")
-                .insert({ enrollment_id: enrollmentId, student_id: studentId, course_id: courseId, completion_percent: 0 });
-              if (progressInsertErr) console.warn("course_progress insert error:", progressInsertErr.message);
-            }
+            await recalculateCourseProgressForStudent(studentId, courseId);
           }
         }
 

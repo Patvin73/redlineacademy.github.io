@@ -1001,44 +1001,39 @@
     const userId = currentStudentProfile.id;
 
     try {
-      const { count: totalLessons } = await window.lmsSupabase
-        .from("lessons")
-        .select("id", { count: "exact", head: true })
-        .eq("course_id", courseId);
-
-      await window.lmsSupabase.from("lesson_progress").upsert({
-        student_id: userId,
-        lesson_id: lessonId,
-        course_id: courseId,
-        completed_at: new Date().toISOString()
-      }, { onConflict: "student_id,lesson_id" }).catch(() => {});
-
-      const { count: completedLessons } = await window.lmsSupabase
-        .from("lesson_progress")
-        .select("id", { count: "exact", head: true })
-        .eq("student_id", userId)
-        .eq("course_id", courseId);
-
-      const pct = totalLessons > 0
-        ? Math.round((completedLessons / totalLessons) * 100)
-        : 0;
-
-      // Ambil enrollment_id dulu
-      const { data: enrollment } = await window.lmsSupabase
-        .from("enrollments")
+      const completedAt = new Date().toISOString();
+      const { data: existingLessonProgress, error: existingLessonErr } = await window.lmsSupabase
+        .from("progress")
         .select("id")
         .eq("student_id", userId)
-        .eq("course_id", courseId)
-        .maybeSingle();
+        .eq("lesson_id", lessonId)
+        .limit(1);
+      if (existingLessonErr) throw existingLessonErr;
 
-      await window.lmsSupabase.from("course_progress").upsert({
-        student_id: userId,
-        course_id: courseId,
-        enrollment_id: enrollment?.id || null,
-        completion_percent: pct,
-        last_accessed_at: new Date().toISOString(),
-        last_lesson_id: lessonId
-      }, { onConflict: "student_id,course_id" });
+      if (existingLessonProgress?.[0]?.id) {
+        const { error: lessonUpdateErr } = await window.lmsSupabase
+          .from("progress")
+          .update({ completed: true, completed_at: completedAt })
+          .eq("id", existingLessonProgress[0].id);
+        if (lessonUpdateErr) throw lessonUpdateErr;
+      } else {
+        const { error: lessonInsertErr } = await window.lmsSupabase
+          .from("progress")
+          .insert({
+            student_id: userId,
+            lesson_id: lessonId,
+            completed: true,
+            completed_at: completedAt
+          });
+        if (lessonInsertErr) throw lessonInsertErr;
+      }
+
+      const { error: progressRpcErr } = await window.lmsSupabase.rpc("recalculate_course_progress", {
+        p_student_id: userId,
+        p_course_id: courseId,
+        p_last_lesson_id: lessonId
+      });
+      if (progressRpcErr) throw progressRpcErr;
 
       // Ambil judul lesson untuk activity log
       const { data: lessonData } = await window.lmsSupabase
@@ -1059,15 +1054,6 @@
           lesson_title: lessonData?.title || "Lesson"
         }
       }).catch(() => {});
-
-      if (pct >= 100) {
-        await window.lmsSupabase.from("certificates").upsert({
-          student_id: userId,
-          course_id: courseId,
-          issued_at: new Date().toISOString(),
-          certificate_no: "CERT-" + userId.substring(0, 6).toUpperCase() + "-" + courseId.substring(0, 6).toUpperCase()
-        }, { onConflict: "student_id,course_id" }).catch(() => {});
-      }
 
       await loadDashboardStats(userId);
       await loadContinueLearning(userId);

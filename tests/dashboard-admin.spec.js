@@ -120,12 +120,13 @@ async function installSupabaseStub(page, role, options = {}) {
   const assignmentSubmissions = [
     {
       id: "sub-1",
+      assignment_id: "assign-1",
       student_id: "e2e-student-1",
       status: "submitted",
       submitted_at: "2026-03-10T10:00:00.000Z",
       grade: null,
       profiles: { id: "e2e-student-1", full_name: "Alpha Student" },
-      assignments: { title: "Module 1 Quiz", trainer_id: kpiRow.trainer_id, pass_mark: 70 },
+      assignments: { title: "Module 1 Quiz", trainer_id: kpiRow.trainer_id, course_id: "course-1", pass_mark: 70 },
       notes: "Need detailed feedback",
       file_urls: ["https://example.com/assignment.pdf"]
     },
@@ -152,6 +153,9 @@ async function installSupabaseStub(page, role, options = {}) {
       file_urls: []
     }
   ];
+  if (Array.isArray(options.extraAssignmentSubmissions)) {
+    assignmentSubmissions.push(...options.extraAssignmentSubmissions);
+  }
 
   const defaultMessages = [
     {
@@ -228,6 +232,20 @@ async function installSupabaseStub(page, role, options = {}) {
   }
   const certificates = [{ id: "cert-1" }, { id: "cert-2" }];
   const lessons = options.lessons ? options.lessons.map((lesson) => ({ ...lesson })) : [];
+  const assignments = options.assignments || [
+    { id: "assign-1", course_id: "course-1", trainer_id: "e2e-trainer", title: "Module 1 Quiz", pass_mark: 70 }
+  ];
+  const courseProgress = options.courseProgress || [
+    {
+      id: "course-progress-1",
+      enrollment_id: "enroll-1",
+      student_id: "e2e-student-1",
+      course_id: "course-1",
+      completion_percent: 0,
+      lessons_completed: 0
+    }
+  ];
+  const progress = options.progress || [];
   const enrollments = [
     {
       id: "enroll-1",
@@ -325,7 +343,9 @@ async function installSupabaseStub(page, role, options = {}) {
     courses,
     lessons,
     enrollments,
-    assignments: options.assignments || [],
+    assignments,
+    course_progress: courseProgress,
+    progress,
     forum_posts: [],
     notifications: [],
     v_course_overview: options.courseOverview || []
@@ -340,6 +360,7 @@ async function installSupabaseStub(page, role, options = {}) {
       const storageStats = ${JSON.stringify(options.storageStats || null)};
       const uploadedFiles = [];
       const functionInvocations = [];
+      const rpcInvocations = [];
       const queryLog = [];
       const channelHandlers = [];
       const shouldFailOverviewTrainerId = ${JSON.stringify(Boolean(options.missingOverviewTrainerId))};
@@ -530,6 +551,109 @@ async function installSupabaseStub(page, role, options = {}) {
         return api;
       };
 
+      const recalculateCourseProgress = (params = {}) => {
+        const studentId = params.p_student_id;
+        const courseId = params.p_course_id;
+        const lastLessonId = params.p_last_lesson_id || null;
+        if (!studentId || !courseId) {
+          return { data: null, error: { message: "p_student_id and p_course_id are required" } };
+        }
+
+        const enrollment = (tableData.enrollments || []).find((row) =>
+          row.student_id === studentId && row.course_id === courseId
+        );
+        if (!enrollment) {
+          return { data: null, error: { message: "Enrollment not found for student/course" } };
+        }
+
+        const lessonIds = (tableData.lessons || [])
+          .filter((lesson) => lesson.course_id === courseId)
+          .map((lesson) => lesson.id)
+          .filter(Boolean);
+        const completedLessonIds = new Set(
+          (tableData.progress || [])
+            .filter((row) => row.student_id === studentId && row.completed === true && lessonIds.includes(row.lesson_id))
+            .map((row) => row.lesson_id)
+        );
+
+        const assignments = (tableData.assignments || []).filter((assignment) => assignment.course_id === courseId);
+        const assignmentIds = assignments.map((assignment) => assignment.id).filter(Boolean);
+        const passMarkByAssignment = new Map(assignments.map((assignment) => [assignment.id, Number(assignment.pass_mark || 70)]));
+        const passedAssignmentIds = new Set();
+        (tableData.assignment_submissions || []).forEach((submission) => {
+          const assignmentId = submission.assignment_id;
+          const grade = Number(submission.grade);
+          if (
+            assignmentIds.includes(assignmentId) &&
+            submission.student_id === studentId &&
+            submission.status === "graded" &&
+            Number.isFinite(grade) &&
+            grade >= (passMarkByAssignment.get(assignmentId) || 70)
+          ) {
+            passedAssignmentIds.add(assignmentId);
+          }
+        });
+
+        const totalUnits = lessonIds.length + assignmentIds.length;
+        const completionPercent = totalUnits > 0
+          ? Math.min(100, Math.round(((completedLessonIds.size + passedAssignmentIds.size) / totalUnits) * 100))
+          : 0;
+        const now = new Date().toISOString();
+        let courseProgress = (tableData.course_progress || []).find((row) =>
+          row.student_id === studentId && row.course_id === courseId
+        );
+        if (!courseProgress) {
+          courseProgress = {
+            id: "course-progress-e2e-" + Math.random().toString(36).slice(2, 8),
+            student_id: studentId,
+            course_id: courseId
+          };
+          tableData.course_progress = tableData.course_progress || [];
+          tableData.course_progress.push(courseProgress);
+        }
+
+        Object.assign(courseProgress, {
+          enrollment_id: enrollment.id || courseProgress.enrollment_id || null,
+          completion_percent: completionPercent,
+          lessons_completed: completedLessonIds.size,
+          last_accessed_at: now,
+          updated_at: now
+        });
+        if (lastLessonId) courseProgress.last_lesson_id = lastLessonId;
+
+        if (["active", "completed"].includes(enrollment.status || "active")) {
+          enrollment.status = completionPercent >= 100 ? "completed" : "active";
+          enrollment.completed_at = completionPercent >= 100 ? (enrollment.completed_at || now) : null;
+          enrollment.updated_at = now;
+        }
+
+        if (completionPercent >= 100) {
+          tableData.certificates = tableData.certificates || [];
+          if (!tableData.certificates.some((row) => row.student_id === studentId && row.course_id === courseId)) {
+            tableData.certificates.push({
+              id: "certificate-e2e-" + Math.random().toString(36).slice(2, 8),
+              student_id: studentId,
+              course_id: courseId,
+              issued_at: now
+            });
+          }
+        }
+
+        return {
+          data: {
+            student_id: studentId,
+            course_id: courseId,
+            completion_percent: completionPercent,
+            completed_lessons: completedLessonIds.size,
+            passed_assignments: passedAssignmentIds.size,
+            total_lessons: lessonIds.length,
+            total_assignments: assignmentIds.length,
+            total_units: totalUnits
+          },
+          error: null
+        };
+      };
+
       window.supabase = {
         createClient: () => ({
           auth: {
@@ -546,6 +670,13 @@ async function installSupabaseStub(page, role, options = {}) {
           from: (table) => {
             queryLog.push(table);
             return createQuery(table);
+          },
+          rpc: async (name, params = {}) => {
+            rpcInvocations.push({ name, params });
+            if (name === "recalculate_course_progress") {
+              return recalculateCourseProgress(params);
+            }
+            return { data: null, error: { message: "Unknown RPC: " + name } };
           },
           functions: {
             invoke: async (name, options = {}) => {
@@ -593,6 +724,7 @@ async function installSupabaseStub(page, role, options = {}) {
       window.__e2eGetTableData = () => tableData;
       window.__e2eGetUploadedFiles = () => uploadedFiles;
       window.__e2eGetFunctionInvocations = () => functionInvocations;
+      window.__e2eGetRpcInvocations = () => rpcInvocations;
       window.__e2eGetQueryLog = () => queryLog;
     })();
   `;
@@ -1043,7 +1175,18 @@ test("trainer can open grading submission and save grade", async ({ page }) => {
   await page.click("#saveGradeBtn");
 
   await expect(page.locator("#gradingMsg")).toContainText("Saved");
-  const notifications = await page.evaluate(() => window.__e2eGetTableData().notifications);
+  const state = await page.evaluate(() => {
+    const rows = window.__e2eGetTableData();
+    return {
+      notifications: rows.notifications,
+      courseProgress: rows.course_progress.find((row) =>
+        row.student_id === "e2e-student-1" && row.course_id === "course-1"
+      ),
+      enrollment: rows.enrollments.find((row) => row.id === "enroll-1"),
+      rpcInvocations: window.__e2eGetRpcInvocations()
+    };
+  });
+  const notifications = state.notifications;
   expect(notifications).toEqual(expect.arrayContaining([
     expect.objectContaining({
       user_id: "e2e-student-1",
@@ -1051,6 +1194,84 @@ test("trainer can open grading submission and save grade", async ({ page }) => {
       title: 'Your assignment "Module 1 Quiz" has been graded: 85% (PASS)',
       is_read: false
     })
+  ]));
+  expect(state.courseProgress).toEqual(expect.objectContaining({
+    completion_percent: 100,
+    lessons_completed: 0
+  }));
+  expect(state.enrollment).toEqual(expect.objectContaining({
+    status: "completed",
+    completed_at: expect.any(String)
+  }));
+  expect(state.rpcInvocations).toEqual(expect.arrayContaining([
+    {
+      name: "recalculate_course_progress",
+      params: {
+        p_student_id: "e2e-student-1",
+        p_course_id: "course-1",
+        p_last_lesson_id: null
+      }
+    }
+  ]));
+});
+
+test("trainer progress calculation counts duplicate passed submissions once", async ({ page }) => {
+  await installSupabaseStub(page, "trainer", {
+    lessons: [
+      { id: "lesson-1", course_id: "course-1", title: "Leadership Intro" },
+      { id: "lesson-2", course_id: "course-1", title: "Leadership Practice" }
+    ],
+    progress: [
+      { id: "progress-1", student_id: "e2e-student-1", course_id: "course-1", lesson_id: "lesson-1", completed: true }
+    ],
+    extraAssignmentSubmissions: [
+      {
+        id: "sub-duplicate-pass",
+        assignment_id: "assign-1",
+        student_id: "e2e-student-1",
+        status: "graded",
+        submitted_at: "2026-03-10T11:00:00.000Z",
+        grade: 92,
+        profiles: { id: "e2e-student-1", full_name: "Alpha Student" },
+        assignments: { title: "Module 1 Quiz", trainer_id: "e2e-trainer", course_id: "course-1", pass_mark: 70 },
+        notes: "",
+        file_urls: []
+      }
+    ]
+  });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='grading']").click();
+  await page.locator(".ad-submission-item", { hasText: "Module 1 Quiz" }).first().click();
+
+  await page.fill("#gradeScore", "85");
+  await page.fill("#gradeFeedback", "Good work.");
+  await page.click("#saveGradeBtn");
+  await expect(page.locator("#gradingMsg")).toContainText("Saved");
+
+  const progressResult = await page.evaluate(() => {
+    const rows = window.__e2eGetTableData();
+    return {
+      courseProgress: rows.course_progress.find((row) =>
+        row.student_id === "e2e-student-1" && row.course_id === "course-1"
+      ),
+      rpcInvocations: window.__e2eGetRpcInvocations()
+    };
+  });
+
+  expect(progressResult.courseProgress).toEqual(expect.objectContaining({
+    completion_percent: 67,
+    lessons_completed: 1
+  }));
+  expect(progressResult.rpcInvocations).toEqual(expect.arrayContaining([
+    {
+      name: "recalculate_course_progress",
+      params: {
+        p_student_id: "e2e-student-1",
+        p_course_id: "course-1",
+        p_last_lesson_id: null
+      }
+    }
   ]));
 });
 

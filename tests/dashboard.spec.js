@@ -8,11 +8,13 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
       const missingViews = ${JSON.stringify(missingViews)};
       let currentPassword = ${JSON.stringify(initialPassword)};
       const functionInvocations = [];
+      const rpcInvocations = [];
       const channelHandlers = [];
 
       window.__QA_TABLE_DATA__ = tableData;
       window.__QA_UPLOADS__ = [];
       window.__QA_FUNCTION_INVOCATIONS__ = functionInvocations;
+      window.__QA_RPC_INVOCATIONS__ = rpcInvocations;
       window.__QA_CHANNEL_HANDLERS__ = channelHandlers;
       window.__QA_TRIGGER_CHANNEL = async (channelName, tableName, eventName) => {
         const matches = channelHandlers.filter((entry) =>
@@ -231,6 +233,109 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
         return api;
       };
 
+      const recalculateCourseProgress = (params = {}) => {
+        const studentId = params.p_student_id;
+        const courseId = params.p_course_id;
+        const lastLessonId = params.p_last_lesson_id || null;
+        if (!studentId || !courseId) {
+          return { data: null, error: { message: "p_student_id and p_course_id are required" } };
+        }
+
+        const enrollment = (tableData.enrollments || []).find((row) =>
+          row.student_id === studentId && row.course_id === courseId
+        );
+        if (!enrollment) {
+          return { data: null, error: { message: "Enrollment not found for student/course" } };
+        }
+
+        const lessonIds = (tableData.lessons || [])
+          .filter((lesson) => lesson.course_id === courseId)
+          .map((lesson) => lesson.id)
+          .filter(Boolean);
+        const completedLessonIds = new Set(
+          (tableData.progress || [])
+            .filter((row) => row.student_id === studentId && row.completed === true && lessonIds.includes(row.lesson_id))
+            .map((row) => row.lesson_id)
+        );
+
+        const assignments = (tableData.assignments || []).filter((assignment) => assignment.course_id === courseId);
+        const assignmentIds = assignments.map((assignment) => assignment.id).filter(Boolean);
+        const passMarkByAssignment = new Map(assignments.map((assignment) => [assignment.id, Number(assignment.pass_mark || 70)]));
+        const passedAssignmentIds = new Set();
+        (tableData.assignment_submissions || []).forEach((submission) => {
+          const assignmentId = submission.assignment_id;
+          const grade = Number(submission.grade);
+          if (
+            assignmentIds.includes(assignmentId) &&
+            submission.student_id === studentId &&
+            submission.status === "graded" &&
+            Number.isFinite(grade) &&
+            grade >= (passMarkByAssignment.get(assignmentId) || 70)
+          ) {
+            passedAssignmentIds.add(assignmentId);
+          }
+        });
+
+        const totalUnits = lessonIds.length + assignmentIds.length;
+        const completionPercent = totalUnits > 0
+          ? Math.min(100, Math.round(((completedLessonIds.size + passedAssignmentIds.size) / totalUnits) * 100))
+          : 0;
+        const now = new Date().toISOString();
+        let courseProgress = (tableData.course_progress || []).find((row) =>
+          row.student_id === studentId && row.course_id === courseId
+        );
+        if (!courseProgress) {
+          courseProgress = {
+            id: "course-progress-qa-" + Math.random().toString(36).slice(2, 10),
+            student_id: studentId,
+            course_id: courseId
+          };
+          tableData.course_progress = tableData.course_progress || [];
+          tableData.course_progress.push(courseProgress);
+        }
+
+        Object.assign(courseProgress, {
+          enrollment_id: enrollment.id || courseProgress.enrollment_id || null,
+          completion_percent: completionPercent,
+          lessons_completed: completedLessonIds.size,
+          last_accessed_at: now,
+          updated_at: now
+        });
+        if (lastLessonId) courseProgress.last_lesson_id = lastLessonId;
+
+        if (["active", "completed"].includes(enrollment.status || "active")) {
+          enrollment.status = completionPercent >= 100 ? "completed" : "active";
+          enrollment.completed_at = completionPercent >= 100 ? (enrollment.completed_at || now) : null;
+          enrollment.updated_at = now;
+        }
+
+        if (completionPercent >= 100) {
+          tableData.certificates = tableData.certificates || [];
+          if (!tableData.certificates.some((row) => row.student_id === studentId && row.course_id === courseId)) {
+            tableData.certificates.push({
+              id: "certificate-qa-" + Math.random().toString(36).slice(2, 10),
+              student_id: studentId,
+              course_id: courseId,
+              issued_at: now
+            });
+          }
+        }
+
+        return {
+          data: {
+            student_id: studentId,
+            course_id: courseId,
+            completion_percent: completionPercent,
+            completed_lessons: completedLessonIds.size,
+            passed_assignments: passedAssignmentIds.size,
+            total_lessons: lessonIds.length,
+            total_assignments: assignmentIds.length,
+            total_units: totalUnits
+          },
+          error: null
+        };
+      };
+
       window.supabase = {
         createClient: () => ({
           auth: {
@@ -253,6 +358,13 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
             }
           },
           from: (table) => createQuery(table),
+          rpc: async (name, params = {}) => {
+            rpcInvocations.push({ name, params });
+            if (name === "recalculate_course_progress") {
+              return recalculateCourseProgress(params);
+            }
+            return { data: null, error: { message: "Unknown RPC: " + name } };
+          },
           functions: {
             invoke: async (name, options = {}) => {
               functionInvocations.push({ name, body: options.body || null });
@@ -353,6 +465,7 @@ function makeStudentFixture() {
       ],
       course_progress: [
         {
+          id: "course-progress-1",
           student_id: studentId,
           course_id: "course-1",
           completion_percent: 65,
@@ -362,6 +475,7 @@ function makeStudentFixture() {
           enrollments: { status: "active" }
         },
         {
+          id: "course-progress-2",
           student_id: studentId,
           course_id: "course-2",
           completion_percent: 100
@@ -396,12 +510,12 @@ function makeStudentFixture() {
           courses: { id: "course-2", title: "First Aid Essentials", enrollment_type: "paid" }
         }
       ],
-      lesson_progress: [
+      progress: [
         {
-          id: "lesson-progress-1",
+          id: "progress-1",
           student_id: studentId,
           lesson_id: "lesson-1",
-          course_id: "course-1",
+          completed: true,
           completed_at: "2099-01-01T08:00:00.000Z"
         }
       ],
@@ -515,6 +629,7 @@ function makeStudentFixture() {
         {
           id: "cert-1",
           student_id: studentId,
+          course_id: "course-2",
           certificate_no: "CERT-001",
           issued_at: "2099-01-05T09:00:00.000Z",
           file_url: "https://example.com/cert.pdf",
@@ -713,7 +828,7 @@ test.describe("Student Dashboard", () => {
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);
 
-    await page.goto("/pages/dashboard-student.html");
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
     await page.locator(".sd-nav__item[data-section='profile']").click();
     await page.click("#changePasswordToggle");
 
@@ -806,6 +921,28 @@ test.describe("Student Dashboard", () => {
 
   test("updates course progress when the lesson viewer marks a lesson complete", async ({ page }) => {
     const fixture = makeStudentFixture();
+    fixture.tableData.assignment_submissions.push(
+      {
+        id: "sub-duplicate-pass-1",
+        assignment_id: "assign-1",
+        student_id: "student-1",
+        status: "graded",
+        submitted_at: "2026-03-10T09:00:00.000Z",
+        grade: 85,
+        notes: "",
+        file_urls: []
+      },
+      {
+        id: "sub-duplicate-pass-2",
+        assignment_id: "assign-1",
+        student_id: "student-1",
+        status: "graded",
+        submitted_at: "2026-03-10T10:00:00.000Z",
+        grade: 90,
+        notes: "",
+        file_urls: []
+      }
+    );
     await installSupabaseStub(page, fixture);
 
     await page.goto("/pages/dashboard-student.html");
@@ -818,12 +955,13 @@ test.describe("Student Dashboard", () => {
     const progressState = await page.evaluate(() => {
       const rows = window.__QA_TABLE_DATA__;
       return {
-        lessonProgress: rows.lesson_progress.find((row) =>
+        lessonProgress: rows.progress.find((row) =>
           row.student_id === "student-1" && row.lesson_id === "lesson-2"
         ),
         courseProgress: rows.course_progress.find((row) =>
           row.student_id === "student-1" && row.course_id === "course-1"
         ),
+        rpcInvocations: window.__QA_RPC_INVOCATIONS__,
         activityLog: rows.activity_logs.find((row) =>
           row.action === "lesson_completed" && row.entity_id === "lesson-2"
         ),
@@ -836,12 +974,22 @@ test.describe("Student Dashboard", () => {
     expect(progressState.lessonProgress).toEqual(expect.objectContaining({
       student_id: "student-1",
       lesson_id: "lesson-2",
-      course_id: "course-1"
+      completed: true
     }));
     expect(progressState.courseProgress).toEqual(expect.objectContaining({
-      completion_percent: 100,
+      completion_percent: 75,
       last_lesson_id: "lesson-2"
     }));
+    expect(progressState.rpcInvocations).toEqual(expect.arrayContaining([
+      {
+        name: "recalculate_course_progress",
+        params: {
+          p_student_id: "student-1",
+          p_course_id: "course-1",
+          p_last_lesson_id: "lesson-2"
+        }
+      }
+    ]));
     expect(progressState.activityLog).toEqual(expect.objectContaining({
       user_id: "student-1",
       action: "lesson_completed",
@@ -849,9 +997,7 @@ test.describe("Student Dashboard", () => {
       entity_id: "lesson-2",
       metadata: expect.objectContaining({ course_id: "course-1", lesson_id: "lesson-2" })
     }));
-    expect(progressState.certificate).toEqual(expect.objectContaining({
-      certificate_no: "CERT-STUDEN-COURSE"
-    }));
+    expect(progressState.certificate).toBeUndefined();
   });
 
   test("creates course progress when lesson completion has no existing row", async ({ page }) => {
@@ -873,20 +1019,33 @@ test.describe("Student Dashboard", () => {
       await window.lmsMarkLessonCompleted("lesson-4", "course-3");
     });
 
-    const courseProgress = await page.evaluate(() => {
+    const progressResult = await page.evaluate(() => {
       const rows = window.__QA_TABLE_DATA__;
-      return rows.course_progress.find((row) =>
-        row.student_id === "student-1" && row.course_id === "course-3"
-      );
+      return {
+        courseProgress: rows.course_progress.find((row) =>
+          row.student_id === "student-1" && row.course_id === "course-3"
+        ),
+        rpcInvocations: window.__QA_RPC_INVOCATIONS__
+      };
     });
 
-    expect(courseProgress).toEqual(expect.objectContaining({
+    expect(progressResult.courseProgress).toEqual(expect.objectContaining({
       student_id: "student-1",
       course_id: "course-3",
       enrollment_id: "enroll-3",
-      completion_percent: 100,
+      completion_percent: 50,
       last_lesson_id: "lesson-4"
     }));
+    expect(progressResult.rpcInvocations).toEqual(expect.arrayContaining([
+      {
+        name: "recalculate_course_progress",
+        params: {
+          p_student_id: "student-1",
+          p_course_id: "course-3",
+          p_last_lesson_id: "lesson-4"
+        }
+      }
+    ]));
   });
 
   test("loads assignments from enrolled courses and maps submission status", async ({ page }) => {
