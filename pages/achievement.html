@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redline Academy — UCS|Mahir Pilot Program 2024–2025</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #E8231A;
+    --deep-red: #9B0000;
+    --black: #0A0A0A;
+    --off-black: #141414;
+    --card: #1A1A1A;
+    --card2: #222222;
+    --line: #2E2E2E;
+    --white: #F2F0ED;
+    --muted: #888;
+    --gold: #C9A84C;
+    --green: #3CB97A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--black);
+    color: var(--white);
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 60px 60px 80px;
+    overflow: hidden;
+    background: var(--black);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 60% at 80% 30%, rgba(232,35,26,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 20% 80%, rgba(155,0,0,0.12) 0%, transparent 70%);
+  }
+
+  .hero-bg-text {
+    position: absolute;
+    top: -20px;
+    left: -10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(120px, 20vw, 260px);
+    color: rgba(232,35,26,0.05);
+    line-height: 1;
+    user-select: none;
+    white-space: nowrap;
+    letter-spacing: -2px;
+  }
+
+  .hero-eyebrow {
+    position: relative;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--red);
+  }
+
+  .hero-title {
+    position: relative;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 10vw, 130px);
+    line-height: 0.9;
+    letter-spacing: 2px;
+    color: var(--white);
+  }
+
+  .hero-title span {
+    color: var(--red);
+  }
+
+  .hero-sub {
+    position: relative;
+    margin-top: 28px;
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 540px;
+    line-height: 1.65;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    position: relative;
+    margin-top: 48px;
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+  }
+
+  .hero-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .hero-stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    line-height: 1;
+    color: var(--white);
+  }
+
+  .hero-stat-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--red);
+  }
+
+  .divider-line {
+    width: 100%;
+    height: 1px;
+    background: var(--line);
+    margin: 0;
+  }
+
+  /* ── SECTION ── */
+  section {
+    padding: 80px 60px;
+  }
+
+  @media(max-width:700px) {
+    .hero { padding: 40px 24px 60px; }
+    section { padding: 60px 24px; }
+    .hero-meta { gap: 32px; }
+  }
+
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 28px;
+    height: 1px;
+    background: var(--red);
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 5vw, 64px);
+    line-height: 1;
+    color: var(--white);
+    margin-bottom: 48px;
+    letter-spacing: 1px;
+  }
+
+  /* ── ABOUT CARDS ── */
+  .about-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-bottom: 64px;
+  }
+  @media(max-width:800px){ .about-grid { grid-template-columns: 1fr; } }
+
+  .about-card {
+    background: var(--card);
+    padding: 36px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .about-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: var(--red);
+    transition: width 0.4s ease;
+  }
+  .about-card:hover::after { width: 100%; }
+
+  .about-icon {
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+  .about-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    color: var(--white);
+  }
+  .about-card p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.65;
+    font-weight: 300;
+  }
+
+  /* ── TIMELINE ── */
+  .timeline-section { background: var(--off-black); }
+
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--red), var(--deep-red), transparent);
+  }
+
+  .tl-item {
+    position: relative;
+    margin-bottom: 0;
+    padding: 28px 0 28px 40px;
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 140px 1fr auto;
+    gap: 24px;
+    align-items: start;
+    transition: background 0.25s;
+  }
+  .tl-item:hover { background: rgba(232,35,26,0.04); }
+
+  .tl-dot {
+    position: absolute;
+    left: -7px;
+    top: 36px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--red);
+    border: 2px solid var(--black);
+    box-shadow: 0 0 0 4px rgba(232,35,26,0.15);
+  }
+
+  .tl-date {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    color: var(--red);
+    letter-spacing: 1px;
+    padding-top: 2px;
+  }
+
+  .tl-content h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 5px;
+  }
+  .tl-content p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.55;
+    font-weight: 300;
+  }
+
+  .tl-badge {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+    white-space: nowrap;
+    align-self: start;
+    margin-top: 4px;
+  }
+  .badge-done { background: rgba(60,185,122,0.15); color: var(--green); }
+  .badge-progress { background: rgba(201,168,76,0.15); color: var(--gold); }
+  .badge-backlog { background: rgba(136,136,136,0.12); color: var(--muted); }
+  .badge-todo { background: rgba(232,35,26,0.12); color: var(--red); }
+
+  @media(max-width:700px){
+    .tl-item { grid-template-columns: 1fr; gap: 6px; }
+  }
+
+  /* ── UNITS ── */
+  .units-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+  @media(max-width:800px){ .units-grid { grid-template-columns: 1fr; } }
+
+  .unit-card {
+    background: var(--card);
+    padding: 40px 32px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .unit-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 0;
+    background: var(--red);
+    transition: height 0.4s ease;
+  }
+  .unit-card:hover::before { height: 100%; }
+
+  .unit-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    color: rgba(232,35,26,0.12);
+    line-height: 1;
+    position: absolute;
+    bottom: 16px;
+    right: 20px;
+  }
+  .unit-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    color: var(--white);
+  }
+  .unit-card p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* ── PSYCHOMETRIC ── */
+  .psych-section { background: var(--off-black); }
+
+  .psych-intro {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 64px;
+    align-items: start;
+  }
+  @media(max-width:800px){ .psych-intro { grid-template-columns: 1fr; } }
+
+  .psych-intro p {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.75;
+    font-weight: 300;
+  }
+
+  .psych-summary-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+
+  .ps-stat {
+    background: var(--card2);
+    padding: 28px 24px;
+    text-align: center;
+  }
+  .ps-stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    color: var(--red);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .ps-stat-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Candidate Cards */
+  .candidates-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    margin-bottom: 48px;
+  }
+  @media(max-width:800px){ .candidates-grid { grid-template-columns: 1fr; } }
+
+  .candidate-card {
+    background: var(--card);
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s;
+  }
+  .candidate-card:hover { transform: translateY(-2px); }
+
+  .candidate-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    gap: 12px;
+  }
+  .candidate-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+    color: var(--white);
+    line-height: 1.1;
+  }
+  .candidate-role {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .qual-badge {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .qual-above { background: rgba(60,185,122,0.15); color: var(--green); border: 1px solid rgba(60,185,122,0.3); }
+  .qual-avg { background: rgba(201,168,76,0.15); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
+  .qual-below { background: rgba(232,35,26,0.12); color: #FF6B6B; border: 1px solid rgba(232,35,26,0.3); }
+
+  /* Score bars */
+  .score-bars { display: flex; flex-direction: column; gap: 10px; }
+
+  .score-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 36px;
+    gap: 10px;
+    align-items: center;
+  }
+  .score-label {
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .score-bar-track {
+    height: 5px;
+    background: var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s ease;
+    background: var(--red);
+  }
+  .score-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    color: var(--white);
+    text-align: right;
+  }
+
+  .final-score {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .final-score-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .final-score-val {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .final-score-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    line-height: 1;
+    color: var(--white);
+  }
+  .final-grade {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    padding: 4px 12px;
+    border-radius: 2px;
+  }
+  .grade-b { background: rgba(201,168,76,0.2); color: var(--gold); }
+  .grade-d { background: rgba(232,35,26,0.15); color: #FF6B6B; }
+
+  .candidate-impression {
+    margin-top: 18px;
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.02);
+    border-left: 2px solid var(--red);
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    font-style: italic;
+    font-weight: 300;
+  }
+
+  /* Radar / Comparison chart */
+  .psych-chart {
+    background: var(--card);
+    padding: 40px;
+    margin-top: 2px;
+  }
+  .psych-chart h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 1px;
+    margin-bottom: 32px;
+  }
+
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .comp-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+    font-weight: 400;
+  }
+  .comp-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+  }
+  .comp-table tr:hover td { background: rgba(232,35,26,0.04); }
+  .td-name { color: var(--white); font-weight: 600; }
+  .td-iq { font-family: 'Bebas Neue', sans-serif; font-size: 20px; }
+  .mini-bar { display: flex; align-items: center; gap: 8px; }
+  .mini-bar-track { flex: 1; height: 4px; background: var(--line); border-radius: 2px; }
+  .mini-bar-fill { height: 4px; border-radius: 2px; background: var(--red); }
+  .mini-val { font-size: 13px; color: var(--white); min-width: 24px; text-align: right; }
+
+  /* ── CAPABILITIES ── */
+  .cap-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+  }
+  @media(max-width:900px){ .cap-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media(max-width:500px){ .cap-grid { grid-template-columns: 1fr; } }
+
+  .cap-card {
+    background: var(--card);
+    padding: 36px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cap-card::after {
+    content: attr(data-num);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 80px;
+    color: rgba(232,35,26,0.06);
+    position: absolute;
+    bottom: -10px;
+    right: 10px;
+    line-height: 1;
+  }
+
+  .cap-icon { font-size: 28px; margin-bottom: 14px; }
+  .cap-card h4 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    color: var(--white);
+  }
+  .cap-card p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--off-black);
+    border-top: 1px solid var(--line);
+    padding: 48px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: var(--white);
+  }
+  .footer-logo span { color: var(--red); }
+
+  .footer-right {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.7;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero > * {
+    animation: fadeUp 0.8s ease both;
+  }
+  .hero-eyebrow { animation-delay: 0.1s; }
+  .hero-title { animation-delay: 0.2s; }
+  .hero-sub { animation-delay: 0.3s; }
+  .hero-meta { animation-delay: 0.4s; }
+
+  /* scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* nav strip */
+  .nav-strip {
+    background: var(--off-black);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-strip a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 14px 22px;
+    transition: color 0.2s, background 0.2s;
+    border-left: 1px solid var(--line);
+  }
+  .nav-strip a:hover { color: var(--white); background: rgba(232,35,26,0.07); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav-strip">
+  <a href="#overview">Overview</a>
+  <a href="#timeline">Timeline</a>
+  <a href="#units">Units</a>
+  <a href="#psychometric">Psychometric</a>
+  <a href="#capability">Capability</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="overview">
+  <div class="hero-bg-text">REDLINE</div>
+  <div class="hero-eyebrow">Pilot Program Achievement Report · 2024–2025</div>
+  <h1 class="hero-title">
+    UCS <span>|</span> MAHIR<br>REDLINE<br><span>ACADEMY</span>
+  </h1>
+  <p class="hero-sub">
+    A first-of-its-kind online caregiving micro-credentials program delivered in Ambon, Maluku, Indonesia — 
+    demonstrating full capacity for online learning delivery, psychometric assessment, and skills-set certification at scale.
+  </p>
+  <div class="hero-meta">
+    <div class="hero-stat">
+      <div class="hero-stat-num">6</div>
+      <div class="hero-stat-label">Pilot Candidates</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">3</div>
+      <div class="hero-stat-label">Competency Units</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">14+</div>
+      <div class="hero-stat-label">Key Milestones</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">2024</div>
+      <div class="hero-stat-label">Launch Year</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- ABOUT -->
+<section>
+  <div class="section-label">Who We Are</div>
+  <div class="section-title">ABOUT THE PROGRAM</div>
+  <div class="about-grid">
+    <div class="about-card reveal">
+      <div class="about-icon">🎯</div>
+      <h3>The Mission</h3>
+      <p>UCS | Mahir is a joint initiative to deliver industry-recognised caregiving micro-credentials to communities in Eastern Indonesia — starting with Ambon and expanding across Maluku province.</p>
+    </div>
+    <div class="about-card reveal">
+      <div class="about-icon">🏥</div>
+      <h3>The Focus</h3>
+      <p>Care for the elderly and people with disabilities. Graduates are equipped for roles in aged care homes, hospitals, clinics, community outreach, and in-home service environments.</p>
+    </div>
+    <div class="about-card reveal">
+      <div class="about-icon">📡</div>
+      <h3>The Method</h3>
+      <p>Fully online LMS-based delivery with Zoom live sessions, psychometric screening, structured assessment tasks, and community volunteer placement — accessible from any island in Maluku.</p>
+    </div>
+  </div>
+  <div class="about-grid">
+    <div class="about-card reveal">
+      <div class="about-icon">📺</div>
+      <h3>Media Presence</h3>
+      <p>Featured on TVRI Maluku in a live broadcast interview — validating the program's credibility and public-facing reach across the province.</p>
+    </div>
+    <div class="about-card reveal">
+      <div class="about-icon">🏫</div>
+      <h3>School Partnerships</h3>
+      <p>Engaged SMK 11 (Central Maluku / Seram Island) and SMK 6 Ambon, with formal requests to deliver our Short & Full Course in-school programs to vocational students.</p>
+    </div>
+    <div class="about-card reveal">
+      <div class="about-icon">🌏</div>
+      <h3>Regional Expansion</h3>
+      <p>Market socialisation conducted across Sparua Island, Seram Island (West Seram), and Buru Island — with targeted outreach to nursing homes and community health centres.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- TIMELINE -->
+<section class="timeline-section" id="timeline">
+  <div class="section-label">Program Journey</div>
+  <div class="section-title">ACTIVITY TIMELINE</div>
+
+  <div class="timeline">
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-date">MAY 2024</div>
+      <div class="tl-content">
+        <h4>Pilot Program Planning</h4>
+        <p>UCS/Mahir Management convene to define pilot scope, program structure, and short/full course differentiation strategy. Stakeholder alignment with Ambon-based partner Janes.</p>
+      </div>
+      <span class="tl-badge badge-done">Done</span>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-date">18 MAY 2024</div>
+      <div class="tl-content">
+        <h4>Psychometric Assessment — Cohort 1</h4>
+        <p>Online Zoom psychometric testing facilitated by assessor Rita. Six candidates screened across intelligence, personality, emotional competency, and vocational aptitude domains.</p>
+      </div>
+      <span class="tl-badge badge-done">Done</span>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-date">4–7 JUN 2024</div>
+      <div class="tl-content">
+        <h4>Pilot Program Launch (Cohort 1)</h4>
+        <p>Program delivered by Rita &amp; Stefi. Core units: Communication, Empowerment, and Infection Control. Initial delivery delayed and rescheduled. Fully delivered online.</p>
+      </div>
+      <span class="tl-badge badge-done">Done</span>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-date">4 JUN 2024</div>
+      <div class="tl-content">
+        <h4>TVRI Maluku Live Interview</h4>
+        <p>Janes (Ambon) participated in a live broadcast interview on TVRI Maluku, raising public awareness and establishing institutional credibility for the UCS | Mahir program.</p>
+      </div>
+      <span class="tl-badge badge-done">Done</span>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-date">9 JUN 2024</div>
+      <div class="tl-content">
+        <h4>Late Psychometric Registrations</h4>
+        <p>Additional candidates Ratih, Austy, and Putri complete late psychometric assessments via Zoom, ensuring all enrolled students are properly screened before advancing.</p>
+      </div>
+      <span class="tl-badge badge-done">Done</span>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-date">14 JUN 2024</div>
+      <div class="tl-content">
+        <h4>LMS Setup &amp; Online Learning Platform</h4>
+        <p>Team evaluates LMS platforms (Udemy, Coursera model). Online data entry, course structure, testing workflows, and content release sequencing established for remote delivery.</p>
+      </div>
+      <span class="tl-badge badge-todo">In Progress</span>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-date">14 JUN 2024</div>
+      <div class="tl-content">
+        <h4>SMK 11 Seram Island Visit</h4>
+        <p>Janes visits Central Maluku vocational school (SMK 11) to present the program and recruit students for the second pilot batch. Strong interest expressed from school leadership.</p>
+      </div>
+      <span class="tl-badge badge-progress">In Progress</span>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-date">15 JUN 2024</div>
+      <div class="tl-content">
+        <h4>SMK 6 Meeting — In-House Program Request</h4>
+        <p>SMK 6 Ambon formally requests UCS | Mahir to deliver its Short/Full course in-house for their students — marking a significant institutional partnership milestone.</p>
+      </div>
+      <span class="tl-badge badge-progress">Follow Up</span>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-date">19 JUN 2024</div>
+      <div class="tl-content">
+        <h4>SMK Short &amp; Full Course Invitation</h4>
+        <p>UCS | Mahir formally invited by SMK to present and potentially run accredited programs within the school curriculum — validating external stakeholder confidence.</p>
+      </div>
+      <span class="tl-badge badge-done">Done</span>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-date">JUL 2024</div>
+      <div class="tl-content">
+        <h4>Assessment Review &amp; Community Outreach Planning</h4>
+        <p>Assessment distributed to all candidates. Community outreach plan drafted for Panti Jompo Inakaka (nursing home). Volunteer activity framework developed for elderly community engagement.</p>
+      </div>
+      <span class="tl-badge badge-todo">Planned</span>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-date">JUL 2024</div>
+      <div class="tl-content">
+        <h4>Western Seram Socialisation</h4>
+        <p>Field visit to West Seram identifies new market segments. Community health facilities, schools, and professional networks targeted for program expansion beyond Ambon city.</p>
+      </div>
+      <span class="tl-badge badge-done">Done</span>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-date">29 JUL – 5 AUG 2024</div>
+      <div class="tl-content">
+        <h4>Social Media Marketing Push</h4>
+        <p>Team activates Instagram, Facebook, and Twitter/X channels. English-captioned video content and talent features produced to build brand recognition. Website SEO optimisation planned.</p>
+      </div>
+      <span class="tl-badge badge-done">Done</span>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-date">AUG 2024</div>
+      <div class="tl-content">
+        <h4>MoU Development — Health Facilities</h4>
+        <p>Draft MoUs prepared for placement partnerships with clinics, hospitals, nursing homes (Panti Jompo), and government-linked facilities to support assessment hour requirements.</p>
+      </div>
+      <span class="tl-badge badge-backlog">Backlog</span>
+    </div>
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-date">OCT–NOV 2024</div>
+      <div class="tl-content">
+        <h4>Ambon Government Recognition Program</h4>
+        <p>Approach to the Ambon Mayor's office planned following installation of the new mayor — targeting formal government endorsement to legitimise credential recognition across Maluku.</p>
+      </div>
+      <span class="tl-badge badge-backlog">Backlog</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- UNITS -->
+<section id="units">
+  <div class="section-label">Curriculum</div>
+  <div class="section-title">PILOT COMPETENCY UNITS</div>
+
+  <div class="units-grid">
+    <div class="unit-card reveal">
+      <div class="unit-num">01</div>
+      <h3>Communication</h3>
+      <p>Effective verbal and non-verbal communication skills for caregiving contexts — building trust, delivering clear instructions, and documenting care outcomes. Delivered online with supporting video content and practice scenarios.</p>
+    </div>
+    <div class="unit-card reveal">
+      <div class="unit-num">02</div>
+      <h3>Empowerment</h3>
+      <p>Supporting client autonomy, dignity, and independence. Participants learn person-centred care principles, advocacy skills, and how to promote active participation in daily care decisions for elderly and disabled clients.</p>
+    </div>
+    <div class="unit-card reveal">
+      <div class="unit-num">03</div>
+      <h3>Hygiene &amp; Infection Control</h3>
+      <p>Comprehensive infection prevention and hygiene management protocols — including respiratory hygiene, personal care standards, and evidence-based infection control applicable to community and residential care settings.</p>
+    </div>
+  </div>
+
+  <div style="margin-top: 40px; background: var(--card); padding: 36px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;" class="reveal">
+    <div>
+      <div class="section-label">Delivery Method</div>
+      <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 1px; margin-bottom: 16px;">ONLINE LEARNING INFRASTRUCTURE</h3>
+      <p style="font-size: 14px; color: var(--muted); line-height: 1.7; font-weight: 300;">
+        All units delivered fully online via LMS platform with video content hosted via YouTube. Live interaction conducted through Zoom, enabling real-time assessor-student engagement across remote islands. Canva-designed presentation decks support visual learning objectives.
+      </p>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px;">
+      <div style="background: var(--card2); padding: 20px; text-align: center;">
+        <div style="font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--red);">LMS</div>
+        <div style="font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-top: 4px;">Platform Delivery</div>
+      </div>
+      <div style="background: var(--card2); padding: 20px; text-align: center;">
+        <div style="font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--red);">ZOOM</div>
+        <div style="font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-top: 4px;">Live Assessment</div>
+      </div>
+      <div style="background: var(--card2); padding: 20px; text-align: center;">
+        <div style="font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--red);">6+</div>
+        <div style="font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-top: 4px;">Video Modules</div>
+      </div>
+      <div style="background: var(--card2); padding: 20px; text-align: center;">
+        <div style="font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--red);">100%</div>
+        <div style="font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-top: 4px;">Remote Delivery</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- PSYCHOMETRIC -->
+<section class="psych-section" id="psychometric">
+  <div class="section-label">Assessment Results</div>
+  <div class="section-title">PSYCHOMETRIC OUTCOMES</div>
+
+  <div class="psych-intro">
+    <p>All candidates completed a comprehensive psychometric evaluation on <strong style="color: var(--white);">18 May 2024</strong> via Zoom, administered by a certified assessor. The battery assessed intelligence quotient, vocational fit, personality dimensions, emotional competency, and cognitive thinking ability — providing a multi-dimensional profile of each participant's capacity and development needs.</p>
+    <div class="psych-summary-stats">
+      <div class="ps-stat">
+        <div class="ps-stat-num">6</div>
+        <div class="ps-stat-label">Candidates Assessed</div>
+      </div>
+      <div class="ps-stat">
+        <div class="ps-stat-num">100%</div>
+        <div class="ps-stat-label">Grade B or Above</div>
+      </div>
+      <div class="ps-stat">
+        <div class="ps-stat-num">118</div>
+        <div class="ps-stat-label">Highest IQ Score</div>
+      </div>
+      <div class="ps-stat">
+        <div class="ps-stat-num">Social</div>
+        <div class="ps-stat-label">Dominant Field Potential</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Candidate Cards -->
+  <div class="candidates-grid">
+
+    <!-- Candidate 1 -->
+    <div class="candidate-card reveal">
+      <div class="candidate-header">
+        <div>
+          <div class="candidate-name">Janes Rumalean</div>
+          <div class="candidate-role">Perawat (Nurse) · D3 Nursing · Age 32</div>
+        </div>
+        <span class="qual-badge qual-above">Above Average</span>
+      </div>
+      <div class="score-bars">
+        <div class="score-row">
+          <div class="score-label">Intelligence</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:94%;background:#3CB97A;"></div></div>
+          <div class="score-val">118</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Vocational Fit</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:60%;"></div></div>
+          <div class="score-val">60</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Interest</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:75%;"></div></div>
+          <div class="score-val">75</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Thinking Ability</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:60%;"></div></div>
+          <div class="score-val">60</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Work Capacity</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:98%;background:#3CB97A;"></div></div>
+          <div class="score-val">98</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Emotional</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:67%;"></div></div>
+          <div class="score-val">67</div>
+        </div>
+      </div>
+      <div class="final-score">
+        <div class="final-score-label">Final Score</div>
+        <div class="final-score-val">
+          <div class="final-score-num">70</div>
+          <div class="final-grade grade-b">B</div>
+        </div>
+      </div>
+      <div class="candidate-impression">Leadership potential noted. Works instructionally and scientifically. Suitable for regulation enforcement and advocacy. Thinking ability: adequate.</div>
+    </div>
+
+    <!-- Candidate 2 -->
+    <div class="candidate-card reveal">
+      <div class="candidate-header">
+        <div>
+          <div class="candidate-name">Yulandi Ferderika W.</div>
+          <div class="candidate-role">Perawat · S1 · Age 22</div>
+        </div>
+        <span class="qual-badge qual-below">Below Average</span>
+      </div>
+      <div class="score-bars">
+        <div class="score-row">
+          <div class="score-label">Intelligence</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:66%;background:#C9A84C;"></div></div>
+          <div class="score-val">83</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Vocational Fit</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:50%;"></div></div>
+          <div class="score-val">50</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Interest</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:65%;"></div></div>
+          <div class="score-val">65</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Thinking Ability</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:20%;background:#FF6B6B;"></div></div>
+          <div class="score-val">20</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Work Capacity</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:51%;"></div></div>
+          <div class="score-val">51</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Emotional</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:67%;"></div></div>
+          <div class="score-val">67</div>
+        </div>
+      </div>
+      <div class="final-score">
+        <div class="final-score-label">Final Score</div>
+        <div class="final-score-val">
+          <div class="final-score-num">51</div>
+          <div class="final-grade grade-b">B</div>
+        </div>
+      </div>
+      <div class="candidate-impression">Adaptive communicator with collaborative potential. Requires mentoring support. Suitable for direct service and operational coordination roles.</div>
+    </div>
+
+    <!-- Candidate 3 -->
+    <div class="candidate-card reveal">
+      <div class="candidate-header">
+        <div>
+          <div class="candidate-name">Bernardus A. Londar</div>
+          <div class="candidate-role">Perawat · SLTA English Education · Age 21</div>
+        </div>
+        <span class="qual-badge qual-below">Below Average</span>
+      </div>
+      <div class="score-bars">
+        <div class="score-row">
+          <div class="score-label">Intelligence</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:62%;background:#C9A84C;"></div></div>
+          <div class="score-val">78</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Vocational Fit</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:65%;"></div></div>
+          <div class="score-val">65</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Interest</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:66%;"></div></div>
+          <div class="score-val">66</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Thinking Ability</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:20%;background:#FF6B6B;"></div></div>
+          <div class="score-val">20</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Work Capacity</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:51%;"></div></div>
+          <div class="score-val">51</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Emotional</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:59%;"></div></div>
+          <div class="score-val">59</div>
+        </div>
+      </div>
+      <div class="final-score">
+        <div class="final-score-label">Final Score</div>
+        <div class="final-score-val">
+          <div class="final-score-num">52</div>
+          <div class="final-grade grade-b">B</div>
+        </div>
+      </div>
+      <div class="candidate-impression">Procedure-oriented team player. Self-directed and active in self-improvement. Needs mentoring support. Creative and communicative work style.</div>
+    </div>
+
+    <!-- Candidate 4 -->
+    <div class="candidate-card reveal">
+      <div class="candidate-header">
+        <div>
+          <div class="candidate-name">Evy Claudya L.</div>
+          <div class="candidate-role">Perawat · SLTA English Education · Age 25</div>
+        </div>
+        <span class="qual-badge qual-avg">Average</span>
+      </div>
+      <div class="score-bars">
+        <div class="score-row">
+          <div class="score-label">Intelligence</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:80%;background:#C9A84C;"></div></div>
+          <div class="score-val">100</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Vocational Fit</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:50%;"></div></div>
+          <div class="score-val">50</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Interest</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:60%;"></div></div>
+          <div class="score-val">60</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Thinking Ability</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:40%;background:#C9A84C;"></div></div>
+          <div class="score-val">40</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Work Capacity</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:47%;"></div></div>
+          <div class="score-val">47</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Emotional</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:62%;"></div></div>
+          <div class="score-val">62</div>
+        </div>
+      </div>
+      <div class="final-score">
+        <div class="final-score-label">Final Score</div>
+        <div class="final-score-val">
+          <div class="final-score-num">52</div>
+          <div class="final-grade grade-b">B</div>
+        </div>
+      </div>
+      <div class="candidate-impression">Detail-oriented with strong compliance focus. Excels in routine, procedural tasks. Recommended for group work to support new concept acquisition.</div>
+    </div>
+
+    <!-- Candidate 5 -->
+    <div class="candidate-card reveal">
+      <div class="candidate-header">
+        <div>
+          <div class="candidate-name">Zeyrindah B. Hehanussa</div>
+          <div class="candidate-role">Perawat · SLTA Economics · Age 17</div>
+        </div>
+        <span class="qual-badge qual-avg">Average</span>
+      </div>
+      <div class="score-bars">
+        <div class="score-row">
+          <div class="score-label">Intelligence</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:78%;background:#C9A84C;"></div></div>
+          <div class="score-val">98</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Vocational Fit</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:55%;"></div></div>
+          <div class="score-val">55</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Interest</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:60%;"></div></div>
+          <div class="score-val">60</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Thinking Ability</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:40%;background:#C9A84C;"></div></div>
+          <div class="score-val">40</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Work Capacity</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:51%;"></div></div>
+          <div class="score-val">51</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Emotional</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:82%;background:#3CB97A;"></div></div>
+          <div class="score-val">82</div>
+        </div>
+      </div>
+      <div class="final-score">
+        <div class="final-score-label">Final Score</div>
+        <div class="final-score-val">
+          <div class="final-score-num">57</div>
+          <div class="final-grade grade-b">B</div>
+        </div>
+      </div>
+      <div class="candidate-impression">Natural leader with high emotional intelligence. Proactive, socially influential. Strong field service and program development potential. Group work recommended.</div>
+    </div>
+
+    <!-- Candidate 6 -->
+    <div class="candidate-card reveal">
+      <div class="candidate-header">
+        <div>
+          <div class="candidate-name">Steven G. Lambiombir</div>
+          <div class="candidate-role">Perawat · SLTA · Age 19</div>
+        </div>
+        <span class="qual-badge qual-below">Below Average</span>
+      </div>
+      <div class="score-bars">
+        <div class="score-row">
+          <div class="score-label">Intelligence</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:64%;background:#C9A84C;"></div></div>
+          <div class="score-val">80</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Vocational Fit</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:50%;"></div></div>
+          <div class="score-val">50</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Interest</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:62%;"></div></div>
+          <div class="score-val">62</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Thinking Ability</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:20%;background:#FF6B6B;"></div></div>
+          <div class="score-val">20</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Work Capacity</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:86%;background:#3CB97A;"></div></div>
+          <div class="score-val">86</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Emotional</div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:56%;"></div></div>
+          <div class="score-val">56</div>
+        </div>
+      </div>
+      <div class="final-score">
+        <div class="final-score-label">Final Score</div>
+        <div class="final-score-val">
+          <div class="final-score-num">21</div>
+          <div class="final-grade grade-d">D</div>
+        </div>
+      </div>
+      <div class="candidate-impression">Consistent and methodical. Suited to structured, analytical, and routine service tasks. Requires learning mentorship and structured progression pathway.</div>
+    </div>
+  </div>
+
+  <!-- Comparison Table -->
+  <div class="psych-chart reveal">
+    <h3>COHORT COMPARISON — KEY METRICS</h3>
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Candidate</th>
+          <th>IQ</th>
+          <th>Qualification</th>
+          <th>Thinking Ability</th>
+          <th>Emotional Score</th>
+          <th>Work Capacity</th>
+          <th>Final Score</th>
+          <th>Grade</th>
+          <th>Field Potential</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-name">Janes Rumalean</td>
+          <td class="td-iq" style="color: var(--green);">118</td>
+          <td><span class="qual-badge qual-above" style="font-size:10px;">Above Avg</span></td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:60%;background:#C9A84C;"></div></div>
+              <div class="mini-val">60</div>
+            </div>
+          </td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:67%;background:#3CB97A;"></div></div>
+              <div class="mini-val">67</div>
+            </div>
+          </td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:98%;background:#3CB97A;"></div></div>
+              <div class="mini-val">98</div>
+            </div>
+          </td>
+          <td style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);">70</td>
+          <td><span class="final-grade grade-b" style="font-size:14px;">B</span></td>
+          <td style="color:var(--muted);font-size:12px;">Social / Scientific</td>
+        </tr>
+        <tr>
+          <td class="td-name">Yulandi F. Wurlianty</td>
+          <td class="td-iq" style="color: var(--gold);">83</td>
+          <td><span class="qual-badge qual-below" style="font-size:10px;">Below Avg</span></td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:20%;background:#FF6B6B;"></div></div>
+              <div class="mini-val">20</div>
+            </div>
+          </td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:67%;background:#3CB97A;"></div></div>
+              <div class="mini-val">67</div>
+            </div>
+          </td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:51%;"></div></div>
+              <div class="mini-val">51</div>
+            </div>
+          </td>
+          <td style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);">51</td>
+          <td><span class="final-grade grade-b" style="font-size:14px;">B</span></td>
+          <td style="color:var(--muted);font-size:12px;">Social / Entrepreneur</td>
+        </tr>
+        <tr>
+          <td class="td-name">Bernardus A. Londar</td>
+          <td class="td-iq" style="color: var(--gold);">78</td>
+          <td><span class="qual-badge qual-below" style="font-size:10px;">Below Avg</span></td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:20%;background:#FF6B6B;"></div></div>
+              <div class="mini-val">20</div>
+            </div>
+          </td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:59%;"></div></div>
+              <div class="mini-val">59</div>
+            </div>
+          </td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:51%;"></div></div>
+              <div class="mini-val">51</div>
+            </div>
+          </td>
+          <td style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);">52</td>
+          <td><span class="final-grade grade-b" style="font-size:14px;">B</span></td>
+          <td style="color:var(--muted);font-size:12px;">Social / Creative</td>
+        </tr>
+        <tr>
+          <td class="td-name">Evy Claudya Latuharhary</td>
+          <td class="td-iq" style="color: var(--white);">100</td>
+          <td><span class="qual-badge qual-avg" style="font-size:10px;">Average</span></td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:40%;background:#C9A84C;"></div></div>
+              <div class="mini-val">40</div>
+            </div>
+          </td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:62%;"></div></div>
+              <div class="mini-val">62</div>
+            </div>
+          </td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:47%;"></div></div>
+              <div class="mini-val">47</div>
+            </div>
+          </td>
+          <td style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);">52</td>
+          <td><span class="final-grade grade-b" style="font-size:14px;">B</span></td>
+          <td style="color:var(--muted);font-size:12px;">Creative / Social</td>
+        </tr>
+        <tr>
+          <td class="td-name">Zeyrindah B. Hehanussa</td>
+          <td class="td-iq" style="color: var(--white);">98</td>
+          <td><span class="qual-badge qual-avg" style="font-size:10px;">Average</span></td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:40%;background:#C9A84C;"></div></div>
+              <div class="mini-val">40</div>
+            </div>
+          </td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:82%;background:#3CB97A;"></div></div>
+              <div class="mini-val">82</div>
+            </div>
+          </td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:51%;"></div></div>
+              <div class="mini-val">51</div>
+            </div>
+          </td>
+          <td style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);">57</td>
+          <td><span class="final-grade grade-b" style="font-size:14px;">B</span></td>
+          <td style="color:var(--muted);font-size:12px;">Social / Administration</td>
+        </tr>
+        <tr>
+          <td class="td-name">Steven G. Lambiombir</td>
+          <td class="td-iq" style="color: var(--gold);">80</td>
+          <td><span class="qual-badge qual-below" style="font-size:10px;">Below Avg</span></td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:20%;background:#FF6B6B;"></div></div>
+              <div class="mini-val">20</div>
+            </div>
+          </td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:56%;"></div></div>
+              <div class="mini-val">56</div>
+            </div>
+          </td>
+          <td>
+            <div class="mini-bar">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:86%;background:#3CB97A;"></div></div>
+              <div class="mini-val">86</div>
+            </div>
+          </td>
+          <td style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);">21</td>
+          <td><span class="final-grade grade-d" style="font-size:14px;">D</span></td>
+          <td style="color:var(--muted);font-size:12px;">Social / Administration</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top: 20px; font-size: 12px; color: var(--muted); font-weight: 300;">
+      Assessment date: 18 May 2024 · Administrator: Rita (Certified Assessor) · Platform: Zoom Online · All candidates are nursing practitioners or vocational students based in Ambon, Maluku.
+    </p>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- CAPABILITY -->
+<section id="capability">
+  <div class="section-label">Our Capacity</div>
+  <div class="section-title">COMPANY CAPABILITY</div>
+
+  <div class="cap-grid">
+    <div class="cap-card reveal" data-num="01">
+      <div class="cap-icon">🖥️</div>
+      <h4>Online Learning Delivery</h4>
+      <p>Full LMS capability including course setup, content sequencing, video module hosting, and learner tracking — proven through Cohort 1 delivery across remote Indonesian islands.</p>
+    </div>
+    <div class="cap-card reveal" data-num="02">
+      <div class="cap-icon">📊</div>
+      <h4>Psychometric Assessment</h4>
+      <p>End-to-end online psychometric screening using certified assessors via Zoom. Multi-dimensional profiling across IQ, personality, emotional competency, vocational aptitude and thinking ability.</p>
+    </div>
+    <div class="cap-card reveal" data-num="03">
+      <div class="cap-icon">🎓</div>
+      <h4>Skills-Set Certification</h4>
+      <p>Structured micro-credentials aligned to industry competency standards. Three core units delivered in Pilot 1: Communication, Empowerment, and Hygiene &amp; Infection Control.</p>
+    </div>
+    <div class="cap-card reveal" data-num="04">
+      <div class="cap-icon">🤝</div>
+      <h4>Institutional Partnerships</h4>
+      <p>Active engagement with vocational schools (SMK 6, SMK 11), health facilities, nursing homes, and government bodies — demonstrating real-world placement and community integration capacity.</p>
+    </div>
+    <div class="cap-card reveal" data-num="05">
+      <div class="cap-icon">📡</div>
+      <h4>Remote Geographic Reach</h4>
+      <p>Program successfully delivered and marketed across multiple islands including Ambon, Seram, Buru, and Sparua — demonstrating scalable remote learning infrastructure.</p>
+    </div>
+    <div class="cap-card reveal" data-num="06">
+      <div class="cap-icon">📣</div>
+      <h4>Public Communications</h4>
+      <p>Media presence established through TVRI Maluku live broadcast. Social media activation across Instagram, Facebook, and Twitter/X with bilingual (English/Indonesian) content strategy.</p>
+    </div>
+    <div class="cap-card reveal" data-num="07">
+      <div class="cap-icon">🌱</div>
+      <h4>Community Outreach</h4>
+      <p>Volunteer program framework developed for elderly care homes (Panti Jompo). Field socialisation conducted with community health centres to build trust and create real-world practice pathways.</p>
+    </div>
+    <div class="cap-card reveal" data-num="08">
+      <div class="cap-icon">📈</div>
+      <h4>Scalable Program Model</h4>
+      <p>Short course and full course pathways designed for rapid expansion. MoU templates prepared for health facility partnerships. Government recognition pathway initiated with Ambon Mayor's office.</p>
+    </div>
+  </div>
+
+  <!-- Key outcomes bar -->
+  <div style="margin-top: 2px; background: var(--red); padding: 40px 48px; display: flex; justify-content: space-between; align-items: center; gap: 32px; flex-wrap: wrap;" class="reveal">
+    <div>
+      <div style="font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 4px; color: rgba(255,255,255,0.6); margin-bottom: 8px;">PILOT PROGRAM OUTCOME</div>
+      <div style="font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: white; line-height: 1;">Proof of Concept — Successfully Delivered</div>
+    </div>
+    <div style="display: flex; gap: 48px; flex-wrap: wrap;">
+      <div style="text-align: center;">
+        <div style="font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: white; line-height: 1;">100%</div>
+        <div style="font-size: 10px; letter-spacing: 3px; color: rgba(255,255,255,0.65); text-transform: uppercase; margin-top: 4px;">Online Delivery</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: white; line-height: 1;">6/6</div>
+        <div style="font-size: 10px; letter-spacing: 3px; color: rgba(255,255,255,0.65); text-transform: uppercase; margin-top: 4px;">Candidates Assessed</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: white; line-height: 1;">3</div>
+        <div style="font-size: 10px; letter-spacing: 3px; color: rgba(255,255,255,0.65); text-transform: uppercase; margin-top: 4px;">Units Delivered</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-logo">UCS <span>|</span> MAHIR</div>
+    <div style="font-size: 11px; color: var(--muted); margin-top: 6px; letter-spacing: 1px;">Redline Academy · Pilot Program One · 2024–2025</div>
+  </div>
+  <div class="footer-right">
+    Online Learning &amp; Assessment Skill Set Program<br>
+    Ambon, Maluku, Indonesia<br>
+    <span style="color: var(--red);">Confidential — Program Achievement Report</span>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, 80 * (Array.from(revealEls).indexOf(entry.target) % 4));
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  revealEls.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

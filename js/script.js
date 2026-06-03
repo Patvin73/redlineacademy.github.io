@@ -336,11 +336,18 @@ const translations = {
     scoreMethode2: "Demonstrasi praktik dan observasi.",
     scoreMethode3: "Portofolio bukti.",
     scoreMethode4: "Proyek dan presentasi.",
+    pilotProgramCtaPrefix: "Pilot Program",
+    pilotProgramCtaTitle: "Laporan Pencapaian 2024-2025",
+    pilotProgramCtaButton: "Lihat Pencapaian Kami",
 
     // Program Cards
     careGiver: "Care Giver",
     careGiverDesc:
-      "Dapatkan keterampilan dasar perawatan kesehatan dan pelatihan berbasis empati untuk mendukung pasien di rumah sakit, panti jompo, dan lingkungan masyarakat.",
+      `Dapatkan keterampilan dasar di bidang layanan kesehatan serta pelatihan berbasis empati untuk mendukung pasien di berbagai lingkungan, seperti rumah sakit, layanan perawatan lansia, dan komunitas.
+
+Agar sesuai dengan jadwal Anda yang padat, Redline Academy menawarkan penilaian pelatihan online yang fleksibel—sebuah metode evaluasi digital modern yang dirancang untuk mengukur keterampilan, pengetahuan, dan kompetensi Anda melalui perangkat apa pun yang terhubung ke internet.
+
+Pengalaman belajar yang lebih praktis dan efisien ini mencakup berbagai format, dengan menyeimbangkan metode tradisional seperti kuis, ujian tertulis, dan tes benar/salah, serta strategi alternatif yang sangat aplikatif seperti proyek kelompok, studi kasus, portofolio, dan simulasi interaktif.`,
 
     bartender: "Bartender",
     bartenderDesc:
@@ -536,7 +543,7 @@ const translations = {
 
     missionTitle: "Misi Kami",
     missionContent:
-      "Memberdayakan setiap individu di setiap tahap perjalanan mereka â€” baik saat memulai karier maupun berpindah dari bidang lain â€” melalui pelatihan berkualitas tinggi yang berfokus pada kebutuhan industri. Kami berdedikasi untuk membekali siswa dengan keterampilan praktis, kepercayaan diri, dan pola pikir yang tangguh untuk berkembang di pasar kerja global yang kompetitif.",
+      "Memberdayakan setiap individu di setiap tahap perjalanan mereka - baik saat memulai karier maupun berpindah dari bidang lain - melalui pelatihan berkualitas tinggi yang berfokus pada kebutuhan industri. Kami berdedikasi untuk membekali siswa dengan keterampilan praktis, kepercayaan diri, dan pola pikir yang tangguh untuk berkembang di pasar kerja global yang kompetitif.",
 
     ourValues: "Nilai-Nilai Kami",
     empowerment: "Pemberdayaan",
@@ -565,6 +572,12 @@ const translations = {
 
     // Team Section
     ourTeam: "Tim Kami",
+    teamAydaDesc:
+      "Sebagai bagian dari Redline Academy, Ayda percaya bahwa pengembangan kemampuan tidak hanya berarti menambah pengetahuan, tetapi juga membentuk cara berpikir, cara bekerja, dan kesiapan menghadapi situasi nyata.<br><br>Dengan latar belakang di bidang pengembangan organisasi dan human capital, Ayda berfokus membantu individu dan tim berkembang melalui pendekatan yang terstruktur, kontekstual, dan relevan dengan kebutuhan kerja.<br><br>Di Redline Academy, ia terlibat langsung dalam perancangan program, pengembangan kurikulum, dan penjagaan kualitas pengalaman belajar agar setiap materi tidak hanya informatif, tetapi juga berdampak nyata.",
+    teamStefanusDesc:
+      "Didorong oleh transformasi berbasis teknologi dalam eLearning, kesehatan digital, dan arsitektur microservices, Stefanus membawa kepemimpinan serta pengalaman praktis yang menghubungkan sektor kesehatan dan layanan komunitas dengan keahlian Online Learning and Assessment Skill Set.<br><br>Dengan menanamkan standar pendidikan dan pelatihan vokasi ke dalam metode penyampaian digital modern, ia berfokus membangun tim yang beragam, membuka ruang bagi ide-ide baru, dan menciptakan lingkungan yang menjunjung tinggi tanggung jawab bersama.<br><br>Kombinasi keahlian ini memastikan Redline Academy tidak sekadar menyelenggarakan pendidikan, tetapi juga membangun jalur pengembangan profesional yang berkelanjutan, didukung teknologi, dan memberdayakan setiap individu untuk mencapai potensi terbaiknya.",
+    teamVictoriaDesc:
+      "Dengan pengalaman bertahun-tahun di bidang pendidikan, penyelenggaraan pelatihan, dan desain pembelajaran, Victoria meyakini bahwa efisiensi tenaga kerja yang sesungguhnya memerlukan pendekatan holistik: mengembangkan karyawan yang menguasai keterampilan inti di tempat kerja sekaligus kompetensi teknis sesuai peran dan tanggung jawab mereka.<br><br>Praktik profesionalnya berlandaskan keyakinan bahwa dengan alat yang tepat, bimbingan berkualitas, serta lingkungan yang positif dan mendorong perkembangan, setiap individu memiliki kemampuan untuk mencapai potensi terbaiknya dan memberikan nilai yang luar biasa bagi organisasi.",
 
     // Footer
     company: "Perusahaan",
@@ -1065,11 +1078,14 @@ const translations = {
     scoreMethode2: "Practical demonstration and observation.",
     scoreMethode3: "Portfolio of evidence.",
     scoreMethode4: "Projects and presentations.",
+    pilotProgramCtaPrefix: "Pilot Program",
+    pilotProgramCtaTitle: "Achievement Report 2024-2025",
+    pilotProgramCtaButton: "Check Our Achievement",
 
     // Program Cards
     careGiver: "Care Giver",
     careGiverDesc:
-      "Gain essential healthcare skills and compassion-driven training to support patients in hospitals, aged care, and community settings.",
+      "Gain essential healthcare skills and compassion-driven training to support patients across hospitals, aged care, and community settings. To fit into your busy schedule, Redline Academy offers flexible online training assessments—a modern digital evaluation method designed to measure your skills, knowledge, and competency through any internet-connected device. This streamlined learning experience encompasses a variety of formats, balancing traditional quizzes, written exams, and true/false tests with highly practical alternative strategies like group projects, case studies, portfolios, and interactive simulations.",
 
     bartender: "Bartender",
     bartenderDesc:
@@ -1266,7 +1282,7 @@ const translations = {
 
     missionTitle: "Our Mission",
     missionContent:
-      "To empower individuals at every stage of their journeyâ€”whether starting a career or transitioning from another field through high-quality, industry-focused training. We are dedicated to equipping our students with practical skills, confidence, and the mindset to thrive in a competitive global workforce.",
+      "To empower individuals at every stage of their journey - whether starting a career or transitioning from another field through high-quality, industry-focused training. We are dedicated to equipping our students with practical skills, confidence, and the mindset to thrive in a competitive global workforce.",
 
     ourValues: "Our Values",
     empowerment: "Empowerment",
@@ -1295,6 +1311,12 @@ const translations = {
 
     // Team Section
     ourTeam: "Our Team",
+    teamAydaDesc:
+      "As part of Redline Academy, Ayda believes capability development is not only about adding knowledge, but also about shaping mindsets, work habits, and readiness for real-world situations.<br><br>With a background in organisational development and human capital, Ayda focuses on helping individuals and teams grow through structured, contextual approaches that stay relevant to workplace needs.<br><br>At Redline Academy, she is directly involved in program design, curriculum development, and learning-experience quality so every material is not only informative, but also meaningfully impactful.",
+    teamStefanusDesc:
+      "Driven by technology-led transformation in eLearning, digital health, and microservices architecture, Stefanus brings leadership and practical experience that connect the health and community services sectors with Online Learning and Assessment Skill Set expertise.<br><br>By embedding vocational education and training standards into modern digital delivery methods, he focuses on building diverse teams, opening space for new ideas, and creating an environment grounded in shared responsibility.<br><br>This combination of expertise ensures Redline Academy does more than deliver education; it builds sustainable professional development pathways that are technology-enabled and empower every individual to reach their best potential.",
+    teamVictoriaDesc:
+      "With years of experience in education, training delivery, and learning design, Victoria believes true workforce efficiency requires a holistic approach: developing employees who master core workplace skills while also building the role-specific technical competencies required by their responsibilities.<br><br>Her professional practice is grounded in the belief that, with the right tools, quality guidance, and a positive environment that encourages growth, every individual has the ability to reach their best potential and deliver exceptional value to an organisation.",
 
     // Footer
     company: "Company",

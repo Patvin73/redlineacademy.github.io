@@ -728,7 +728,10 @@ details > *:not(summary) {
   padding: 1.5rem;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-red);
+  height: 100%;
+  box-sizing: border-box;
 }
+.feature-card h2,
 .feature-card h3,
 .feature-card p {
   color: #ffffff;
