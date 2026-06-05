@@ -711,6 +711,9 @@ details > *:not(summary) {
   box-shadow: var(--shadow-xs);
   transition: transform 0.22s ease, box-shadow 0.22s ease;
   border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 .card:hover {
   transform: translateY(-4px);
@@ -813,6 +816,9 @@ details > *:not(summary) {
 
 .card-body {
   padding: 1.1rem 1.25rem;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 }
 .card-title {
   font-family: 'Bricolage Grotesque', sans-serif;
@@ -827,6 +833,13 @@ details > *:not(summary) {
   margin-bottom: 1.25rem;
   font-size: 0.93rem;
   line-height: 1.6;
+}
+.card-body > .btn {
+  align-self: flex-start;
+  margin-top: auto;
+}
+.card-body.text-center > .btn {
+  align-self: center;
 }
 .card-icon {
   width: 52px;
