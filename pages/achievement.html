@@ -686,12 +686,54 @@
     border-left: 1px solid var(--line);
   }
   .nav-strip a:hover { color: var(--white); background: rgba(232,35,26,0.07); }
+
+  .nav-strip .nav-brand {
+    align-self: stretch;
+    margin-right: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 22px;
+    color: var(--white);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    border-left: 0;
+    border-right: 1px solid var(--line);
+  }
+
+  .nav-strip .nav-brand:hover {
+    background: rgba(232,35,26,0.07);
+  }
+
+  .nav-brand img {
+    display: block;
+    width: 40px;
+    height: auto;
+  }
+
+  @media(max-width:700px) {
+    .nav-strip {
+      flex-wrap: wrap;
+    }
+
+    .nav-strip .nav-brand {
+      flex-basis: 100%;
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+  }
 </style>
 </head>
 <body>
 
 <!-- NAV -->
 <nav class="nav-strip">
+  <a class="nav-brand" href="../" aria-label="Redline Academy home">
+    <img src="../assets/images/redlinewlogo.png" alt="Redline Academy Logo" loading="lazy" decoding="async" width="1043" height="624">
+    <span>Redline Academy</span>
+  </a>
   <a href="#overview">Overview</a>
   <a href="#timeline">Timeline</a>
   <a href="#units">Units</a>
