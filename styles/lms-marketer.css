@@ -345,14 +345,14 @@
 .mk-stats-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 28px;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .mk-stat-card {
   background: #fefcf9;
   border: 1px solid #d9d2c8;
-  border-radius: 10px;
+  border-radius: 0;
   padding: 20px;
   position: relative;
   overflow: hidden;
@@ -374,7 +374,7 @@
   right: 0;
   height: 3px;
   background: var(--border-color);
-  border-radius: 10px 10px 0 0;
+  border-radius: 0;
 }
 
 .mk-stat-card.accent::before {
@@ -438,8 +438,8 @@
 .mk-card {
   background: #fefcf9;
   border: 1px solid #d9d2c8;
-  border-radius: 10px;
-  margin-bottom: 20px;
+  border-radius: 0;
+  margin-bottom: 14px;
   overflow: hidden;
 }
 

@@ -624,14 +624,14 @@
 .sd-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: .875rem;
-  margin-bottom: 1.25rem;
+  gap: .625rem;
+  margin-bottom: .875rem;
 }
 
 .sd-stat-card {
   background: var(--sd-card-bg);
   border: 1px solid var(--sd-border);
-  border-radius: var(--sd-radius-md);
+  border-radius: 0;
   padding: 1.1rem 1.25rem;
   display: flex;
   align-items: center;
@@ -694,8 +694,8 @@
 .sd-mid-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: .875rem;
-  margin-bottom: 1.25rem;
+  gap: .625rem;
+  margin-bottom: .875rem;
 }
 
 /* ================================================================
@@ -704,10 +704,10 @@
 .sd-card {
   background: var(--sd-card-bg);
   border: 1px solid var(--sd-border);
-  border-radius: var(--sd-radius-md);
+  border-radius: 0;
   padding: 1.25rem;
   box-shadow: var(--sd-shadow-sm);
-  margin-bottom: 1.25rem;
+  margin-bottom: .875rem;
 }
 
 .sd-card:last-child { margin-bottom: 0; }
@@ -1020,13 +1020,13 @@
 .sd-course-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  gap: .625rem;
 }
 
 .sd-course-card {
   background: var(--sd-card-bg);
   border: 1px solid var(--sd-border);
-  border-radius: var(--sd-radius-md);
+  border-radius: 0;
   overflow: hidden;
   box-shadow: var(--sd-shadow-sm);
   transition: transform var(--sd-ease), box-shadow var(--sd-ease);
@@ -1194,9 +1194,9 @@
   background: var(--sd-card-bg);
   border: 1px solid var(--sd-border);
   border-left: 4px solid transparent;
-  border-radius: var(--sd-radius-md);
+  border-radius: 0;
   padding: 1rem 1.25rem;
-  margin-bottom: .75rem;
+  margin-bottom: .5rem;
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -1248,13 +1248,13 @@
 .sd-cert-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  gap: .625rem;
 }
 
 .sd-cert-card {
   background: linear-gradient(135deg, #0f1623 0%, #1a2535 100%);
   border: 1px solid rgba(255,255,255,.08);
-  border-radius: var(--sd-radius-lg);
+  border-radius: 0;
   padding: 1.5rem;
   position: relative;
   overflow: hidden;
@@ -1507,14 +1507,14 @@
 .sd-resource-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  gap: .625rem;
   margin-top: 1rem;
 }
 
 .sd-resource-card {
   background: var(--sd-card-bg);
   border: 1px solid var(--sd-border);
-  border-radius: var(--sd-radius-md);
+  border-radius: 0;
   padding: 1.1rem;
   display: flex;
   align-items: flex-start;
@@ -1943,7 +1943,7 @@
 .sd-skeleton-card {
   background: var(--sd-card-bg);
   border: 1px solid var(--sd-border);
-  border-radius: var(--sd-radius-md);
+  border-radius: 0;
   overflow: hidden;
 }
 

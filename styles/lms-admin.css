@@ -596,14 +596,14 @@
 .ad-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: .875rem;
-  margin-bottom: 1.25rem;
+  gap: .625rem;
+  margin-bottom: .875rem;
 }
 
 .ad-kpi-card {
   background: var(--sd-card-bg);
   border: 1px solid var(--sd-border);
-  border-radius: var(--sd-radius-md);
+  border-radius: 0;
   padding: 1.1rem 1.25rem;
   display: flex;
   align-items: center;
@@ -657,8 +657,8 @@
 .ad-mid-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: .875rem;
-  margin-bottom: 1.25rem;
+  gap: .625rem;
+  margin-bottom: .875rem;
 }
 
 /* ================================================================
@@ -667,10 +667,10 @@
 .ad-card {
   background: var(--sd-card-bg);
   border: 1px solid var(--sd-border);
-  border-radius: var(--sd-radius-md);
+  border-radius: 0;
   padding: 1.25rem;
   box-shadow: var(--sd-shadow-sm);
-  margin-bottom: 1.25rem;
+  margin-bottom: .875rem;
 }
 
 .ad-card:last-child { margin-bottom: 0; }
@@ -1633,14 +1633,14 @@
 .ad-metrics-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: .875rem;
-  margin-bottom: 1.25rem;
+  gap: .625rem;
+  margin-bottom: .875rem;
 }
 
 .ad-metric-card {
   background: var(--sd-card-bg);
   border: 1px solid var(--sd-border);
-  border-radius: var(--sd-radius-md);
+  border-radius: 0;
   padding: 1.1rem 1.25rem;
   box-shadow: var(--sd-shadow-sm);
 }
@@ -1668,13 +1668,13 @@
 .ad-announcements-list {
   display: flex;
   flex-direction: column;
-  gap: .75rem;
+  gap: .5rem;
 }
 
 .ad-announcement-item {
   background: var(--sd-card-bg);
   border: 1px solid var(--sd-border);
-  border-radius: var(--sd-radius-md);
+  border-radius: 0;
   padding: 1.25rem;
   display: flex;
   gap: 1rem;
@@ -1732,14 +1732,14 @@
 .ad-payment-summary {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: .875rem;
-  margin-bottom: 1.25rem;
+  gap: .625rem;
+  margin-bottom: .875rem;
 }
 
 .ad-payment-card {
   background: var(--sd-card-bg);
   border: 1px solid var(--sd-border);
-  border-radius: var(--sd-radius-md);
+  border-radius: 0;
   padding: 1.1rem 1.25rem;
   box-shadow: var(--sd-shadow-sm);
 }
@@ -2022,7 +2022,7 @@
   width: min(560px, calc(100% - 2rem));
   background: var(--sd-card-bg);
   border: 1px solid var(--sd-border);
-  border-radius: var(--sd-radius-lg);
+  border-radius: 0;
   box-shadow: var(--sd-shadow-md);
   padding: 1.25rem 1.25rem 1rem;
   z-index: 1;
