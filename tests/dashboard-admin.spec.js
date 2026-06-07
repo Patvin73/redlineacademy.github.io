@@ -1331,6 +1331,14 @@ test("trainer can create schedule event", async ({ page }) => {
   await expect(page.locator(".ad-event-row__title", { hasText: "E2E Trainer Event" })).toBeVisible();
   const schedules = await page.evaluate(() => window.__e2eGetTableData().schedules);
   expect(schedules.at(-1)).toMatchObject({ course_id: "course-1" });
+  const notifications = await page.evaluate(() => window.__e2eGetTableData().notifications);
+  expect(notifications).toEqual(expect.arrayContaining([
+    expect.objectContaining({
+      user_id: "e2e-student-1",
+      type: "schedule_new",
+      is_read: false
+    })
+  ]));
 });
 
 test("trainer sees unread messages badge", async ({ page }) => {
@@ -1789,11 +1797,18 @@ test("trainer can use course builder tabs and save draft", async ({ page }) => {
   await page.fill("#cbDesc", "Draft course for automated test.");
   await page.selectOption("#cbCategory", "communication");
   await page.fill("#cbDuration", "4");
+  await page.setInputFiles("#cbThumbnail", {
+    name: "draft-thumb.png",
+    mimeType: "image/png",
+    buffer: Buffer.from([0x89, 0x50, 0x4e, 0x47])
+  });
 
   await page.click("#saveDraftBtn");
   await expect(page.locator("#builderMsg")).toContainText("Course saved");
 
-  await expect(page.locator(".ad-course-row__title", { hasText: "E2E Draft Course" })).toBeVisible();
+  const courseRow = page.locator(".ad-course-row", { hasText: "E2E Draft Course" });
+  await expect(courseRow.locator(".ad-course-row__title")).toBeVisible();
+  await expect(courseRow.locator(".ad-course-row__thumb img")).toHaveAttribute("src", /\/signed\/course-materials\/courses\/thumbnails\//);
 });
 
 test("trainer can upload lesson material and save it with course lessons", async ({ page }) => {

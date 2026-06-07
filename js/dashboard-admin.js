@@ -1134,7 +1134,12 @@
         return;
       }
 
-      courses.forEach((course) => {
+      const coursesWithThumbnails = await Promise.all(courses.map(async (course) => ({
+        course,
+        thumbnailDisplayUrl: await resolveCourseMaterialUrl({ material_url: course.thumbnail_url })
+      })));
+
+      coursesWithThumbnails.forEach(({ course, thumbnailDisplayUrl }) => {
         const canManageCourse = currentRole === "admin" || course.trainer_id === currentProfile?.id;
         const creatorId = creatorIdForCourse(course);
         const statusTag = {
@@ -1155,8 +1160,8 @@
         row.setAttribute("aria-label", `View ${course.title || "course"}`);
         row.innerHTML = `
           <div class="ad-course-row__thumb">
-            ${toSafeUiUrl(course.thumbnail_url)
-              ? `<img src="${escHtml(toSafeUiUrl(course.thumbnail_url))}" alt="${escHtml(course.title)}" style="width:100%;height:100%;object-fit:cover;border-radius:6px" />`
+            ${thumbnailDisplayUrl
+              ? `<img src="${escHtml(thumbnailDisplayUrl)}" alt="${escHtml(course.title)}" style="width:100%;height:100%;object-fit:cover;border-radius:6px" />`
               : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>`
             }
           </div>
@@ -1499,9 +1504,17 @@
         ({ error } = await window.lmsSupabase.from("courses").insert(payload));
       }
       if (error) throw error;
+      const hasNewMaterials = modules.some((module) => module.lessons.some((lesson) => lesson.file));
       if (modules.length) {
         if (msg) { msg.textContent = "Uploading course materials..."; msg.style.color = "var(--sd-text-secondary)"; }
         await saveCourseLessons(courseId, modules);
+      }
+      if (hasNewMaterials) {
+        await notifyActiveStudents(
+          courseId,
+          "material_new",
+          `Materi baru tersedia di "${title}"`
+        );
       }
 
       if (msg) { msg.textContent = "✓ Course saved!"; msg.style.color = "var(--sd-green)"; }
@@ -2152,6 +2165,46 @@
     }
   }
 
+  async function getActiveStudentIdsForCourseNotification(courseId = null) {
+    if (!window.lmsSupabase || !currentProfile?.id) return [];
+    let courseIds = courseId ? [courseId] : [];
+
+    if (!courseIds.length) {
+      const { data: courses, error: courseErr } = await window.lmsSupabase
+        .from("courses")
+        .select("id")
+        .eq("trainer_id", currentProfile.id);
+      if (courseErr) throw courseErr;
+      courseIds = (courses || []).map((course) => course.id).filter(Boolean);
+    }
+    if (!courseIds.length) return [];
+
+    const { data: enrollments, error } = await window.lmsSupabase
+      .from("enrollments")
+      .select("student_id")
+      .in("course_id", courseIds)
+      .eq("status", "active");
+    if (error) throw error;
+
+    return [...new Set((enrollments || []).map((row) => row.student_id).filter(Boolean))];
+  }
+
+  async function notifyActiveStudents(courseId, type, title) {
+    try {
+      const studentIds = await getActiveStudentIdsForCourseNotification(courseId);
+      if (!studentIds.length) return;
+      const rows = studentIds.map((studentId) => ({
+        user_id: studentId,
+        type,
+        title,
+        is_read: false
+      }));
+      await window.lmsSupabase.from("notifications").insert(rows).catch(() => {});
+    } catch {
+      // Notification delivery is non-blocking for creator workflows.
+    }
+  }
+
   function setupScheduleForm() {
     const createBtn = $("createEventBtn");
     const card      = $("eventFormCard");
@@ -2207,6 +2260,12 @@
 
       const { error } = await window.lmsSupabase.from("schedules").insert(payload);
       if (error) throw error;
+
+      await notifyActiveStudents(
+        payload.course_id,
+        "schedule_new",
+        `Jadwal baru: "${title}" - ${formatDT(payload.start_datetime)}`
+      );
 
       if (msg) { msg.textContent = "✓ Event created!"; msg.style.color = "var(--sd-green)"; }
       setTimeout(() => { $("eventFormCard").hidden = true; loadedSections.delete("schedule"); loadEventsList(); }, 1000);
@@ -4301,9 +4360,9 @@
   }
 
   function getNotifIcon(type) {
-    return { assignment_new: "📋", assignment_graded: "📝", quiz_result: "✅", new_message: "💬",
+    return { assignment_new: "📋", assignment_graded: "📝", material_new: "📚", quiz_result: "✅", new_message: "💬",
       course_enrolled: "🎓", certificate_issued: "🏆", submission_received: "📤",
-      session_reminder: "📅", announcement: "📢" }[type] || "🔔";
+      session_reminder: "📅", schedule_new: "📅", announcement: "📢" }[type] || "🔔";
   }
 
   function setupRealtimeNotifications(userId) {

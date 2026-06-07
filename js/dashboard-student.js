@@ -45,6 +45,23 @@
     if (dot) dot.style.display = (studentUnreadMessages + studentUnreadNotifications) > 0 ? "block" : "none";
   }
 
+  async function countStudentActiveCourses(userId) {
+    if (!userId || !window.lmsSupabase) return null;
+    try {
+      const { data, error } = await window.lmsSupabase
+        .from("enrollments")
+        .select("course_id, status")
+        .eq("student_id", userId);
+      if (error) throw error;
+      return new Set((data || [])
+        .filter((row) => (row.status || "active") === "active")
+        .map((row) => row.course_id)
+        .filter(Boolean)).size;
+    } catch {
+      return null;
+    }
+  }
+
   async function refreshStudentMessageIndicators(userId = currentStudentProfile?.id) {
     if (!userId || !window.lmsSupabase) return;
     try {
@@ -456,12 +473,15 @@
   function getNotifIcon(type) {
     const icons = {
       assignment_graded: "📝",
+      assignment_new:    "📋",
+      material_new:      "📚",
       quiz_result:       "✅",
       new_message:       "💬",
       forum_reply:       "💬",
       course_enrolled:   "🎓",
       certificate_issued:"🏆",
       session_reminder:  "📅",
+      schedule_new:      "📅",
       announcement:      "📢",
       deadline_reminder: "⏰",
     };
@@ -740,7 +760,7 @@
     }
 
     // Sections yang harus selalu reload agar data terbaru terlihat
-    const alwaysReload = ["assignments", "messages"];
+    const alwaysReload = ["assignments", "messages", "schedule", "resources"];
     if (alwaysReload.includes(sectionId)) {
       loadedStudentSections.delete(sectionId);
     }
@@ -893,7 +913,13 @@
         throw error;
       }
 
-      if ($("statCoursesEnrolled"))    $("statCoursesEnrolled").textContent    = data.courses_enrolled    || 0;
+      const activeCourseCount = await countStudentActiveCourses(userId);
+      const dashboardCourseCount = data.courses_enrolled || 0;
+      if ($("statCoursesEnrolled")) {
+        $("statCoursesEnrolled").textContent = activeCourseCount === null
+          ? dashboardCourseCount
+          : Math.max(dashboardCourseCount, activeCourseCount);
+      }
       if ($("statLessonsCompleted"))   $("statLessonsCompleted").textContent   = data.lessons_completed   || 0;
       if ($("statPendingAssignments")) $("statPendingAssignments").textContent = data.pending_submissions || 0;
       if ($("statCertificates"))       $("statCertificates").textContent       = data.certificates_earned || 0;
@@ -1560,32 +1586,69 @@
     }
   }
 
+  async function fetchStudentScheduleEvents(userId, options = {}) {
+    const nowIso = new Date().toISOString();
+    const limit = options.limit || 20;
+    const { data: enrollments, error: enrollErr } = await window.lmsSupabase
+      .from("enrollments")
+      .select("course_id, status")
+      .eq("student_id", userId);
+    if (enrollErr) throw enrollErr;
+
+    const courseIds = [
+      ...new Set((enrollments || [])
+        .filter((row) => !["inactive", "dropped"].includes(row.status || "active"))
+        .map((row) => row.course_id)
+        .filter(Boolean))
+    ];
+    if (courseIds.length === 0) return [];
+
+    const { data: courseRows, error: courseErr } = await window.lmsSupabase
+      .from("courses")
+      .select("id, trainer_id")
+      .in("id", courseIds);
+    if (courseErr) throw courseErr;
+    const trainerIds = [...new Set((courseRows || []).map((row) => row.trainer_id).filter(Boolean))];
+
+    const courseScheduleQuery = window.lmsSupabase
+      .from("schedules")
+      .select("id, title, event_type, start_datetime, end_datetime, meeting_url, course_id, trainer_id")
+      .in("course_id", courseIds)
+      .order("start_datetime", { ascending: true })
+      .limit(limit);
+    if (options.upcomingOnly !== false) courseScheduleQuery.gte("start_datetime", nowIso);
+    const { data: courseEvents, error: courseScheduleErr } = await courseScheduleQuery;
+    if (courseScheduleErr) throw courseScheduleErr;
+
+    let trainerEvents = [];
+    if (trainerIds.length > 0) {
+      const trainerScheduleQuery = window.lmsSupabase
+        .from("schedules")
+        .select("id, title, event_type, start_datetime, end_datetime, meeting_url, course_id, trainer_id")
+        .in("trainer_id", trainerIds)
+        .or("course_id.is.null")
+        .order("start_datetime", { ascending: true })
+        .limit(limit);
+      if (options.upcomingOnly !== false) trainerScheduleQuery.gte("start_datetime", nowIso);
+      const { data, error } = await trainerScheduleQuery;
+      if (error) throw error;
+      trainerEvents = data || [];
+    }
+
+    return Array.from(
+      new Map([...(courseEvents || []), ...trainerEvents].map((event) => [event.id, event])).values()
+    )
+      .sort((a, b) => new Date(a.start_datetime || 0) - new Date(b.start_datetime || 0))
+      .slice(0, limit);
+  }
+
   async function loadUpcomingSchedule(userId) {
     const list  = $("scheduleList");
     const empty = $("scheduleEmpty");
     if (!list) return;
 
     try {
-      // Get courses student is enrolled in first
-      const { data: enrollments } = await window.lmsSupabase
-        .from("enrollments")
-        .select("course_id")
-        .eq("student_id", userId);
-
-      const courseIds = (enrollments || []).map((e) => e.course_id);
-
-      if (courseIds.length === 0) throw new Error("No enrollments");
-
-      const { data, error } = await window.lmsSupabase
-        .from("schedules")
-        .select("id, title, event_type, start_datetime, end_datetime, meeting_url")
-        .in("course_id", courseIds)
-        .gte("start_datetime", new Date().toISOString())
-        .order("start_datetime", { ascending: true })
-        .limit(4);
-
-      if (error) throw error;
-
+      const data = await fetchStudentScheduleEvents(userId, { limit: 4 });
       if (!data || data.length === 0) throw new Error("No upcoming events");
 
       if (empty) empty.style.display = "none";
@@ -1675,22 +1738,7 @@
     if (!list) return;
 
     try {
-      const { data: enrollments } = await window.lmsSupabase
-        .from("enrollments")
-        .select("course_id")
-        .eq("student_id", userId)
-
-      const courseIds = (enrollments || []).map((e) => e.course_id).filter(Boolean);
-      if (courseIds.length === 0) throw new Error("No enrollments");
-
-      const { data, error } = await window.lmsSupabase
-        .from("schedules")
-        .select("id, title, event_type, start_datetime, end_datetime, meeting_url")
-        .in("course_id", courseIds)
-        .order("start_datetime", { ascending: true })
-        .limit(20);
-
-      if (error) throw error;
+      const data = await fetchStudentScheduleEvents(userId, { limit: 20, upcomingOnly: false });
       if (!data || data.length === 0) throw new Error("No schedule");
 
       fullScheduleCache = data;
@@ -1920,6 +1968,38 @@
       checkbox.checked = Boolean(option?.selected);
     });
     updateStudentRecipientSummary();
+  }
+
+  function ensureStudentRecipientOption(recipientId, labelText) {
+    const recipient = $("studentMsgRecipient");
+    const list = $("studentMsgRecipientList");
+    if (!recipient || !recipientId) return;
+    if (Array.from(recipient.options).some((option) => option.value === recipientId)) return;
+
+    const label = labelText || recipientId;
+    const option = document.createElement("option");
+    option.value = recipientId;
+    option.dataset.label = label;
+    option.textContent = label;
+    recipient.appendChild(option);
+
+    if (list) {
+      const optionLabel = document.createElement("label");
+      optionLabel.className = "sd-recipient-option";
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.dataset.recipientId = recipientId;
+      checkbox.addEventListener("change", () => {
+        option.selected = checkbox.checked;
+        enforceStudentMessageRecipientLimit();
+        updateStudentRecipientSummary();
+      });
+      const text = document.createElement("span");
+      text.textContent = label;
+      optionLabel.appendChild(checkbox);
+      optionLabel.appendChild(text);
+      list.appendChild(optionLabel);
+    }
   }
 
   function enforceStudentMessageRecipientLimit() {
@@ -2159,6 +2239,9 @@
       setStudentComposerStatus(err.message || "Recipients failed to load.", true);
     }
 
+    if (selectedRecipientId) {
+      ensureStudentRecipientOption(selectedRecipientId, options.recipientLabel || selectedRecipientId);
+    }
     if (recipient && recipient.options.length === 1) {
       recipient.selectedIndex = 0;
       syncStudentRecipientCheckboxes();
@@ -2291,10 +2374,11 @@
             }
           }
           const sender = profileMap.get(msg.sender_id) || msg.profiles || {};
+          const senderLabel = sender.full_name || sender.email || msg.sender_id || "System";
           detail.innerHTML = `
             <div class="sd-message-view__body">
               <p class="sd-inbox-item__name">${escHtml(group.subject)}</p>
-              <p class="sd-inbox-item__time">From: ${escHtml(sender.full_name || sender.email || "System")} - ${formatDateTime(group.created_at)}</p>
+              <p class="sd-inbox-item__time">From: ${escHtml(senderLabel)} - ${formatDateTime(group.created_at)}</p>
               <div class="sd-message-detail__body">${escHtml(group.body || "-").replace(/\n/g, "<br>")}</div>
               <div class="sd-message-detail__actions">
                 <button class="sd-btn sd-btn--outline" type="button" data-sd-msg-reply>Reply</button>
@@ -2334,7 +2418,11 @@
 
         detail.querySelector("[data-sd-msg-reply]")?.addEventListener("click", async () => {
           const msg = group.messages[0];
-          await openStudentMessageComposer(msg.sender_id, { subject: getStudentReplySubject(group.subject), focusBody: true });
+          await openStudentMessageComposer(msg.sender_id, {
+            subject: getStudentReplySubject(group.subject),
+            focusBody: true,
+            recipientLabel: group.sender?.full_name || group.sender?.email || msg.sender_id
+          });
         });
         detail.querySelector("[data-sd-msg-archive]")?.addEventListener("click", async () => {
           try {
@@ -2669,11 +2757,15 @@
         },
         async () => {
           loadedStudentSections.delete("assignments");
+          loadedStudentSections.delete("schedule");
+          loadedStudentSections.delete("resources");
           await loadNotifications(userId);
           // Refresh stat cards di home saat ada notifikasi baru (kursus/tugas baru)
           await loadDashboardStats(userId);
           await loadContinueLearning(userId);
           if (currentSection === "assignments") loadAssignments(userId);
+          if (currentSection === "schedule") loadFullSchedule(userId);
+          if (currentSection === "resources") loadResources(userId);
           if (currentSection === "courses") {
             loadedStudentSections.delete("courses");
             await loadCourseGrid(userId);

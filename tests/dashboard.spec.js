@@ -870,6 +870,16 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#courseGrid .sd-course-card[data-status='available']")).toHaveCount(1);
   });
 
+  test("course stat falls back to active enrollments when dashboard view is stale", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    fixture.tableData.v_student_dashboard[0].courses_enrolled = 0;
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
+
+    await expect(page.locator("#statCoursesEnrolled")).toHaveText("1");
+  });
+
   test("realtime notification refreshes student stats and active course grid", async ({ page }) => {
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);
@@ -1098,6 +1108,26 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#scheduleFullList [data-schedule-render='true']")).not.toHaveCount(0);
   });
 
+  test("shows trainer-wide schedule events for enrolled students", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    fixture.tableData.schedules.push({
+      id: "schedule-trainer-wide",
+      title: "Trainer-wide briefing",
+      event_type: "live_session",
+      start_datetime: "2099-01-09T09:00:00.000Z",
+      end_datetime: "2099-01-09T10:00:00.000Z",
+      meeting_url: "",
+      course_id: null,
+      trainer_id: "trainer-1"
+    });
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
+    await page.locator(".sd-nav__item[data-section='schedule']").click();
+
+    await expect(page.locator("#scheduleFullList")).toContainText("Trainer-wide briefing");
+  });
+
   test("filters lesson material resource cards by material type and search text", async ({ page }) => {
     // This test covers enrolled lesson materials, material-type tabs, and search together.
     const fixture = makeStudentFixture();
@@ -1194,6 +1224,23 @@ test.describe("Student Dashboard", () => {
     await page.locator("[data-sd-msg-delete-inbox]").click();
     const afterDelete = await page.evaluate(() => window.__QA_TABLE_DATA__.messages);
     expect(afterDelete.some((msg) => msg.id === "msg-1")).toBe(false);
+  });
+
+  test("reply keeps the original sender when sender profile is not returned", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    fixture.tableData.profiles = fixture.tableData.profiles.filter((profile) => profile.id !== "trainer-1");
+    fixture.tableData.messages = fixture.tableData.messages.map((message) =>
+      message.sender_id === "trainer-1" ? { ...message, profiles: null } : message
+    );
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
+    await page.locator(".sd-nav__item[data-section='messages']").click();
+    await page.locator(".sd-inbox-item", { hasText: "Welcome" }).click();
+
+    await expect(page.locator("#messageDetail")).toContainText("From: trainer-1");
+    await page.locator("[data-sd-msg-reply]").click();
+    await expect(page.locator("#studentMsgRecipient")).toHaveValues(["trainer-1"]);
   });
 
   test("message notification opens the selected student message", async ({ page }) => {
