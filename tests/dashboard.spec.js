@@ -855,7 +855,7 @@ test.describe("Student Dashboard", () => {
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);
 
-    await page.goto("/pages/dashboard-student.html");
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
     await page.locator(".sd-nav__item[data-section='courses']").click();
 
     await expect(page.locator("#courseGrid .sd-course-card")).toHaveCount(3);
@@ -873,11 +873,16 @@ test.describe("Student Dashboard", () => {
   test("course stat falls back to active enrollments when dashboard view is stale", async ({ page }) => {
     const fixture = makeStudentFixture();
     fixture.tableData.v_student_dashboard[0].courses_enrolled = 0;
+    fixture.tableData.v_student_dashboard[0].pending_submissions = 0;
+    fixture.tableData.enrollments[0].status = "paid";
+    fixture.tableData.course_progress = fixture.tableData.course_progress.filter((row) => row.course_id !== "course-1");
     await installSupabaseStub(page, fixture);
 
     await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
 
     await expect(page.locator("#statCoursesEnrolled")).toHaveText("1");
+    await expect(page.locator("#statPendingAssignments")).toHaveText("2");
+    await expect(page.locator("#continueLearningContent")).toContainText("Aged Care Basics");
   });
 
   test("realtime notification refreshes student stats and active course grid", async ({ page }) => {
@@ -885,7 +890,7 @@ test.describe("Student Dashboard", () => {
     await installSupabaseStub(page, fixture);
 
     await page.goto("/pages/dashboard-student.html");
-    await expect(page.locator("#statCoursesEnrolled")).toHaveText("2");
+    await expect(page.locator("#statCoursesEnrolled")).toHaveText("1");
     await page.locator(".sd-nav__item[data-section='courses']").click();
     await expect(page.locator("#courseGrid .sd-course-card")).toHaveCount(3);
     await expect(page.locator("#courseGrid")).not.toContainText("Realtime Care");
@@ -913,7 +918,7 @@ test.describe("Student Dashboard", () => {
     });
 
     expect(triggered).toBe(1);
-    await expect(page.locator("#statCoursesEnrolled")).toHaveText("3");
+    await expect(page.locator("#statCoursesEnrolled")).toHaveText("2");
     await expect(page.locator("#courseGrid")).toContainText("Realtime Care");
   });
 
@@ -1065,17 +1070,27 @@ test.describe("Student Dashboard", () => {
 
   test("loads assignments from enrolled courses and maps submission status", async ({ page }) => {
     const fixture = makeStudentFixture();
+    fixture.tableData.enrollments[0].status = "paid";
+    fixture.tableData.assignments.push({
+      id: "assign-new-no-submission",
+      course_id: "course-1",
+      title: "Trainer New Assignment",
+      type: "assignment",
+      course_title: "Aged Care Basics",
+      due_at: "2099-01-09"
+    });
     await installSupabaseStub(page, fixture);
 
     await page.goto("/pages/dashboard-student.html");
     await page.locator(".sd-nav__item[data-section='assignments']").click();
 
-    await expect(page.locator("#assignmentList .sd-assignment-item")).toHaveCount(3);
+    await expect(page.locator("#assignmentList .sd-assignment-item")).toHaveCount(4);
     await expect(page.locator("#assignmentList")).toContainText("Module 1 Quiz");
     await expect(page.locator("#assignmentList")).toContainText("Final Assignment");
     await expect(page.locator("#assignmentList")).toContainText("Care Plan Rewrite");
+    await expect(page.locator("#assignmentList")).toContainText("Trainer New Assignment");
     await expect(page.locator("#assignmentList")).not.toContainText("Unenrolled Course Quiz");
-    await expect(page.locator(".sd-assignment-item[data-status='pending']")).toHaveCount(1);
+    await expect(page.locator(".sd-assignment-item[data-status='pending']")).toHaveCount(2);
 
     await page.locator(".sd-filter-tab[data-filter='graded']").click();
     await expect(page.locator(".sd-assignment-item[data-status='graded']")).toBeVisible();
@@ -1093,6 +1108,7 @@ test.describe("Student Dashboard", () => {
   test("switches schedule view from list to calendar using real dashboard controls", async ({ page }) => {
     // This test covers the list/calendar schedule toggle, which existing tests do not exercise.
     const fixture = makeStudentFixture();
+    fixture.tableData.enrollments[0].status = "paid";
     await installSupabaseStub(page, fixture);
 
     await page.goto("/pages/dashboard-student.html");
@@ -1126,6 +1142,26 @@ test.describe("Student Dashboard", () => {
     await page.locator(".sd-nav__item[data-section='schedule']").click();
 
     await expect(page.locator("#scheduleFullList")).toContainText("Trainer-wide briefing");
+  });
+
+  test("shows global admin schedule events for students", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    fixture.tableData.schedules.push({
+      id: "schedule-admin-global",
+      title: "All-student admin briefing",
+      event_type: "live_session",
+      start_datetime: "2099-01-11T09:00:00.000Z",
+      end_datetime: "2099-01-11T10:00:00.000Z",
+      meeting_url: "",
+      course_id: null,
+      trainer_id: "admin-1"
+    });
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
+    await page.locator(".sd-nav__item[data-section='schedule']").click();
+
+    await expect(page.locator("#scheduleFullList")).toContainText("All-student admin briefing");
   });
 
   test("filters lesson material resource cards by material type and search text", async ({ page }) => {

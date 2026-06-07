@@ -45,18 +45,63 @@
     if (dot) dot.style.display = (studentUnreadMessages + studentUnreadNotifications) > 0 ? "block" : "none";
   }
 
-  async function countStudentActiveCourses(userId) {
+  const INACTIVE_ENROLLMENT_STATUSES = ["completed", "inactive", "dropped", "cancelled", "suspended"];
+
+  function isActiveEnrollmentStatus(status) {
+    return !INACTIVE_ENROLLMENT_STATUSES.includes((status || "active").toLowerCase());
+  }
+
+  async function getStudentEnrollmentCourseIds(userId, { activeOnly = false } = {}) {
     if (!userId || !window.lmsSupabase) return null;
-    try {
-      const { data, error } = await window.lmsSupabase
-        .from("enrollments")
-        .select("course_id, status")
-        .eq("student_id", userId);
-      if (error) throw error;
-      return new Set((data || [])
-        .filter((row) => (row.status || "active") === "active")
+    const { data, error } = await window.lmsSupabase
+      .from("enrollments")
+      .select("course_id, status")
+      .eq("student_id", userId);
+    if (error) throw error;
+    return [
+      ...new Set((data || [])
+        .filter((row) => !activeOnly || isActiveEnrollmentStatus(row.status))
         .map((row) => row.course_id)
-        .filter(Boolean)).size;
+        .filter(Boolean))
+    ];
+  }
+
+  async function countStudentActiveCourses(userId) {
+    try {
+      const courseIds = await getStudentEnrollmentCourseIds(userId, { activeOnly: true });
+      return courseIds ? courseIds.length : null;
+    } catch {
+      return null;
+    }
+  }
+
+  async function countStudentPendingAssignments(userId) {
+    try {
+      const courseIds = await getStudentEnrollmentCourseIds(userId);
+      if (!courseIds || courseIds.length === 0) return 0;
+
+      const { data, error } = await window.lmsSupabase
+        .from("assignments")
+        .select(`
+          id,
+          is_published,
+          assignment_submissions (
+            id,
+            student_id,
+            status
+          )
+        `)
+        .in("course_id", courseIds);
+      if (error) throw error;
+
+      return (data || []).filter((assignment) => {
+        if (assignment.is_published === false) return false;
+        const submissions = Array.isArray(assignment.assignment_submissions)
+          ? assignment.assignment_submissions
+          : [];
+        const ownSubmission = submissions.find((item) => item.student_id === userId);
+        return !ownSubmission || ["pending", "resubmit_required"].includes(ownSubmission.status || "pending");
+      }).length;
     } catch {
       return null;
     }
@@ -914,22 +959,26 @@
       }
 
       const activeCourseCount = await countStudentActiveCourses(userId);
+      const pendingAssignmentCount = await countStudentPendingAssignments(userId);
       const dashboardCourseCount = data.courses_enrolled || 0;
+      const dashboardPendingCount = data.pending_submissions || 0;
+      const finalPendingCount = pendingAssignmentCount === null
+        ? dashboardPendingCount
+        : Math.max(dashboardPendingCount, pendingAssignmentCount);
       if ($("statCoursesEnrolled")) {
         $("statCoursesEnrolled").textContent = activeCourseCount === null
           ? dashboardCourseCount
-          : Math.max(dashboardCourseCount, activeCourseCount);
+          : activeCourseCount;
       }
       if ($("statLessonsCompleted"))   $("statLessonsCompleted").textContent   = data.lessons_completed   || 0;
-      if ($("statPendingAssignments")) $("statPendingAssignments").textContent = data.pending_submissions || 0;
+      if ($("statPendingAssignments")) $("statPendingAssignments").textContent = finalPendingCount;
       if ($("statCertificates"))       $("statCertificates").textContent       = data.certificates_earned || 0;
 
       // Update assignment badge in nav
       const badge = $("assignmentBadge");
       if (badge) {
-        const count = data.pending_submissions || 0;
-        badge.textContent = count;
-        badge.style.display = count > 0 ? "inline-block" : "none";
+        badge.textContent = finalPendingCount;
+        badge.style.display = finalPendingCount > 0 ? "inline-block" : "none";
       }
 
       const statNavMap = [
@@ -965,6 +1014,55 @@
   }
 
   /* ── Continue Learning ──────────────────────────────────────────── */
+  async function getFirstActiveCourseForContinue(userId) {
+    const courseIds = await getStudentEnrollmentCourseIds(userId, { activeOnly: true });
+    if (!courseIds || courseIds.length === 0) return null;
+    const { data, error } = await window.lmsSupabase
+      .from("courses")
+      .select("id, title, thumbnail_url, slug, category_id, categories(name)")
+      .in("id", courseIds)
+      .eq("status", "published")
+      .order("title", { ascending: true })
+      .limit(1);
+    if (error) throw error;
+    return data?.[0] || null;
+  }
+
+  function renderContinueLearningCourse(container, course, completionPercent = 0) {
+    const pct = Math.round(completionPercent || 0);
+    const thumbSrc = toSafeUiUrl(course.thumbnail_url) || "";
+    container.innerHTML = `
+        <div class="sd-continue-item">
+          <div class="sd-continue-item__thumb${thumbSrc ? "" : " sd-continue-item__thumb--placeholder"}">
+            ${thumbSrc
+              ? `<img src="${escHtml(thumbSrc)}" alt="${escHtml(course.title)}" loading="lazy" />`
+              : `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>`
+            }
+          </div>
+          <div>
+            <p class="sd-continue-item__course">${escHtml(course.categories?.name || course.category_id || "Program")}</p>
+            <p class="sd-continue-item__title">${escHtml(course.title)}</p>
+            <div class="sd-progress">
+              <div class="sd-progress__bar">
+                <div class="sd-progress__fill" style="width:${pct}%"></div>
+              </div>
+              <span class="sd-progress__pct">${pct}%</span>
+            </div>
+            <button class="sd-btn sd-btn--primary sd-btn--sm sd-continue-item__btn"
+              onclick="window._sdActivateSection('courses')"
+              data-i18n="lmsContinueBtn">Continue</button>
+          </div>
+        </div>`;
+  }
+
+  function renderNoActiveCourses(container) {
+    container.innerHTML = `
+        <div class="sd-empty-state" style="padding:1.5rem 0">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          <p data-i18n="lmsNoCourses" style="margin:0;font-size:.875rem">No active courses</p>
+        </div>`;
+  }
+
   async function loadContinueLearning(userId) {
     const container = $("continueLearningContent");
     if (!container) return;
@@ -987,38 +1085,16 @@
 
       if (error || !data) throw error || new Error("No active course");
 
-      const course  = data.courses;
-      const pct     = Math.round(data.completion_percent || 0);
-      const thumbSrc = toSafeUiUrl(course.thumbnail_url) || "";
-
-      container.innerHTML = `
-        <div class="sd-continue-item">
-          <div class="sd-continue-item__thumb${thumbSrc ? "" : " sd-continue-item__thumb--placeholder"}">
-            ${thumbSrc
-              ? `<img src="${escHtml(thumbSrc)}" alt="${escHtml(course.title)}" loading="lazy" />`
-              : `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>`
-            }
-          </div>
-          <div>
-            <p class="sd-continue-item__course">${escHtml(data.courses?.categories?.name || data.courses?.category_id || "Program")}</p>
-            <p class="sd-continue-item__title">${escHtml(course.title)}</p>
-            <div class="sd-progress">
-              <div class="sd-progress__bar">
-                <div class="sd-progress__fill" style="width:${pct}%"></div>
-              </div>
-              <span class="sd-progress__pct">${pct}%</span>
-            </div>
-            <button class="sd-btn sd-btn--primary sd-btn--sm sd-continue-item__btn"
-              onclick="window._sdActivateSection('courses')"
-              data-i18n="lmsContinueBtn">Continue</button>
-          </div>
-        </div>`;
+      renderContinueLearningCourse(container, data.courses, data.completion_percent);
     } catch {
-      container.innerHTML = `
-        <div class="sd-empty-state" style="padding:1.5rem 0">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-          <p data-i18n="lmsNoCourses" style="margin:0;font-size:.875rem">No active courses</p>
-        </div>`;
+      try {
+        const fallbackCourse = await getFirstActiveCourseForContinue(userId);
+        if (fallbackCourse) {
+          renderContinueLearningCourse(container, fallbackCourse, 0);
+          return;
+        }
+      } catch {}
+      renderNoActiveCourses(container);
     }
   }
 
@@ -1357,16 +1433,7 @@
     };
 
     try {
-      const { data: enrollments, error: enrollErr } = await window.lmsSupabase
-        .from("enrollments")
-        .select("course_id")
-        .eq("student_id", userId);
-
-      if (enrollErr) throw enrollErr;
-
-      const courseIds = [
-        ...new Set((enrollments || []).map((enroll) => enroll.course_id).filter(Boolean))
-      ];
+      const courseIds = await getStudentEnrollmentCourseIds(userId) || [];
 
       if (courseIds.length === 0) {
         renderEmpty();
@@ -1390,7 +1457,6 @@
           )
         `)
         .in("course_id", courseIds)
-        .eq("assignment_submissions.student_id", userId)
         .order("due_at", { ascending: true });
 
       if (assignErr) throw assignErr;
@@ -1589,26 +1655,8 @@
   async function fetchStudentScheduleEvents(userId, options = {}) {
     const nowIso = new Date().toISOString();
     const limit = options.limit || 20;
-    const { data: enrollments, error: enrollErr } = await window.lmsSupabase
-      .from("enrollments")
-      .select("course_id, status")
-      .eq("student_id", userId);
-    if (enrollErr) throw enrollErr;
-
-    const courseIds = [
-      ...new Set((enrollments || [])
-        .filter((row) => !["inactive", "dropped"].includes(row.status || "active"))
-        .map((row) => row.course_id)
-        .filter(Boolean))
-    ];
+    const courseIds = await getStudentEnrollmentCourseIds(userId, { activeOnly: true }) || [];
     if (courseIds.length === 0) return [];
-
-    const { data: courseRows, error: courseErr } = await window.lmsSupabase
-      .from("courses")
-      .select("id, trainer_id")
-      .in("id", courseIds);
-    if (courseErr) throw courseErr;
-    const trainerIds = [...new Set((courseRows || []).map((row) => row.trainer_id).filter(Boolean))];
 
     const courseScheduleQuery = window.lmsSupabase
       .from("schedules")
@@ -1620,23 +1668,50 @@
     const { data: courseEvents, error: courseScheduleErr } = await courseScheduleQuery;
     if (courseScheduleErr) throw courseScheduleErr;
 
-    let trainerEvents = [];
-    if (trainerIds.length > 0) {
-      const trainerScheduleQuery = window.lmsSupabase
+    let globalEvents = [];
+    try {
+      const globalScheduleQuery = window.lmsSupabase
         .from("schedules")
         .select("id, title, event_type, start_datetime, end_datetime, meeting_url, course_id, trainer_id")
-        .in("trainer_id", trainerIds)
         .or("course_id.is.null")
         .order("start_datetime", { ascending: true })
         .limit(limit);
-      if (options.upcomingOnly !== false) trainerScheduleQuery.gte("start_datetime", nowIso);
-      const { data, error } = await trainerScheduleQuery;
+      if (options.upcomingOnly !== false) globalScheduleQuery.gte("start_datetime", nowIso);
+      const { data, error } = await globalScheduleQuery;
       if (error) throw error;
-      trainerEvents = data || [];
+      globalEvents = data || [];
+    } catch (err) {
+      console.warn("Global schedule load skipped:", err.message || err);
+    }
+
+    let trainerEvents = [];
+    try {
+      const { data: courseRows, error: courseErr } = await window.lmsSupabase
+        .from("courses")
+        .select("id, trainer_id")
+        .in("id", courseIds);
+      if (courseErr) throw courseErr;
+      const trainerIds = [...new Set((courseRows || []).map((row) => row.trainer_id).filter(Boolean))];
+
+      if (trainerIds.length > 0) {
+        const trainerScheduleQuery = window.lmsSupabase
+          .from("schedules")
+          .select("id, title, event_type, start_datetime, end_datetime, meeting_url, course_id, trainer_id")
+          .in("trainer_id", trainerIds)
+          .or("course_id.is.null")
+          .order("start_datetime", { ascending: true })
+          .limit(limit);
+        if (options.upcomingOnly !== false) trainerScheduleQuery.gte("start_datetime", nowIso);
+        const { data, error } = await trainerScheduleQuery;
+        if (error) throw error;
+        trainerEvents = data || [];
+      }
+    } catch (err) {
+      console.warn("Trainer-wide schedule load skipped:", err.message || err);
     }
 
     return Array.from(
-      new Map([...(courseEvents || []), ...trainerEvents].map((event) => [event.id, event])).values()
+      new Map([...(courseEvents || []), ...globalEvents, ...trainerEvents].map((event) => [event.id, event])).values()
     )
       .sort((a, b) => new Date(a.start_datetime || 0) - new Date(b.start_datetime || 0))
       .slice(0, limit);
