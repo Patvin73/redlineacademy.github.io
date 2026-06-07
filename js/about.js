@@ -16,10 +16,22 @@
   // Guard: keluar jika elemen modal tidak ditemukan di halaman ini
   if (!overlay || !closeBtn || !nameEl || !roleEl || !bioEl) return;
 
-  function openModal(name, role, bio) {
+  function getTranslatedBio(key, fallback) {
+    if (key && typeof window.t === 'function') {
+      return window.t(key);
+    }
+    return fallback || '';
+  }
+
+  function openModal(name, role, bio, bioKey) {
     nameEl.textContent = name;
     roleEl.textContent = role;
-    bioEl.innerHTML    = bio;
+    if (bioKey) {
+      bioEl.setAttribute('data-i18n', bioKey);
+    } else {
+      bioEl.removeAttribute('data-i18n');
+    }
+    bioEl.innerHTML = getTranslatedBio(bioKey, bio);
 
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -41,7 +53,8 @@
     openModal(
       btn.getAttribute('data-name') || '',
       btn.getAttribute('data-role') || '',
-      btn.getAttribute('data-bio')  || ''
+      btn.getAttribute('data-bio')  || '',
+      btn.getAttribute('data-bio-i18n') || ''
     );
   });
 
