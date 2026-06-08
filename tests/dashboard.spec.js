@@ -165,7 +165,11 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
             limitValue = n;
             return api;
           },
-          single: () => Promise.resolve(queryError ? { data: null, error: queryError } : { data: rows[0] || null, error: null }),
+          single: () => Promise.resolve(queryError
+            ? { data: null, error: queryError }
+            : rows[0]
+            ? { data: rows[0], error: null }
+            : { data: null, error: { code: "PGRST116", message: "No rows returned" } }),
           maybeSingle: () => Promise.resolve(queryError ? { data: null, error: queryError } : { data: rows[0] || null, error: null }),
           insert: (payload) => {
             const items = Array.isArray(payload) ? payload : [payload];
@@ -740,10 +744,10 @@ function makeMarketerFixture() {
 }
 
 test.describe("Student Dashboard", () => {
-  test("logs SQL guidance when the student dashboard view is missing", async ({ page }) => {
+  test("logs view missing and falls back when the student dashboard view is missing", async ({ page }) => {
     const consoleMessages = [];
     page.on("console", (message) => {
-      if (message.type() === "error") consoleMessages.push(message.text());
+      if (["error", "warning"].includes(message.type())) consoleMessages.push(message.text());
     });
 
     const fixture = makeStudentFixture();
@@ -751,7 +755,24 @@ test.describe("Student Dashboard", () => {
     await installSupabaseStub(page, fixture);
     await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
 
-    await expect.poll(() => consoleMessages.join("\n")).toContain("Run SQL to create public.v_student_dashboard");
+    await expect.poll(() => consoleMessages.join("\n")).toContain("[LMS] View missing: v_student_dashboard.");
+    await expect(page.locator("#statCoursesEnrolled")).toHaveText("1");
+  });
+
+  test("falls back to direct student stats when dashboard view has no row", async ({ page }) => {
+    const consoleMessages = [];
+    page.on("console", (message) => {
+      if (message.type() === "warning") consoleMessages.push(message.text());
+    });
+
+    const fixture = makeStudentFixture();
+    fixture.tableData.v_student_dashboard = [];
+    await installSupabaseStub(page, fixture);
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
+
+    await expect.poll(() => consoleMessages.join("\n")).toContain("[STATS] No row in v_student_dashboard for this student. Using direct count.");
+    await expect(page.locator("#statCoursesEnrolled")).toHaveText("1");
+    await expect(page.locator("#statPendingAssignments")).toHaveText("2");
   });
 
   test("refreshes profile form when returning to profile section", async ({ page }) => {
@@ -1079,9 +1100,18 @@ test.describe("Student Dashboard", () => {
       course_title: "Aged Care Basics",
       due_at: "2099-01-09"
     });
+    fixture.tableData.assignments.push({
+      id: "assign-draft-hidden",
+      course_id: "course-1",
+      title: "Draft Hidden Assignment",
+      type: "assignment",
+      course_title: "Aged Care Basics",
+      due_at: "2099-01-10",
+      is_published: false
+    });
     await installSupabaseStub(page, fixture);
 
-    await page.goto("/pages/dashboard-student.html");
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
     await page.locator(".sd-nav__item[data-section='assignments']").click();
 
     await expect(page.locator("#assignmentList .sd-assignment-item")).toHaveCount(4);
@@ -1089,6 +1119,7 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#assignmentList")).toContainText("Final Assignment");
     await expect(page.locator("#assignmentList")).toContainText("Care Plan Rewrite");
     await expect(page.locator("#assignmentList")).toContainText("Trainer New Assignment");
+    await expect(page.locator("#assignmentList")).not.toContainText("Draft Hidden Assignment");
     await expect(page.locator("#assignmentList")).not.toContainText("Unenrolled Course Quiz");
     await expect(page.locator(".sd-assignment-item[data-status='pending']")).toHaveCount(2);
 
@@ -1108,10 +1139,10 @@ test.describe("Student Dashboard", () => {
   test("switches schedule view from list to calendar using real dashboard controls", async ({ page }) => {
     // This test covers the list/calendar schedule toggle, which existing tests do not exercise.
     const fixture = makeStudentFixture();
-    fixture.tableData.enrollments[0].status = "paid";
+    fixture.tableData.enrollments[0].status = "completed";
     await installSupabaseStub(page, fixture);
 
-    await page.goto("/pages/dashboard-student.html");
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
     await page.locator(".sd-nav__item[data-section='schedule']").click();
 
     await expect(page.locator("#scheduleFullList .sd-schedule-item")).toHaveCount(2);
@@ -1122,6 +1153,24 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator(".sd-view-btn[data-view='calendar']")).toHaveClass(/active/);
     await expect(page.locator("#scheduleFullList .sd-schedule-item")).toHaveCount(0);
     await expect(page.locator("#scheduleFullList [data-schedule-render='true']")).not.toHaveCount(0);
+  });
+
+  test("warns when a student has no enrolled courses for assignments", async ({ page }) => {
+    const consoleMessages = [];
+    page.on("console", (message) => {
+      if (message.type() === "warning") consoleMessages.push(message.text());
+    });
+
+    const fixture = makeStudentFixture();
+    fixture.tableData.enrollments = [];
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
+    await page.locator(".sd-nav__item[data-section='assignments']").click();
+
+    await expect.poll(() => consoleMessages.join("\n")).toContain("[ENROLLMENT] courseIds kosong untuk userId:");
+    await expect.poll(() => consoleMessages.join("\n")).toContain("[ASSIGNMENTS] No enrolled courses found. Trainer-created assignments won't show.");
+    await expect(page.locator("#assignmentEmpty")).toBeVisible();
   });
 
   test("shows trainer-wide schedule events for enrolled students", async ({ page }) => {
@@ -1162,6 +1211,27 @@ test.describe("Student Dashboard", () => {
     await page.locator(".sd-nav__item[data-section='schedule']").click();
 
     await expect(page.locator("#scheduleFullList")).toContainText("All-student admin briefing");
+  });
+
+  test("shows global schedule events even when enrolled course ids are empty", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    fixture.tableData.enrollments = [];
+    fixture.tableData.schedules.push({
+      id: "schedule-global-no-enrollment",
+      title: "Global no-enrollment briefing",
+      event_type: "live_session",
+      start_datetime: "2099-01-13T09:00:00.000Z",
+      end_datetime: "2099-01-13T10:00:00.000Z",
+      meeting_url: "",
+      course_id: null,
+      trainer_id: "admin-1"
+    });
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
+    await page.locator(".sd-nav__item[data-section='schedule']").click();
+
+    await expect(page.locator("#scheduleFullList")).toContainText("Global no-enrollment briefing");
   });
 
   test("filters lesson material resource cards by material type and search text", async ({ page }) => {

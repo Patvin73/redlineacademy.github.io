@@ -45,7 +45,7 @@
     if (dot) dot.style.display = (studentUnreadMessages + studentUnreadNotifications) > 0 ? "block" : "none";
   }
 
-  const INACTIVE_ENROLLMENT_STATUSES = ["completed", "inactive", "dropped", "cancelled", "suspended"];
+  const INACTIVE_ENROLLMENT_STATUSES = ["completed"];
 
   function isActiveEnrollmentStatus(status) {
     return !INACTIVE_ENROLLMENT_STATUSES.includes((status || "active").toLowerCase());
@@ -58,12 +58,21 @@
       .select("course_id, status")
       .eq("student_id", userId);
     if (error) throw error;
-    return [
+    const result = [
       ...new Set((data || [])
         .filter((row) => !activeOnly || isActiveEnrollmentStatus(row.status))
         .map((row) => row.course_id)
         .filter(Boolean))
     ];
+    // [FIX-BUG#3] Diagnostik: log jika tidak ada course ditemukan
+    if (result.length === 0) {
+      console.warn(
+        "[ENROLLMENT] courseIds kosong untuk userId:", userId,
+        "| activeOnly:", activeOnly,
+        "| raw rows:", (data || []).map(r => ({ course_id: r.course_id, status: r.status }))
+      );
+    }
+    return result;
   }
 
   async function countStudentActiveCourses(userId) {
@@ -940,6 +949,16 @@
 
   /* ── Dashboard Stats ────────────────────────────────────────────── */
   async function loadDashboardStats(userId) {
+    // [FIX-BUG#2] Hitung dari enrollments langsung, tidak bergantung pada view
+    let activeCourseCount = null;
+    let pendingAssignmentCount = null;
+    try {
+      activeCourseCount = await countStudentActiveCourses(userId);
+      pendingAssignmentCount = await countStudentPendingAssignments(userId);
+    } catch (preErr) {
+      console.warn("[STATS] Pre-fetch error:", preErr.message);
+    }
+
     try {
       // Use the v_student_dashboard view from our schema
       const { data, error } = await window.lmsSupabase
@@ -950,16 +969,23 @@
 
       if (error) {
         if (error.code === "42P01") {
-          console.error(
-            "[LMS] View missing: v_student_dashboard. Run SQL to create public.v_student_dashboard with student_id, courses_enrolled, lessons_completed, pending_submissions, and certificates_earned columns.",
-            error
-          );
+          console.error("[LMS] View missing: v_student_dashboard.", error);
+        } else if (error.code === "PGRST116") {
+          // [FIX-BUG#2] Student belum punya row di view — tampilkan dari direct count
+          console.warn("[STATS] No row in v_student_dashboard for this student. Using direct count.");
+          if ($("statCoursesEnrolled"))
+            $("statCoursesEnrolled").textContent = activeCourseCount ?? 0;
+          if ($("statPendingAssignments"))
+            $("statPendingAssignments").textContent = pendingAssignmentCount ?? 0;
+          if ($("statLessonsCompleted"))   $("statLessonsCompleted").textContent   = 0;
+          if ($("statCertificates"))       $("statCertificates").textContent       = 0;
+          return;
+        } else {
+          throw error;
         }
         throw error;
       }
 
-      const activeCourseCount = await countStudentActiveCourses(userId);
-      const pendingAssignmentCount = await countStudentPendingAssignments(userId);
       const dashboardCourseCount = data.courses_enrolled || 0;
       const dashboardPendingCount = data.pending_submissions || 0;
       const finalPendingCount = pendingAssignmentCount === null
@@ -1007,9 +1033,13 @@
       });
     } catch (err) {
       console.warn("Stats load error (view may not exist yet):", err.message);
-      // Fallback: set all stats to 0
-      ["statCoursesEnrolled","statLessonsCompleted","statPendingAssignments","statCertificates"]
-        .forEach((id) => { if ($(id)) $(id).textContent = "0"; });
+      // [FIX-BUG#2] Gunakan direct count jika view error
+      if ($("statCoursesEnrolled"))
+        $("statCoursesEnrolled").textContent = activeCourseCount ?? 0;
+      if ($("statPendingAssignments"))
+        $("statPendingAssignments").textContent = pendingAssignmentCount ?? 0;
+      if ($("statLessonsCompleted"))   $("statLessonsCompleted").textContent   = 0;
+      if ($("statCertificates"))       $("statCertificates").textContent       = 0;
     }
   }
 
@@ -1436,6 +1466,7 @@
       const courseIds = await getStudentEnrollmentCourseIds(userId) || [];
 
       if (courseIds.length === 0) {
+        console.warn("[ASSIGNMENTS] No enrolled courses found. Trainer-created assignments won't show.");
         renderEmpty();
         setupFilterHandler();
         return;
@@ -1460,7 +1491,8 @@
         .order("due_at", { ascending: true });
 
       if (assignErr) throw assignErr;
-      if (!assignments || assignments.length === 0) {
+      const publishedAssignments = (assignments || []).filter(a => a.is_published !== false);
+      if (!publishedAssignments || publishedAssignments.length === 0) {
         renderEmpty();
         setupFilterHandler();
         return;
@@ -1469,7 +1501,7 @@
       list.querySelectorAll(".sd-assignment-item").forEach((el) => el.remove());
       hideEmpty();
 
-      assignments.forEach((assignment) => {
+      publishedAssignments.forEach((assignment) => {
         const joinedSubmissions = Array.isArray(assignment.assignment_submissions)
           ? assignment.assignment_submissions
           : [];
@@ -1581,7 +1613,7 @@
 
             if (existing?.id) {
               // Update existing submission (untuk kasus resubmit_required)
-              await window.lmsSupabase
+              const { error: updateErr } = await window.lmsSupabase
                 .from("assignment_submissions")
                 .update({
                   status: "submitted",
@@ -1590,9 +1622,10 @@
                   notes: null
                 })
                 .eq("id", existing.id);
+              if (updateErr) throw updateErr;
             } else {
               // Insert baru
-              await window.lmsSupabase
+              const { error: insertErr } = await window.lmsSupabase
                 .from("assignment_submissions")
                 .insert({
                   student_id: userId,
@@ -1601,6 +1634,7 @@
                   submitted_at: new Date().toISOString(),
                   file_urls: [fileUrl]
                 });
+              if (insertErr) throw insertErr;
             }
             await loadAssignments(userId);
 
@@ -1655,18 +1689,27 @@
   async function fetchStudentScheduleEvents(userId, options = {}) {
     const nowIso = new Date().toISOString();
     const limit = options.limit || 20;
-    const courseIds = await getStudentEnrollmentCourseIds(userId, { activeOnly: true }) || [];
-    if (courseIds.length === 0) return [];
+    // [FIX-BUG#3] Gunakan activeOnly: false agar enrollment dengan status
+    // non-standard (null, "enrolled") tetap mendapat jadwal.
+    const courseIds = await getStudentEnrollmentCourseIds(userId, { activeOnly: false }) || [];
+    // [FIX-BUG#3] Jangan early return jika courseIds kosong —
+    // jadwal global (course_id IS NULL) tetap harus ditampilkan.
 
-    const courseScheduleQuery = window.lmsSupabase
-      .from("schedules")
-      .select("id, title, event_type, start_datetime, end_datetime, meeting_url, course_id, trainer_id")
-      .in("course_id", courseIds)
-      .order("start_datetime", { ascending: true })
-      .limit(limit);
-    if (options.upcomingOnly !== false) courseScheduleQuery.gte("start_datetime", nowIso);
-    const { data: courseEvents, error: courseScheduleErr } = await courseScheduleQuery;
-    if (courseScheduleErr) throw courseScheduleErr;
+    // TODO: Add is_published column to schedules table if trainer schedule visibility is needed.
+    // [FIX-BUG#3] Skip course-specific query jika tidak ada courseIds
+    let courseEvents = [];
+    if (courseIds.length > 0) {
+      const courseScheduleQuery = window.lmsSupabase
+        .from("schedules")
+        .select("id, title, event_type, start_datetime, end_datetime, meeting_url, course_id, trainer_id")
+        .in("course_id", courseIds)
+        .order("start_datetime", { ascending: true })
+        .limit(limit);
+      if (options.upcomingOnly !== false) courseScheduleQuery.gte("start_datetime", nowIso);
+      const { data: courseEventsData, error: courseScheduleErr } = await courseScheduleQuery;
+      if (courseScheduleErr) throw courseScheduleErr;
+      courseEvents = courseEventsData || [];
+    }
 
     let globalEvents = [];
     try {
@@ -1686,19 +1729,24 @@
 
     let trainerEvents = [];
     try {
-      const { data: courseRows, error: courseErr } = await window.lmsSupabase
-        .from("courses")
-        .select("id, trainer_id")
-        .in("id", courseIds);
-      if (courseErr) throw courseErr;
+      let courseRows = [];
+      if (courseIds.length > 0) {
+        const { data, error: courseErr } = await window.lmsSupabase
+          .from("courses")
+          .select("id, trainer_id")
+          .in("id", courseIds);
+        if (courseErr) throw courseErr;
+        courseRows = data || [];
+      }
       const trainerIds = [...new Set((courseRows || []).map((row) => row.trainer_id).filter(Boolean))];
 
       if (trainerIds.length > 0) {
+        // [FIX-BUG#3] Ambil SEMUA jadwal dari trainer yang mengajar
+        // kursus student — baik yang punya course_id maupun tidak.
         const trainerScheduleQuery = window.lmsSupabase
           .from("schedules")
           .select("id, title, event_type, start_datetime, end_datetime, meeting_url, course_id, trainer_id")
           .in("trainer_id", trainerIds)
-          .or("course_id.is.null")
           .order("start_datetime", { ascending: true })
           .limit(limit);
         if (options.upcomingOnly !== false) trainerScheduleQuery.gte("start_datetime", nowIso);

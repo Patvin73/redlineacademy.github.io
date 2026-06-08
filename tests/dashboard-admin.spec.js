@@ -1219,6 +1219,42 @@ test("trainer can open grading submission and save grade", async ({ page }) => {
   ]));
 });
 
+test("trainer sees submissions for courses they own even when assignment was created by admin", async ({ page }) => {
+  await installSupabaseStub(page, "trainer", {
+    assignments: [
+      { id: "assign-1", course_id: "course-1", trainer_id: "e2e-trainer", title: "Module 1 Quiz", pass_mark: 70 },
+      { id: "assign-admin-created-course-task", course_id: "course-1", trainer_id: "e2e-admin", title: "Admin Created Course Task", pass_mark: 70 }
+    ],
+    extraAssignmentSubmissions: [
+      {
+        id: "sub-admin-created-course-task",
+        assignment_id: "assign-admin-created-course-task",
+        student_id: "e2e-student-2",
+        status: "submitted",
+        submitted_at: "2026-03-11T10:00:00.000Z",
+        grade: null,
+        profiles: { id: "e2e-student-2", full_name: "Bravo Student" },
+        assignments: {
+          title: "Admin Created Course Task",
+          trainer_id: "e2e-admin",
+          course_id: "course-1",
+          pass_mark: 70,
+          courses: { trainer_id: "e2e-trainer" }
+        },
+        notes: "",
+        file_urls: []
+      }
+    ]
+  });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator(".ad-nav__item[data-section='grading']").click();
+  await expect(page.locator("#section-grading")).toHaveClass(/active/);
+
+  await expect(page.locator(".ad-submission-item")).toHaveCount(2);
+  await expect(page.locator("#submissionQueue")).toContainText("Admin Created Course Task");
+});
+
 test("trainer progress calculation counts duplicate passed submissions once", async ({ page }) => {
   await installSupabaseStub(page, "trainer", {
     lessons: [

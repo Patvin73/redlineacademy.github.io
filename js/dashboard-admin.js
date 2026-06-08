@@ -653,6 +653,41 @@
   /* ================================================================
      PENDING ACTIONS
   ================================================================ */
+  async function getTrainerGradingAssignmentIds() {
+    if (currentRole !== "trainer" || !currentProfile?.id) return null;
+
+    const assignmentIds = new Set();
+
+    const { data: ownAssignments, error: ownAssignmentsErr } = await window.lmsSupabase
+      .from("assignments")
+      .select("id")
+      .eq("trainer_id", currentProfile.id);
+    if (ownAssignmentsErr) throw ownAssignmentsErr;
+    (ownAssignments || []).forEach((assignment) => {
+      if (assignment.id) assignmentIds.add(assignment.id);
+    });
+
+    const { data: trainerCourses, error: trainerCoursesErr } = await window.lmsSupabase
+      .from("courses")
+      .select("id")
+      .eq("trainer_id", currentProfile.id);
+    if (trainerCoursesErr) throw trainerCoursesErr;
+
+    const courseIds = (trainerCourses || []).map((course) => course.id).filter(Boolean);
+    if (courseIds.length > 0) {
+      const { data: courseAssignments, error: courseAssignmentsErr } = await window.lmsSupabase
+        .from("assignments")
+        .select("id")
+        .in("course_id", courseIds);
+      if (courseAssignmentsErr) throw courseAssignmentsErr;
+      (courseAssignments || []).forEach((assignment) => {
+        if (assignment.id) assignmentIds.add(assignment.id);
+      });
+    }
+
+    return [...assignmentIds];
+  }
+
   async function loadPendingActions() {
     const list  = $("pendingList");
     const count = $("pendingActionCount");
@@ -663,17 +698,24 @@
 
     try {
       // Pending grading
-      const { data: subs } = await window.lmsSupabase
-        .from("assignment_submissions")
-        .select("id, student_id, assignment_id, submitted_at, assignments!inner(title, trainer_id)")
-        .eq("status", "submitted")
-        .eq("assignments.trainer_id", currentProfile.id)
-        .limit(5);
+      const gradingAssignmentIds = await getTrainerGradingAssignmentIds();
+      let subs = [];
+      if (currentRole !== "trainer" || gradingAssignmentIds.length > 0) {
+        let pendingQuery = window.lmsSupabase
+          .from("assignment_submissions")
+          .select("id, student_id, assignment_id, submitted_at, assignments!inner(title, trainer_id)")
+          .eq("status", "submitted")
+          .limit(5);
+        if (currentRole === "trainer") pendingQuery = pendingQuery.in("assignment_id", gradingAssignmentIds);
+        const { data: pendingSubs } = await pendingQuery;
+        subs = pendingSubs || [];
+      }
 
-      (subs || []).forEach((s) => {
+      subs.forEach((s) => {
+        const assignment = Array.isArray(s.assignments) ? s.assignments[0] : s.assignments;
         actions.push({
           icon: "📝",
-          text: `Grade: ${s.assignments?.title || "Assignment"}`,
+          text: `Grade: ${assignment?.title || "Assignment"}`,
           meta: timeAgo(s.submitted_at),
           section: "grading",
         });
@@ -1717,25 +1759,34 @@
     queue.querySelectorAll(".ad-submission-item").forEach((el) => el.remove());
 
     try {
+      const gradingAssignmentIds = await getTrainerGradingAssignmentIds();
+      if (currentRole === "trainer" && gradingAssignmentIds.length === 0) {
+        if (empty) empty.style.display = "flex";
+        return;
+      }
+
       let query = window.lmsSupabase
         .from("assignment_submissions")
         .select(`
           id, status, submitted_at, grade, notes, file_urls,
           profiles ( id, full_name ),
-          assignments!inner ( title, trainer_id, pass_mark )
+          assignments!inner ( title, trainer_id, pass_mark, course_id )
         `)
-        .eq("assignments.trainer_id", currentProfile.id)
         .order("submitted_at", { ascending: false })
         .limit(20);
 
       if (filter !== "all") query = query.eq("status", filter);
+      if (currentRole === "trainer") query = query.in("assignment_id", gradingAssignmentIds);
 
-      const { data } = await query;
+      const { data, error } = await query;
+      if (error) throw error;
 
-      if (!data || data.length === 0) { if (empty) empty.style.display = "flex"; return; }
+      const visibleSubmissions = data || [];
+
+      if (!visibleSubmissions || visibleSubmissions.length === 0) { if (empty) empty.style.display = "flex"; return; }
       if (empty) empty.style.display = "none";
 
-      data.forEach((sub) => {
+      visibleSubmissions.forEach((sub) => {
         const item = document.createElement("div");
         item.className = "ad-submission-item";
         item.dataset.id = sub.id;
