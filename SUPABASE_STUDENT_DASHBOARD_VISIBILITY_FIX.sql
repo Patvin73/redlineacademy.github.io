@@ -27,11 +27,45 @@ left join public.certificates cert on cert.student_id = e.student_id
 group by e.student_id;
 
 grant select on public.v_student_dashboard to anon, authenticated;
+grant select on public.profiles to authenticated;
 grant select on public.courses to authenticated;
 grant select on public.enrollments to authenticated;
 grant select on public.assignments to authenticated;
 grant select, insert, update on public.assignment_submissions to authenticated;
 grant select on public.schedules to authenticated;
+
+drop policy if exists "trainer_read_courses_for_grading" on public.courses;
+create policy "trainer_read_courses_for_grading"
+on public.courses
+for select
+to authenticated
+using (
+  status = 'published'
+  or trainer_id = (select auth.uid())
+  or private.is_staff((select auth.uid()))
+);
+
+drop policy if exists "trainer_read_assignments_for_grading" on public.assignments;
+create policy "trainer_read_assignments_for_grading"
+on public.assignments
+for select
+to authenticated
+using (
+  trainer_id = (select auth.uid())
+  or private.is_staff((select auth.uid()))
+  or exists (
+    select 1
+    from public.courses c
+    where c.id = assignments.course_id
+      and c.trainer_id = (select auth.uid())
+  )
+  or exists (
+    select 1
+    from public.enrollments e
+    where e.student_id = (select auth.uid())
+      and e.course_id = assignments.course_id
+  )
+);
 
 -- Student must be able to read their own enrollment rows. Without this,
 -- dashboard stats, assignments, schedules, and materials all look empty.
@@ -69,7 +103,41 @@ for select
 to authenticated
 using (
   student_id = (select auth.uid())
+  or exists (
+    select 1
+    from public.assignments a
+    where a.id = assignment_submissions.assignment_id
+      and a.trainer_id = (select auth.uid())
+  )
+  or exists (
+    select 1
+    from public.assignments a
+    join public.courses c on c.id = a.course_id
+    where a.id = assignment_submissions.assignment_id
+      and c.trainer_id = (select auth.uid())
+  )
   or private.is_staff((select auth.uid()))
+);
+
+drop policy if exists "trainer_read_student_profiles_for_grading" on public.profiles;
+create policy "trainer_read_student_profiles_for_grading"
+on public.profiles
+for select
+to authenticated
+using (
+  id = (select auth.uid())
+  or private.is_staff((select auth.uid()))
+  or exists (
+    select 1
+    from public.assignment_submissions sub
+    join public.assignments a on a.id = sub.assignment_id
+    left join public.courses c on c.id = a.course_id
+    where sub.student_id = profiles.id
+      and (
+        a.trainer_id = (select auth.uid())
+        or c.trainer_id = (select auth.uid())
+      )
+  )
 );
 
 drop policy if exists "student_insert_own_assignment_submissions" on public.assignment_submissions;

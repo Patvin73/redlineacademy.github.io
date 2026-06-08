@@ -1769,7 +1769,7 @@
         .from("assignment_submissions")
         .select(`
           id, status, submitted_at, grade, notes, file_urls,
-          profiles ( id, full_name ),
+          profiles!assignment_submissions_student_id_fkey ( id, full_name ),
           assignments!inner ( title, trainer_id, pass_mark, course_id )
         `)
         .order("submitted_at", { ascending: false })
