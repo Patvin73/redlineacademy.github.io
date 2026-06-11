@@ -20,6 +20,7 @@
   let studentNotificationChannelUserId = null;
   let studentMessageChannel = null;
   let studentMessageChannelUserId = null;
+  let studentUnreadSections = { courses: 0, assignments: 0, schedule: 0 };
   const COURSE_MATERIAL_BUCKET = "course-materials";
   const ASSIGNMENT_SUBMISSIONS_BUCKET = "assignment-submissions";
 
@@ -36,6 +37,19 @@
   }
 
   function updateStudentAttentionIndicators() {
+    const sectionBadges = [
+      { id: "courseBadge", count: studentUnreadSections.courses },
+      { id: "assignmentBadge", count: studentUnreadSections.assignments },
+      { id: "scheduleBadge", count: studentUnreadSections.schedule }
+    ];
+    sectionBadges.forEach(({ id, count }) => {
+      const badge = $(id);
+      if (!badge) return;
+      const existingCount = id === "assignmentBadge" ? parseInt(badge.textContent || "0", 10) || 0 : 0;
+      const nextCount = Math.max(count, existingCount);
+      badge.textContent = nextCount;
+      badge.style.display = nextCount > 0 ? "inline-block" : "none";
+    });
     const msgBadge = $("messageBadge");
     if (msgBadge) {
       msgBadge.textContent = studentUnreadMessages;
@@ -43,6 +57,28 @@
     }
     const dot = $("notifDot");
     if (dot) dot.style.display = (studentUnreadMessages + studentUnreadNotifications) > 0 ? "block" : "none";
+  }
+
+  function notificationSection(type) {
+    return {
+      assignment_new: "assignments",
+      assignment_graded: "assignments",
+      submission_received: "assignments",
+      course_enrolled: "courses",
+      material_new: "courses",
+      schedule_new: "schedule",
+      session_reminder: "schedule"
+    }[type] || "";
+  }
+
+  function updateStudentSectionNotificationCounts(notifications = []) {
+    const counts = { courses: 0, assignments: 0, schedule: 0 };
+    (notifications || []).forEach((notification) => {
+      if (notification.is_read) return;
+      const section = notificationSection(notification.type);
+      if (section && Object.prototype.hasOwnProperty.call(counts, section)) counts[section] += 1;
+    });
+    studentUnreadSections = counts;
   }
 
   const INACTIVE_ENROLLMENT_STATUSES = ["completed"];
@@ -403,6 +439,7 @@
         });
         studentUnreadMessages = 0;
         studentUnreadNotifications = 0;
+        studentUnreadSections = { courses: 0, assignments: 0, schedule: 0 };
         updateNotifDot();
         if (!window.lmsSupabase || unreadItems.length === 0) return;
         const unreadNotificationIds = unreadItems.map((item) => item.dataset.id).filter(Boolean);
@@ -432,6 +469,7 @@
   function renderNotifications(notifications, messageNotifs = []) {
     const list    = $("notifList");
     if (!list) return;
+    updateStudentSectionNotificationCounts(notifications);
 
     const messageItems = (messageNotifs || []).map((msg) => ({
       id: msg.id,
@@ -459,6 +497,7 @@
       list.innerHTML = `<li class="sd-notif-empty" data-i18n="lmsNoNotifications">No notifications</li>`;
       studentUnreadNotifications = 0;
       studentUnreadMessages = 0;
+      studentUnreadSections = { courses: 0, assignments: 0, schedule: 0 };
       updateStudentAttentionIndicators();
       return;
     }
@@ -513,6 +552,7 @@
               .eq("id", id)
               .catch(() => {});
           }
+          await loadNotifications(currentStudentProfile?.id);
         }
         updateStudentAttentionIndicators();
       });
@@ -1058,9 +1098,9 @@
     return data?.[0] || null;
   }
 
-  function renderContinueLearningCourse(container, course, completionPercent = 0) {
+  async function renderContinueLearningCourse(container, course, completionPercent = 0) {
     const pct = Math.round(completionPercent || 0);
-    const thumbSrc = toSafeUiUrl(course.thumbnail_url) || "";
+    const thumbSrc = await resolveCourseMaterialUrl({ material_url: course.thumbnail_url }) || "";
     container.innerHTML = `
         <div class="sd-continue-item">
           <div class="sd-continue-item__thumb${thumbSrc ? "" : " sd-continue-item__thumb--placeholder"}">
@@ -1115,12 +1155,12 @@
 
       if (error || !data) throw error || new Error("No active course");
 
-      renderContinueLearningCourse(container, data.courses, data.completion_percent);
+      await renderContinueLearningCourse(container, data.courses, data.completion_percent);
     } catch {
       try {
         const fallbackCourse = await getFirstActiveCourseForContinue(userId);
         if (fallbackCourse) {
-          renderContinueLearningCourse(container, fallbackCourse, 0);
+          await renderContinueLearningCourse(container, fallbackCourse, 0);
           return;
         }
       } catch {}
@@ -1362,7 +1402,12 @@
 
       grid.innerHTML = "";
 
-      const cards = courses.map((course) => {
+      const coursesWithThumbnails = await Promise.all(courses.map(async (course) => ({
+        course,
+        thumbnailDisplayUrl: await resolveCourseMaterialUrl({ material_url: course.thumbnail_url })
+      })));
+
+      const cards = coursesWithThumbnails.map(({ course, thumbnailDisplayUrl }) => {
         const enroll = enrollmentMap.get(course.id);
         const statusRaw = (enroll?.status || "available").toLowerCase();
         const status = statusRaw === "completed"
@@ -1378,7 +1423,7 @@
           : "sd-status-badge--active";
         const progress = Math.round(progressMap.get(course.id) || 0);
         const progressLabel = typeof t === "function" ? t("lmsProgress") : "Progress";
-        const thumbSrc = toSafeUiUrl(course.thumbnail_url) || "";
+        const thumbSrc = thumbnailDisplayUrl || "";
         const category = course.categories?.name || course.category_id || "Course";
         const creatorLabel = typeof t === "function" ? t("lmsCreatorId") : "Creator ID";
         const creatorId = creatorIdForCourse(course);
@@ -2205,7 +2250,7 @@
       group.messages.sort((a, b) => String(a.recipient_id || "").localeCompare(String(b.recipient_id || "")));
       group.key = `${group.type}:${group.messages.map((msg) => msg.id).sort().join(",")}`;
       group.isUnread = group.messages.some((msg) => !msg.is_read && msg.recipient_id === currentStudentProfile.id);
-      group.sender = profileMap.get(group.sender_id) || group.messages[0]?.profiles || {};
+      group.sender = profileMap.get(group.sender_id) || group.messages[0]?.sender_profile || group.messages[0]?.profiles || {};
       return group;
     });
   }
@@ -2393,7 +2438,11 @@
 
     try {
       bindStudentMessageViewTabs();
-      const messageSelect = "id, sender_id, recipient_id, subject, body, is_read, is_archived, created_at";
+      const messageSelect = `
+        id, sender_id, recipient_id, subject, body, is_read, is_archived, created_at,
+        sender_profile:profiles!messages_sender_id_fkey ( id, full_name, email, role ),
+        recipient_profile:profiles!messages_recipient_id_fkey ( id, full_name, email, role )
+      `;
       const [{ data: receivedData, error: receivedError }, { data: sentData, error: sentError }] = await Promise.all([
         (() => {
           const q = window.lmsSupabase
@@ -2496,8 +2545,8 @@
               refreshMessageBadges();
             }
           }
-          const sender = profileMap.get(msg.sender_id) || msg.profiles || {};
-          const senderLabel = sender.full_name || sender.email || msg.sender_id || "System";
+          const sender = profileMap.get(msg.sender_id) || msg.sender_profile || msg.profiles || {};
+          const senderLabel = sender.full_name || sender.email || "Unknown sender";
           detail.innerHTML = `
             <div class="sd-message-view__body">
               <p class="sd-inbox-item__name">${escHtml(group.subject)}</p>

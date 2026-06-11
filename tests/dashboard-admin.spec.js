@@ -93,6 +93,7 @@ async function installSupabaseStub(page, role, options = {}) {
     pending_grading: 2,
     avg_completion_percent: 76
   };
+  Object.assign(kpiRow, options.kpiRow || {});
 
   const schedules = [
     {
@@ -818,6 +819,7 @@ test("trainer does not check admin-only required views", async ({ page }) => {
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
 
   await expect(page.locator(".ad-main").getByText("Database view")).toHaveCount(0);
+  await page.waitForFunction(() => typeof window.__e2eGetQueryLog === "function");
   await expect.poll(async () => page.evaluate(() => window.__e2eGetQueryLog())).not.toContain("v_students_at_risk");
   await expect.poll(async () => page.evaluate(() => window.__e2eGetQueryLog())).not.toContain("v_course_overview");
 });
@@ -1078,8 +1080,28 @@ test("trainer sees KPI values and role badge", async ({ page }) => {
 
   await expect(page.locator("#kpiTotalStudents")).toHaveText("12");
   await expect(page.locator("#kpiActiveCourses")).toHaveText("3");
-  await expect(page.locator("#kpiPendingGrading")).toHaveText("2");
+  await expect(page.locator("#kpiPendingGrading")).toHaveText("1");
   await expect(page.locator("#kpiCompletionRate")).toHaveText("76%");
+});
+
+test("trainer total student KPI falls back to visible students when trainer view is stale", async ({ page }) => {
+  await installSupabaseStub(page, "trainer", {
+    kpiRow: { total_students: 0 },
+    extraProfiles: [
+      {
+        id: "e2e-student-3",
+        full_name: "Charlie Student",
+        role: "student",
+        student_id: "ST-003",
+        email: "charlie@example.com",
+        is_active: true,
+        created_at: "2026-03-05T08:00:00.000Z"
+      }
+    ]
+  });
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await expect(page.locator("#kpiTotalStudents")).toHaveText("3");
 });
 
 test("admin sees registered students even without enrollments", async ({ page }) => {

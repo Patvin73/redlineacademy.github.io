@@ -508,7 +508,7 @@ test.describe("Student and marketer flows", {
     await installSupabaseStub(page, stub);
 
     await page.goto("/pages/dashboard-student.html");
-    await expect(page.locator("#statCoursesEnrolled")).toHaveText("2");
+    await expect(page.locator("#statCoursesEnrolled")).toHaveText("1");
     await expect(page.locator(".sd-progress__pct")).toContainText("65%");
     await expect(page.locator("#courseGrid .sd-course-card")).toHaveCount(0);
 

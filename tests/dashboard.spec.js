@@ -479,7 +479,12 @@ function makeStudentFixture() {
           completion_percent: 65,
           last_accessed_at: "2099-01-01T08:00:00.000Z",
           last_lesson_id: "lesson-1",
-          courses: { id: "course-1", title: "Aged Care Basics", thumbnail_url: "", slug: "aged-care-basics" },
+          courses: {
+            id: "course-1",
+            title: "Aged Care Basics",
+            thumbnail_url: "https://example.com/course-materials/courses/thumbnails/aged-care-basics.png",
+            slug: "aged-care-basics"
+          },
           enrollments: { status: "active" }
         },
         {
@@ -536,7 +541,7 @@ function makeStudentFixture() {
         {
           id: "course-1",
           title: "Aged Care Basics",
-          thumbnail_url: "",
+          thumbnail_url: "https://example.com/course-materials/courses/thumbnails/aged-care-basics.png",
           category_id: "aged-care",
           trainer_id: trainerId,
           profiles: { admin_id: "TR-001" },
@@ -872,7 +877,7 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#pfConfirmPw")).toHaveValue("");
   });
 
-  test("shows all courses with creator IDs, including courses not yet enrolled", async ({ page }) => {
+  test("shows all courses with signed thumbnails and creator IDs, including courses not yet enrolled", async ({ page }) => {
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);
 
@@ -889,6 +894,9 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#courseGrid")).toContainText("Creator ID: TR-001");
     await expect(page.locator("#courseGrid")).toContainText("Creator ID: TR-009");
     await expect(page.locator("#courseGrid .sd-course-card[data-status='available']")).toHaveCount(1);
+    await expect(
+      page.locator("#courseGrid .sd-course-card", { hasText: "Aged Care Basics" }).locator(".sd-course-card__thumb img")
+    ).toHaveAttribute("src", "https://example.com/signed/course-materials/courses/thumbnails/aged-care-basics.png");
   });
 
   test("course stat falls back to active enrollments when dashboard view is stale", async ({ page }) => {
@@ -904,6 +912,10 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#statCoursesEnrolled")).toHaveText("1");
     await expect(page.locator("#statPendingAssignments")).toHaveText("2");
     await expect(page.locator("#continueLearningContent")).toContainText("Aged Care Basics");
+    await expect(page.locator("#continueLearningContent .sd-continue-item__thumb img")).toHaveAttribute(
+      "src",
+      "https://example.com/signed/course-materials/courses/thumbnails/aged-care-basics.png"
+    );
   });
 
   test("realtime notification refreshes student stats and active course grid", async ({ page }) => {
@@ -1332,11 +1344,13 @@ test.describe("Student Dashboard", () => {
     expect(afterDelete.some((msg) => msg.id === "msg-1")).toBe(false);
   });
 
-  test("reply keeps the original sender when sender profile is not returned", async ({ page }) => {
+  test("reply uses the original sender name when the profile lookup is not returned", async ({ page }) => {
     const fixture = makeStudentFixture();
     fixture.tableData.profiles = fixture.tableData.profiles.filter((profile) => profile.id !== "trainer-1");
     fixture.tableData.messages = fixture.tableData.messages.map((message) =>
-      message.sender_id === "trainer-1" ? { ...message, profiles: null } : message
+      message.sender_id === "trainer-1"
+        ? { ...message, profiles: null, sender_profile: { id: "trainer-1", full_name: "Trainer One", email: "trainer@example.com" } }
+        : message
     );
     await installSupabaseStub(page, fixture);
 
@@ -1344,9 +1358,10 @@ test.describe("Student Dashboard", () => {
     await page.locator(".sd-nav__item[data-section='messages']").click();
     await page.locator(".sd-inbox-item", { hasText: "Welcome" }).click();
 
-    await expect(page.locator("#messageDetail")).toContainText("From: trainer-1");
+    await expect(page.locator("#messageDetail")).toContainText("From: Trainer One");
     await page.locator("[data-sd-msg-reply]").click();
     await expect(page.locator("#studentMsgRecipient")).toHaveValues(["trainer-1"]);
+    await expect(page.locator("#studentMsgRecipient option:checked")).toHaveText("Trainer One");
   });
 
   test("message notification opens the selected student message", async ({ page }) => {
@@ -1375,7 +1390,7 @@ test.describe("Student Dashboard", () => {
 
     await page.goto("/pages/dashboard-student.html");
     await expect(page.locator("#messageBadge")).toHaveText("1");
-    await expect(page.locator("#statPendingAssignments")).toHaveText("1");
+    await expect(page.locator("#statPendingAssignments")).toHaveText("2");
 
     const triggered = await page.evaluate(async () => {
       const rows = window.__QA_TABLE_DATA__;

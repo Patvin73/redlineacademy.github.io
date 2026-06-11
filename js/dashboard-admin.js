@@ -22,6 +22,7 @@
   let adminNotificationChannelUserId = null;
   let adminMessageChannel = null;
   let adminMessageChannelUserId = null;
+  let adminUnreadSections = { courses: 0, grading: 0, schedule: 0 };
   const USER_ROLE_TAGS = { admin: "red", trainer: "purple", student: "blue" };
   const COURSE_MATERIAL_BUCKET = "course-materials";
   const LESSON_MATERIAL_ACCEPT = {
@@ -506,6 +507,14 @@
           .eq("trainer_id", currentProfile.id)
           .single();
         data = trainerData;
+        if (data) {
+          const [visibleStudentCount, pendingGradingCount] = await Promise.all([
+            countVisibleStudentsForCurrentRole().catch(() => null),
+            countPendingGradingForCurrentRole().catch(() => null)
+          ]);
+          if ((data.total_students || 0) === 0 && visibleStudentCount !== null) data.total_students = visibleStudentCount;
+          if (pendingGradingCount !== null) data.pending_grading = pendingGradingCount;
+        }
       }
 
       if (data) {
@@ -686,6 +695,28 @@
     }
 
     return [...assignmentIds];
+  }
+
+  async function countVisibleStudentsForCurrentRole() {
+    const { count, error } = await window.lmsSupabase
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("role", "student");
+    if (error) throw error;
+    return count || 0;
+  }
+
+  async function countPendingGradingForCurrentRole() {
+    const gradingAssignmentIds = await getTrainerGradingAssignmentIds();
+    if (currentRole === "trainer" && gradingAssignmentIds.length === 0) return 0;
+    let query = window.lmsSupabase
+      .from("assignment_submissions")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "submitted");
+    if (currentRole === "trainer") query = query.in("assignment_id", gradingAssignmentIds);
+    const { count, error } = await query;
+    if (error) throw error;
+    return count || 0;
   }
 
   async function loadPendingActions() {
@@ -1767,11 +1798,7 @@
 
       let query = window.lmsSupabase
         .from("assignment_submissions")
-        .select(`
-          id, status, submitted_at, grade, notes, file_urls,
-          profiles!assignment_submissions_student_id_fkey ( id, full_name ),
-          assignments!inner ( title, trainer_id, pass_mark, course_id )
-        `)
+        .select("id, student_id, assignment_id, status, submitted_at, grade, notes, file_urls")
         .order("submitted_at", { ascending: false })
         .limit(20);
 
@@ -1781,7 +1808,7 @@
       const { data, error } = await query;
       if (error) throw error;
 
-      const visibleSubmissions = data || [];
+      const visibleSubmissions = await hydrateSubmissionQueueRows(data || []);
 
       if (!visibleSubmissions || visibleSubmissions.length === 0) { if (empty) empty.style.display = "flex"; return; }
       if (empty) empty.style.display = "none";
@@ -1810,6 +1837,42 @@
       });
 
     } catch (err) { console.warn("Submission queue error:", err.message); }
+  }
+
+  async function hydrateSubmissionQueueRows(submissions) {
+    const studentIds = [...new Set((submissions || []).map((sub) => sub.student_id).filter(Boolean))];
+    const assignmentIds = [...new Set((submissions || []).map((sub) => sub.assignment_id).filter(Boolean))];
+    let profileRows = [];
+    let assignmentRows = [];
+    try {
+      if (studentIds.length) {
+        const { data } = await window.lmsSupabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", studentIds);
+        profileRows = data || [];
+      }
+    } catch {
+      profileRows = [];
+    }
+    try {
+      if (assignmentIds.length) {
+        const { data } = await window.lmsSupabase
+          .from("assignments")
+          .select("id, title, trainer_id, pass_mark, course_id")
+          .in("id", assignmentIds);
+        assignmentRows = data || [];
+      }
+    } catch {
+      assignmentRows = [];
+    }
+    const profileMap = new Map(profileRows.map((profile) => [profile.id, profile]));
+    const assignmentMap = new Map(assignmentRows.map((assignment) => [assignment.id, assignment]));
+    return (submissions || []).map((sub) => ({
+      ...sub,
+      profiles: sub.profiles || profileMap.get(sub.student_id) || null,
+      assignments: sub.assignments || assignmentMap.get(sub.assignment_id) || null
+    }));
   }
 
   function openGradingForm(sub) {
@@ -2393,6 +2456,19 @@
   let adminUnreadNotifications = 0;
 
   function updateAdminAttentionIndicators() {
+    const sectionBadges = [
+      { id: "adCourseBadge", count: adminUnreadSections.courses },
+      { id: "gradingBadge", count: adminUnreadSections.grading },
+      { id: "adScheduleBadge", count: adminUnreadSections.schedule }
+    ];
+    sectionBadges.forEach(({ id, count }) => {
+      const badge = $(id);
+      if (!badge) return;
+      const existingCount = id === "gradingBadge" ? parseInt(badge.textContent || "0", 10) || 0 : 0;
+      const nextCount = Math.max(count, existingCount);
+      badge.textContent = nextCount;
+      badge.style.display = nextCount > 0 ? "inline-block" : "none";
+    });
     const msgBadge = $("adMsgBadge");
     if (msgBadge) {
       msgBadge.textContent = adminUnreadMessages;
@@ -2400,6 +2476,28 @@
     }
     const dot = $("adNotifDot");
     if (dot) dot.style.display = (adminUnreadMessages + adminUnreadNotifications) > 0 ? "block" : "none";
+  }
+
+  function adminNotificationSection(type) {
+    return {
+      assignment_new: "grading",
+      assignment_graded: "grading",
+      submission_received: "grading",
+      course_enrolled: "courses",
+      material_new: "courses",
+      schedule_new: "schedule",
+      session_reminder: "schedule"
+    }[type] || "";
+  }
+
+  function updateAdminSectionNotificationCounts(notifs = []) {
+    const counts = { courses: 0, grading: 0, schedule: 0 };
+    (notifs || []).forEach((notif) => {
+      if (notif.is_read) return;
+      const section = adminNotificationSection(notif.type);
+      if (section && Object.prototype.hasOwnProperty.call(counts, section)) counts[section] += 1;
+    });
+    adminUnreadSections = counts;
   }
 
   async function refreshAdminMessageIndicators(userId = currentProfile?.id) {
@@ -4337,6 +4435,7 @@
     const list = $("adNotifList");
     if (!list) return;
 
+    updateAdminSectionNotificationCounts(notifs);
     adminUnreadNotifications = notifs.filter((n) => !n.is_read).length;
     adminUnreadMessages = messageNotifs.filter((msg) => !msg.is_read && msg.recipient_id === currentProfile?.id).length;
     updateAdminAttentionIndicators();
