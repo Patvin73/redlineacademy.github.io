@@ -1368,7 +1368,7 @@ test("trainer can create schedule event", async ({ page }) => {
   await page.click("#createEventBtn");
   await expect(page.locator("#eventFormCard")).toBeVisible();
   await expect(page.locator("#evCourse option")).toHaveCount(2);
-  await expect(page.locator("#evCourse option[value='']")).toHaveText("All Enrolled Students");
+  await expect(page.locator("#evCourse option[value='']")).toHaveText("Semua Student Terdaftar");
   await expect(page.locator("#evCourse option[value='course-1']")).toHaveText("Leadership Basics");
   await expect(page.locator("#evCourse option[value='course-2']")).toHaveCount(0);
 
@@ -2136,7 +2136,7 @@ test("admin can publish and delete announcement", async ({ page }) => {
   await page.click("#createAnnouncementBtn");
   await expect(page.locator("#announcementFormCard")).toBeVisible();
   await expect(page.locator("#anCourse option")).toHaveCount(3);
-  await expect(page.locator("#anCourse option[value='']")).toHaveText("All Courses (Global)");
+  await expect(page.locator("#anCourse option[value='']")).toHaveText("Semua Kursus (Global)");
   await expect(page.locator("#anCourse option[value='course-1']")).toHaveText("Leadership Basics");
   await expect(page.locator("#anCourse option[value='course-2']")).toHaveText("Emergency Response");
 

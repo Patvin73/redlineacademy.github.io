@@ -711,7 +711,7 @@
           <div class="ad-settings-layout">
             <!-- Profile Info Card -->
             <div class="ad-card">
-              <h3 class="ad-card__title">Profile Information</h3>
+              <h3 class="ad-card__title" data-i18n="adProfileInformation">Profile Information</h3>
 
               <!-- Avatar -->
               <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
@@ -733,6 +733,7 @@
                     class="ad-btn ad-btn--outline ad-btn--sm"
                     id="adAvatarUploadBtn"
                     type="button"
+                    data-i18n="adChangePhoto"
                   >
                     Change Photo
                   </button>
@@ -750,33 +751,34 @@
               </div>
 
               <div class="ad-field">
-                <label class="ad-label" for="adPfFullName">Full Name</label>
+                <label class="ad-label" for="adPfFullName" data-i18n="fullNameLabel">Full Name</label>
                 <input class="ad-input" type="text" id="adPfFullName" />
               </div>
               <div class="ad-field">
-                <label class="ad-label" for="adPfPhone">Phone</label>
+                <label class="ad-label" for="adPfPhone" data-i18n="phoneLabel">Phone</label>
                 <input class="ad-input" type="tel" id="adPfPhone" />
               </div>
               <div class="ad-field">
-                <label class="ad-label" for="adPfBio">Bio</label>
+                <label class="ad-label" for="adPfBio" data-i18n="lmsBioLabel">Bio</label>
                 <textarea
                   class="ad-input"
                   id="adPfBio"
                   rows="3"
+                  data-i18n-placeholder="adProfileBioPlaceholder"
                   placeholder="Tell students about yourself..."
                 ></textarea>
               </div>
               <p id="adProfileMsg" style="font-size:12px;min-height:18px;margin-bottom:8px"></p>
-              <button class="ad-btn ad-btn--primary" id="adSaveProfileBtn">
+              <button class="ad-btn ad-btn--primary" id="adSaveProfileBtn" data-i18n="lmsSaveProfile">
                 Save Changes
               </button>
             </div>
 
             <!-- Change Password Card -->
             <div class="ad-card">
-              <h3 class="ad-card__title">Change Password</h3>
+              <h3 class="ad-card__title" data-i18n="lmsChangePassword">Change Password</h3>
               <div class="ad-field">
-                <label class="ad-label" for="adCurrentPw">Current Password</label>
+                <label class="ad-label" for="adCurrentPw" data-i18n="lmsCurrentPassword">Current Password</label>
                 <input
                   class="ad-input"
                   type="password"
@@ -785,7 +787,7 @@
                 />
               </div>
               <div class="ad-field">
-                <label class="ad-label" for="adNewPw">New Password</label>
+                <label class="ad-label" for="adNewPw" data-i18n="lmsNewPassword">New Password</label>
                 <input
                   class="ad-input"
                   type="password"
@@ -794,7 +796,7 @@
                 />
               </div>
               <div class="ad-field">
-                <label class="ad-label" for="adConfirmPw">Confirm New Password</label>
+                <label class="ad-label" for="adConfirmPw" data-i18n="lmsConfirmPassword">Confirm New Password</label>
                 <input
                   class="ad-input"
                   type="password"
@@ -803,7 +805,7 @@
                 />
               </div>
               <p id="adPasswordMsg" style="font-size:12px;min-height:18px;margin-bottom:8px"></p>
-              <button class="ad-btn ad-btn--primary" id="adChangePasswordBtn">
+              <button class="ad-btn ad-btn--primary" id="adChangePasswordBtn" data-i18n="lmsUpdatePassword">
                 Update Password
               </button>
             </div>
@@ -1042,17 +1044,17 @@
                     >Category</label
                   >
                   <select class="ad-input ad-select" id="cbCategory">
-                    <option value="">-- Select --</option>
-                    <option value="aged-care">Aged Care</option>
-                    <option value="disability-support">
+                    <option value="" data-i18n="adSelectOption">-- Select --</option>
+                    <option value="aged-care" data-i18n="adCategoryAgedCare">Aged Care</option>
+                    <option value="disability-support" data-i18n="adCategoryDisabilitySupport">
                       Disability Support
                     </option>
-                    <option value="first-aid">First Aid</option>
-                    <option value="mental-health">Mental Health</option>
-                    <option value="medication">Medication Assistance</option>
-                    <option value="manual-handling">Manual Handling</option>
-                    <option value="infection-control">Infection Control</option>
-                    <option value="communication">Communication</option>
+                    <option value="first-aid" data-i18n="adCategoryFirstAid">First Aid</option>
+                    <option value="mental-health" data-i18n="adCategoryMentalHealth">Mental Health</option>
+                    <option value="medication" data-i18n="adCategoryMedication">Medication Assistance</option>
+                    <option value="manual-handling" data-i18n="adCategoryManualHandling">Manual Handling</option>
+                    <option value="infection-control" data-i18n="adCategoryInfectionControl">Infection Control</option>
+                    <option value="communication" data-i18n="adCategoryCommunication">Communication</option>
                   </select>
                 </div>
               </div>
@@ -1075,9 +1077,9 @@
                     >Level</label
                   >
                   <select class="ad-input ad-select" id="cbLevel">
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced">Advanced</option>
+                    <option value="beginner" data-i18n="adLevelBeginner">Beginner</option>
+                    <option value="intermediate" data-i18n="adLevelIntermediate">Intermediate</option>
+                    <option value="advanced" data-i18n="adLevelAdvanced">Advanced</option>
                   </select>
                 </div>
                 <div class="ad-field">
@@ -1137,6 +1139,7 @@
                     <input
                       class="ad-input ad-input--inline"
                       type="text"
+                      data-i18n-placeholder="adModuleTitlePlaceholder"
                       placeholder="Module title..."
                     />
                     <button
@@ -1160,15 +1163,16 @@
                   <ul class="ad-lessons-list">
                     <li class="ad-lesson-item">
                       <select class="ad-input ad-select ad-select--xs ad-lesson-type">
-                        <option value="video">📹 Video</option>
-                        <option value="pdf">📄 PDF</option>
-                        <option value="text">📝 Text</option>
-                        <option value="quiz">❓ Quiz</option>
-                        <option value="assignment">📋 Assignment</option>
+                        <option value="video" data-i18n="adLessonTypeVideo">📹 Video</option>
+                        <option value="pdf" data-i18n="adLessonTypePdf">📄 PDF</option>
+                        <option value="text" data-i18n="adLessonTypeText">📝 Text</option>
+                        <option value="quiz" data-i18n="adLessonTypeQuiz">❓ Quiz</option>
+                        <option value="assignment" data-i18n="adLessonTypeAssignment">📋 Assignment</option>
                       </select>
                       <input
                         class="ad-input ad-input--grow"
                         type="text"
+                        data-i18n-placeholder="adLessonTitlePlaceholder"
                         placeholder="Lesson title..."
                       />
                       <div class="ad-material-upload">
@@ -1181,10 +1185,11 @@
                         <button
                           class="ad-btn ad-btn--outline ad-btn--sm ad-material-upload-btn"
                           type="button"
+                          data-i18n="adUploadMaterial"
                         >
                           Upload Material
                         </button>
-                        <span class="ad-material-file">No file selected</span>
+                        <span class="ad-material-file" data-i18n="adNoFileSelected">No file selected</span>
                       </div>
                       <button
                         class="ad-icon-btn ad-icon-btn--danger"
@@ -1298,8 +1303,8 @@
                     >Featured Course</label
                   >
                   <select class="ad-input ad-select" id="cbIsFeatured">
-                    <option value="false">No</option>
-                    <option value="true">Yes</option>
+                    <option value="false" data-i18n="adNo">No</option>
+                    <option value="true" data-i18n="adYes">Yes</option>
                   </select>
                 </div>
               </div>
@@ -1378,62 +1383,62 @@
 
           <div class="ad-card" id="assignmentFormCard" hidden>
             <div class="ad-card__header">
-              <h3 id="assignmentFormTitle">Buat Tugas Baru</h3>
-              <button class="ad-icon-btn" id="closeAssignmentForm" aria-label="Tutup">✕</button>
+              <h3 id="assignmentFormTitle" data-i18n="adAssignmentNewTitle">Buat Tugas Baru</h3>
+              <button class="ad-icon-btn" id="closeAssignmentForm" aria-label="Tutup" data-i18n-aria-label="adClose">✕</button>
             </div>
             <div class="ad-card__body" style="display:grid;gap:16px;">
               <div class="ad-field">
-                <label class="ad-label" for="atTitle">Judul Tugas *</label>
-                <input class="ad-input" id="atTitle" type="text" placeholder="Contoh: Studi Kasus Perawatan Lanjut Usia" required />
+                <label class="ad-label" for="atTitle" data-i18n="adAssignmentTitle">Judul Tugas *</label>
+                <input class="ad-input" id="atTitle" type="text" data-i18n-placeholder="adAssignmentTitlePlaceholder" placeholder="Contoh: Studi Kasus Perawatan Lanjut Usia" required />
               </div>
               <div class="ad-field">
-                <label class="ad-label" for="atDesc">Deskripsi / Instruksi</label>
-                <textarea class="ad-input ad-textarea" id="atDesc" rows="4" placeholder="Jelaskan apa yang harus dikerjakan student..."></textarea>
+                <label class="ad-label" for="atDesc" data-i18n="adAssignmentDesc">Deskripsi / Instruksi</label>
+                <textarea class="ad-input ad-textarea" id="atDesc" rows="4" data-i18n-placeholder="adAssignmentDescPlaceholder" placeholder="Jelaskan apa yang harus dikerjakan student..."></textarea>
               </div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                 <div class="ad-field">
-                  <label class="ad-label" for="atCourse">Kursus *</label>
+                  <label class="ad-label" for="atCourse" data-i18n="adAssignmentCourse">Kursus *</label>
                   <select class="ad-input ad-select" id="atCourse" required>
-                    <option value="">Pilih kursus...</option>
+                    <option value="" data-i18n="adAssignmentSelectCourse">Pilih kursus...</option>
                   </select>
                 </div>
                 <div class="ad-field">
-                  <label class="ad-label" for="atType">Tipe</label>
+                  <label class="ad-label" for="atType" data-i18n="adAssignmentType">Tipe</label>
                   <select class="ad-input ad-select" id="atType">
-                    <option value="assignment">📋 Assignment (Upload File)</option>
-                    <option value="quiz">📝 Quiz (Teks + Upload)</option>
+                    <option value="assignment" data-i18n="adAssignmentTypeFile">📋 Assignment (Upload File)</option>
+                    <option value="quiz" data-i18n="adAssignmentTypeQuiz">📝 Quiz (Teks + Upload)</option>
                   </select>
                 </div>
               </div>
               <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
                 <div class="ad-field">
-                  <label class="ad-label" for="atDueAt">Deadline *</label>
+                  <label class="ad-label" for="atDueAt" data-i18n="adAssignmentDeadline">Deadline *</label>
                   <input class="ad-input" id="atDueAt" type="datetime-local" required />
                 </div>
                 <div class="ad-field">
-                  <label class="ad-label" for="atPassMark">Nilai Lulus (%)</label>
+                  <label class="ad-label" for="atPassMark" data-i18n="adPassMark">Nilai Lulus (%)</label>
                   <input class="ad-input" id="atPassMark" type="number" min="0" max="100" value="70" />
                 </div>
                 <div class="ad-field">
-                  <label class="ad-label" for="atMaxScore">Nilai Maksimal</label>
+                  <label class="ad-label" for="atMaxScore" data-i18n="adAssignmentMaxScore">Nilai Maksimal</label>
                   <input class="ad-input" id="atMaxScore" type="number" min="1" value="100" />
                 </div>
               </div>
               <div style="display:flex;gap:10px;align-items:center;">
                 <p class="ad-grading-msg" id="assignmentFormMsg" aria-live="polite"></p>
-                <button class="ad-btn ad-btn--outline" id="cancelAssignmentBtn" type="button">Batal</button>
-                <button class="ad-btn ad-btn--primary" id="saveAssignmentBtn" type="button">Simpan & Terbitkan</button>
+                <button class="ad-btn ad-btn--outline" id="cancelAssignmentBtn" type="button" data-i18n="adCancel">Batal</button>
+                <button class="ad-btn ad-btn--primary" id="saveAssignmentBtn" type="button" data-i18n="adSaveCourse">Simpan & Terbitkan</button>
               </div>
             </div>
           </div>
 
           <div class="ad-card" id="myAssignmentsCard" style="margin-bottom:16px;">
             <div class="ad-card__header" style="display:flex;align-items:center;justify-content:space-between;">
-              <h3>Tugas yang Sudah Dibuat</h3>
-              <button class="ad-btn ad-btn--outline ad-btn--sm" id="refreshAssignmentsBtn">Refresh</button>
+              <h3 data-i18n="adAssignmentsCreated">Tugas yang Sudah Dibuat</h3>
+              <button class="ad-btn ad-btn--outline ad-btn--sm" id="refreshAssignmentsBtn" data-i18n="adRefresh">Refresh</button>
             </div>
             <div id="myAssignmentsList" style="display:grid;gap:8px;padding:12px 16px;">
-              <p id="myAssignmentsEmpty" style="color:var(--sd-text-muted);font-size:.875rem;">
+              <p id="myAssignmentsEmpty" style="color:var(--sd-text-muted);font-size:.875rem;" data-i18n="adAssignmentsEmpty">
                 Belum ada tugas yang dibuat.
               </p>
             </div>
@@ -1495,7 +1500,7 @@
                       —
                     </p>
                   </div>
-                  <span class="ad-tag" id="gradeCurrentStatus">Submitted</span>
+                  <span class="ad-tag" id="gradeCurrentStatus" data-i18n="lmsTabSubmitted">Submitted</span>
                 </div>
                 <!-- File preview -->
                 <div class="ad-file-preview" id="gradeFilePreview">
@@ -1542,7 +1547,7 @@
                   </div>
                 </div>
                 <div class="ad-field">
-                  <label class="ad-label">Competency Status</label>
+                  <label class="ad-label" data-i18n="adCompetencyStatus">Competency Status</label>
                   <p class="ad-grade-result" id="gradeCompetencyResult">—</p>
                 </div>
                 <div class="ad-field">
@@ -1627,11 +1632,11 @@
                   >Type</label
                 >
                 <select class="ad-input ad-select" id="evType">
-                  <option value="live_session">Live Session</option>
-                  <option value="webinar">Webinar</option>
-                  <option value="exam">Exam</option>
-                  <option value="orientation">Orientation</option>
-                  <option value="other">Other</option>
+                  <option value="live_session" data-i18n="adEventTypeLiveSession">Live Session</option>
+                  <option value="webinar" data-i18n="adEventTypeWebinar">Webinar</option>
+                  <option value="exam" data-i18n="adEventTypeExam">Exam</option>
+                  <option value="orientation" data-i18n="adEventTypeOrientation">Orientation</option>
+                  <option value="other" data-i18n="adEventTypeOther">Other</option>
                 </select>
               </div>
             </div>
@@ -1669,7 +1674,7 @@
                   >Course</label
                 >
                 <select class="ad-input ad-select" id="evCourse">
-                  <option value="">All Enrolled Students</option>
+                  <option value="" data-i18n="adAllEnrolledStudents">All Enrolled Students</option>
                 </select>
               </div>
               <div class="ad-field">
@@ -1680,8 +1685,8 @@
                   >Mandatory</label
                 >
                 <select class="ad-input ad-select" id="evMandatory">
-                  <option value="false">No</option>
-                  <option value="true">Yes</option>
+                  <option value="false" data-i18n="adNo">No</option>
+                  <option value="true" data-i18n="adYes">Yes</option>
                 </select>
               </div>
             </div>
@@ -1749,9 +1754,9 @@
             </button>
           </div>
           <div class="ad-filter-tabs ad-message-tabs" role="tablist" aria-label="Message views">
-            <button class="ad-filter-tab active" type="button" data-message-view="inbox">Pesan Masuk</button>
-            <button class="ad-filter-tab" type="button" data-message-view="history">History</button>
-            <button class="ad-filter-tab" type="button" data-message-view="archive">Archive</button>
+            <button class="ad-filter-tab active" type="button" data-message-view="inbox" data-i18n="lmsMessageInbox">Pesan Masuk</button>
+            <button class="ad-filter-tab" type="button" data-message-view="history" data-i18n="lmsMessageHistory">History</button>
+            <button class="ad-filter-tab" type="button" data-message-view="archive" data-i18n="lmsMessageArchive">Archive</button>
           </div>
           <div class="ad-messages-layout">
             <div class="ad-inbox" id="adInboxList">
@@ -1809,8 +1814,8 @@
                   </div>
                 </div>
                 <div class="ad-field">
-                  <label class="ad-label" for="adMsgSubject">Subject</label>
-                  <input class="ad-input" type="text" id="adMsgSubject" placeholder="Message subject..." />
+                  <label class="ad-label" for="adMsgSubject" data-i18n="lmsMsgSubject">Subject</label>
+                  <input class="ad-input" type="text" id="adMsgSubject" data-i18n-placeholder="adMsgSubjectPlaceholder" placeholder="Message subject..." />
                 </div>
                 <div class="ad-field">
                   <label class="ad-label" for="adMsgBody" data-i18n="adMsgBody">Message</label>
@@ -2171,8 +2176,8 @@
                 >
                 <select class="ad-input ad-select" id="anTarget">
                   <option value="all" data-i18n="adFilterAll">All</option>
-                  <option value="student">Students Only</option>
-                  <option value="trainer">Trainers Only</option>
+                  <option value="student" data-i18n="adTargetStudentsOnly">Students Only</option>
+                  <option value="trainer" data-i18n="adTargetTrainersOnly">Trainers Only</option>
                 </select>
               </div>
             </div>
@@ -2198,7 +2203,7 @@
                   >Target Course (optional)</label
                 >
                 <select class="ad-input ad-select" id="anCourse">
-                  <option value="">All Courses (Global)</option>
+                  <option value="" data-i18n="adAllCoursesGlobal">All Courses (Global)</option>
                 </select>
               </div>
               <div class="ad-field">

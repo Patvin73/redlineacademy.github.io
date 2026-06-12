@@ -1385,17 +1385,17 @@
       li.className = "ad-lesson-item";
       li.innerHTML = `
         <select class="ad-input ad-select ad-select--xs ad-lesson-type">
-          <option value="video">📹 Video</option>
-          <option value="pdf">📄 PDF</option>
-          <option value="text">📝 Text</option>
-          <option value="quiz">❓ Quiz</option>
-          <option value="assignment">📋 Assignment</option>
+          <option value="video" data-i18n="adLessonTypeVideo">${escHtml(tSafe("adLessonTypeVideo", "📹 Video"))}</option>
+          <option value="pdf" data-i18n="adLessonTypePdf">${escHtml(tSafe("adLessonTypePdf", "📄 PDF"))}</option>
+          <option value="text" data-i18n="adLessonTypeText">${escHtml(tSafe("adLessonTypeText", "📝 Text"))}</option>
+          <option value="quiz" data-i18n="adLessonTypeQuiz">${escHtml(tSafe("adLessonTypeQuiz", "❓ Quiz"))}</option>
+          <option value="assignment" data-i18n="adLessonTypeAssignment">${escHtml(tSafe("adLessonTypeAssignment", "📋 Assignment"))}</option>
         </select>
-        <input class="ad-input ad-input--grow" type="text" placeholder="Lesson title..." />
+        <input class="ad-input ad-input--grow" type="text" data-i18n-placeholder="adLessonTitlePlaceholder" placeholder="${escHtml(tSafe("adLessonTitlePlaceholder", "Lesson title..."))}" />
         <div class="ad-material-upload">
           <input class="ad-material-input" type="file" accept="video/*" hidden />
-          <button class="ad-btn ad-btn--outline ad-btn--sm ad-material-upload-btn" type="button">Upload Material</button>
-          <span class="ad-material-file">No file selected</span>
+          <button class="ad-btn ad-btn--outline ad-btn--sm ad-material-upload-btn" type="button" data-i18n="adUploadMaterial">${escHtml(tSafe("adUploadMaterial", "Upload Material"))}</button>
+          <span class="ad-material-file" data-i18n="adNoFileSelected">${escHtml(tSafe("adNoFileSelected", "No file selected"))}</span>
         </div>
         <button class="ad-icon-btn ad-icon-btn--danger" aria-label="Remove lesson">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -1422,7 +1422,7 @@
     const label = lessonItem.querySelector(".ad-material-file");
     if (!label) return;
     const fileName = fileInput?.files?.[0]?.name || "";
-    label.textContent = fileName || "No file selected";
+    label.textContent = fileName || tSafe("adNoFileSelected", "No file selected");
     label.style.color = "";
     delete label.dataset.existingUrl;
     delete label.dataset.existingPath;
