@@ -897,6 +897,15 @@ test.describe("Student Dashboard", () => {
     await expect(
       page.locator("#courseGrid .sd-course-card", { hasText: "Aged Care Basics" }).locator(".sd-course-card__thumb img")
     ).toHaveAttribute("src", "https://example.com/signed/course-materials/courses/thumbnails/aged-care-basics.png");
+    await expect(
+      page.locator("#courseGrid .sd-course-card", { hasText: "Aged Care Basics" }).locator(".sd-course-card__thumb")
+    ).toHaveCSS("overflow", "hidden");
+    await expect(
+      page.locator("#courseGrid .sd-course-card", { hasText: "Aged Care Basics" }).locator(".sd-course-card__thumb img")
+    ).toHaveCSS("object-fit", "cover");
+    await expect(
+      page.locator("#courseGrid .sd-course-card", { hasText: "Aged Care Basics" }).locator(".sd-course-card__thumb img")
+    ).toHaveCSS("height", "140px");
   });
 
   test("course stat falls back to active enrollments when dashboard view is stale", async ({ page }) => {
@@ -916,6 +925,12 @@ test.describe("Student Dashboard", () => {
       "src",
       "https://example.com/signed/course-materials/courses/thumbnails/aged-care-basics.png"
     );
+    await expect(page.locator("#continueLearningContent .sd-continue-item__thumb")).toHaveCSS("overflow", "hidden");
+    await expect(page.locator("#continueLearningContent .sd-continue-item__thumb")).toHaveCSS("width", "96px");
+    await expect(page.locator("#continueLearningContent .sd-continue-item__thumb")).toHaveCSS("height", "68px");
+    await expect(page.locator("#continueLearningContent .sd-continue-item__thumb img")).toHaveCSS("object-fit", "cover");
+    await expect(page.locator("#continueLearningContent .sd-continue-item__thumb img")).toHaveCSS("width", "94px");
+    await expect(page.locator("#continueLearningContent .sd-continue-item__thumb img")).toHaveCSS("height", "66px");
   });
 
   test("shows competency separately from course progress", async ({ page }) => {
