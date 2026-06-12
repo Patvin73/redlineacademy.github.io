@@ -543,12 +543,6 @@ async function installSupabaseStub(page, role, options = {}) {
           const data = limitValue ? rows.slice(0, limitValue) : rows;
           return resolve(queryError ? { data: null, error: queryError, count: 0 } : makeResponse(data));
         };
-        api.catch = (reject) => {
-          applyPendingChanges();
-          const data = limitValue ? rows.slice(0, limitValue) : rows;
-          const response = queryError ? { data: null, error: queryError, count: 0 } : makeResponse(data);
-          return Promise.resolve(response).catch(reject);
-        };
         return api;
       };
 

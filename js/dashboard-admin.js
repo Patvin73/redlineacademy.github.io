@@ -40,6 +40,15 @@
   ================================================================ */
   const $ = (id) => document.getElementById(id);
 
+  async function runSupabaseSilently(query, label = "Supabase mutation") {
+    try {
+      const { error } = await query;
+      if (error) throw error;
+    } catch (err) {
+      console.warn(`${label}:`, err.message || err);
+    }
+  }
+
   function removeRealtimeChannel(channel) {
     if (!channel) return;
     if (window.lmsSupabase?.removeChannel) {
@@ -1972,7 +1981,10 @@
 
         row.querySelector("[data-delete-assignment]")?.addEventListener("click", () => {
           showConfirmModal("Hapus tugas ini? Semua submission yang ada akan ikut terhapus.", async () => {
-            await window.lmsSupabase.from("assignments").delete().eq("id", assignment.id).catch(() => {});
+            await runSupabaseSilently(
+              window.lmsSupabase.from("assignments").delete().eq("id", assignment.id),
+              "Delete assignment failed"
+            );
             row.remove();
             loadMyAssignments();
             loadSubmissionQueue(currentGradingFilter);
@@ -2199,7 +2211,10 @@
             title: `Tugas baru: "${title}" — Deadline ${dueDate}`,
             is_read: false,
           }));
-          await window.lmsSupabase.from("notifications").insert(notifRows).catch(() => {});
+          await runSupabaseSilently(
+            window.lmsSupabase.from("notifications").insert(notifRows),
+            "Assignment notification insert failed"
+          );
         }
       } catch {
         // Notifikasi non-blocking — jangan throw
@@ -2284,12 +2299,15 @@
 
         await recalculateCourseProgressForStudent(submissionData.student_id, assignmentData?.course_id);
 
-        await window.lmsSupabase.from("notifications").insert({
-          user_id: submissionData.student_id,
-          type: "assignment_graded",
-          title: notifTitle,
-          is_read: false,
-        }).catch(() => {});
+        await runSupabaseSilently(
+          window.lmsSupabase.from("notifications").insert({
+            user_id: submissionData.student_id,
+            type: "assignment_graded",
+            title: notifTitle,
+            is_read: false,
+          }),
+          "Grading notification insert failed"
+        );
       }
 
       if (msg) { msg.textContent = "✓ Saved! Student notified."; msg.className = "ad-grading-msg success"; }
@@ -2386,7 +2404,10 @@
         title,
         is_read: false
       }));
-      await window.lmsSupabase.from("notifications").insert(rows).catch(() => {});
+      await runSupabaseSilently(
+        window.lmsSupabase.from("notifications").insert(rows),
+        "Message notification insert failed"
+      );
     } catch {
       // Notification delivery is non-blocking for creator workflows.
     }
@@ -2508,7 +2529,10 @@
 
         row.querySelector(".ad-icon-btn--danger").addEventListener("click", () => {
           showConfirmModal("Delete this event?", async () => {
-            await window.lmsSupabase.from("schedules").delete().eq("id", ev.id).catch(() => {});
+            await runSupabaseSilently(
+              window.lmsSupabase.from("schedules").delete().eq("id", ev.id),
+              "Delete schedule failed"
+            );
             row.remove();
           });
           return;
@@ -3401,7 +3425,10 @@
       if (!btn) return;
       const uid = btn.dataset.uid;
     const isActive = btn.textContent.trim() === "Suspend";
-      await window.lmsSupabase.from("profiles").update({ is_active: !isActive }).eq("id", uid).catch(() => {});
+      await runSupabaseSilently(
+        window.lmsSupabase.from("profiles").update({ is_active: !isActive }).eq("id", uid),
+        "Toggle user active state failed"
+      );
     btn.textContent = isActive ? "Activate" : "Suspend";
     });
 
@@ -4410,7 +4437,10 @@
 
         item.querySelector(".ad-icon-btn--danger").addEventListener("click", () => {
           showConfirmModal("Delete this announcement?", async () => {
-            await window.lmsSupabase.from("announcements").delete().eq("id", ann.id).catch(() => {});
+            await runSupabaseSilently(
+              window.lmsSupabase.from("announcements").delete().eq("id", ann.id),
+              "Delete announcement failed"
+            );
             item.remove();
           });
           return;
@@ -4557,11 +4587,13 @@
         if (kind === "message") {
           const messageId = item.dataset.messageId;
           if (messageId && window.lmsSupabase) {
-            await window.lmsSupabase
-              .from("messages")
-              .update({ is_read: true, read_at: new Date().toISOString() })
-              .eq("id", messageId)
-              .catch(() => {});
+            await runSupabaseSilently(
+              window.lmsSupabase
+                .from("messages")
+                .update({ is_read: true, read_at: new Date().toISOString() })
+                .eq("id", messageId),
+              "Mark message read failed"
+            );
           }
           adminUnreadMessages = Math.max(adminUnreadMessages - 1, 0);
           activeMessageView = "inbox";
@@ -4571,11 +4603,13 @@
           await loadMessages({ selectedMessageId: messageId });
         } else {
           adminUnreadNotifications = list.querySelectorAll(".ad-notif-list-item.unread[data-kind='notification']").length;
-          await window.lmsSupabase
-            .from("notifications")
-            .update({ is_read: true, read_at: new Date().toISOString() })
-            .eq("id", item.dataset.id)
-            .catch(() => {});
+          await runSupabaseSilently(
+            window.lmsSupabase
+              .from("notifications")
+              .update({ is_read: true, read_at: new Date().toISOString() })
+              .eq("id", item.dataset.id),
+            "Mark notification read failed"
+          );
         }
         updateAdminAttentionIndicators();
       });
@@ -4734,18 +4768,22 @@
       const unreadNotificationIds = unreadItems.map((item) => item.dataset.id).filter(Boolean);
       const unreadMessageIds = unreadItems.map((item) => item.dataset.messageId).filter(Boolean);
       if (unreadNotificationIds.length > 0) {
-        await window.lmsSupabase
-          .from("notifications")
-          .update({ is_read: true, read_at: new Date().toISOString() })
-          .in("id", unreadNotificationIds)
-          .catch(() => {});
+        await runSupabaseSilently(
+          window.lmsSupabase
+            .from("notifications")
+            .update({ is_read: true, read_at: new Date().toISOString() })
+            .in("id", unreadNotificationIds),
+          "Mark notifications read failed"
+        );
       }
       if (unreadMessageIds.length > 0) {
-        await window.lmsSupabase
-          .from("messages")
-          .update({ is_read: true, read_at: new Date().toISOString() })
-          .in("id", unreadMessageIds)
-          .catch(() => {});
+        await runSupabaseSilently(
+          window.lmsSupabase
+            .from("messages")
+            .update({ is_read: true, read_at: new Date().toISOString() })
+            .in("id", unreadMessageIds),
+          "Mark messages read failed"
+        );
         if (currentSection === "messages") await loadMessages();
       }
       // Re-fetch dari DB untuk pastikan state akurat
