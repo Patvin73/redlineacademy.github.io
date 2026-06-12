@@ -23,6 +23,7 @@
   let studentUnreadSections = { courses: 0, assignments: 0, schedule: 0 };
   const COURSE_MATERIAL_BUCKET = "course-materials";
   const ASSIGNMENT_SUBMISSIONS_BUCKET = "assignment-submissions";
+  const Competency = window.RedlineCompetency || {};
 
   /* ── DOM refs ───────────────────────────────────────────────────── */
   const $ = (id) => document.getElementById(id);
@@ -911,6 +912,7 @@
       // 4. Load home dashboard data; other sections lazy-load when opened.
       await Promise.all([
         loadDashboardStats(user.id),
+        loadCompetencySummary(user.id),
         loadContinueLearning(user.id),
         loadUpcomingSchedule(user.id),
         loadAnnouncements(currentStudentProfile.id),
@@ -985,6 +987,100 @@
     ];
     nameEls.forEach((el) => { if (el) el.textContent = name; });
     if ($("studentName")) $("studentName").textContent = name;
+  }
+
+  async function loadCompetencySummary(userId) {
+    const container = $("competencySummaryContent");
+    if (!container || !window.lmsSupabase || !Competency.calculateCompetencyResult) return;
+
+    const renderEmpty = (message = "No assessment components are available yet.") => {
+      container.innerHTML = `
+        <div class="sd-empty-state" style="padding:1rem 0">
+          <p style="margin:0;font-size:.875rem">${escHtml(message)}</p>
+        </div>`;
+    };
+
+    try {
+      const { data: enrollments, error: enrollErr } = await window.lmsSupabase
+        .from("enrollments")
+        .select("id, student_id, course_id, status, courses(id, title)")
+        .eq("student_id", userId);
+      if (enrollErr) throw enrollErr;
+
+      const validEnrollments = (enrollments || []).filter((enrollment) =>
+        ["active", "completed", "paid", "enrolled"].includes(String(enrollment.status || "").toLowerCase())
+      );
+      const courseIds = [...new Set(validEnrollments.map((enrollment) => enrollment.course_id).filter(Boolean))];
+      if (courseIds.length === 0) {
+        renderEmpty("No active competency assessments.");
+        return;
+      }
+
+      const { data: courses } = await window.lmsSupabase
+        .from("courses")
+        .select("id, title")
+        .in("id", courseIds)
+        .catch(() => ({ data: [] }));
+      const courseMap = new Map((courses || []).map((course) => [course.id, course]));
+
+      const { data: assignments, error: assignErr } = await window.lmsSupabase
+        .from("assignments")
+        .select(`
+          *,
+          assignment_submissions (
+            id,
+            assignment_id,
+            student_id,
+            status,
+            submitted_at,
+            grade,
+            feedback
+          )
+        `)
+        .in("course_id", courseIds);
+      if (assignErr) throw assignErr;
+
+      const rows = validEnrollments.map((enrollment) => {
+        const courseAssignments = (assignments || []).filter((assignment) =>
+          assignment.course_id === enrollment.course_id && assignment.is_published !== false
+        );
+        const components = courseAssignments.map((assignment) => {
+          const submissions = Array.isArray(assignment.assignment_submissions)
+            ? assignment.assignment_submissions
+            : [];
+          const submission = submissions.find((item) => item.student_id === userId);
+          return Competency.componentFromAssignment(assignment, submission);
+        });
+        const result = Competency.calculateCompetencyResult({
+          enrollment,
+          requiredComponents: components
+        });
+        const course = enrollment.courses || courseMap.get(enrollment.course_id) || {};
+        const reason = result.unsatisfactoryReasons[0] || "All required assessment components are satisfactory.";
+        return `
+          <div class="sd-assignment-item" data-competency-course="${escHtml(enrollment.course_id)}">
+            <div class="sd-assignment-item__body">
+              <p class="sd-assignment-item__title">${escHtml(course.title || "Course")}</p>
+              <p class="sd-assignment-item__meta">Assessment Progress: ${result.completedRequiredCount}/${result.totalRequiredCount} required components satisfactory</p>
+              <p class="sd-assignment-item__meta">${escHtml(reason)}</p>
+            </div>
+            <div class="sd-assignment-item__actions">
+              <span class="sd-status-badge ${result.isCompetent ? "sd-status-badge--completed" : "sd-status-badge--inactive"}">
+                ${escHtml(result.displayLabel)}
+              </span>
+            </div>
+          </div>`;
+      }).join("");
+
+      if (!rows) {
+        renderEmpty();
+        return;
+      }
+      container.innerHTML = rows;
+    } catch (err) {
+      console.warn("Competency summary load error:", err.message || err);
+      renderEmpty("Competency status is not available right now.");
+    }
   }
 
   /* ── Dashboard Stats ────────────────────────────────────────────── */
@@ -1602,13 +1698,16 @@
             </button>`;
         } else if (status === "graded") {
           const gradeScore = submission?.grade !== null && submission?.grade !== undefined ? `${submission.grade}%` : "-";
-          const passMark = assignment.pass_mark || 70;
-          const isPassed = submission?.grade !== null && parseFloat(submission?.grade || 0) >= passMark;
+          const component = Competency.componentFromAssignment
+            ? Competency.componentFromAssignment(assignment, submission)
+            : { isSatisfactory: submission?.grade !== null && parseFloat(submission?.grade || 0) >= (assignment.pass_mark || 70) };
+          const isPassed = component.isSatisfactory;
+          const assessmentLabel = isPassed ? "Satisfactory" : "Not Yet Satisfactory";
           const feedbackText = submission?.feedback ? escHtml(submission.feedback) : "";
           actions = `
             <div class="sd-grade-result" style="text-align:right;">
               <span class="sd-status-badge ${isPassed ? "sd-status-badge--completed" : "sd-status-badge--inactive"}" style="font-size:1rem;">
-                ${gradeScore} ${isPassed ? "✓ LULUS" : "✗ TIDAK LULUS"}
+                ${gradeScore} ${isPassed ? "✓ LULUS" : "✗ TIDAK LULUS"} · ${assessmentLabel}
               </span>
               ${feedbackText ? `<p style="font-size:11.5px;color:var(--sd-text-secondary);margin-top:6px;max-width:220px;">"${feedbackText}"</p>` : ""}
             </div>`;

@@ -44,10 +44,13 @@ describe("LMS progress SQL contract", () => {
     expect(productionSql).toMatch(/count\s*\(\s*distinct\s+p\.lesson_id\s*\)/i);
     expect(productionSql).toMatch(/count\s*\(\s*distinct\s+s\.assignment_id\s*\)/i);
     expect(productionSql).toMatch(/s\.status\s*=\s*'graded'/i);
-    expect(productionSql).toMatch(/s\.grade\s*>=\s*coalesce\s*\(\s*a\.pass_mark\s*,\s*70\s*\)/i);
+    expect(productionSql).toMatch(/greatest\s*\(\s*coalesce\s*\(\s*a\.pass_mark\s*,\s*70\s*\)\s*,\s*80\s*\)/i);
+    expect(productionSql).toMatch(/critical_safety_passed[\s\S]*?not\s+in\s*\('false',\s*'failed',\s*'fail',\s*'not_passed'/i);
     expect(productionSql).toMatch(/when\s+v_total_units\s*<=\s*0\s+then\s+0/i);
+    expect(productionSql).toMatch(/v_competency_status[\s\S]*?v_passed_assignments\s*=\s*v_total_assignments/i);
     expect(productionSql).toMatch(/on\s+conflict\s*\(\s*student_id\s*,\s*course_id\s*\)/i);
-    expect(productionSql).toMatch(/insert\s+into\s+public\.certificates[\s\S]*?where\s+not\s+exists/i);
+    expect(productionSql).toMatch(/if\s+v_competency_status\s*=\s*'COMPETENT'\s+then[\s\S]*?insert\s+into\s+public\.certificates/i);
+    expect(productionSql).toMatch(/'competency_status',\s*v_competency_status/i);
     expect(productionSql).toMatch(/revoke\s+all\s+on\s+function\s+public\.recalculate_course_progress\(uuid,\s*uuid,\s*uuid\)\s+from\s+public/i);
     expect(productionSql).toMatch(/grant\s+execute\s+on\s+function\s+public\.recalculate_course_progress\(uuid,\s*uuid,\s*uuid\)\s+to\s+authenticated/i);
   });
@@ -69,5 +72,9 @@ describe("LMS progress SQL contract", () => {
   test("existing staff policies cover grading and enrollment completion writes", () => {
     expect(lmsSetupSql).toMatch(/create\s+policy\s+"lms_write_staff_submissions"[\s\S]*?on\s+public\.assignment_submissions[\s\S]*?for\s+update[\s\S]*?private\.is_staff/i);
     expect(lmsSetupSql).toMatch(/create\s+policy\s+"lms_write_staff_enrollments"[\s\S]*?on\s+public\.enrollments[\s\S]*?for\s+all[\s\S]*?private\.is_staff/i);
+  });
+
+  test("student submission inserts cannot write grading fields", () => {
+    expect(lmsSetupSql).toMatch(/create\s+policy\s+"lms_student_insert_own_submission"[\s\S]*?status\s+in\s*\('submitted','under_review'\)[\s\S]*?grade\s+is\s+null[\s\S]*?graded_at\s+is\s+null/i);
   });
 });

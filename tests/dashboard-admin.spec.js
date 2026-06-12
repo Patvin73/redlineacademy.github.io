@@ -1217,7 +1217,7 @@ test("trainer can open grading submission and save grade", async ({ page }) => {
     expect.objectContaining({
       user_id: "e2e-student-1",
       type: "assignment_graded",
-      title: 'Your assignment "Module 1 Quiz" has been graded: 85% (PASS)',
+      title: 'Your assignment "Module 1 Quiz" has been graded: 85% (Satisfactory)',
       is_read: false
     })
   ]));

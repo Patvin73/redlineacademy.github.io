@@ -155,7 +155,17 @@ create policy "lms_delete_staff_assignments" on public.assignments for delete to
 drop policy if exists "lms_write_staff_submissions" on public.assignment_submissions;
 drop policy if exists "lms_student_insert_own_submission" on public.assignment_submissions;
 create policy "lms_write_staff_submissions" on public.assignment_submissions for update to authenticated using (private.is_staff((select auth.uid()))) with check (private.is_staff((select auth.uid())));
-create policy "lms_student_insert_own_submission" on public.assignment_submissions for insert to authenticated with check (student_id = (select auth.uid()) or private.is_staff((select auth.uid())));
+create policy "lms_student_insert_own_submission" on public.assignment_submissions for insert to authenticated with check (
+  private.is_staff((select auth.uid()))
+  or (
+    student_id = (select auth.uid())
+    and status in ('submitted','under_review')
+    and grade is null
+    and feedback is null
+    and graded_by is null
+    and graded_at is null
+  )
+);
 
 drop policy if exists "lms_write_staff_schedules" on public.schedules;
 drop policy if exists "lms_insert_staff_schedules" on public.schedules;

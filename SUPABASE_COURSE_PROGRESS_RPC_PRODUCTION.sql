@@ -26,6 +26,7 @@ declare
   v_passed_assignments integer := 0;
   v_total_units integer := 0;
   v_completion_percent numeric(5,2) := 0;
+  v_competency_status text := 'NOT_YET_COMPETENT';
 begin
   if v_uid is null then
     raise exception 'Authentication required'
@@ -80,7 +81,13 @@ begin
     and a.course_id = p_course_id
     and s.status = 'graded'
     and s.grade is not null
-    and s.grade >= coalesce(a.pass_mark, 70);
+    and s.grade >= case
+      when lower(coalesce(to_jsonb(a)->>'type', 'assignment')) = 'quiz'
+        then greatest(coalesce(a.pass_mark, 70), 80)
+      else coalesce(a.pass_mark, 70)
+    end
+    and coalesce(nullif(lower(to_jsonb(s)->>'critical_safety_passed'), ''), 'true')
+      not in ('false', 'failed', 'fail', 'not_passed', 'not passed', 'no');
 
   v_total_units := coalesce(v_total_lessons, 0) + coalesce(v_total_assignments, 0);
   v_completion_percent := case
@@ -91,6 +98,15 @@ begin
         ((coalesce(v_completed_lessons, 0) + coalesce(v_passed_assignments, 0))::numeric / v_total_units::numeric) * 100
       )
     )
+  end;
+
+  -- Competency is assessment-based; progress percentage remains a learning indicator only.
+  v_competency_status := case
+    when v_enrollment_status in ('active', 'completed', 'paid', 'enrolled')
+      and v_total_assignments > 0
+      and v_passed_assignments = v_total_assignments
+      then 'COMPETENT'
+    else 'NOT_YET_COMPETENT'
   end;
 
   insert into public.course_progress (
@@ -124,13 +140,13 @@ begin
 
   if v_enrollment_status in ('active', 'completed') then
     update public.enrollments
-    set status = case when v_completion_percent >= 100 then 'completed' else 'active' end,
-        completed_at = case when v_completion_percent >= 100 then coalesce(completed_at, v_now) else null end,
+    set status = case when v_competency_status = 'COMPETENT' then 'completed' else 'active' end,
+        completed_at = case when v_competency_status = 'COMPETENT' then coalesce(completed_at, v_now) else null end,
         updated_at = v_now
     where id = v_enrollment_id;
   end if;
 
-  if v_completion_percent >= 100 then
+  if v_competency_status = 'COMPETENT' then
     insert into public.certificates (student_id, course_id, issued_at)
     select p_student_id, p_course_id, v_now
     where not exists (
@@ -149,7 +165,9 @@ begin
     'passed_assignments', coalesce(v_passed_assignments, 0),
     'total_lessons', coalesce(v_total_lessons, 0),
     'total_assignments', coalesce(v_total_assignments, 0),
-    'total_units', v_total_units
+    'total_units', v_total_units,
+    'competency_status', v_competency_status,
+    'final_status', v_competency_status
   );
 end;
 $$;

@@ -750,7 +750,17 @@ drop policy if exists "lms_write_staff_submissions" on public.assignment_submiss
 drop policy if exists "lms_student_insert_own_submission" on public.assignment_submissions;
 create policy "lms_select_all_submissions" on public.assignment_submissions for select to authenticated using (true);
 create policy "lms_write_staff_submissions" on public.assignment_submissions for update to authenticated using (private.is_staff(auth.uid())) with check (private.is_staff(auth.uid()));
-create policy "lms_student_insert_own_submission" on public.assignment_submissions for insert to authenticated with check (student_id = auth.uid() or private.is_staff(auth.uid()));
+create policy "lms_student_insert_own_submission" on public.assignment_submissions for insert to authenticated with check (
+  private.is_staff(auth.uid())
+  or (
+    student_id = auth.uid()
+    and status in ('submitted','under_review')
+    and grade is null
+    and feedback is null
+    and graded_by is null
+    and graded_at is null
+  )
+);
 
 drop policy if exists "lms_select_all_schedules" on public.schedules;
 drop policy if exists "lms_write_staff_schedules" on public.schedules;

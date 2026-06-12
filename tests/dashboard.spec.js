@@ -918,6 +918,22 @@ test.describe("Student Dashboard", () => {
     );
   });
 
+  test("shows competency separately from course progress", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
+
+    await expect(page.locator("#competencySummaryContent")).toContainText("Aged Care Basics");
+    await expect(page.locator("#competencySummaryContent")).toContainText("Not Yet Competent (NYC)");
+    await expect(page.locator("#competencySummaryContent")).toContainText("Assessment Progress: 0/2");
+    await expect(page.locator("#competencySummaryContent")).toContainText("First Aid Essentials");
+    await expect(page.locator("#competencySummaryContent")).toContainText("Competent (C)");
+
+    await page.locator(".sd-nav__item[data-section='courses']").click();
+    await expect(page.locator("#courseGrid .sd-course-card", { hasText: "First Aid Essentials" })).toContainText(/100% (Progress|Progres)/);
+  });
+
   test("realtime notification refreshes student stats and active course grid", async ({ page }) => {
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);

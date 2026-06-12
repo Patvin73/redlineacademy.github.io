@@ -16,6 +16,7 @@
   let usersCache       = [];
   let activeUserRoleFilter = "all";
   let selectedSubmissionId = null;
+  let selectedSubmissionContext = null;
   let currentGradingFilter = "submitted";
   let editingCourseId  = null;
   let adminNotificationChannel = null;
@@ -25,6 +26,7 @@
   let adminUnreadSections = { courses: 0, grading: 0, schedule: 0 };
   const USER_ROLE_TAGS = { admin: "red", trainer: "purple", student: "blue" };
   const COURSE_MATERIAL_BUCKET = "course-materials";
+  const Competency = window.RedlineCompetency || {};
   const LESSON_MATERIAL_ACCEPT = {
     video: "video/*",
     pdf: "application/pdf",
@@ -1818,6 +1820,12 @@
         item.className = "ad-submission-item";
         item.dataset.id = sub.id;
 
+        const component = Competency.componentFromAssignment
+          ? Competency.componentFromAssignment(sub.assignments || {}, sub)
+          : null;
+        const assessmentTag = component && sub.status === "graded"
+          ? `<span class="ad-tag ${component.isSatisfactory ? "ad-tag--green" : "ad-tag--red"}">${component.isSatisfactory ? "Satisfactory" : "Not Yet Satisfactory"}</span>`
+          : "";
         const statusTag = {
           submitted:    `<span class="ad-tag ad-tag--orange">Submitted</span>`,
           graded:       `<span class="ad-tag ad-tag--green">Graded</span>`,
@@ -1829,7 +1837,7 @@
           <div>
             <p class="ad-submission-item__student">${escHtml(sub.profiles?.full_name || "—")}</p>
             <p class="ad-submission-item__assignment">${escHtml(sub.assignments?.title || "—")}</p>
-            <p class="ad-submission-item__time">${timeAgo(sub.submitted_at)} ${statusTag}</p>
+            <p class="ad-submission-item__time">${timeAgo(sub.submitted_at)} ${statusTag} ${assessmentTag}</p>
           </div>`;
 
         item.addEventListener("click", () => openGradingForm(sub));
@@ -1859,7 +1867,7 @@
       if (assignmentIds.length) {
         const { data } = await window.lmsSupabase
           .from("assignments")
-          .select("id, title, trainer_id, pass_mark, course_id")
+          .select("id, title, type, trainer_id, pass_mark, course_id")
           .in("id", assignmentIds);
         assignmentRows = data || [];
       }
@@ -1883,6 +1891,7 @@
     if (!panel || !form) return;
 
     selectedSubmissionId = sub.id;
+    selectedSubmissionContext = sub;
     document.querySelectorAll(".ad-submission-item").forEach((el) => {
       el.classList.toggle("active", el.dataset.id === sub.id);
     });
@@ -1896,7 +1905,7 @@
     if ($("gradeStudentNotes"))   $("gradeStudentNotes").textContent    = sub.notes || "(No notes)";
     if ($("gradeScore"))          $("gradeScore").value                 = sub.grade || "";
 
-    updateGradeResult(sub.grade, sub.assignments?.pass_mark);
+    updateCompetencyGradeResult(sub.grade, sub.assignments?.pass_mark);
 
     // File list
     const fileList = $("gradeFileList");
@@ -1991,6 +2000,55 @@
     }
   }
 
+  function updateCompetencyGradeResult(score, passMark = 70) {
+    const el = $("gradeResult");
+    const competencyEl = $("gradeCompetencyResult");
+    if (!el) return;
+    if (score === "" || score === null || typeof score === "undefined" || Number.isNaN(parseFloat(score))) {
+      el.textContent = "—";
+      el.className = "ad-grade-result";
+      if (competencyEl) {
+        competencyEl.textContent = "—";
+        competencyEl.className = "ad-grade-result";
+      }
+      return;
+    }
+    if (!Competency.assessComponent) {
+      updateGradeResult(score, passMark);
+      if (competencyEl) {
+        const passed = parseFloat(score) >= passMark;
+        competencyEl.textContent = passed ? "Satisfactory" : "Not Yet Satisfactory";
+        competencyEl.className = `ad-grade-result ${passed ? "ad-grade-result--pass" : "ad-grade-result--fail"}`;
+      }
+      return;
+    }
+    const component = Competency.assessComponent
+      ? Competency.assessComponent({
+          title: selectedSubmissionContext?.assignments?.title || "Assignment",
+          type: selectedSubmissionContext?.assignments?.type || "assignment",
+          status: "graded",
+          submitted: true,
+          score,
+          pass_mark: passMark
+        })
+      : { isSatisfactory: parseFloat(score) >= passMark };
+    if (component.isSatisfactory) {
+      el.textContent = "PASS ✓";
+      el.className = "ad-grade-result ad-grade-result--pass";
+      if (competencyEl) {
+        competencyEl.textContent = "Satisfactory";
+        competencyEl.className = "ad-grade-result ad-grade-result--pass";
+      }
+    } else {
+      el.textContent = "FAIL ✗";
+      el.className = "ad-grade-result ad-grade-result--fail";
+      if (competencyEl) {
+        competencyEl.textContent = "Not Yet Satisfactory";
+        competencyEl.className = "ad-grade-result ad-grade-result--fail";
+      }
+    }
+  }
+
   function setupGradingPanel() {
     // Filter tabs in grading section
     const gradingSection = $("section-grading");
@@ -2007,7 +2065,9 @@
 
     // Live grade preview
     const scoreInput = $("gradeScore");
-    scoreInput && scoreInput.addEventListener("input", () => updateGradeResult(scoreInput.value));
+    scoreInput && scoreInput.addEventListener("input", () =>
+      updateCompetencyGradeResult(scoreInput.value, selectedSubmissionContext?.assignments?.pass_mark)
+    );
 
     // Save grade
     const saveBtn = $("saveGradeBtn");
@@ -2197,7 +2257,7 @@
       // Fetch submission data to notify the student with the assignment result.
       const { data: submissionData } = await window.lmsSupabase
         .from("assignment_submissions")
-        .select("assignment_id, student_id, assignments(title, course_id, pass_mark)")
+        .select("assignment_id, student_id, assignments(title, type, course_id, pass_mark)")
         .eq("id", selectedSubmissionId)
         .single();
 
@@ -2206,9 +2266,20 @@
           ? submissionData.assignments[0]
           : submissionData.assignments;
         const assignmentTitle = assignmentData?.title || "Assignment";
-        const isPass = newStatus === "graded" && !isNaN(score) && score >= (assignmentData?.pass_mark || 70);
+        const component = Competency.assessComponent
+          ? Competency.assessComponent({
+              title: assignmentTitle,
+              type: assignmentData?.type || "assignment",
+              status: "graded",
+              submitted: true,
+              score,
+              pass_mark: assignmentData?.pass_mark || 70
+            })
+          : { isSatisfactory: newStatus === "graded" && !isNaN(score) && score >= (assignmentData?.pass_mark || 70) };
+        const isPass = newStatus === "graded" && component.isSatisfactory;
+        const assessmentLabel = isPass ? "Satisfactory" : "Not Yet Satisfactory";
         const notifTitle = newStatus === "graded"
-          ? `Your assignment "${assignmentTitle}" has been graded: ${score}% (${isPass ? "PASS" : "FAIL"})`
+          ? `Your assignment "${assignmentTitle}" has been graded: ${score}% (${assessmentLabel})`
           : `Your assignment "${assignmentTitle}" needs resubmission.`;
 
         await recalculateCourseProgressForStudent(submissionData.student_id, assignmentData?.course_id);
@@ -2226,6 +2297,7 @@
         loadSubmissionQueue(currentGradingFilter);
         // Reset grading panel state
         selectedSubmissionId = null;
+        selectedSubmissionContext = null;
         const gradingForm = $("gradingForm");
         const gradingPanelEmpty = $("gradingPanelEmpty");
         if (gradingForm) gradingForm.hidden = true;
@@ -2233,6 +2305,7 @@
         document.querySelectorAll(".ad-submission-item").forEach((el) => el.classList.remove("active"));
         if ($("gradeScore")) $("gradeScore").value = "";
         if ($("gradeFeedback")) $("gradeFeedback").value = "";
+        if ($("gradeCompetencyResult")) { $("gradeCompetencyResult").textContent = "—"; $("gradeCompetencyResult").className = "ad-grade-result"; }
         if ($("gradeResult")) { $("gradeResult").textContent = "—"; $("gradeResult").className = "ad-grade-result"; }
       }, 1500);
 
