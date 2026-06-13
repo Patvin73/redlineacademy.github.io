@@ -127,15 +127,38 @@
     return "10000000-1000-4000-8000-" + Math.random().toString(16).slice(2, 14).padEnd(12, "0");
   }
 
-  async function sendMessageEmailNotification(messageId) {
-    if (!messageId || !window.lmsSupabase?.functions?.invoke) return;
+  async function sendExternalNotificationDelivery(payload) {
+    if (!window.lmsSupabase?.functions?.invoke) return;
+    const body = {
+      message_ids: (payload?.message_ids || []).filter(Boolean),
+      notification_ids: (payload?.notification_ids || []).filter(Boolean)
+    };
+    if (!body.message_ids.length && !body.notification_ids.length) return;
     try {
-      const { error } = await window.lmsSupabase.functions.invoke("send-message-email", {
-        body: { message_id: messageId }
+      const { error } = await window.lmsSupabase.functions.invoke("send-lms-notification", {
+        body
       });
       if (error) throw error;
     } catch (err) {
-      console.warn("Message email notification failed:", err.message || err);
+      console.warn("External notification delivery failed:", err.message || err);
+    }
+  }
+
+  async function createNotificationsWithDelivery(rows, label = "Notification insert failed") {
+    const items = (Array.isArray(rows) ? rows : [rows]).filter(Boolean);
+    if (!items.length || !window.lmsSupabase) return [];
+    try {
+      const { data, error } = await window.lmsSupabase
+        .from("notifications")
+        .insert(items)
+        .select("id");
+      if (error) throw error;
+      const notificationIds = (data || []).map((row) => row.id).filter(Boolean);
+      await sendExternalNotificationDelivery({ notification_ids: notificationIds });
+      return notificationIds;
+    } catch (err) {
+      console.warn(label, err.message || err);
+      return [];
     }
   }
 
@@ -2211,10 +2234,7 @@
             title: `Tugas baru: "${title}" — Deadline ${dueDate}`,
             is_read: false,
           }));
-          await runSupabaseSilently(
-            window.lmsSupabase.from("notifications").insert(notifRows),
-            "Assignment notification insert failed"
-          );
+          await createNotificationsWithDelivery(notifRows, "Assignment notification insert failed");
         }
       } catch {
         // Notifikasi non-blocking — jangan throw
@@ -2299,13 +2319,12 @@
 
         await recalculateCourseProgressForStudent(submissionData.student_id, assignmentData?.course_id);
 
-        await runSupabaseSilently(
-          window.lmsSupabase.from("notifications").insert({
+        await createNotificationsWithDelivery({
             user_id: submissionData.student_id,
             type: "assignment_graded",
             title: notifTitle,
             is_read: false,
-          }),
+          },
           "Grading notification insert failed"
         );
       }
@@ -2404,10 +2423,7 @@
         title,
         is_read: false
       }));
-      await runSupabaseSilently(
-        window.lmsSupabase.from("notifications").insert(rows),
-        "Message notification insert failed"
-      );
+      await createNotificationsWithDelivery(rows, "Message notification insert failed");
     } catch {
       // Notification delivery is non-blocking for creator workflows.
     }
@@ -2779,7 +2795,9 @@
         .from("messages")
         .insert(messageRows);
       if (error) throw error;
-      await Promise.all(messageRows.map((message) => sendMessageEmailNotification(message.id)));
+      await sendExternalNotificationDelivery({
+        message_ids: messageRows.map((message) => message.id)
+      });
       if (body) body.value = "";
       const subjectEl = $("adMsgSubject");
       if (subjectEl) subjectEl.value = "";

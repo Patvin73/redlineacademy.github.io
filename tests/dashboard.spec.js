@@ -179,6 +179,7 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
               }
               baseRows.push(item);
             });
+            rows = items;
             return api;
           },
           upsert: (payload, options = {}) => {
@@ -1644,12 +1645,13 @@ test.describe("Student Dashboard", () => {
         body: "Can you review my answer?"
       })
     ]));
-    const emailInvocations = await page.evaluate(() => window.__QA_FUNCTION_INVOCATIONS__);
-    sentMessagesForRecipients.forEach((message) => {
-      expect(emailInvocations).toEqual(expect.arrayContaining([
-        { name: "send-message-email", body: { message_id: message.id } }
-      ]));
-    });
+    const notificationInvocations = await page.evaluate(() => window.__QA_FUNCTION_INVOCATIONS__);
+    expect(notificationInvocations).toEqual(expect.arrayContaining([
+      {
+        name: "send-lms-notification",
+        body: { message_ids: sentMessagesForRecipients.map((message) => message.id), notification_ids: [] }
+      }
+    ]));
     await page.locator("[data-student-message-view='history']").click();
     await expect(page.locator(".sd-inbox-item", { hasText: "Question about Module 1" })).toHaveCount(1);
     await page.locator(".sd-inbox-item", { hasText: "Question about Module 1" }).click();

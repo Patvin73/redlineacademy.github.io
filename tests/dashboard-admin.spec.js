@@ -504,6 +504,7 @@ async function installSupabaseStub(page, role, options = {}) {
               }
               baseRows.push(item);
             });
+            rows = items;
             return api;
           },
           update: (payload) => {
@@ -1212,6 +1213,9 @@ test("trainer can open grading submission and save grade", async ({ page }) => {
     };
   });
   const notifications = state.notifications;
+  const gradedNotification = notifications.find((row) =>
+    row.user_id === "e2e-student-1" && row.type === "assignment_graded"
+  );
   expect(notifications).toEqual(expect.arrayContaining([
     expect.objectContaining({
       user_id: "e2e-student-1",
@@ -1219,6 +1223,13 @@ test("trainer can open grading submission and save grade", async ({ page }) => {
       title: 'Your assignment "Module 1 Quiz" has been graded: 85% (Satisfactory)',
       is_read: false
     })
+  ]));
+  const deliveryInvocations = await page.evaluate(() => window.__e2eGetFunctionInvocations());
+  expect(deliveryInvocations).toEqual(expect.arrayContaining([
+    {
+      name: "send-lms-notification",
+      body: { message_ids: [], notification_ids: [gradedNotification.id] }
+    }
   ]));
   expect(state.courseProgress).toEqual(expect.objectContaining({
     completion_percent: 100,
@@ -1389,12 +1400,22 @@ test("trainer can create schedule event", async ({ page }) => {
   const schedules = await page.evaluate(() => window.__e2eGetTableData().schedules);
   expect(schedules.at(-1)).toMatchObject({ course_id: "course-1" });
   const notifications = await page.evaluate(() => window.__e2eGetTableData().notifications);
+  const scheduleNotification = notifications.find((row) =>
+    row.user_id === "e2e-student-1" && row.type === "schedule_new"
+  );
   expect(notifications).toEqual(expect.arrayContaining([
     expect.objectContaining({
       user_id: "e2e-student-1",
       type: "schedule_new",
       is_read: false
     })
+  ]));
+  const deliveryInvocations = await page.evaluate(() => window.__e2eGetFunctionInvocations());
+  expect(deliveryInvocations).toEqual(expect.arrayContaining([
+    {
+      name: "send-lms-notification",
+      body: { message_ids: [], notification_ids: [scheduleNotification.id] }
+    }
   ]));
 });
 
@@ -1596,12 +1617,13 @@ test("trainer can compose a system message to multiple recipients across roles",
     })
   ]));
   await expect(page.locator("#adMsgSubject")).toHaveValue("");
-  const emailInvocations = await page.evaluate(() => window.__e2eGetFunctionInvocations());
-  sentMessagesForRecipients.forEach((message) => {
-    expect(emailInvocations).toEqual(expect.arrayContaining([
-      { name: "send-message-email", body: { message_id: message.id } }
-    ]));
-  });
+  const notificationInvocations = await page.evaluate(() => window.__e2eGetFunctionInvocations());
+  expect(notificationInvocations).toEqual(expect.arrayContaining([
+    {
+      name: "send-lms-notification",
+      body: { message_ids: sentMessagesForRecipients.map((message) => message.id), notification_ids: [] }
+    }
+  ]));
 
   await expect(page.locator(".ad-inbox-item", { hasText: "Module 2 review" })).toHaveCount(1);
   await page.locator(".ad-inbox-item", { hasText: "Module 2 review" }).click();
