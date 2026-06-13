@@ -167,8 +167,7 @@ test.describe("Public content i18n", { tag: "@public" }, () => {
     ];
 
     for (const route of routes) {
-      await page.goto(route);
-      await page.waitForLoadState("domcontentloaded");
+      await page.goto(route, { waitUntil: "domcontentloaded" });
       await page.waitForTimeout(200);
     }
 

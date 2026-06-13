@@ -1753,10 +1753,18 @@
               New Message
             </button>
           </div>
-          <div class="ad-filter-tabs ad-message-tabs" role="tablist" aria-label="Message views">
-            <button class="ad-filter-tab active" type="button" data-message-view="inbox" data-i18n="lmsMessageInbox">Pesan Masuk</button>
-            <button class="ad-filter-tab" type="button" data-message-view="history" data-i18n="lmsMessageHistory">History</button>
-            <button class="ad-filter-tab" type="button" data-message-view="archive" data-i18n="lmsMessageArchive">Archive</button>
+          <div class="ad-msg-controls">
+            <div class="ad-filter-tabs ad-message-tabs" role="tablist" aria-label="Message views">
+              <button class="ad-filter-tab active" type="button" data-message-view="inbox" data-i18n="lmsMessageInbox">Pesan Masuk</button>
+              <button class="ad-filter-tab" type="button" data-message-view="history" data-i18n="lmsMessageHistory">History</button>
+              <button class="ad-filter-tab" type="button" data-message-view="archive" data-i18n="lmsMessageArchive">Archive</button>
+            </div>
+            <div class="ad-msg-search">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="search" class="ad-msg-search__input" id="adMsgSearchInput" placeholder="Cari pesan..." aria-label="Cari pesan" />
+            </div>
           </div>
           <div class="ad-messages-layout">
             <div class="ad-inbox" id="adInboxList">

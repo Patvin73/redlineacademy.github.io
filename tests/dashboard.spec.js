@@ -933,6 +933,100 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#continueLearningContent .sd-continue-item__thumb img")).toHaveCSS("height", "66px");
   });
 
+  test("keeps half-complete enrolled courses active and hides certificate count until certificate logic ships", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    fixture.tableData.v_student_dashboard[0].courses_enrolled = 0;
+    fixture.tableData.v_student_dashboard[0].certificates_earned = 1;
+    fixture.tableData.enrollments[0].status = "completed";
+    fixture.tableData.course_progress = fixture.tableData.course_progress.map((row) =>
+      row.course_id === "course-1"
+        ? { ...row, completion_percent: 50 }
+        : row
+    );
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
+
+    await expect(page.locator("#statCoursesEnrolled")).toHaveText("1");
+    await expect(page.locator("#statCertificates")).toHaveText("0");
+
+    await page.locator(".sd-nav__item[data-section='courses']").click();
+    const activeCourse = page.locator("#courseGrid .sd-course-card", { hasText: "Aged Care Basics" });
+    await expect(activeCourse).toHaveAttribute("data-status", "active");
+    await expect(activeCourse).toContainText(/50% (Progress|Progres)/);
+  });
+
+  test("shows batch material courses in My Courses when their materials appear in Resources", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    fixture.tableData.profiles[0].batch = "2026";
+    fixture.tableData.enrollments.push({
+      id: "enroll-draft",
+      student_id: "student-1",
+      course_id: "course-draft",
+      status: "active"
+    });
+    fixture.tableData.course_progress.push({
+      id: "course-progress-draft",
+      student_id: "student-1",
+      course_id: "course-draft",
+      completion_percent: 50
+    });
+    fixture.tableData.courses.push({
+      id: "course-draft",
+      title: "Enrolled Resource Course",
+      status: "draft",
+      thumbnail_url: "",
+      category_id: "aged-care",
+      trainer_id: "trainer-1",
+      profiles: { admin_id: "TR-001" },
+      categories: { id: "aged-care", name: "Aged Care" }
+    });
+    fixture.tableData.lessons.push({
+      id: "lesson-draft-resource",
+      course_id: "course-draft",
+      title: "Draft Course Material",
+      material_type: "pdf",
+      material_url: "https://example.com/draft-course.pdf",
+      material_path: "",
+      lesson_order: 1,
+      courses: { id: "course-draft", title: "Enrolled Resource Course", enrollment_type: "paid" }
+    });
+    fixture.tableData.courses.push({
+      id: "course-batch-admin",
+      title: "Admin Batch Material Course",
+      status: "draft",
+      thumbnail_url: "",
+      category_id: "aged-care",
+      trainer_id: "admin-1",
+      profiles: { admin_id: "ADM-001" },
+      categories: { id: "aged-care", name: "Aged Care" }
+    });
+    fixture.tableData.lessons.push({
+      id: "lesson-batch-admin-resource",
+      course_id: "course-batch-admin",
+      title: "Admin Batch 2026 Material",
+      material_type: "pdf",
+      material_url: "https://example.com/admin-batch-2026.pdf",
+      material_path: "",
+      lesson_order: 1,
+      courses: { id: "course-batch-admin", title: "Admin Batch Material Course", enrollment_type: "paid" }
+    });
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
+    await page.locator(".sd-nav__item[data-section='resources']").click();
+    await expect(page.locator("#resourceGrid [data-resource-card='true']", { hasText: "Draft Course Material" })).toBeVisible();
+    await expect(page.locator("#resourceGrid [data-resource-card='true']", { hasText: "Admin Batch 2026 Material" })).toBeVisible();
+
+    await page.locator(".sd-nav__item[data-section='courses']").click();
+    const courseCard = page.locator("#courseGrid .sd-course-card", { hasText: "Enrolled Resource Course" });
+    await expect(courseCard).toBeVisible();
+    await expect(courseCard).toHaveAttribute("data-status", "active");
+    const adminBatchCourse = page.locator("#courseGrid .sd-course-card", { hasText: "Admin Batch Material Course" });
+    await expect(adminBatchCourse).toBeVisible();
+    await expect(adminBatchCourse).toHaveAttribute("data-status", "active");
+  });
+
   test("shows competency separately from course progress", async ({ page }) => {
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);
@@ -953,7 +1047,7 @@ test.describe("Student Dashboard", () => {
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);
 
-    await page.goto("/pages/dashboard-student.html");
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
     await expect(page.locator("#statCoursesEnrolled")).toHaveText("1");
     await page.locator(".sd-nav__item[data-section='courses']").click();
     await expect(page.locator("#courseGrid .sd-course-card")).toHaveCount(3);
@@ -1188,14 +1282,23 @@ test.describe("Student Dashboard", () => {
     await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
     await page.locator(".sd-nav__item[data-section='schedule']").click();
 
-    await expect(page.locator("#scheduleFullList .sd-schedule-item")).toHaveCount(2);
+    await expect(page.locator("#scheduleFullList .sd-schedule-event-card")).toHaveCount(2);
+    await expect(page.locator("#scheduleFullList .sd-schedule-event-card", { hasText: "Live Session" })).toContainText("January 2099");
     await expect(page.locator("#scheduleFullList a", { hasText: "Join" })).toHaveCount(1);
 
     await page.click(".sd-view-btn[data-view='calendar']");
 
     await expect(page.locator(".sd-view-btn[data-view='calendar']")).toHaveClass(/active/);
-    await expect(page.locator("#scheduleFullList .sd-schedule-item")).toHaveCount(0);
-    await expect(page.locator("#scheduleFullList [data-schedule-render='true']")).not.toHaveCount(0);
+    await expect(page.locator("#scheduleFullList .sd-schedule-event-card")).toHaveCount(0);
+    await expect(page.locator(".sd-schedule-calendar__title")).toHaveText("January 2099");
+    await expect(page.locator(".sd-schedule-calendar__weekday.is-sunday")).toHaveText("Sun");
+    await expect(page.locator(".sd-schedule-calendar__cell.is-sunday").first()).toBeVisible();
+    await expect(page.locator(".sd-schedule-calendar")).toContainText("Sun, Jan 2099");
+
+    await page.locator("[data-schedule-month='next']").click();
+    await expect(page.locator(".sd-schedule-calendar__title")).toHaveText("February 2099");
+    await page.locator("[data-schedule-month='prev']").click();
+    await expect(page.locator(".sd-schedule-calendar__title")).toHaveText("January 2099");
   });
 
   test("warns when a student has no enrolled courses for assignments", async ({ page }) => {
@@ -1412,6 +1515,26 @@ test.describe("Student Dashboard", () => {
     expect(messages.find((msg) => msg.id === "msg-1")).toEqual(expect.objectContaining({
       is_read: true,
       recipient_id: "student-1"
+    }));
+  });
+
+  test("assignment notification opens assignments and marks the notification read", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html");
+    await page.click("#sdNotifBtn");
+    await page.locator(".sd-notif-list-item", { hasText: "Assignment graded" }).click();
+
+    await expect(page.locator("#notifPanel")).toBeHidden();
+    await expect(page.locator("#section-assignments")).toHaveClass(/active/);
+
+    const notification = await page.evaluate(() =>
+      window.__QA_TABLE_DATA__.notifications.find((row) => row.id === "notif-2")
+    );
+    expect(notification).toEqual(expect.objectContaining({
+      is_read: true,
+      read_at: expect.any(String)
     }));
   });
 

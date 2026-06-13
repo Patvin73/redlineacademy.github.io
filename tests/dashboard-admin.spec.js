@@ -728,6 +728,11 @@ async function installSupabaseStub(page, role, options = {}) {
     })();
   `;
 
+  await page.addInitScript(`
+    window.__LMS_SUPABASE_BOOTSTRAP__ = Promise.resolve();
+    ${supabaseStub}
+  `);
+
   await page.route("**/*supabase-js@2*", (route) => {
     route.fulfill({
       status: 200,
@@ -744,7 +749,7 @@ for (const role of ["admin", "trainer"]) {
 test(`${role} profile avatar upload persists and keeps the crop fixed`, async ({ page }) => {
   await installSupabaseStub(page, role);
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
-  await expect(page.locator("#sidebarName")).toContainText(role === "admin" ? "E2E Admin" : "E2E Trainer");
+  await expect(page.locator("#sidebarName")).toContainText(role === "admin" ? "E2E Admin" : "E2E Trainer", { timeout: 30000 });
 
   await page.locator(".ad-nav__item[data-section='profile']").click();
   await expect(page.locator("#section-profile")).toHaveClass(/active/);

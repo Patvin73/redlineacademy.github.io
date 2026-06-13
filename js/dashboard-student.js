@@ -16,11 +16,13 @@
   let activeStudentMessageView = "inbox";
   let studentUnreadMessages = 0;
   let studentUnreadNotifications = 0;
+  let studentPendingAssignmentCount = 0;
   let studentNotificationChannel = null;
   let studentNotificationChannelUserId = null;
   let studentMessageChannel = null;
   let studentMessageChannelUserId = null;
   let studentUnreadSections = { courses: 0, assignments: 0, schedule: 0 };
+  let scheduleCalendarCursor = null;
   const COURSE_MATERIAL_BUCKET = "course-materials";
   const ASSIGNMENT_SUBMISSIONS_BUCKET = "assignment-submissions";
   const Competency = window.RedlineCompetency || {};
@@ -46,7 +48,7 @@
     sectionBadges.forEach(({ id, count }) => {
       const badge = $(id);
       if (!badge) return;
-      const existingCount = id === "assignmentBadge" ? parseInt(badge.textContent || "0", 10) || 0 : 0;
+      const existingCount = id === "assignmentBadge" ? studentPendingAssignmentCount : 0;
       const nextCount = Math.max(count, existingCount);
       badge.textContent = nextCount;
       badge.style.display = nextCount > 0 ? "inline-block" : "none";
@@ -84,8 +86,78 @@
 
   const INACTIVE_ENROLLMENT_STATUSES = ["completed"];
 
-  function isActiveEnrollmentStatus(status) {
-    return !INACTIVE_ENROLLMENT_STATUSES.includes((status || "active").toLowerCase());
+  function normalizeCompletionPercent(value) {
+    const percent = Number(value);
+    if (!Number.isFinite(percent)) return 0;
+    return Math.max(0, Math.min(100, Math.round(percent)));
+  }
+
+  function isEnrollmentCourseActive(enrollment, progressMap = new Map()) {
+    if (!enrollment?.course_id) return false;
+    const hasProgress = progressMap.has(enrollment.course_id);
+    const percent = normalizeCompletionPercent(progressMap.get(enrollment.course_id));
+    const status = (enrollment.status || "active").toLowerCase();
+    if (percent >= 100) return false;
+    if (status === "completed") return hasProgress && percent < 100;
+    return !INACTIVE_ENROLLMENT_STATUSES.includes(status);
+  }
+
+  async function getCourseProgressMap(userId, courseIds = []) {
+    const uniqueCourseIds = [...new Set((courseIds || []).filter(Boolean))];
+    if (!userId || uniqueCourseIds.length === 0 || !window.lmsSupabase) return new Map();
+    const { data, error } = await window.lmsSupabase
+      .from("course_progress")
+      .select("course_id, completion_percent")
+      .eq("student_id", userId)
+      .in("course_id", uniqueCourseIds);
+    if (error) throw error;
+    return new Map(
+      (data || [])
+        .filter((row) => row.course_id)
+        .map((row) => [row.course_id, normalizeCompletionPercent(row.completion_percent)])
+    );
+  }
+
+  function getCurrentStudentBatch() {
+    const profile = currentStudentProfile || {};
+    const batch = profile.batch
+      || (profile.created_at ? new Date(profile.created_at).getFullYear() : "");
+    return String(batch || "").trim();
+  }
+
+  function uniqueIds(values = []) {
+    return [...new Set((values || []).filter(Boolean))];
+  }
+
+  async function getStudentBatchMaterialCourseIds() {
+    if (!window.lmsSupabase || !getCurrentStudentBatch()) return [];
+    try {
+      const { data, error } = await window.lmsSupabase
+        .from("lessons")
+        .select("course_id")
+        .not("material_url", "is", null);
+      if (error) throw error;
+      return uniqueIds((data || []).map((lesson) => lesson.course_id));
+    } catch (err) {
+      console.warn("Batch material course scope skipped:", err.message || err);
+      return [];
+    }
+  }
+
+  async function getStudentLearningCourseIds(userId, { includeBatchMaterials = false } = {}) {
+    const enrolledCourseIds = await getStudentEnrollmentCourseIds(userId) || [];
+    if (!includeBatchMaterials) return enrolledCourseIds;
+    const batchMaterialCourseIds = await getStudentBatchMaterialCourseIds();
+    return uniqueIds([...enrolledCourseIds, ...batchMaterialCourseIds]);
+  }
+
+  async function runSupabaseSilently(query) {
+    try {
+      const { error } = await query;
+      if (error) console.warn("Supabase mutation skipped:", error.message || error);
+    } catch (err) {
+      console.warn("Supabase mutation skipped:", err.message || err);
+    }
   }
 
   async function getStudentEnrollmentCourseIds(userId, { activeOnly = false } = {}) {
@@ -95,9 +167,13 @@
       .select("course_id, status")
       .eq("student_id", userId);
     if (error) throw error;
+    const rows = data || [];
+    const progressMap = activeOnly
+      ? await getCourseProgressMap(userId, rows.map((row) => row.course_id))
+      : new Map();
     const result = [
-      ...new Set((data || [])
-        .filter((row) => !activeOnly || isActiveEnrollmentStatus(row.status))
+      ...new Set(rows
+        .filter((row) => !activeOnly || isEnrollmentCourseActive(row, progressMap))
         .map((row) => row.course_id)
         .filter(Boolean))
     ];
@@ -114,8 +190,14 @@
 
   async function countStudentActiveCourses(userId) {
     try {
-      const courseIds = await getStudentEnrollmentCourseIds(userId, { activeOnly: true });
-      return courseIds ? courseIds.length : null;
+      const { data, error } = await window.lmsSupabase
+        .from("enrollments")
+        .select("course_id, status")
+        .eq("student_id", userId);
+      if (error) throw error;
+      const enrollments = data || [];
+      const progressMap = await getCourseProgressMap(userId, enrollments.map((row) => row.course_id));
+      return enrollments.filter((row) => isEnrollmentCourseActive(row, progressMap)).length;
     } catch {
       return null;
     }
@@ -446,18 +528,16 @@
         const unreadNotificationIds = unreadItems.map((item) => item.dataset.id).filter(Boolean);
         const unreadMessageIds = unreadItems.map((item) => item.dataset.messageId).filter(Boolean);
         if (unreadNotificationIds.length > 0) {
-          await window.lmsSupabase
+          await runSupabaseSilently(window.lmsSupabase
             .from("notifications")
             .update({ is_read: true, read_at: new Date().toISOString() })
-            .in("id", unreadNotificationIds)
-            .catch(() => {});
+            .in("id", unreadNotificationIds));
         }
         if (unreadMessageIds.length > 0) {
-          await window.lmsSupabase
+          await runSupabaseSilently(window.lmsSupabase
             .from("messages")
             .update({ is_read: true, read_at: new Date().toISOString() })
-            .in("id", unreadMessageIds)
-            .catch(() => {});
+            .in("id", unreadMessageIds));
           if (currentSection === "messages") await loadMessages(currentStudentProfile?.id);
         }
         // Re-fetch dari DB untuk pastikan state akurat
@@ -510,7 +590,7 @@
     list.innerHTML = items
       .map(
         (item) => `
-      <li class="sd-notif-list-item ${item.unread ? "unread" : ""}" data-kind="${item.kind}" ${item.kind === "message" ? `data-message-id="${escHtml(item.id)}"` : `data-id="${escHtml(item.id)}"`}>
+      <li class="sd-notif-list-item ${item.unread ? "unread" : ""}" data-kind="${item.kind}" data-type="${escHtml(item.type || "")}" ${item.kind === "message" ? `data-message-id="${escHtml(item.id)}"` : `data-id="${escHtml(item.id)}"`}>
         <div class="sd-notif-list-item__icon">
           ${getNotifIcon(item.type)}
         </div>
@@ -531,11 +611,10 @@
         if (kind === "message") {
           const messageId = item.dataset.messageId;
           if (messageId && window.lmsSupabase) {
-            await window.lmsSupabase
+            await runSupabaseSilently(window.lmsSupabase
               .from("messages")
               .update({ is_read: true, read_at: new Date().toISOString() })
-              .eq("id", messageId)
-              .catch(() => {});
+              .eq("id", messageId));
           }
           studentUnreadMessages = Math.max(studentUnreadMessages - 1, 0);
           activeStudentMessageView = "inbox";
@@ -547,13 +626,16 @@
           const id = item.dataset.id;
           studentUnreadNotifications = list.querySelectorAll(".sd-notif-list-item.unread[data-kind='notification']").length;
           if (id && window.lmsSupabase) {
-            await window.lmsSupabase
+            await runSupabaseSilently(window.lmsSupabase
               .from("notifications")
               .update({ is_read: true, read_at: new Date().toISOString() })
-              .eq("id", id)
-              .catch(() => {});
+              .eq("id", id));
           }
+          const targetSection = notificationSection(item.dataset.type);
+          const notifPanel = $("notifPanel");
+          if (notifPanel) notifPanel.hidden = true;
           await loadNotifications(currentStudentProfile?.id);
+          if (targetSection && window._sdActivateSection) window._sdActivateSection(targetSection);
         }
         updateStudentAttentionIndicators();
       });
@@ -1113,8 +1195,10 @@
             $("statCoursesEnrolled").textContent = activeCourseCount ?? 0;
           if ($("statPendingAssignments"))
             $("statPendingAssignments").textContent = pendingAssignmentCount ?? 0;
+          studentPendingAssignmentCount = pendingAssignmentCount ?? 0;
           if ($("statLessonsCompleted"))   $("statLessonsCompleted").textContent   = 0;
           if ($("statCertificates"))       $("statCertificates").textContent       = 0;
+          updateStudentAttentionIndicators();
           return;
         } else {
           throw error;
@@ -1127,6 +1211,7 @@
       const finalPendingCount = pendingAssignmentCount === null
         ? dashboardPendingCount
         : Math.max(dashboardPendingCount, pendingAssignmentCount);
+      studentPendingAssignmentCount = finalPendingCount;
       if ($("statCoursesEnrolled")) {
         $("statCoursesEnrolled").textContent = activeCourseCount === null
           ? dashboardCourseCount
@@ -1134,14 +1219,10 @@
       }
       if ($("statLessonsCompleted"))   $("statLessonsCompleted").textContent   = data.lessons_completed   || 0;
       if ($("statPendingAssignments")) $("statPendingAssignments").textContent = finalPendingCount;
-      if ($("statCertificates"))       $("statCertificates").textContent       = data.certificates_earned || 0;
+      if ($("statCertificates"))       $("statCertificates").textContent       = 0;
 
       // Update assignment badge in nav
-      const badge = $("assignmentBadge");
-      if (badge) {
-        badge.textContent = finalPendingCount;
-        badge.style.display = finalPendingCount > 0 ? "inline-block" : "none";
-      }
+      updateStudentAttentionIndicators();
 
       const statNavMap = [
         { cardId: "statCoursesEnrolled",    section: "courses",      trend: "up"   },
@@ -1174,8 +1255,10 @@
         $("statCoursesEnrolled").textContent = activeCourseCount ?? 0;
       if ($("statPendingAssignments"))
         $("statPendingAssignments").textContent = pendingAssignmentCount ?? 0;
+      studentPendingAssignmentCount = pendingAssignmentCount ?? 0;
       if ($("statLessonsCompleted"))   $("statLessonsCompleted").textContent   = 0;
       if ($("statCertificates"))       $("statCertificates").textContent       = 0;
+      updateStudentAttentionIndicators();
     }
   }
 
@@ -1458,36 +1541,38 @@
         .eq("student_id", userId);
 
       if (enrollErr) throw enrollErr;
-      const enrolledCourseIds = (enrollments || []).map((e) => e.course_id).filter(Boolean);
+      const enrolledCourseIds = uniqueIds((enrollments || []).map((e) => e.course_id));
+      const batchMaterialCourseIds = await getStudentBatchMaterialCourseIds();
+      const studentCourseIds = uniqueIds([...enrolledCourseIds, ...batchMaterialCourseIds]);
 
-      let progressRows = [];
-      if (enrolledCourseIds.length) {
-        const { data, error: progressErr } = await window.lmsSupabase
-          .from("course_progress")
-          .select("course_id, completion_percent")
-          .eq("student_id", userId)
-          .in("course_id", enrolledCourseIds);
-
-        if (progressErr) throw progressErr;
-        progressRows = data || [];
-      }
-      const progressMap = new Map(
-        (progressRows || [])
-          .filter((row) => row.course_id)
-          .map((row) => [row.course_id, row.completion_percent || 0])
-      );
-
-      const { data: courses, error: courseErr } = await window.lmsSupabase
-        .from("courses")
-        .select(`
+      const progressMap = await getCourseProgressMap(userId, studentCourseIds);
+      const courseSelect = `
           id, title, thumbnail_url, category_id, trainer_id,
           categories ( name ),
           profiles!courses_trainer_id_fkey(admin_id, student_id)
-        `)
+        `;
+
+      let studentCourses = [];
+      if (studentCourseIds.length) {
+        const { data, error: enrolledCourseErr } = await window.lmsSupabase
+          .from("courses")
+          .select(courseSelect)
+          .in("id", studentCourseIds)
+          .order("title", { ascending: true });
+        if (enrolledCourseErr) throw enrolledCourseErr;
+        studentCourses = data || [];
+      }
+
+      const { data: publishedCourses, error: courseErr } = await window.lmsSupabase
+        .from("courses")
+        .select(courseSelect)
         .eq("status", "published")
         .order("title", { ascending: true });
 
       if (courseErr) throw courseErr;
+      const courses = Array.from(
+        new Map([...(studentCourses || []), ...(publishedCourses || [])].map((course) => [course.id, course])).values()
+      ).sort((a, b) => String(a.title || "").localeCompare(String(b.title || "")));
       if (!courses || courses.length === 0) {
         renderEmpty();
         setupFilterHandler();
@@ -1505,19 +1590,21 @@
 
       const cards = coursesWithThumbnails.map(({ course, thumbnailDisplayUrl }) => {
         const enroll = enrollmentMap.get(course.id);
+        const isBatchMaterialCourse = batchMaterialCourseIds.includes(course.id);
         const statusRaw = (enroll?.status || "available").toLowerCase();
-        const status = statusRaw === "completed"
+        const hasProgress = progressMap.has(course.id);
+        const progress = normalizeCompletionPercent(progressMap.get(course.id));
+        const status = !enroll && !isBatchMaterialCourse
+          ? "available"
+          : progress >= 100 || (statusRaw === "completed" && !hasProgress)
           ? "completed"
-          : enroll
-          ? "active"
-          : "available";
+          : "active";
         const statusLabel = typeof t === "function"
           ? t(status === "completed" ? "lmsFilterCompleted" : status === "available" ? "lmsStatusAvailable" : "lmsFilterActive")
           : status === "completed" ? "Completed" : status === "available" ? "Available" : "Active";
         const badgeClass = status === "completed"
           ? "sd-status-badge--completed"
           : "sd-status-badge--active";
-        const progress = Math.round(progressMap.get(course.id) || 0);
         const progressLabel = typeof t === "function" ? t("lmsProgress") : "Progress";
         const thumbSrc = thumbnailDisplayUrl || "";
         const category = course.categories?.name || course.category_id || "Course";
@@ -2016,6 +2103,57 @@
     }
   }
 
+  function scheduleDateKey(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  function formatScheduleMonthTitle(date) {
+    return date.toLocaleDateString("en-AU", { month: "long", year: "numeric" });
+  }
+
+  function formatScheduleEventDateParts(iso) {
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) {
+      return { day: "", monthYear: "", weekday: "", fullDate: "", time: "" };
+    }
+    return {
+      day: date.toLocaleDateString("en-AU", { day: "2-digit" }),
+      monthYear: date.toLocaleDateString("en-AU", { month: "short", year: "numeric" }),
+      weekday: date.toLocaleDateString("en-AU", { weekday: "long" }),
+      fullDate: date.toLocaleDateString("en-AU", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      }),
+      time: date.toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit" })
+    };
+  }
+
+  function formatScheduleEventTimeRange(event) {
+    const start = formatScheduleEventDateParts(event.start_datetime);
+    if (!event.end_datetime) return `${start.fullDate}, ${start.time}`;
+    const end = new Date(event.end_datetime);
+    const startDate = new Date(event.start_datetime);
+    const endTime = end.toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit" });
+    if (scheduleDateKey(startDate) === scheduleDateKey(end)) {
+      return `${start.fullDate}, ${start.time} - ${endTime}`;
+    }
+    return `${start.fullDate}, ${start.time} - ${formatDateTime(event.end_datetime)}`;
+  }
+
+  function scheduleTypeLabel(type) {
+    return {
+      live_session: "Live session",
+      exam: "Exam",
+      orientation: "Orientation"
+    }[type] || "Deadline";
+  }
+
   function renderFullSchedule() {
     const container = $("scheduleFullContent");
     const list = $("scheduleFullList");
@@ -2032,52 +2170,78 @@
     if (empty) empty.style.display = "none";
 
     if ((container?.dataset.view || "list") === "calendar") {
-      const baseDate = new Date(fullScheduleCache[0]?.start_datetime || Date.now());
+      const fallbackDate = new Date(fullScheduleCache[0]?.start_datetime || Date.now());
+      const baseDate = scheduleCalendarCursor || fallbackDate;
+      scheduleCalendarCursor = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
       const monthStart = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
       const monthEnd = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0);
-      const startWeekday = (monthStart.getDay() + 6) % 7;
+      const startWeekday = monthStart.getDay();
       const totalCells = Math.ceil((startWeekday + monthEnd.getDate()) / 7) * 7;
       const eventMap = new Map();
 
       fullScheduleCache.forEach((event) => {
-        const key = new Date(event.start_datetime).toISOString().slice(0, 10);
+        const key = scheduleDateKey(new Date(event.start_datetime));
         if (!eventMap.has(key)) eventMap.set(key, []);
         eventMap.get(key).push(event);
       });
 
+      const toolbar = document.createElement("div");
+      toolbar.dataset.scheduleRender = "true";
+      toolbar.className = "sd-schedule-calendar__toolbar";
+      toolbar.innerHTML = `
+        <button class="sd-btn sd-btn--outline sd-btn--sm" type="button" data-schedule-month="prev" aria-label="Previous month">&lt;</button>
+        <p class="sd-schedule-calendar__title">${escHtml(formatScheduleMonthTitle(monthStart))}</p>
+        <button class="sd-btn sd-btn--outline sd-btn--sm" type="button" data-schedule-month="next" aria-label="Next month">&gt;</button>
+      `;
+      toolbar.querySelectorAll("[data-schedule-month]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const direction = btn.dataset.scheduleMonth === "next" ? 1 : -1;
+          scheduleCalendarCursor = new Date(monthStart.getFullYear(), monthStart.getMonth() + direction, 1);
+          renderFullSchedule();
+        });
+      });
+      list.insertBefore(toolbar, empty);
+
       const calendar = document.createElement("div");
       calendar.dataset.scheduleRender = "true";
-      calendar.style.display = "grid";
-      calendar.style.gridTemplateColumns = "repeat(7, minmax(0, 1fr))";
-      calendar.style.gap = ".75rem";
+      calendar.className = "sd-schedule-calendar";
+
+      ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach((weekday, index) => {
+        const header = document.createElement("div");
+        header.dataset.scheduleRender = "true";
+        header.className = `sd-schedule-calendar__weekday${index === 0 ? " is-sunday" : ""}`;
+        header.textContent = weekday;
+        calendar.appendChild(header);
+      });
 
       for (let cellIndex = 0; cellIndex < totalCells; cellIndex++) {
         const dayNumber = cellIndex - startWeekday + 1;
         const cell = document.createElement("div");
         cell.dataset.scheduleRender = "true";
-        cell.style.border = "1px solid var(--sd-border)";
-        cell.style.borderRadius = "var(--sd-radius-md)";
-        cell.style.padding = ".6rem";
-        cell.style.minHeight = "120px";
-        cell.style.background = "#fff";
+        cell.className = "sd-schedule-calendar__cell";
 
         if (dayNumber < 1 || dayNumber > monthEnd.getDate()) {
-          cell.style.opacity = ".35";
+          cell.classList.add("is-muted");
           calendar.appendChild(cell);
           continue;
         }
 
         const date = new Date(baseDate.getFullYear(), baseDate.getMonth(), dayNumber);
-        const key = date.toISOString().slice(0, 10);
+        const key = scheduleDateKey(date);
         const dayEvents = eventMap.get(key) || [];
+        const isSunday = date.getDay() === 0;
+        if (isSunday) cell.classList.add("is-sunday");
+        const dateCaption = `${date.toLocaleDateString("en-AU", { weekday: "short" })}, ${date.toLocaleDateString("en-AU", { month: "short", year: "numeric" })}`;
 
-        cell.innerHTML = `<div style="font-weight:700;margin-bottom:.5rem;">${dayNumber}</div>`;
+        cell.innerHTML = `
+          <div class="sd-schedule-calendar__date" aria-label="${escHtml(date.toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}">
+            <span>${dayNumber}</span>
+            <small>${escHtml(dateCaption)}</small>
+          </div>`;
         dayEvents.forEach((event) => {
           const item = document.createElement("div");
-          item.style.fontSize = ".78rem";
-          item.style.lineHeight = "1.35";
-          item.style.marginBottom = ".45rem";
-          item.innerHTML = `<strong>${escHtml(event.title || "Event")}</strong><br>${escHtml(formatDateTime(event.start_datetime))}`;
+          item.className = "sd-schedule-calendar__event";
+          item.innerHTML = `<strong>${escHtml(event.title || "Event")}</strong><br>${escHtml(formatScheduleEventTimeRange(event))}`;
           cell.appendChild(item);
         });
 
@@ -2090,19 +2254,23 @@
 
     fullScheduleCache.forEach((event) => {
       const typeClass = {
-        live_session: "sd-schedule-item--live",
-        exam: "sd-schedule-item--exam",
-        orientation: "sd-schedule-item--live",
-      }[event.event_type] || "sd-schedule-item--deadline";
+        live_session: "sd-schedule-event-card--live",
+        exam: "sd-schedule-event-card--exam",
+        orientation: "sd-schedule-event-card--live",
+      }[event.event_type] || "sd-schedule-event-card--deadline";
+      const dateParts = formatScheduleEventDateParts(event.start_datetime);
 
       const item = document.createElement("div");
       item.dataset.scheduleRender = "true";
-      item.className = `sd-schedule-item ${typeClass}`;
+      item.className = `sd-schedule-event-card ${typeClass}`;
       item.innerHTML = `
-        <span class="sd-schedule-item__dot"></span>
-        <div class="sd-schedule-item__info">
-          <p class="sd-schedule-item__title">${escHtml(event.title || "Event")}</p>
-          <p class="sd-schedule-item__time">${formatDateTime(event.start_datetime)}${event.end_datetime ? ` - ${formatDateTime(event.end_datetime)}` : ""}</p>
+        <div class="sd-schedule-event-card__date">
+          <p class="sd-schedule-event-card__day">${escHtml(dateParts.day)}</p>
+          <p class="sd-schedule-event-card__month">${escHtml(dateParts.monthYear)}</p>
+        </div>
+        <div class="sd-schedule-event-card__info">
+          <p class="sd-schedule-event-card__title">${escHtml(event.title || "Event")}</p>
+          <p class="sd-schedule-event-card__meta">${escHtml(scheduleTypeLabel(event.event_type))} - ${escHtml(formatScheduleEventTimeRange(event))}</p>
         </div>
         ${toSafeUiUrl(event.meeting_url)
           ? `<a href="${escHtml(toSafeUiUrl(event.meeting_url))}" target="_blank" rel="noopener" class="sd-btn sd-btn--outline sd-btn--sm">Join</a>`
@@ -2622,6 +2790,33 @@
         updateStudentAttentionIndicators();
       };
 
+      const profileLabel = (profile = {}, fallback = "Unknown sender") =>
+        profile.full_name || profile.email || fallback;
+      const initialsFor = (value) => {
+        const words = String(value || "RA").trim().split(/\s+/).filter(Boolean);
+        return (words.length > 1 ? `${words[0][0]}${words[1][0]}` : words[0]?.slice(0, 2) || "RA").toUpperCase();
+      };
+      const roleClassFor = (role) => {
+        const normalized = String(role || "system").toLowerCase();
+        return ["admin", "trainer", "student"].includes(normalized) ? normalized : "system";
+      };
+      const renderRoleTag = (profile = {}) => {
+        const role = roleClassFor(profile.role);
+        return `<span class="sd-role-tag sd-role-tag--${role}">${escHtml(role)}</span>`;
+      };
+      const renderThreadMessage = ({ out = false, name, body, time }) => {
+        const avatar = initialsFor(name);
+        return `
+          <div class="sd-thread-msg${out ? " sd-thread-msg--out" : ""}">
+            <div class="sd-thread-av${out ? " sd-thread-av--me" : ""}">${escHtml(avatar)}</div>
+            <div class="sd-thread-bubble-wrap">
+              <div class="sd-thread-name">${escHtml(name)}</div>
+              <div class="sd-thread-bubble">${escHtml(body || "-")}</div>
+              <div class="sd-thread-time">${escHtml(time || "")}</div>
+            </div>
+          </div>`;
+      };
+
       const renderMessageDetail = async (group) => {
         if (!detail) return;
         setMessagePanelVisible(viewEmpty, false);
@@ -2645,44 +2840,66 @@
             }
           }
           const sender = profileMap.get(msg.sender_id) || msg.sender_profile || msg.profiles || {};
-          const senderLabel = sender.full_name || sender.email || "Unknown sender";
+          const senderLabel = profileLabel(sender);
           detail.innerHTML = `
-            <div class="sd-message-view__body">
-              <p class="sd-inbox-item__name">${escHtml(group.subject)}</p>
-              <p class="sd-inbox-item__time">From: ${escHtml(senderLabel)} - ${formatDateTime(group.created_at)}</p>
-              <div class="sd-message-detail__body">${escHtml(group.body || "-").replace(/\n/g, "<br>")}</div>
-              <div class="sd-message-detail__actions">
-                <button class="sd-btn sd-btn--outline" type="button" data-sd-msg-reply>Reply</button>
-                ${activeStudentMessageView === "archive"
-                  ? `<button class="sd-btn sd-btn--outline" type="button" data-sd-msg-restore>Restore</button>`
-                  : `<button class="sd-btn sd-btn--outline" type="button" data-sd-msg-archive>Archive</button>`}
-                <button class="sd-btn sd-btn--danger" type="button" data-sd-msg-delete-inbox="${escHtml(msg.id)}">Delete</button>
+            <div class="sd-msg-detail-header">
+              <div class="sd-msg-detail-avatar">${escHtml(initialsFor(senderLabel))}</div>
+              <div class="sd-msg-detail-meta">
+                <p class="sd-msg-detail-subject">${escHtml(group.subject)}</p>
+                <p class="sd-msg-detail-from">From: <strong>${escHtml(senderLabel)}</strong></p>
+                <p class="sd-msg-detail-date">Received: ${formatDateTime(group.created_at)}</p>
               </div>
+              <div class="sd-msg-detail-actions">
+                <button class="sd-btn sd-btn--msg-reply" type="button" data-sd-msg-reply>Reply</button>
+                ${activeStudentMessageView === "archive"
+                  ? `<button class="sd-btn sd-btn--msg-archive" type="button" data-sd-msg-restore>Restore</button>`
+                  : `<button class="sd-btn sd-btn--msg-archive" type="button" data-sd-msg-archive>Archive</button>`}
+                <button class="sd-btn sd-btn--msg-delete" type="button" data-sd-msg-delete-inbox="${escHtml(msg.id)}">Delete</button>
+              </div>
+            </div>
+            <div class="sd-msg-thread">
+              ${renderThreadMessage({
+                name: senderLabel,
+                body: group.body,
+                time: formatDateTime(group.created_at)
+              })}
             </div>`;
         } else {
           const recipients = group.messages.map((msg) => ({
             message: msg,
             profile: profileMap.get(msg.recipient_id) || {}
           }));
+          const senderLabel = profileLabel(currentStudentProfile, "You");
           detail.innerHTML = `
-            <div class="sd-message-view__body">
-              <p class="sd-inbox-item__name">${escHtml(group.subject)}</p>
-              <p class="sd-inbox-item__time">Sent to ${recipients.length} recipient${recipients.length === 1 ? "" : "s"} - ${formatDateTime(group.created_at)}</p>
-              <div class="sd-message-detail__body">${escHtml(group.body || "-").replace(/\n/g, "<br>")}</div>
-              <div class="sd-message-detail__recipients">
-                <p class="sd-message-detail__label">Dikirim ke</p>
-                ${recipients.map(({ message, profile }) => `
-                  <div class="sd-message-recipient" data-message-id="${escHtml(message.id)}">
-                    <span>${escHtml(profile.full_name || profile.email || message.recipient_id)}</span>
-                  </div>
-                `).join("")}
+            <div class="sd-msg-detail-header">
+              <div class="sd-msg-detail-avatar">${escHtml(initialsFor(senderLabel))}</div>
+              <div class="sd-msg-detail-meta">
+                <p class="sd-msg-detail-subject">${escHtml(group.subject)}</p>
+                <p class="sd-msg-detail-from">Sent to <strong>${recipients.length} recipient${recipients.length === 1 ? "" : "s"}</strong></p>
+                <p class="sd-msg-detail-date">${formatDateTime(group.created_at)}</p>
               </div>
-              <div class="sd-message-detail__actions">
+              <div class="sd-msg-detail-actions">
                 ${activeStudentMessageView === "archive"
-                  ? `<button class="sd-btn sd-btn--outline" type="button" data-sd-msg-restore>Restore</button>`
-                  : `<button class="sd-btn sd-btn--outline" type="button" data-sd-msg-archive>Archive</button>`}
-                <button class="sd-btn sd-btn--danger" type="button" data-sd-msg-delete-all>Delete</button>
+                  ? `<button class="sd-btn sd-btn--msg-archive" type="button" data-sd-msg-restore>Restore</button>`
+                  : `<button class="sd-btn sd-btn--msg-archive" type="button" data-sd-msg-archive>Archive</button>`}
+                <button class="sd-btn sd-btn--msg-delete" type="button" data-sd-msg-delete-all>Delete</button>
               </div>
+            </div>
+            <div class="sd-msg-thread">
+              ${renderThreadMessage({
+                out: true,
+                name: senderLabel,
+                body: group.body,
+                time: formatDateTime(group.created_at)
+              })}
+            </div>
+            <div class="sd-message-detail__recipients">
+              <p class="sd-message-detail__label">Dikirim ke</p>
+              ${recipients.map(({ message, profile }) => `
+                <div class="sd-message-recipient" data-message-id="${escHtml(message.id)}">
+                  <span>${escHtml(profile.full_name || profile.email || message.recipient_id)}</span>
+                </div>
+              `).join("")}
             </div>`;
         }
         if (detailStatus) setStudentMessageStatus(detailStatus, true);
@@ -2765,21 +2982,33 @@
               return profile.full_name || profile.email || msg.recipient_id;
             })
           : [];
-        const title = group.type === "sent"
-          ? group.subject || "Sent message"
-          : group.subject || group.sender.full_name || "Message";
+        const senderName = group.type === "sent"
+          ? `To ${recipientNames.length} recipient${recipientNames.length === 1 ? "" : "s"}`
+          : profileLabel(group.sender);
+        const subject = group.subject || (group.type === "sent" ? "Sent message" : "Message");
         const preview = group.type === "sent"
           ? `To: ${recipientNames.slice(0, 2).join(", ")}${recipientNames.length > 2 ? ` +${recipientNames.length - 2}` : ""}`
           : (group.body?.substring(0, 60) || "-");
+        const statusBadge = activeStudentMessageView === "archive"
+          ? `<span class="sd-msg-status-badge sd-msg-status-badge--archived">Archived</span>`
+          : group.type === "sent"
+            ? `<span class="sd-msg-status-badge sd-msg-status-badge--sent">Sent</span>`
+            : "";
         item.innerHTML = `
-          <div class="sd-avatar sd-avatar--sm">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-          </div>
+          <div class="sd-inbox-item__avatar">${escHtml(initialsFor(senderName))}</div>
           <div class="sd-inbox-item__body">
-            <p class="sd-inbox-item__name">${escHtml(title)}</p>
-            <p class="sd-inbox-item__preview">${escHtml(preview)}</p>
+            <div class="sd-inbox-item__top">
+              <span class="sd-inbox-item__name">${escHtml(senderName)}</span>
+              <span class="sd-inbox-item__time">${group.type === "sent" ? "Sent" : timeAgo(group.created_at)}</span>
+            </div>
+            <div class="sd-inbox-item__subject">${escHtml(subject)}</div>
+            <div class="sd-inbox-item__preview">${escHtml(preview)}</div>
+            <div class="sd-inbox-item__tags">
+              ${group.type === "sent" ? statusBadge : renderRoleTag(group.sender)}
+              ${group.isUnread ? `<span class="sd-msg-status-badge sd-msg-status-badge--received">Unread</span>` : ""}
+            </div>
           </div>
-          <span class="sd-inbox-item__time">${group.type === "sent" ? "Sent" : timeAgo(group.created_at)}</span>`;
+          ${group.isUnread ? `<div class="sd-inbox-item__unread-dot"></div>` : ""}`;
         item.addEventListener("click", async () => {
           await setActiveMessage(item, group);
         });
@@ -2812,14 +3041,8 @@
     if (!grid) return;
 
     try {
-      const { data: enrollments, error: enrollErr } = await window.lmsSupabase
-        .from("enrollments")
-        .select("course_id")
-        .eq("student_id", userId)
-
-      if (enrollErr) throw enrollErr;
-      const courseIds = (enrollments || []).map((e) => e.course_id).filter(Boolean);
-      if (courseIds.length === 0) throw new Error("No enrollments");
+      const courseIds = await getStudentLearningCourseIds(userId, { includeBatchMaterials: true });
+      if (courseIds.length === 0) throw new Error("No learning courses");
 
       // Ambil lesson materials dari kursus yang dienroll
       const { data, error } = await window.lmsSupabase

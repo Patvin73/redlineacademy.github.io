@@ -430,7 +430,7 @@ test.describe("Student and marketer flows", {
     const studentStub = makeStudentStub("student");
     await installSupabaseStub(page, studentStub);
 
-    await page.goto("/pages/dashboard-student.html");
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/dashboard-student\.html/);
     await expect(page.locator("#section-home")).toBeVisible();
 

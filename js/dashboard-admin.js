@@ -3000,6 +3000,33 @@
         updateAdminAttentionIndicators();
       };
 
+      const profileLabel = (profile = {}, fallback = "System") =>
+        profile.full_name || profile.email || fallback;
+      const initialsFor = (value) => {
+        const words = String(value || "RA").trim().split(/\s+/).filter(Boolean);
+        return (words.length > 1 ? `${words[0][0]}${words[1][0]}` : words[0]?.slice(0, 2) || "RA").toUpperCase();
+      };
+      const roleClassFor = (role) => {
+        const normalized = String(role || "system").toLowerCase();
+        return ["admin", "trainer", "student"].includes(normalized) ? normalized : "system";
+      };
+      const renderRoleTag = (profile = {}) => {
+        const role = roleClassFor(profile.role);
+        return `<span class="ad-role-tag ad-role-tag--${role}">${escHtml(role)}</span>`;
+      };
+      const renderThreadMessage = ({ out = false, name, body, time }) => {
+        const avatar = initialsFor(name);
+        return `
+          <div class="ad-thread-msg${out ? " ad-thread-msg--out" : ""}">
+            <div class="ad-thread-av${out ? " ad-thread-av--me" : ""}">${escHtml(avatar)}</div>
+            <div class="ad-thread-bubble-wrap">
+              <div class="ad-thread-name">${escHtml(name)}</div>
+              <div class="ad-thread-bubble">${escHtml(body || "-")}</div>
+              <div class="ad-thread-time">${escHtml(time || "")}</div>
+            </div>
+          </div>`;
+      };
+
       const renderMessageDetail = async (group) => {
         if (!viewDetail) return;
         try {
@@ -3022,45 +3049,68 @@
               }
             }
             const sender = profileMap.get(msg.sender_id) || msg.profiles || {};
+            const senderName = profileLabel(sender);
             viewDetail.innerHTML = `
-              <div class="ad-message-view__detail">
-                <p class="ad-inbox-item__name">${escHtml(group.subject)}</p>
-                <p class="ad-inbox-item__time">From: ${escHtml(sender.full_name || sender.email || "System")} - ${timeAgo(group.created_at)}</p>
-                <div class="ad-message-detail__body">${escHtml(group.body || "-").replace(/\n/g, "<br>")}</div>
-                <div class="ad-message-detail__actions">
-                  <button class="ad-btn ad-btn--outline" type="button" data-ad-msg-reply>Reply</button>
-                  ${activeMessageView === "archive"
-                    ? `<button class="ad-btn ad-btn--outline" type="button" data-ad-msg-restore>Restore</button>`
-                    : `<button class="ad-btn ad-btn--outline" type="button" data-ad-msg-archive>Archive</button>`}
-                  <button class="ad-btn ad-btn--danger" type="button" data-ad-msg-delete-inbox="${escHtml(msg.id)}">Delete</button>
+              <div class="ad-msg-detail-header">
+                <div class="ad-msg-detail-avatar">${escHtml(initialsFor(senderName))}</div>
+                <div class="ad-msg-detail-meta">
+                  <p class="ad-msg-detail-subject">${escHtml(group.subject)}</p>
+                  <p class="ad-msg-detail-from">From: <strong>${escHtml(senderName)}</strong></p>
+                  <p class="ad-msg-detail-date">Received: ${timeAgo(group.created_at)}</p>
                 </div>
+                <div class="ad-msg-detail-actions">
+                  <button class="ad-btn ad-btn--msg-reply" type="button" data-ad-msg-reply>Reply</button>
+                  ${activeMessageView === "archive"
+                    ? `<button class="ad-btn ad-btn--msg-archive" type="button" data-ad-msg-restore>Restore</button>`
+                    : `<button class="ad-btn ad-btn--msg-archive" type="button" data-ad-msg-archive>Archive</button>`}
+                  <button class="ad-btn ad-btn--msg-delete" type="button" data-ad-msg-delete-inbox="${escHtml(msg.id)}">Delete</button>
+                </div>
+              </div>
+              <div class="ad-msg-thread">
+                ${renderThreadMessage({
+                  name: senderName,
+                  body: group.body,
+                  time: timeAgo(group.created_at)
+                })}
               </div>`;
           } else {
             const recipients = group.messages.map((msg) => ({
               message: msg,
               profile: profileMap.get(msg.recipient_id) || {}
             }));
+            const senderName = profileLabel(currentProfile, "You");
             viewDetail.innerHTML = `
-              <div class="ad-message-view__detail">
-                <p class="ad-inbox-item__name">${escHtml(group.subject)}</p>
-                <p class="ad-inbox-item__time">Sent to ${recipients.length} recipient${recipients.length === 1 ? "" : "s"} - ${timeAgo(group.created_at)}</p>
-                <div class="ad-message-detail__body">${escHtml(group.body || "-").replace(/\n/g, "<br>")}</div>
-                <div class="ad-message-detail__recipients">
-                  <p class="ad-message-detail__label">Dikirim ke</p>
-                  ${recipients.map(({ message, profile }) => `
-                    <div class="ad-message-recipient" data-message-id="${escHtml(message.id)}">
-                      <span>${escHtml(profile.full_name || profile.email || message.recipient_id)}</span>
-                      <button class="ad-btn ad-btn--outline ad-btn--xs" type="button" data-ad-msg-delete-one="${escHtml(message.id)}">Hapus penerima</button>
-                    </div>
-                  `).join("")}
+              <div class="ad-msg-detail-header">
+                <div class="ad-msg-detail-avatar">${escHtml(initialsFor(senderName))}</div>
+                <div class="ad-msg-detail-meta">
+                  <p class="ad-msg-detail-subject">${escHtml(group.subject)}</p>
+                  <p class="ad-msg-detail-from">Sent to <strong>${recipients.length} recipient${recipients.length === 1 ? "" : "s"}</strong></p>
+                  <p class="ad-msg-detail-date">${timeAgo(group.created_at)}</p>
                 </div>
-                <div class="ad-message-detail__actions">
-                  <button class="ad-btn ad-btn--outline" type="button" data-ad-msg-edit>Edit</button>
+                <div class="ad-msg-detail-actions">
+                  <button class="ad-btn ad-btn--msg-reply" type="button" data-ad-msg-edit>Edit</button>
                   ${activeMessageView === "archive"
-                    ? `<button class="ad-btn ad-btn--outline" type="button" data-ad-msg-restore>Restore</button>`
-                    : `<button class="ad-btn ad-btn--outline" type="button" data-ad-msg-archive>Archive</button>`}
-                  <button class="ad-btn ad-btn--danger" type="button" data-ad-msg-delete-all>Hapus pesan</button>
+                    ? `<button class="ad-btn ad-btn--msg-archive" type="button" data-ad-msg-restore>Restore</button>`
+                    : `<button class="ad-btn ad-btn--msg-archive" type="button" data-ad-msg-archive>Archive</button>`}
+                  <button class="ad-btn ad-btn--msg-delete" type="button" data-ad-msg-delete-all>Hapus pesan</button>
                 </div>
+              </div>
+              <div class="ad-msg-thread">
+                ${renderThreadMessage({
+                  out: true,
+                  name: senderName,
+                  body: group.body,
+                  time: timeAgo(group.created_at)
+                })}
+              </div>
+              <div class="ad-message-detail__recipients">
+                <p class="ad-message-detail__label">Dikirim ke</p>
+                ${recipients.map(({ message, profile }) => `
+                  <div class="ad-message-recipient" data-message-id="${escHtml(message.id)}">
+                    <span>${escHtml(profile.full_name || profile.email || message.recipient_id)}</span>
+                    <button class="ad-btn ad-btn--outline ad-btn--xs" type="button" data-ad-msg-delete-one="${escHtml(message.id)}">Hapus penerima</button>
+                  </div>
+                `).join("")}
               </div>`;
           }
 
@@ -3191,21 +3241,33 @@
             })
           : [];
         const sender = profileMap.get(group.sender_id) || {};
-        const title = group.type === "sent"
-          ? group.subject || "Sent message"
-          : group.subject || sender.full_name || "Message";
+        const senderName = group.type === "sent"
+          ? `To ${recipientNames.length} recipient${recipientNames.length === 1 ? "" : "s"}`
+          : profileLabel(sender, "System");
+        const subject = group.subject || (group.type === "sent" ? "Sent message" : "Message");
         const preview = group.type === "sent"
           ? `To: ${recipientNames.slice(0, 2).join(", ")}${recipientNames.length > 2 ? ` +${recipientNames.length - 2}` : ""}`
           : (group.body?.substring(0, 60) || "-");
+        const statusBadge = activeMessageView === "archive"
+          ? `<span class="ad-msg-status-badge ad-msg-status-badge--archived">Archived</span>`
+          : group.type === "sent"
+            ? `<span class="ad-msg-status-badge ad-msg-status-badge--sent">Sent</span>`
+            : "";
         item.innerHTML = `
-          <div class="ad-avatar ad-avatar--sm">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-          </div>
+          <div class="ad-inbox-item__avatar">${escHtml(initialsFor(senderName))}</div>
           <div class="ad-inbox-item__body">
-            <p class="ad-inbox-item__name">${escHtml(title)}</p>
-            <p class="ad-inbox-item__preview">${escHtml(preview)}</p>
+            <div class="ad-inbox-item__top">
+              <span class="ad-inbox-item__name">${escHtml(senderName)}</span>
+              <span class="ad-inbox-item__time">${group.type === "sent" ? "Sent" : timeAgo(group.created_at)}</span>
+            </div>
+            <div class="ad-inbox-item__subject">${escHtml(subject)}</div>
+            <div class="ad-inbox-item__preview">${escHtml(preview)}</div>
+            <div class="ad-inbox-item__tags">
+              ${group.type === "sent" ? statusBadge : renderRoleTag(sender)}
+              ${group.isUnread ? `<span class="ad-msg-status-badge ad-msg-status-badge--received">Unread</span>` : ""}
+            </div>
           </div>
-          <span class="ad-inbox-item__time">${group.type === "sent" ? "Sent" : timeAgo(group.created_at)}</span>`;
+          ${group.isUnread ? `<div class="ad-inbox-item__unread-dot"></div>` : ""}`;
         item.addEventListener("click", async () => {
           await setActiveMessage(item, group);
         });
