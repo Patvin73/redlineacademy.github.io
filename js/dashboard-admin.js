@@ -2810,6 +2810,10 @@
       activeMessageView = "history";
       loadedSections.delete("messages");
       await loadMessages();
+      setTimeout(() => {
+        const thread = document.querySelector("#adMsgThread, .ad-msg-thread");
+        if (thread) thread.scrollTop = thread.scrollHeight;
+      }, 300);
     } catch (err) {
       setComposerStatus(err.message || "Message failed.", true);
     } finally {
@@ -3044,6 +3048,35 @@
             </div>
           </div>`;
       };
+      const normalizeThreadSubject = (subject) =>
+        String(subject || "Message").replace(/^(re:\s*)+/i, "").trim().toLowerCase();
+      const getThreadMessages = (baseMsg) => {
+        if (!baseMsg) return [];
+        const baseSubject = normalizeThreadSubject(baseMsg.subject);
+        const firstUser = baseMsg.sender_id;
+        const secondUser = baseMsg.recipient_id;
+        const threadMessages = data
+          .filter((msg) => {
+            const samePair = (msg.sender_id === firstUser && msg.recipient_id === secondUser)
+              || (msg.sender_id === secondUser && msg.recipient_id === firstUser);
+            return samePair && normalizeThreadSubject(msg.subject) === baseSubject;
+          })
+          .sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+        return threadMessages.length > 0 ? threadMessages : [baseMsg];
+      };
+      const renderThreadFor = (baseMsg, fallbackSenderName) =>
+        getThreadMessages(baseMsg).map((threadMsg) => {
+          const isOut = threadMsg.sender_id === currentProfile.id;
+          const senderProfile = isOut
+            ? currentProfile
+            : profileMap.get(threadMsg.sender_id) || threadMsg.profiles || {};
+          return renderThreadMessage({
+            out: isOut,
+            name: isOut ? profileLabel(senderProfile, "You") : profileLabel(senderProfile, fallbackSenderName),
+            body: threadMsg.body,
+            time: timeAgo(threadMsg.created_at)
+          });
+        }).join("");
 
       const renderMessageDetail = async (group) => {
         if (!viewDetail) return;
@@ -3068,6 +3101,7 @@
             }
             const sender = profileMap.get(msg.sender_id) || msg.profiles || {};
             const senderName = profileLabel(sender);
+            const threadHTML = renderThreadFor(msg, senderName);
             viewDetail.innerHTML = `
               <div class="ad-msg-detail-header">
                 <div class="ad-msg-detail-avatar">${escHtml(initialsFor(senderName))}</div>
@@ -3084,12 +3118,8 @@
                   <button class="ad-btn ad-btn--msg-delete" type="button" data-ad-msg-delete-inbox="${escHtml(msg.id)}">Delete</button>
                 </div>
               </div>
-              <div class="ad-msg-thread">
-                ${renderThreadMessage({
-                  name: senderName,
-                  body: group.body,
-                  time: timeAgo(group.created_at)
-                })}
+              <div class="ad-msg-thread" id="adMsgThread">
+                ${threadHTML}
               </div>`;
           } else {
             const recipients = group.messages.map((msg) => ({
@@ -3097,6 +3127,15 @@
               profile: profileMap.get(msg.recipient_id) || {}
             }));
             const senderName = profileLabel(currentProfile, "You");
+            const canRenderConversation = group.messages.length === 1;
+            const threadHTML = canRenderConversation
+              ? renderThreadFor(group.messages[0], senderName)
+              : renderThreadMessage({
+                  out: true,
+                  name: senderName,
+                  body: group.body,
+                  time: timeAgo(group.created_at)
+                });
             viewDetail.innerHTML = `
               <div class="ad-msg-detail-header">
                 <div class="ad-msg-detail-avatar">${escHtml(initialsFor(senderName))}</div>
@@ -3113,13 +3152,8 @@
                   <button class="ad-btn ad-btn--msg-delete" type="button" data-ad-msg-delete-all>Hapus pesan</button>
                 </div>
               </div>
-              <div class="ad-msg-thread">
-                ${renderThreadMessage({
-                  out: true,
-                  name: senderName,
-                  body: group.body,
-                  time: timeAgo(group.created_at)
-                })}
+              <div class="ad-msg-thread" id="adMsgThread">
+                ${threadHTML}
               </div>
               <div class="ad-message-detail__recipients">
                 <p class="ad-message-detail__label">Dikirim ke</p>
@@ -3131,6 +3165,10 @@
                 `).join("")}
               </div>`;
           }
+          setTimeout(() => {
+            const thread = viewDetail.querySelector("#adMsgThread, .ad-msg-thread");
+            if (thread) thread.scrollTop = thread.scrollHeight;
+          }, 50);
 
           viewDetail.querySelector("[data-ad-msg-archive]")?.addEventListener("click", async () => {
             try {

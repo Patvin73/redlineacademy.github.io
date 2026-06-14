@@ -436,7 +436,7 @@ test.describe("Student and marketer flows", {
 
     const adminStub = makeStudentStub("admin");
     await installSupabaseStub(page, adminStub);
-    await page.goto("/pages/dashboard-student.html");
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
     await page.waitForURL("**/pages/dashboard-admin.html");
   });
 

@@ -1521,9 +1521,23 @@ test("trainer can open message detail", async ({ page }) => {
   await installSupabaseStub(page, "trainer");
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#sidebarRoleBadge")).toHaveText("Trainer");
+  await page.evaluate(() => {
+    window.__e2eGetTableData().messages.push({
+      id: "msg-trainer-reply",
+      sender_id: "e2e-trainer",
+      recipient_id: "e2e-student-1",
+      subject: "Re: Question",
+      body: "I will check it.",
+      is_read: true,
+      is_archived: false,
+      created_at: "2026-03-10T08:05:00.000Z"
+    });
+  });
 
   await page.locator(".ad-nav__item[data-section='messages']").click();
   await expect(page.locator("#section-messages")).toHaveClass(/active/);
+  await expect(page.locator("#adMsgComposeForm")).toBeHidden();
+  await expect(page.locator("#adMsgViewEmpty")).toBeVisible();
 
   const inboxMessage = page.locator(".ad-inbox-item", { hasText: "Need help with Module 2." });
   await expect(inboxMessage).toHaveAttribute("role", "button");
@@ -1534,6 +1548,8 @@ test("trainer can open message detail", async ({ page }) => {
   await expect(page.locator("#adMsgViewEmpty")).toBeHidden();
   await expect(page.locator("#adMsgDetail")).toBeVisible();
   await expect(page.locator("#adMsgDetail")).toContainText("Need help with Module 2.");
+  await expect(page.locator("#adMsgDetail")).toContainText("I will check it.");
+  await expect(page.locator("#adMsgThread .ad-thread-msg")).toHaveCount(2);
   await expect(page.locator("#adMsgDetail")).toContainText("Reply");
   await expect(page.locator("#adMsgDetail")).toContainText("Archive");
   await expect(page.locator("#adMsgDetail")).toContainText("Delete");

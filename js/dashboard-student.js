@@ -2651,6 +2651,10 @@
       setTimeout(() => closeStudentMessageComposer(), 1200);
       if (window._sdActivateSection) window._sdActivateSection("messages");
       await loadMessages(currentStudentProfile.id);
+      setTimeout(() => {
+        const thread = document.querySelector("#sdMsgThread, .sd-msg-thread");
+        if (thread) thread.scrollTop = thread.scrollHeight;
+      }, 300);
     } catch (err) {
       setStudentComposerStatus(err.message || dashboardText("lmsMsgFailed", "Message failed to send."), true);
     } finally {
@@ -2841,6 +2845,35 @@
             </div>
           </div>`;
       };
+      const normalizeThreadSubject = (subject) =>
+        String(subject || "Message").replace(/^(re:\s*)+/i, "").trim().toLowerCase();
+      const getThreadMessages = (baseMsg) => {
+        if (!baseMsg) return [];
+        const baseSubject = normalizeThreadSubject(baseMsg.subject);
+        const firstUser = baseMsg.sender_id;
+        const secondUser = baseMsg.recipient_id;
+        const threadMessages = data
+          .filter((msg) => {
+            const samePair = (msg.sender_id === firstUser && msg.recipient_id === secondUser)
+              || (msg.sender_id === secondUser && msg.recipient_id === firstUser);
+            return samePair && normalizeThreadSubject(msg.subject) === baseSubject;
+          })
+          .sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+        return threadMessages.length > 0 ? threadMessages : [baseMsg];
+      };
+      const renderThreadFor = (baseMsg, fallbackSenderName) =>
+        getThreadMessages(baseMsg).map((threadMsg) => {
+          const isOut = threadMsg.sender_id === userId;
+          const senderProfile = isOut
+            ? currentStudentProfile
+            : profileMap.get(threadMsg.sender_id) || threadMsg.sender_profile || threadMsg.profiles || {};
+          return renderThreadMessage({
+            out: isOut,
+            name: isOut ? profileLabel(senderProfile, "You") : profileLabel(senderProfile, fallbackSenderName),
+            body: threadMsg.body,
+            time: formatDateTime(threadMsg.created_at)
+          });
+        }).join("");
 
       const renderMessageDetail = async (group) => {
         if (!detail) return;
@@ -2866,6 +2899,7 @@
           }
           const sender = profileMap.get(msg.sender_id) || msg.sender_profile || msg.profiles || {};
           const senderLabel = profileLabel(sender);
+          const threadHTML = renderThreadFor(msg, senderLabel);
           detail.innerHTML = `
             <div class="sd-msg-detail-header">
               <div class="sd-msg-detail-avatar">${escHtml(initialsFor(senderLabel))}</div>
@@ -2882,12 +2916,8 @@
                 <button class="sd-btn sd-btn--msg-delete" type="button" data-sd-msg-delete-inbox="${escHtml(msg.id)}">Delete</button>
               </div>
             </div>
-            <div class="sd-msg-thread">
-              ${renderThreadMessage({
-                name: senderLabel,
-                body: group.body,
-                time: formatDateTime(group.created_at)
-              })}
+            <div class="sd-msg-thread" id="sdMsgThread">
+              ${threadHTML}
             </div>`;
         } else {
           const recipients = group.messages.map((msg) => ({
@@ -2895,6 +2925,15 @@
             profile: profileMap.get(msg.recipient_id) || {}
           }));
           const senderLabel = profileLabel(currentStudentProfile, "You");
+          const canRenderConversation = group.messages.length === 1;
+          const threadHTML = canRenderConversation
+            ? renderThreadFor(group.messages[0], senderLabel)
+            : renderThreadMessage({
+                out: true,
+                name: senderLabel,
+                body: group.body,
+                time: formatDateTime(group.created_at)
+              });
           detail.innerHTML = `
             <div class="sd-msg-detail-header">
               <div class="sd-msg-detail-avatar">${escHtml(initialsFor(senderLabel))}</div>
@@ -2910,13 +2949,8 @@
                 <button class="sd-btn sd-btn--msg-delete" type="button" data-sd-msg-delete-all>Delete</button>
               </div>
             </div>
-            <div class="sd-msg-thread">
-              ${renderThreadMessage({
-                out: true,
-                name: senderLabel,
-                body: group.body,
-                time: formatDateTime(group.created_at)
-              })}
+            <div class="sd-msg-thread" id="sdMsgThread">
+              ${threadHTML}
             </div>
             <div class="sd-message-detail__recipients">
               <p class="sd-message-detail__label">Dikirim ke</p>
@@ -2928,6 +2962,10 @@
             </div>`;
         }
         if (detailStatus) setStudentMessageStatus(detailStatus, true);
+        setTimeout(() => {
+          const thread = detail.querySelector("#sdMsgThread, .sd-msg-thread");
+          if (thread) thread.scrollTop = thread.scrollHeight;
+        }, 50);
 
         detail.querySelector("[data-sd-msg-reply]")?.addEventListener("click", async () => {
           const msg = group.messages[0];

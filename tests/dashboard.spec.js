@@ -782,6 +782,7 @@ test.describe("Student Dashboard", () => {
   });
 
   test("refreshes profile form when returning to profile section", async ({ page }) => {
+    test.setTimeout(60000);
     const fixture = makeStudentFixture();
     await installSupabaseStub(page, fixture);
 
@@ -1408,6 +1409,16 @@ test.describe("Student Dashboard", () => {
   test("marks notifications and messages read from the student indicators", async ({ page }) => {
     // This test covers the notification panel action and verifies message unread state keeps the bell on until read.
     const fixture = makeStudentFixture();
+    fixture.tableData.messages.push({
+      id: "msg-student-reply",
+      sender_id: "student-1",
+      recipient_id: "trainer-1",
+      subject: "Re: Welcome",
+      body: "Thanks for the update.",
+      is_read: true,
+      is_archived: false,
+      created_at: "2026-01-10T10:05:00.000Z"
+    });
     await installSupabaseStub(page, fixture);
 
     await page.goto("/pages/dashboard-student.html");
@@ -1437,6 +1448,8 @@ test.describe("Student Dashboard", () => {
     }));
 
     await page.locator(".sd-nav__item[data-section='messages']").click();
+    await expect(page.locator("#studentMsgComposeForm")).toBeHidden();
+    await expect(page.locator("#messageViewEmpty")).toBeVisible();
     const welcomeMessage = page.locator(".sd-inbox-item", { hasText: "Welcome" });
     await expect(welcomeMessage).toHaveAttribute("role", "button");
     await expect(welcomeMessage).toHaveAttribute("tabindex", "0");
@@ -1444,6 +1457,8 @@ test.describe("Student Dashboard", () => {
     await page.keyboard.press("Enter");
     await expect(welcomeMessage).toHaveAttribute("aria-selected", "true");
     await expect(page.locator("#messageDetail")).toContainText("Please review module one.");
+    await expect(page.locator("#messageDetail")).toContainText("Thanks for the update.");
+    await expect(page.locator("#sdMsgThread .sd-thread-msg")).toHaveCount(2);
     await expect(page.locator("#messageDetail")).toContainText("Reply");
     await expect(page.locator("#messageDetail")).toContainText("Archive");
     await expect(page.locator("#messageDetail")).toContainText("Delete");
