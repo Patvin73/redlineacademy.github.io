@@ -10,6 +10,48 @@ function makeLocalDateTime(daysFromNow, hour = 9) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+async function expectThreadMessageFullyVisible(page, threadSelector, messageSelector, edge) {
+  await expect.poll(async () => page.locator(threadSelector).evaluate((thread, selector) => {
+    const edgeMessage = thread.querySelector(selector);
+    if (!edgeMessage) return false;
+    const scroller = thread.closest("#adMsgDetail") || thread;
+    const header = scroller.querySelector(".ad-msg-detail-header");
+    const threadRect = scroller.getBoundingClientRect();
+    const minTop = header ? Math.max(threadRect.top, header.getBoundingClientRect().bottom) : threadRect.top;
+    const messageRect = edgeMessage.getBoundingClientRect();
+    return messageRect.top >= minTop - 1
+      && messageRect.bottom <= threadRect.bottom + 1;
+  }, `${messageSelector}:${edge}-child`)).toBe(true);
+}
+
+async function expectFirstThreadMessageFullyVisible(page, threadSelector, messageSelector) {
+  await expectThreadMessageFullyVisible(page, threadSelector, messageSelector, "first");
+}
+
+async function expectLastThreadMessageFullyVisible(page, threadSelector, messageSelector) {
+  await expectThreadMessageFullyVisible(page, threadSelector, messageSelector, "last");
+}
+
+async function expectRightPanelWheelScrolls(page, panelSelector) {
+  const panel = page.locator(panelSelector);
+  await panel.evaluate((el) => {
+    el.style.height = "220px";
+    el.style.maxHeight = "220px";
+    el.scrollTop = 0;
+  });
+  await expect.poll(async () => panel.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true);
+  await page.locator(panelSelector).hover({ position: { x: 20, y: 20 } });
+  await page.mouse.wheel(0, 500);
+  await expect.poll(async () => panel.evaluate((el) => el.scrollTop > 0)).toBe(true);
+  await page.mouse.wheel(0, -500);
+  await expect.poll(async () => panel.evaluate((el) => el.scrollTop === 0)).toBe(true);
+  await panel.evaluate((el) => {
+    el.style.height = "";
+    el.style.maxHeight = "";
+    el.scrollTop = 0;
+  });
+}
+
 async function installSupabaseStub(page, role, options = {}) {
   const profiles = [
     {
@@ -396,31 +438,50 @@ async function installSupabaseStub(page, role, options = {}) {
 
       const applyOrFilter = (rows, expression) => {
         if (!expression) return rows;
-        const conditions = String(expression)
-          .split(",")
-          .map((part) => part.trim())
-          .filter(Boolean)
-          .map((part) => {
-            const pieces = part.split(".");
-            return {
-              column: pieces[0],
-              operator: pieces[1],
-              value: pieces.slice(2).join(".")
-            };
+        const splitTopLevel = (value) => {
+          const parts = [];
+          let depth = 0;
+          let current = "";
+          String(value).split("").forEach((char) => {
+            if (char === "," && depth === 0) {
+              if (current.trim()) parts.push(current.trim());
+              current = "";
+              return;
+            }
+            if (char === "(") depth += 1;
+            if (char === ")") depth = Math.max(0, depth - 1);
+            current += char;
           });
+          if (current.trim()) parts.push(current.trim());
+          return parts;
+        };
+        const matchesCondition = (row, part) => {
+          const pieces = part.split(".");
+          const condition = {
+            column: pieces[0],
+            operator: pieces[1],
+            value: pieces.slice(2).join(".")
+          };
+          const rawValue = getValue(row, condition.column);
+          const value = condition.column === "is_archived" && typeof rawValue === "undefined"
+            ? false
+            : rawValue;
+          if (condition.operator === "eq") return String(value) === condition.value;
+          if (condition.operator === "is" && condition.value === "null") {
+            return rawValue === null || typeof rawValue === "undefined";
+          }
+          return false;
+        };
+        const matchesGroup = (row, part) => {
+          if (part.startsWith("and(") && part.endsWith(")")) {
+            return splitTopLevel(part.slice(4, -1)).every((condition) => matchesCondition(row, condition));
+          }
+          return matchesCondition(row, part);
+        };
+        const conditions = splitTopLevel(expression);
 
         return rows.filter((row) =>
-          conditions.some((condition) => {
-            const rawValue = getValue(row, condition.column);
-            const value = condition.column === "is_archived" && typeof rawValue === "undefined"
-              ? false
-              : rawValue;
-            if (condition.operator === "eq") return String(value) === condition.value;
-            if (condition.operator === "is" && condition.value === "null") {
-              return rawValue === null || typeof rawValue === "undefined";
-            }
-            return false;
-          })
+          conditions.some((condition) => matchesGroup(row, condition))
         );
       };
 
@@ -1532,6 +1593,16 @@ test("trainer can open message detail", async ({ page }) => {
       is_archived: false,
       created_at: "2026-03-10T08:05:00.000Z"
     });
+    window.__e2eGetTableData().messages.push({
+      id: "msg-student-followup",
+      sender_id: "e2e-student-1",
+      recipient_id: "e2e-trainer",
+      subject: "Re: Question",
+      body: "Any update on Module 2?",
+      is_read: true,
+      is_archived: false,
+      created_at: "2026-03-10T08:10:00.000Z"
+    });
   });
 
   await page.locator(".ad-nav__item[data-section='messages']").click();
@@ -1539,7 +1610,9 @@ test("trainer can open message detail", async ({ page }) => {
   await expect(page.locator("#adMsgComposeForm")).toBeHidden();
   await expect(page.locator("#adMsgViewEmpty")).toBeVisible();
 
-  const inboxMessage = page.locator(".ad-inbox-item", { hasText: "Need help with Module 2." });
+  const inboxMessage = page.locator(".ad-inbox-item", { hasText: "Question" });
+  await expect(inboxMessage).toHaveCount(1);
+  await expect(inboxMessage).toContainText("Any update on Module 2?");
   await expect(inboxMessage).toHaveAttribute("role", "button");
   await expect(inboxMessage).toHaveAttribute("tabindex", "0");
   await inboxMessage.focus();
@@ -1549,7 +1622,10 @@ test("trainer can open message detail", async ({ page }) => {
   await expect(page.locator("#adMsgDetail")).toBeVisible();
   await expect(page.locator("#adMsgDetail")).toContainText("Need help with Module 2.");
   await expect(page.locator("#adMsgDetail")).toContainText("I will check it.");
-  await expect(page.locator("#adMsgThread .ad-thread-msg")).toHaveCount(2);
+  await expect(page.locator("#adMsgDetail")).toContainText("Any update on Module 2?");
+  await expect(page.locator("#adMsgThread .ad-thread-msg")).toHaveCount(3);
+  await expectFirstThreadMessageFullyVisible(page, "#adMsgThread", ".ad-thread-msg");
+  await expectRightPanelWheelScrolls(page, "#adMsgDetail");
   await expect(page.locator("#adMsgDetail")).toContainText("Reply");
   await expect(page.locator("#adMsgDetail")).toContainText("Archive");
   await expect(page.locator("#adMsgDetail")).toContainText("Delete");
@@ -1559,15 +1635,21 @@ test("trainer can open message detail", async ({ page }) => {
   await expect(page.locator("#adMsgSubject")).toHaveValue("Re: Question");
   await expect(page.locator("#adMsgRecipient")).toHaveValues(["e2e-student-1"]);
   await expect(page.locator("#adMsgBody")).toBeFocused();
-  await page.locator("#adCancelMsgBtn").click();
+  await page.locator("#adMsgBody").fill("I replied from the thread.");
+  await page.locator("#adSendMsgBtn").click();
+  await expect(page.locator("#adMsgComposeForm")).toBeHidden();
+  await expect(page.locator("[data-message-view='inbox']")).toHaveClass(/active/);
+  await expect(page.locator("#adMsgDetail")).toContainText("I replied from the thread.");
+  await expect(page.locator("#adMsgThread .ad-thread-msg")).toHaveCount(4);
+  await expectLastThreadMessageFullyVisible(page, "#adMsgThread", ".ad-thread-msg");
 
-  await page.locator(".ad-inbox-item", { hasText: "Need help with Module 2." }).click();
+  await page.locator(".ad-inbox-item", { hasText: "Question" }).click();
   await page.locator("[data-ad-msg-archive]").click();
   await expect.poll(async () => {
     const messages = await page.evaluate(() => window.__e2eGetTableData().messages);
     return messages.find((msg) => msg.id === "msg-1")?.is_archived;
   }).toBe(true);
-  await expect(page.locator(".ad-inbox-item", { hasText: "Need help with Module 2." })).toHaveCount(0);
+  await expect(page.locator(".ad-inbox-item", { hasText: "Question" })).toHaveCount(0);
   await page.locator("[data-message-view='archive']").click();
   await expect(page.locator(".ad-inbox-item", { hasText: "Question" })).toHaveCount(1);
   await page.locator(".ad-inbox-item", { hasText: "Question" }).click();
@@ -1581,8 +1663,11 @@ test("trainer can open message detail", async ({ page }) => {
   await page.locator("[data-message-view='inbox']").click();
   await page.locator(".ad-inbox-item", { hasText: "Question" }).click();
   await page.locator("[data-ad-msg-delete-inbox]").click();
+  await page.getByRole("dialog").getByRole("button", { name: "Hapus" }).click();
   const messages = await page.evaluate(() => window.__e2eGetTableData().messages);
   expect(messages.some((msg) => msg.id === "msg-1")).toBe(false);
+  expect(messages.some((msg) => msg.id === "msg-student-followup")).toBe(false);
+  expect(messages.some((msg) => msg.body === "I replied from the thread.")).toBe(false);
 });
 
 test("trainer can compose a system message to multiple recipients across roles", async ({ page }) => {

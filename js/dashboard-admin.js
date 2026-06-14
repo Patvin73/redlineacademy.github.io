@@ -2564,6 +2564,9 @@
   ================================================================ */
   const MAX_MESSAGE_RECIPIENTS = 50;
   let messageComposerBound = false;
+  let messageComposerReturnView = "";
+  let messageSending = false;
+  let messagesLoadSeq = 0;
   let activeMessageView = "inbox";
   let adminUnreadMessages = 0;
   let adminUnreadNotifications = 0;
@@ -2767,29 +2770,38 @@
     const recipient = $("adMsgRecipient");
     const body = $("adMsgBody");
     const sendBtn = $("adSendMsgBtn");
-    if (sendBtn?.disabled) return;
+    const composeForm = $("adMsgComposeForm");
+    if (messageSending || sendBtn?.disabled) return;
+    messageSending = true;
     const recipientIds = getSelectedMessageRecipients(recipient);
     const messageBody = body?.value.trim() || "";
 
     if (recipientIds.length === 0 || !messageBody) {
+      messageSending = false;
       setComposerStatus(tSafe("adMsgRequired", "Recipient and message are required."), true);
       return;
     }
     if (recipientIds.length > MAX_MESSAGE_RECIPIENTS) {
+      messageSending = false;
       setComposerStatus(tSafe("adMsgTooManyRecipients", "You can select up to 50 recipients at once."), true);
       return;
     }
-    if (!window.lmsSupabase || !currentProfile?.id) return;
+    if (!window.lmsSupabase || !currentProfile?.id) {
+      messageSending = false;
+      return;
+    }
 
     try {
       if (sendBtn) sendBtn.disabled = true;
       const messageSubject = ($("adMsgSubject")?.value.trim()) || null;
+      const sentAt = new Date().toISOString();
       const messageRows = recipientIds.map((recipientId) => ({
         id: createClientId(),
         sender_id: currentProfile.id,
         recipient_id: recipientId,
         subject: messageSubject,
-        body: messageBody
+        body: messageBody,
+        created_at: sentAt
       }));
       const { error } = await window.lmsSupabase
         .from("messages")
@@ -2807,16 +2819,25 @@
       syncMessageRecipientCheckboxes();
       setMessageRecipientDropdownOpen(false);
       setComposerStatus(tSafe("adMsgSent", "Message sent."));
-      activeMessageView = "history";
+      const replyViewFallback = /^re:/i.test(messageSubject || "") && recipientIds.length === 1 ? "inbox" : "history";
+      activeMessageView = messageComposerReturnView || composeForm?.dataset.returnView || replyViewFallback;
+      messageComposerReturnView = "";
+      if (composeForm) delete composeForm.dataset.returnView;
       loadedSections.delete("messages");
-      await loadMessages();
+      await loadMessages({
+        selectedMessageId: messageRows[0]?.id,
+        scrollThreadToLatest: true,
+        selectedThread: recipientIds.length === 1
+          ? { counterpartId: recipientIds[0], subject: messageSubject }
+          : null
+      });
       setTimeout(() => {
-        const thread = document.querySelector("#adMsgThread, .ad-msg-thread");
-        if (thread) thread.scrollTop = thread.scrollHeight;
+        scrollAdminMessageThreadToLatest(document.querySelector("#adMsgThread, .ad-msg-thread"));
       }, 300);
     } catch (err) {
       setComposerStatus(err.message || "Message failed.", true);
     } finally {
+      messageSending = false;
       if (sendBtn) sendBtn.disabled = false;
     }
   }
@@ -2824,6 +2845,54 @@
   function getReplySubject(subject) {
     const value = String(subject || "Message").trim();
     return /^re:/i.test(value) ? value : `Re: ${value}`;
+  }
+
+  function scrollAdminMessageThreadToLatest(thread) {
+    if (!thread) return;
+    const scroller = thread.closest("#adMsgDetail") || thread;
+    const align = () => {
+      const lastMessage = thread.querySelector(".ad-thread-msg:last-child");
+      if (lastMessage?.scrollIntoView) {
+        lastMessage.scrollIntoView({ block: "end", inline: "nearest" });
+      }
+      scroller.scrollTop = scroller.scrollHeight;
+    };
+    const schedule = typeof window.requestAnimationFrame === "function"
+      ? window.requestAnimationFrame.bind(window)
+      : (callback) => setTimeout(callback, 0);
+    schedule(() => {
+      align();
+      setTimeout(align, 80);
+    });
+  }
+
+  function scrollAdminMessageThreadToStart(thread) {
+    if (!thread) return;
+    const scroller = thread.closest("#adMsgDetail") || thread;
+    const align = () => {
+      scroller.scrollTop = 0;
+      thread.scrollTop = 0;
+    };
+    const schedule = typeof window.requestAnimationFrame === "function"
+      ? window.requestAnimationFrame.bind(window)
+      : (callback) => setTimeout(callback, 0);
+    schedule(() => {
+      align();
+      setTimeout(align, 80);
+    });
+  }
+
+  function bindAdminMessageThreadScrolling(panel) {
+    if (!panel || panel.dataset.adThreadScrollBound === "true") return;
+    panel.dataset.adThreadScrollBound = "true";
+    panel.addEventListener("wheel", (event) => {
+      if (panel.scrollHeight <= panel.clientHeight) return;
+      const maxScroll = panel.scrollHeight - panel.clientHeight;
+      const nextScroll = Math.max(0, Math.min(maxScroll, panel.scrollTop + event.deltaY));
+      if (nextScroll === panel.scrollTop) return;
+      panel.scrollTop = nextScroll;
+      event.preventDefault();
+    }, { passive: false });
   }
 
   async function openMessageComposer(selectedRecipientId = "", options = {}) {
@@ -2838,6 +2907,9 @@
     const sendBtn = $("adSendMsgBtn");
     const cancelBtn = $("adCancelMsgBtn");
     if (!composeForm) return;
+    messageComposerReturnView = options.returnView || "";
+    if (options.returnView) composeForm.dataset.returnView = options.returnView;
+    else delete composeForm.dataset.returnView;
 
     setMessagePanelVisible(viewEmpty, false);
     setMessagePanelVisible(viewDetail, false);
@@ -2900,13 +2972,18 @@
   }
 
   function groupMessagesForHistory(messages) {
+    const normalizeThreadSubject = (subject) =>
+      String(subject || "Message").replace(/^(re:\s*)+/i, "").trim().toLowerCase();
+
     const groups = new Map();
     (messages || []).forEach((msg) => {
       const isSent = msg.sender_id === currentProfile.id;
+      const counterpartId = isSent ? msg.recipient_id : msg.sender_id;
+      const threadSubject = normalizeThreadSubject(msg.subject);
       const batchTime = msg.created_at ? String(msg.created_at).slice(0, 19) : "pending";
       const groupId = isSent
         ? `sent:${msg.sender_id}|${msg.subject || ""}|${msg.body || ""}|${batchTime}`
-        : `received:${msg.id}`;
+        : `received:${counterpartId}|${threadSubject}`;
       if (!groups.has(groupId)) {
         groups.set(groupId, {
           id: groupId,
@@ -2918,11 +2995,18 @@
           messages: []
         });
       }
-      groups.get(groupId).messages.push(msg);
+      const group = groups.get(groupId);
+      group.messages.push(msg);
+      if (new Date(msg.created_at || 0) >= new Date(group.created_at || 0)) {
+        group.created_at = msg.created_at;
+        group.body = msg.body || "";
+        group.subject = msg.subject || group.subject;
+        if (!isSent) group.sender_id = msg.sender_id;
+      }
     });
 
     return Array.from(groups.values()).map((group) => {
-      group.messages.sort((a, b) => String(a.recipient_id || "").localeCompare(String(b.recipient_id || "")));
+      group.messages.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
       group.key = `${group.type}:${group.messages.map((msg) => msg.id).sort().join(",")}`;
       group.isUnread = group.messages.some((msg) => !msg.is_read && msg.recipient_id === currentProfile.id);
       return group;
@@ -2930,8 +3014,11 @@
   }
 
   async function loadMessages(...args) {
+    const loadSeq = ++messagesLoadSeq;
     const [options = {}] = args;
     const selectedMessageId = options?.selectedMessageId ? String(options.selectedMessageId) : "";
+    const selectedThread = options?.selectedThread || null;
+    const scrollThreadToLatest = Boolean(options?.scrollThreadToLatest);
     const inbox = $("adInboxList");
     const empty = $("adInboxEmpty");
     const viewEmpty = $("adMsgViewEmpty");
@@ -2972,6 +3059,7 @@
       const data = Array.from(
         new Map([...(receivedData || []), ...(sentData || [])].map((msg) => [msg.id, msg])).values()
       ).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 100);
+      if (loadSeq !== messagesLoadSeq) return;
 
       inbox.querySelectorAll(".ad-inbox-item").forEach((el) => el.remove());
       setMessagePanelVisible(viewDetail, false);
@@ -3064,8 +3152,29 @@
           .sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
         return threadMessages.length > 0 ? threadMessages : [baseMsg];
       };
-      const renderThreadFor = (baseMsg, fallbackSenderName) =>
-        getThreadMessages(baseMsg).map((threadMsg) => {
+      const fetchFullThread = async (baseMsg) => {
+        if (!baseMsg || !baseMsg.sender_id || !baseMsg.recipient_id) return getThreadMessages(baseMsg);
+        const userA = baseMsg.sender_id;
+        const userB = baseMsg.recipient_id;
+        const baseSubject = normalizeThreadSubject(baseMsg.subject);
+        try {
+          const { data: threadData, error } = await window.lmsSupabase
+            .from("messages")
+            .select(messageSelect)
+            .or(`and(sender_id.eq.${userA},recipient_id.eq.${userB}),and(sender_id.eq.${userB},recipient_id.eq.${userA})`)
+            .order("created_at", { ascending: true })
+            .limit(300);
+          if (error) throw error;
+          const filtered = (threadData || [])
+            .filter((msg) => normalizeThreadSubject(msg.subject) === baseSubject);
+          return filtered.length > 0 ? filtered : [baseMsg];
+        } catch {
+          return getThreadMessages(baseMsg);
+        }
+      };
+      const renderThreadFor = async (baseMsg, fallbackSenderName) => {
+        const threadMessages = await fetchFullThread(baseMsg);
+        return threadMessages.map((threadMsg) => {
           const isOut = threadMsg.sender_id === currentProfile.id;
           const senderProfile = isOut
             ? currentProfile
@@ -3077,6 +3186,18 @@
             time: timeAgo(threadMsg.created_at)
           });
         }).join("");
+      };
+      const groupMatchesSelectedMessage = (group) => {
+        const baseMsg = group.messages[group.messages.length - 1] || group.messages[0];
+        if (selectedMessageId) {
+          if (group.messages.some((msg) => String(msg.id) === selectedMessageId)) return true;
+          if (getThreadMessages(baseMsg).some((msg) => String(msg.id) === selectedMessageId)) return true;
+        }
+        if (!selectedThread || !baseMsg) return false;
+        const counterpartId = group.type === "sent" ? baseMsg.recipient_id : group.sender_id;
+        return counterpartId === selectedThread.counterpartId
+          && normalizeThreadSubject(group.subject) === normalizeThreadSubject(selectedThread.subject);
+      };
 
       const renderMessageDetail = async (group) => {
         if (!viewDetail) return;
@@ -3086,22 +3207,27 @@
           setMessagePanelVisible(viewDetail, true);
 
           if (group.type === "received") {
-            const msg = group.messages[0];
-            if (!msg.is_read && msg.recipient_id === currentProfile.id) {
+            const unreadIds = group.messages
+              .filter((msg) => !msg.is_read && msg.recipient_id === currentProfile.id)
+              .map((msg) => msg.id);
+            if (unreadIds.length > 0) {
               const { error } = await window.lmsSupabase
                 .from("messages")
                 .update({ is_read: true, read_at: new Date().toISOString() })
-                .eq("id", msg.id);
+                .in("id", unreadIds);
               if (error) {
                 showToastError(error.message || "Message read status failed.");
               } else {
-                msg.is_read = true;
+                group.messages.forEach((msg) => {
+                  if (unreadIds.includes(msg.id)) msg.is_read = true;
+                });
                 refreshMessageBadges();
               }
             }
-            const sender = profileMap.get(msg.sender_id) || msg.profiles || {};
+            const msg = group.messages[group.messages.length - 1];
+            const sender = profileMap.get(group.sender_id) || msg.profiles || {};
             const senderName = profileLabel(sender);
-            const threadHTML = renderThreadFor(msg, senderName);
+            const threadHTML = await renderThreadFor(msg, senderName);
             viewDetail.innerHTML = `
               <div class="ad-msg-detail-header">
                 <div class="ad-msg-detail-avatar">${escHtml(initialsFor(senderName))}</div>
@@ -3115,7 +3241,7 @@
                   ${activeMessageView === "archive"
                     ? `<button class="ad-btn ad-btn--msg-archive" type="button" data-ad-msg-restore>Restore</button>`
                     : `<button class="ad-btn ad-btn--msg-archive" type="button" data-ad-msg-archive>Archive</button>`}
-                  <button class="ad-btn ad-btn--msg-delete" type="button" data-ad-msg-delete-inbox="${escHtml(msg.id)}">Delete</button>
+                  <button class="ad-btn ad-btn--msg-delete" type="button" data-ad-msg-delete-inbox>Delete</button>
                 </div>
               </div>
               <div class="ad-msg-thread" id="adMsgThread">
@@ -3129,7 +3255,7 @@
             const senderName = profileLabel(currentProfile, "You");
             const canRenderConversation = group.messages.length === 1;
             const threadHTML = canRenderConversation
-              ? renderThreadFor(group.messages[0], senderName)
+              ? await renderThreadFor(group.messages[0], senderName)
               : renderThreadMessage({
                   out: true,
                   name: senderName,
@@ -3165,10 +3291,16 @@
                 `).join("")}
               </div>`;
           }
+          bindAdminMessageThreadScrolling(viewDetail);
           setTimeout(() => {
             const thread = viewDetail.querySelector("#adMsgThread, .ad-msg-thread");
-            if (thread) thread.scrollTop = thread.scrollHeight;
+            if (scrollThreadToLatest) scrollAdminMessageThreadToLatest(thread);
+            else scrollAdminMessageThreadToStart(thread);
           }, 50);
+          const activeMessageIds = (group.type === "received"
+            ? await fetchFullThread(group.messages[group.messages.length - 1] || group.messages[0])
+            : group.messages
+          ).map((msg) => msg.id);
 
           viewDetail.querySelector("[data-ad-msg-archive]")?.addEventListener("click", async () => {
             try {
@@ -3187,21 +3319,23 @@
             }
           });
           viewDetail.querySelector("[data-ad-msg-reply]")?.addEventListener("click", async () => {
-            const msg = group.messages[0];
-            await openMessageComposer(msg.sender_id, { subject: getReplySubject(group.subject) });
+            await openMessageComposer(group.sender_id, {
+              subject: getReplySubject(group.subject),
+              returnView: activeMessageView === "archive" ? "history" : activeMessageView
+            });
           });
-          viewDetail.querySelector("[data-ad-msg-delete-inbox]")?.addEventListener("click", async () => {
-            const messageId = group.messages[0]?.id;
-            if (!messageId) return;
-            const { error } = await window.lmsSupabase
-              .from("messages")
-              .delete()
-              .eq("id", messageId);
-            if (error) {
-              showToastError(error.message || "Message delete failed.");
-              return;
-            }
-            await loadMessages();
+          viewDetail.querySelector("[data-ad-msg-delete-inbox]")?.addEventListener("click", () => {
+            showConfirmModal("Hapus seluruh percakapan ini?", async () => {
+              const { error } = await window.lmsSupabase
+                .from("messages")
+                .delete()
+                .in("id", activeMessageIds);
+              if (error) {
+                showToastError(error.message || "Message delete failed.");
+                return;
+              }
+              await loadMessages();
+            });
           });
           viewDetail.querySelector("[data-ad-msg-edit]")?.addEventListener("click", () => {
             viewDetail.innerHTML = `
@@ -3332,7 +3466,7 @@
           event.preventDefault();
           await setActiveMessage(item, group);
         });
-        if (selectedMessageId && group.messages.some((msg) => String(msg.id) === selectedMessageId)) {
+        if (groupMatchesSelectedMessage(group)) {
           selectedMessageItem = item;
           selectedMessageGroup = group;
         }

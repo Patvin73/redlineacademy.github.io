@@ -1,5 +1,47 @@
 const { test, expect } = require("@playwright/test");
 
+async function expectThreadMessageFullyVisible(page, threadSelector, messageSelector, edge) {
+  await expect.poll(async () => page.locator(threadSelector).evaluate((thread, selector) => {
+    const edgeMessage = thread.querySelector(selector);
+    if (!edgeMessage) return false;
+    const scroller = thread.closest("#messageDetail") || thread;
+    const header = scroller.querySelector(".sd-msg-detail-header");
+    const threadRect = scroller.getBoundingClientRect();
+    const minTop = header ? Math.max(threadRect.top, header.getBoundingClientRect().bottom) : threadRect.top;
+    const messageRect = edgeMessage.getBoundingClientRect();
+    return messageRect.top >= minTop - 1
+      && messageRect.bottom <= threadRect.bottom + 1;
+  }, `${messageSelector}:${edge}-child`)).toBe(true);
+}
+
+async function expectFirstThreadMessageFullyVisible(page, threadSelector, messageSelector) {
+  await expectThreadMessageFullyVisible(page, threadSelector, messageSelector, "first");
+}
+
+async function expectLastThreadMessageFullyVisible(page, threadSelector, messageSelector) {
+  await expectThreadMessageFullyVisible(page, threadSelector, messageSelector, "last");
+}
+
+async function expectRightPanelWheelScrolls(page, panelSelector) {
+  const panel = page.locator(panelSelector);
+  await panel.evaluate((el) => {
+    el.style.height = "220px";
+    el.style.maxHeight = "220px";
+    el.scrollTop = 0;
+  });
+  await expect.poll(async () => panel.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true);
+  await page.locator(panelSelector).hover({ position: { x: 20, y: 20 } });
+  await page.mouse.wheel(0, 500);
+  await expect.poll(async () => panel.evaluate((el) => el.scrollTop > 0)).toBe(true);
+  await page.mouse.wheel(0, -500);
+  await expect.poll(async () => panel.evaluate((el) => el.scrollTop === 0)).toBe(true);
+  await panel.evaluate((el) => {
+    el.style.height = "";
+    el.style.maxHeight = "";
+    el.scrollTop = 0;
+  });
+}
+
 function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectPass123!", missingViews = [] }) {
   return `
     (() => {
@@ -46,31 +88,50 @@ function buildSupabaseStub({ tableData, currentUser, initialPassword = "CorrectP
 
       const applyOrFilter = (rows, expression) => {
         if (!expression) return rows;
-        const conditions = String(expression)
-          .split(",")
-          .map((part) => part.trim())
-          .filter(Boolean)
-          .map((part) => {
-            const pieces = part.split(".");
-            return {
-              column: pieces[0],
-              operator: pieces[1],
-              value: pieces.slice(2).join(".")
-            };
+        const splitTopLevel = (value) => {
+          const parts = [];
+          let depth = 0;
+          let current = "";
+          String(value).split("").forEach((char) => {
+            if (char === "," && depth === 0) {
+              if (current.trim()) parts.push(current.trim());
+              current = "";
+              return;
+            }
+            if (char === "(") depth += 1;
+            if (char === ")") depth = Math.max(0, depth - 1);
+            current += char;
           });
+          if (current.trim()) parts.push(current.trim());
+          return parts;
+        };
+        const matchesCondition = (row, part) => {
+          const pieces = part.split(".");
+          const condition = {
+            column: pieces[0],
+            operator: pieces[1],
+            value: pieces.slice(2).join(".")
+          };
+          const rawValue = getValue(row, condition.column);
+          const value = condition.column === "is_archived" && typeof rawValue === "undefined"
+            ? false
+            : rawValue;
+          if (condition.operator === "eq") return String(value) === condition.value;
+          if (condition.operator === "is" && condition.value === "null") {
+            return rawValue === null || typeof rawValue === "undefined";
+          }
+          return false;
+        };
+        const matchesGroup = (row, part) => {
+          if (part.startsWith("and(") && part.endsWith(")")) {
+            return splitTopLevel(part.slice(4, -1)).every((condition) => matchesCondition(row, condition));
+          }
+          return matchesCondition(row, part);
+        };
+        const conditions = splitTopLevel(expression);
 
         return rows.filter((row) =>
-          conditions.some((condition) => {
-            const rawValue = getValue(row, condition.column);
-            const value = condition.column === "is_archived" && typeof rawValue === "undefined"
-              ? false
-              : rawValue;
-            if (condition.operator === "eq") return String(value) === condition.value;
-            if (condition.operator === "is" && condition.value === "null") {
-              return rawValue === null || typeof rawValue === "undefined";
-            }
-            return false;
-          })
+          conditions.some((condition) => matchesGroup(row, condition))
         );
       };
 
@@ -1417,7 +1478,17 @@ test.describe("Student Dashboard", () => {
       body: "Thanks for the update.",
       is_read: true,
       is_archived: false,
-      created_at: "2026-01-10T10:05:00.000Z"
+      created_at: "2099-01-01T09:05:00.000Z"
+    });
+    fixture.tableData.messages.push({
+      id: "msg-student-followup",
+      sender_id: "trainer-1",
+      recipient_id: "student-1",
+      subject: "Re: Welcome",
+      body: "Following up on module one.",
+      is_read: true,
+      is_archived: false,
+      created_at: "2099-01-01T09:10:00.000Z"
     });
     await installSupabaseStub(page, fixture);
 
@@ -1451,6 +1522,8 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#studentMsgComposeForm")).toBeHidden();
     await expect(page.locator("#messageViewEmpty")).toBeVisible();
     const welcomeMessage = page.locator(".sd-inbox-item", { hasText: "Welcome" });
+    await expect(welcomeMessage).toHaveCount(1);
+    await expect(welcomeMessage).toContainText("Following up on module one.");
     await expect(welcomeMessage).toHaveAttribute("role", "button");
     await expect(welcomeMessage).toHaveAttribute("tabindex", "0");
     await welcomeMessage.focus();
@@ -1458,7 +1531,10 @@ test.describe("Student Dashboard", () => {
     await expect(welcomeMessage).toHaveAttribute("aria-selected", "true");
     await expect(page.locator("#messageDetail")).toContainText("Please review module one.");
     await expect(page.locator("#messageDetail")).toContainText("Thanks for the update.");
-    await expect(page.locator("#sdMsgThread .sd-thread-msg")).toHaveCount(2);
+    await expect(page.locator("#messageDetail")).toContainText("Following up on module one.");
+    await expect(page.locator("#sdMsgThread .sd-thread-msg")).toHaveCount(3);
+    await expectFirstThreadMessageFullyVisible(page, "#sdMsgThread", ".sd-thread-msg");
+    await expectRightPanelWheelScrolls(page, "#messageDetail");
     await expect(page.locator("#messageDetail")).toContainText("Reply");
     await expect(page.locator("#messageDetail")).toContainText("Archive");
     await expect(page.locator("#messageDetail")).toContainText("Delete");
@@ -1468,7 +1544,13 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator("#studentMsgSubject")).toHaveValue("Re: Welcome");
     await expect(page.locator("#studentMsgRecipient")).toHaveValues(["trainer-1"]);
     await expect(page.locator("#studentMsgBody")).toBeFocused();
-    await page.locator("#studentCancelMsgBtn").click();
+    await page.locator("#studentMsgBody").fill("I reviewed it from the thread.");
+    await page.locator("#studentSendMsgBtn").click();
+    await expect(page.locator("#studentMsgComposeForm")).toBeHidden();
+    await expect(page.locator("[data-student-message-view='inbox']")).toHaveClass(/active/);
+    await expect(page.locator("#messageDetail")).toContainText("I reviewed it from the thread.");
+    await expect(page.locator("#sdMsgThread .sd-thread-msg")).toHaveCount(4);
+    await expectLastThreadMessageFullyVisible(page, "#sdMsgThread", ".sd-thread-msg");
 
     await page.locator(".sd-inbox-item", { hasText: "Welcome" }).click();
     await page.locator("[data-sd-msg-archive]").click();
@@ -1490,8 +1572,11 @@ test.describe("Student Dashboard", () => {
     await page.locator("[data-student-message-view='inbox']").click();
     await page.locator(".sd-inbox-item", { hasText: "Welcome" }).click();
     await page.locator("[data-sd-msg-delete-inbox]").click();
+    await page.locator("#sdConfirmOk").click();
     const afterDelete = await page.evaluate(() => window.__QA_TABLE_DATA__.messages);
     expect(afterDelete.some((msg) => msg.id === "msg-1")).toBe(false);
+    expect(afterDelete.some((msg) => msg.id === "msg-student-followup")).toBe(false);
+    expect(afterDelete.some((msg) => msg.body === "I reviewed it from the thread.")).toBe(false);
   });
 
   test("reply uses the original sender name when the profile lookup is not returned", async ({ page }) => {
@@ -1512,6 +1597,57 @@ test.describe("Student Dashboard", () => {
     await page.locator("[data-sd-msg-reply]").click();
     await expect(page.locator("#studentMsgRecipient")).toHaveValues(["trainer-1"]);
     await expect(page.locator("#studentMsgRecipient option:checked")).toHaveText("Trainer One");
+  });
+
+  test("renders the full thread when older messages are outside the global message pool", async ({ page }) => {
+    const fixture = makeStudentFixture();
+    fixture.tableData.messages = fixture.tableData.messages.map((message) =>
+      message.id === "msg-1" ? { ...message, is_read: true } : message
+    );
+    fixture.tableData.messages.push({
+      id: "msg-old-thread-reply",
+      sender_id: "student-1",
+      recipient_id: "trainer-1",
+      subject: "Re: Welcome",
+      body: "This is the middle reply.",
+      is_read: true,
+      is_archived: false,
+      created_at: "2099-01-01T09:05:00.000Z"
+    });
+    fixture.tableData.messages.push({
+      id: "msg-old-thread-followup",
+      sender_id: "trainer-1",
+      recipient_id: "student-1",
+      subject: "Re: Welcome",
+      body: "This is the latest visible reply.",
+      is_read: true,
+      is_archived: false,
+      created_at: "2099-01-01T09:10:00.000Z"
+    });
+    fixture.tableData.messages.push(...Array.from({ length: 98 }, (_, index) => ({
+      id: `msg-noise-${index + 1}`,
+      sender_id: "admin-1",
+      recipient_id: "student-1",
+      subject: `Announcement ${index + 1}`,
+      body: `Noise message ${index + 1}`,
+      is_read: true,
+      is_archived: false,
+      created_at: `2099-01-03T${String(Math.floor(index / 60)).padStart(2, "0")}:${String(index % 60).padStart(2, "0")}:00.000Z`
+    })));
+    await installSupabaseStub(page, fixture);
+
+    await page.goto("/pages/dashboard-student.html");
+    await page.locator(".sd-nav__item[data-section='messages']").click();
+
+    const welcomeMessage = page.locator(".sd-inbox-item", { hasText: "Welcome" });
+    await expect(welcomeMessage).toHaveCount(1);
+    await expect(welcomeMessage).toContainText("This is the latest visible reply.");
+    await welcomeMessage.click();
+
+    await expect(page.locator("#messageDetail")).toContainText("Please review module one.");
+    await expect(page.locator("#messageDetail")).toContainText("This is the middle reply.");
+    await expect(page.locator("#messageDetail")).toContainText("This is the latest visible reply.");
+    await expect(page.locator("#sdMsgThread .sd-thread-msg")).toHaveCount(3);
   });
 
   test("message notification opens the selected student message", async ({ page }) => {
