@@ -1919,6 +1919,16 @@ test("trainer can filter grading tabs (submitted/graded/all)", async ({ page }) 
   await page.locator("#section-grading .ad-filter-tab[data-filter='graded']").click();
   await expect(page.locator(".ad-submission-item")).toHaveCount(1);
   await expect(page.locator(".ad-submission-item__assignment")).toContainText("Final Quiz");
+  await page.locator(".ad-submission-item").first().click();
+  await expect(page.locator("#gradingForm")).toBeVisible();
+  await expect(page.locator("#gradeAssignmentTitle")).toHaveText("Final Quiz");
+
+  await page.locator("#section-grading .ad-filter-tab[data-filter='submitted']").click();
+  await expect(page.locator("#gradingForm")).toBeHidden();
+  await expect(page.locator("#gradingPanelEmpty")).toBeVisible();
+  await expect(page.locator(".ad-submission-item.active")).toHaveCount(0);
+  await expect(page.locator(".ad-submission-item")).toHaveCount(1);
+  await expect(page.locator(".ad-submission-item__assignment")).toContainText("Module 1 Quiz");
 
   await page.locator("#section-grading .ad-filter-tab[data-filter='all']").click();
   await expect(page.locator(".ad-submission-item")).toHaveCount(3);

@@ -1961,6 +1961,20 @@
     }
   }
 
+  function resetGradingPanel() {
+    selectedSubmissionId = null;
+    selectedSubmissionContext = null;
+    const gradingForm = $("gradingForm");
+    const gradingPanelEmpty = $("gradingPanelEmpty");
+    if (gradingForm) gradingForm.hidden = true;
+    if (gradingPanelEmpty) gradingPanelEmpty.style.display = "flex";
+    document.querySelectorAll(".ad-submission-item").forEach((el) => el.classList.remove("active"));
+    if ($("gradeScore")) $("gradeScore").value = "";
+    if ($("gradeFeedback")) $("gradeFeedback").value = "";
+    if ($("gradeCompetencyResult")) { $("gradeCompetencyResult").textContent = "—"; $("gradeCompetencyResult").className = "ad-grade-result"; }
+    if ($("gradeResult")) { $("gradeResult").textContent = "—"; $("gradeResult").className = "ad-grade-result"; }
+  }
+
   async function loadMyAssignments() {
     const list = $("myAssignmentsList");
     const empty = $("myAssignmentsEmpty");
@@ -2100,7 +2114,9 @@
         tab.addEventListener("click", () => {
           gradingSection.querySelectorAll(".ad-filter-tab").forEach((t) => t.classList.remove("active"));
           tab.classList.add("active");
-          currentGradingFilter = tab.dataset.filter || "submitted";
+          const nextFilter = tab.dataset.filter || "submitted";
+          if (nextFilter !== currentGradingFilter) resetGradingPanel();
+          currentGradingFilter = nextFilter;
           loadSubmissionQueue(currentGradingFilter);
         });
       });
@@ -2340,18 +2356,7 @@
       if (msg) { msg.textContent = "✓ Saved! Student notified."; msg.className = "ad-grading-msg success"; }
       setTimeout(() => {
         loadSubmissionQueue(currentGradingFilter);
-        // Reset grading panel state
-        selectedSubmissionId = null;
-        selectedSubmissionContext = null;
-        const gradingForm = $("gradingForm");
-        const gradingPanelEmpty = $("gradingPanelEmpty");
-        if (gradingForm) gradingForm.hidden = true;
-        if (gradingPanelEmpty) gradingPanelEmpty.style.display = "flex";
-        document.querySelectorAll(".ad-submission-item").forEach((el) => el.classList.remove("active"));
-        if ($("gradeScore")) $("gradeScore").value = "";
-        if ($("gradeFeedback")) $("gradeFeedback").value = "";
-        if ($("gradeCompetencyResult")) { $("gradeCompetencyResult").textContent = "—"; $("gradeCompetencyResult").className = "ad-grade-result"; }
-        if ($("gradeResult")) { $("gradeResult").textContent = "—"; $("gradeResult").className = "ad-grade-result"; }
+        resetGradingPanel();
       }, 1500);
 
     } catch (err) {
