@@ -264,3 +264,870 @@
     padding: 16px;
   }
 }
+
+/* ================================================================
+   Assignments & Grading Redesign - Admin/Trainer
+   Scope: #section-grading only
+   ================================================================ */
+
+.ad-body #section-grading {
+  --grading-gap: 16px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.ad-body #section-grading .ad-grading-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: var(--grading-gap);
+  padding: 18px;
+  border: 1px solid rgba(226, 232, 240, .95);
+  border-radius: 20px;
+  background: linear-gradient(135deg, #ffffff 0%, #fff6f7 100%);
+  box-shadow: 0 14px 38px rgba(16, 24, 40, .07);
+}
+
+.ad-body #section-grading .ad-grading-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--sd-red);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.ad-body #section-grading .ad-grading-hero__eyebrow::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--sd-red);
+  box-shadow: 0 0 0 5px rgba(229, 0, 26, .10);
+}
+
+.ad-body #section-grading .ad-section__header {
+  margin: 0;
+}
+
+.ad-body #section-grading .ad-section__header h2 {
+  margin-bottom: 4px;
+  color: #101828;
+}
+
+.ad-body #section-grading .ad-section__header p {
+  max-width: 560px;
+  margin: 0;
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 700;
+}
+
+.ad-body #section-grading .ad-grading-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ad-body #section-grading .ad-filter-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid #e7ebf2;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .05);
+}
+
+.ad-body #section-grading .ad-filter-tab {
+  min-height: 38px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+  padding: 10px 14px;
+  transition: color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.ad-body #section-grading .ad-filter-tab:hover {
+  color: var(--sd-red);
+  background: #fff1f2;
+}
+
+.ad-body #section-grading .ad-filter-tab.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, #0f1623 0%, #1c2235 50%, #1c1c12 100%);
+  box-shadow: 0 10px 22px rgba(15, 22, 35, .22);
+}
+
+.ad-body #section-grading .ad-btn:focus-visible,
+.ad-body #section-grading .ad-filter-tab:focus-visible,
+.ad-body #section-grading .ad-icon-btn:focus-visible,
+.ad-body #section-grading .ad-submission-item:focus-visible {
+  outline: 3px solid rgba(229, 0, 26, .24);
+  outline-offset: 3px;
+}
+
+.ad-body #section-grading #assignmentFormCard {
+  margin-bottom: var(--grading-gap);
+  border-color: rgba(229, 0, 26, .18);
+  border-radius: 18px;
+  box-shadow: 0 18px 38px rgba(229, 0, 26, .08);
+  overflow: hidden;
+}
+
+.ad-body #section-grading #assignmentFormCard .ad-card__header {
+  background: linear-gradient(135deg, #fff1f2 0%, #ffffff 100%);
+}
+
+.ad-body #section-grading #assignmentFormCard .ad-card__body {
+  display: grid;
+  gap: 16px;
+}
+
+.ad-body #section-grading .ad-form-grid-2,
+.ad-body #section-grading .ad-form-grid-3 {
+  display: grid;
+  gap: 12px;
+}
+
+.ad-body #section-grading .ad-form-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ad-body #section-grading .ad-form-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ad-body #section-grading .ad-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 2px;
+}
+
+.ad-body #section-grading .ad-form-actions .ad-grading-msg {
+  margin-right: auto;
+}
+
+.ad-body #section-grading .ad-input,
+.ad-body #section-grading .ad-select,
+.ad-body #section-grading .ad-textarea {
+  border-radius: 12px;
+}
+
+.ad-body #section-grading .ad-grading-content-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 390px) minmax(0, 1fr);
+  gap: var(--grading-gap);
+  align-items: start;
+}
+
+.ad-body #section-grading #myAssignmentsCard {
+  position: sticky;
+  top: 84px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 108px);
+  margin-bottom: 0;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.ad-body #section-grading #myAssignmentsCard .ad-card__header {
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  background: #ffffff;
+}
+
+.ad-body #section-grading .ad-assignments-card-subtitle {
+  display: block;
+  margin-top: 3px;
+  color: #98a2b3;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.ad-body #section-grading #myAssignmentsList {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  overflow: auto;
+}
+
+.ad-body #section-grading #myAssignmentsEmpty {
+  margin: 0;
+  color: #667085;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.ad-body #section-grading .ad-assignment-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 12px !important;
+  border: 1px solid #eef2f7 !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.ad-body #section-grading .ad-assignment-row:hover {
+  transform: translateY(-1px);
+  border-color: rgba(229, 0, 26, .24) !important;
+  box-shadow: 0 12px 26px rgba(16, 24, 40, .07);
+}
+
+.ad-body #section-grading .ad-assignment-row p:first-child {
+  color: #101828;
+  font-weight: 900 !important;
+}
+
+.ad-body #section-grading .ad-grading-workspace {
+  min-width: 0;
+  display: grid;
+  gap: var(--grading-gap);
+}
+
+.ad-body #section-grading .ad-grading-workspace-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border: 1px solid #e7ebf2;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(16, 24, 40, .06);
+}
+
+.ad-body #section-grading .ad-grading-workspace-header h3 {
+  margin: 0;
+  color: #101828;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.ad-body #section-grading .ad-grading-workspace-header p {
+  margin: 4px 0 0;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.ad-body #section-grading .ad-review-status-strip {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.ad-body #section-grading .ad-grading-layout {
+  grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+  gap: var(--grading-gap);
+  align-items: stretch;
+  min-height: 620px;
+}
+
+.ad-body #section-grading .ad-submission-queue,
+.ad-body #section-grading .ad-grading-panel {
+  border: 1px solid #e7ebf2;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(16, 24, 40, .06);
+  overflow: auto;
+  max-height: 720px;
+}
+
+.ad-body #section-grading .ad-submission-queue {
+  padding: 8px;
+}
+
+.ad-body #section-grading .ad-submission-queue__header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -8px -8px 8px;
+  padding: 13px 14px;
+  border-bottom: 1px solid #eef2f7;
+  background: rgba(255, 255, 255, .96);
+  backdrop-filter: blur(12px);
+}
+
+.ad-body #section-grading .ad-submission-queue__title {
+  margin: 0;
+  color: #101828;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.ad-body #section-grading .ad-submission-queue__hint {
+  color: #98a2b3;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ad-body #section-grading .ad-submission-item {
+  display: block;
+  margin-bottom: 8px;
+  padding: 13px 14px;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  background: #ffffff;
+  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.ad-body #section-grading .ad-submission-item:hover {
+  border-color: #e7ebf2;
+  background: #fbfcff;
+  box-shadow: 0 10px 22px rgba(16, 24, 40, .05);
+}
+
+.ad-body #section-grading .ad-submission-item.active {
+  border-color: rgba(229, 0, 26, .22);
+  background: linear-gradient(135deg, #fff1f2 0%, #ffffff 100%);
+  box-shadow: 0 12px 24px rgba(229, 0, 26, .08);
+}
+
+.ad-body #section-grading .ad-submission-item__student {
+  margin: 0 0 3px;
+  overflow: hidden;
+  color: #101828;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ad-body #section-grading .ad-submission-item__assignment {
+  margin: 0 0 8px;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.ad-body #section-grading .ad-submission-item__time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 0;
+  color: #98a2b3;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ad-body #section-grading .ad-grading-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ad-body #section-grading .ad-grading-panel__empty,
+.ad-body #section-grading .ad-empty-state {
+  min-height: 220px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 28px;
+  color: #667085;
+  text-align: center;
+  font-weight: 800;
+}
+
+.ad-body #section-grading .ad-grading-panel__empty {
+  min-height: 560px;
+}
+
+.ad-body #section-grading .ad-grading-form {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.ad-body #section-grading .ad-grading-form__header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  align-items: flex-start;
+  padding: 18px 20px;
+  border-bottom: 1px solid #eef2f7;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.ad-body #section-grading .ad-grading-form__student {
+  margin: 0 0 4px;
+  color: #101828;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.ad-body #section-grading .ad-grading-form__assignment {
+  margin: 0;
+  color: #667085;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.ad-body #section-grading .ad-grading-panel-body {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.ad-body #section-grading .ad-review-section {
+  border: 1px solid #eef2f7;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 16px;
+}
+
+.ad-body #section-grading .ad-review-section__title,
+.ad-body #section-grading .ad-file-preview__label {
+  margin: 0 0 10px;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.ad-body #section-grading .ad-file-list {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ad-body #section-grading .ad-file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e7ebf2;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.ad-body #section-grading .ad-file-chip:hover {
+  border-color: rgba(229, 0, 26, .24);
+  background: #fff1f2;
+  color: var(--sd-red);
+}
+
+.ad-body #section-grading .ad-grading-form__student-notes {
+  margin: 0;
+  padding: 13px 14px;
+  border: 1px solid #e7ebf2;
+  border-radius: 14px;
+  background: #f8fafc;
+  color: #667085;
+  font-size: 14px;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.ad-body #section-grading .ad-grade-result {
+  min-height: 43px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid #e7ebf2;
+  border-radius: 14px;
+  background: #f8fafc;
+  color: #667085;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.ad-body #section-grading .ad-grade-helper {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.ad-body #section-grading .ad-grading-form__footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding: 16px 18px;
+  border-top: 1px solid #eef2f7;
+  background: #f8fafc;
+}
+
+.ad-body #section-grading .ad-grading-form__footer > div {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ad-body #section-grading #reqResubmitBtn {
+  border-color: rgba(249, 115, 22, .28);
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.ad-body #section-grading #reqResubmitBtn:hover {
+  border-color: rgba(249, 115, 22, .45);
+  background: #ffedd5;
+}
+
+.ad-body #section-grading .ad-grading-msg {
+  margin: 0;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.ad-body #section-grading .ad-grading-msg.error {
+  color: var(--sd-red);
+}
+
+.ad-body #section-grading .ad-grading-msg.success {
+  color: #15803d;
+}
+
+@media (max-width: 1180px) {
+  .ad-body #section-grading .ad-grading-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ad-body #section-grading #myAssignmentsCard {
+    position: static;
+    max-height: none;
+  }
+
+  .ad-body #section-grading .ad-grading-layout {
+    grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 980px) {
+  .ad-body #section-grading .ad-grading-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .ad-body #section-grading .ad-grading-toolbar {
+    justify-content: flex-start;
+  }
+
+  .ad-body #section-grading .ad-grading-layout {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .ad-body #section-grading .ad-submission-queue,
+  .ad-body #section-grading .ad-grading-panel {
+    max-height: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .ad-body #section-grading {
+    max-width: none;
+  }
+
+  .ad-body #section-grading .ad-grading-hero,
+  .ad-body #section-grading .ad-grading-workspace-header {
+    padding: 16px;
+  }
+
+  .ad-body #section-grading .ad-grading-workspace-header,
+  .ad-body #section-grading .ad-grading-form__header,
+  .ad-body #section-grading .ad-grading-form__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ad-body #section-grading .ad-filter-tabs {
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    border-radius: 16px;
+  }
+
+  .ad-body #section-grading .ad-filter-tab {
+    flex: 0 0 auto;
+  }
+
+  .ad-body #section-grading .ad-toolbar-main-btn,
+  .ad-body #section-grading .ad-form-actions .ad-btn,
+  .ad-body #section-grading .ad-grading-form__footer .ad-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ad-body #section-grading .ad-form-grid-2,
+  .ad-body #section-grading .ad-form-grid-3,
+  .ad-body #section-grading .ad-field-row,
+  .ad-body #section-grading .ad-assignment-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ad-body #section-grading .ad-form-actions,
+  .ad-body #section-grading .ad-grading-form__footer > div {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ad-body #section-grading .ad-form-actions .ad-grading-msg {
+    margin-right: 0;
+  }
+}
+
+/* ================================================================
+   Assignments & Grading Accordion Refinement
+   Scope: #section-grading only
+   ================================================================ */
+
+.ad-body #section-grading .ad-grading-hero {
+  margin-bottom: 18px;
+}
+
+.ad-body #section-grading details.ad-grading-accordion {
+  border: 1px solid #e7ebf2;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 14px 34px rgba(16, 24, 40, .07);
+  overflow: visible;
+}
+
+.ad-body #section-grading details.ad-grading-accordion + details.ad-grading-accordion {
+  margin-top: 18px;
+}
+
+.ad-body #section-grading .ad-grading-accordion__summary {
+  display: list-item;
+  min-height: 76px;
+  padding: 18px 20px;
+  cursor: pointer;
+  list-style-position: inside;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+  transition: background .18s ease, border-color .18s ease;
+}
+
+.ad-body #section-grading .ad-grading-accordion__summary::marker {
+  color: #667085;
+  font-size: 16px;
+}
+
+.ad-body #section-grading .ad-grading-accordion__summary:hover {
+  background: linear-gradient(180deg, #ffffff 0%, #fff6f7 100%);
+}
+
+.ad-body #section-grading .ad-grading-accordion__summary:focus-visible {
+  outline: 3px solid rgba(229, 0, 26, .24);
+  outline-offset: -3px;
+}
+
+.ad-body #section-grading .ad-grading-accordion__summary h3 {
+  margin: 0;
+  color: #101828;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.ad-body #section-grading .ad-grading-accordion__summary > div:first-child {
+  display: inline-block;
+  max-width: min(620px, calc(100% - 230px));
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+.ad-body #section-grading .ad-grading-accordion__summary p {
+  margin: 5px 0 0;
+  color: #667085;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.ad-body #section-grading .ad-grading-accordion__summary .ad-review-status-strip {
+  display: inline-flex;
+  margin-left: 16px;
+  vertical-align: middle;
+}
+
+.ad-body #section-grading .ad-grading-accordion__dot {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  margin-left: 12px;
+  border-radius: 999px;
+  background: var(--sd-red);
+  box-shadow: 0 0 0 5px rgba(229, 0, 26, .14);
+  vertical-align: middle;
+}
+
+.ad-body #section-grading .ad-grading-accordion__dot[hidden] {
+  display: none;
+}
+
+.ad-body #section-grading .ad-grading-accordion__body {
+  padding: 0 20px 20px;
+  border-top: 1px solid #eef2f7;
+}
+
+.ad-body #section-grading .ad-grading-accordion--assignments .ad-grading-accordion__body {
+  padding-top: 18px;
+}
+
+.ad-body #section-grading .ad-grading-accordion--review .ad-grading-accordion__body {
+  padding-top: 20px;
+}
+
+.ad-body #section-grading .ad-grading-review-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.ad-body #section-grading .ad-grading-accordion--assignments #myAssignmentsCard {
+  position: static;
+  max-height: none;
+  margin: 0;
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+.ad-body #section-grading .ad-grading-accordion--assignments #myAssignmentsList {
+  max-height: 420px;
+}
+
+.ad-body #section-grading .ad-grading-accordion--review .ad-grading-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, .9fr) minmax(440px, 1.4fr);
+  gap: 18px;
+  align-items: start;
+  min-height: 0;
+}
+
+.ad-body #section-grading .ad-grading-accordion--review .ad-submission-queue,
+.ad-body #section-grading .ad-grading-accordion--review .ad-grading-panel {
+  max-height: none;
+  min-height: 0;
+}
+
+.ad-body #section-grading .ad-grading-accordion--review .ad-submission-queue {
+  max-height: 640px;
+  min-width: 0;
+}
+
+.ad-body #section-grading .ad-grading-accordion--review .ad-grading-panel {
+  min-width: 0;
+  overflow: visible;
+}
+
+.ad-body #section-grading .ad-grading-accordion--review .ad-grading-panel__empty {
+  min-height: 420px;
+}
+
+.ad-body #section-grading .ad-grading-accordion--review .ad-grading-panel-body {
+  padding: 20px;
+}
+
+.ad-body #section-grading .ad-grading-accordion--review .ad-grading-form__header,
+.ad-body #section-grading .ad-grading-accordion--review .ad-grading-form__footer {
+  position: static;
+}
+
+@media (max-width: 1180px) {
+  .ad-body #section-grading .ad-grading-accordion--review .ad-grading-layout {
+    grid-template-columns: minmax(280px, .9fr) minmax(380px, 1.35fr);
+  }
+}
+
+@media (max-width: 980px) {
+  .ad-body #section-grading .ad-grading-accordion__summary {
+    display: list-item;
+  }
+
+  .ad-body #section-grading .ad-grading-accordion__summary > div:first-child {
+    max-width: calc(100% - 36px);
+  }
+
+  .ad-body #section-grading .ad-grading-accordion__summary .ad-review-status-strip {
+    display: flex;
+    justify-content: flex-start;
+    margin: 12px 0 0 28px;
+  }
+
+  .ad-body #section-grading .ad-grading-accordion--review .ad-grading-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ad-body #section-grading .ad-grading-accordion--review .ad-submission-queue,
+  .ad-body #section-grading .ad-grading-accordion--review .ad-grading-panel {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 680px) {
+  .ad-body #section-grading details.ad-grading-accordion + details.ad-grading-accordion {
+    margin-top: 14px;
+  }
+
+  .ad-body #section-grading .ad-grading-accordion__summary {
+    min-height: 68px;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .ad-body #section-grading .ad-grading-accordion__summary h3 {
+    font-size: 16px;
+  }
+
+  .ad-body #section-grading .ad-grading-accordion__summary p {
+    font-size: 13px;
+  }
+
+  .ad-body #section-grading .ad-grading-accordion__body {
+    padding: 0 14px 14px;
+  }
+
+  .ad-body #section-grading .ad-grading-accordion--assignments .ad-grading-accordion__body,
+  .ad-body #section-grading .ad-grading-accordion--review .ad-grading-accordion__body {
+    padding-top: 14px;
+  }
+}

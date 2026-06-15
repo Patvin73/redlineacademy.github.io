@@ -52,6 +52,12 @@ async function expectRightPanelWheelScrolls(page, panelSelector) {
   });
 }
 
+async function openReviewWorkspace(page) {
+  const reviewPanel = page.locator("#section-grading .ad-grading-accordion--review");
+  await reviewPanel.locator("summary").click();
+  await expect(page.locator("#section-grading .ad-grading-accordion--review[open]")).toHaveCount(1);
+}
+
 async function installSupabaseStub(page, role, options = {}) {
   const profiles = [
     {
@@ -868,6 +874,22 @@ test("dashboard admin renders core sections", { tag: "@critical" }, async ({ pag
   await expect(page.locator("#kpiCompletionRate")).toBeVisible();
 });
 
+test("grading accordions start closed and review panel shows pending-submission dot", async ({ page }) => {
+  await installSupabaseStub(page, "trainer");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await expect(page.locator("#sidebarName")).toHaveText("E2E Trainer");
+  await page.locator(".ad-nav__item[data-section='grading']").click();
+  await expect(page.locator("#section-grading")).toHaveClass(/active/);
+
+  await expect(page.locator("#section-grading .ad-grading-accordion--assignments[open]")).toHaveCount(0);
+  await expect(page.locator("#section-grading .ad-grading-accordion--review[open]")).toHaveCount(0);
+  await expect(page.locator("#reviewWorkspaceDot")).toBeVisible();
+
+  await openReviewWorkspace(page);
+  await expect(page.locator("#section-grading .ad-filter-tab[data-filter='submitted']")).toBeVisible();
+});
+
 test("admin warns when a required database view is missing", async ({ page }) => {
   await installSupabaseStub(page, "admin", { missingViews: ["v_course_overview"] });
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
@@ -1250,6 +1272,7 @@ test("trainer can open grading submission and save grade", async ({ page }) => {
 
   await page.locator(".ad-nav__item[data-section='grading']").click();
   await expect(page.locator("#section-grading")).toHaveClass(/active/);
+  await openReviewWorkspace(page);
 
   const firstSubmission = page.locator(".ad-submission-item").first();
   await expect(firstSubmission).toBeVisible();
@@ -1343,6 +1366,7 @@ test("trainer sees submissions for courses they own even when assignment was cre
 
   await page.locator(".ad-nav__item[data-section='grading']").click();
   await expect(page.locator("#section-grading")).toHaveClass(/active/);
+  await openReviewWorkspace(page);
 
   await expect(page.locator(".ad-submission-item")).toHaveCount(2);
   await expect(page.locator("#submissionQueue")).toContainText("Admin Created Course Task");
@@ -1375,6 +1399,7 @@ test("trainer progress calculation counts duplicate passed submissions once", as
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
 
   await page.locator(".ad-nav__item[data-section='grading']").click();
+  await openReviewWorkspace(page);
   await page.locator(".ad-submission-item", { hasText: "Module 1 Quiz" }).first().click();
 
   await page.fill("#gradeScore", "85");
@@ -1886,6 +1911,7 @@ test("trainer can filter grading tabs (submitted/graded/all)", async ({ page }) 
 
   await page.locator(".ad-nav__item[data-section='grading']").click();
   await expect(page.locator("#section-grading")).toHaveClass(/active/);
+  await openReviewWorkspace(page);
 
   await expect(page.locator(".ad-submission-item")).toHaveCount(1);
   await expect(page.locator(".ad-submission-item__assignment")).toContainText("Module 1 Quiz");
@@ -1905,6 +1931,7 @@ test("trainer keeps active grading filter after saving a grade", async ({ page }
 
   await page.locator(".ad-nav__item[data-section='grading']").click();
   await expect(page.locator("#section-grading")).toHaveClass(/active/);
+  await openReviewWorkspace(page);
 
   await page.locator("#section-grading .ad-filter-tab[data-filter='graded']").click();
   await expect(page.locator(".ad-submission-item")).toHaveCount(1);
@@ -1927,6 +1954,7 @@ test("trainer can request resubmit from grading panel", async ({ page }) => {
 
   await page.locator(".ad-nav__item[data-section='grading']").click();
   await expect(page.locator("#section-grading")).toHaveClass(/active/);
+  await openReviewWorkspace(page);
 
   const firstSubmission = page.locator(".ad-submission-item").first();
   await expect(firstSubmission).toBeVisible();
@@ -1943,6 +1971,7 @@ test("trainer can filter resubmit_required items", async ({ page }) => {
 
   await page.locator(".ad-nav__item[data-section='grading']").click();
   await expect(page.locator("#section-grading")).toHaveClass(/active/);
+  await openReviewWorkspace(page);
 
   await page.locator("#section-grading .ad-filter-tab[data-filter='resubmit_required']").click();
   await expect(page.locator(".ad-submission-item")).toHaveCount(1);

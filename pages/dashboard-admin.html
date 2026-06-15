@@ -1336,49 +1336,24 @@
              SECTION: GRADING
         ══════════════════════════════ -->
         <section class="ad-section" id="section-grading">
-          <div class="ad-section__header">
-            <h2 data-i18n="adNavGrading">Assignments & Grading</h2>
-            <div class="ad-filter-tabs" role="tablist">
+          <div class="ad-grading-hero">
+            <div>
+              <div class="ad-section__header">
+                <div>
+                  <h2>Assessment Workspace</h2>
+                  <p>Manage created assignments, review learner submissions, and provide grading feedback. Use Created Assignments to manage tasks; use Review Workspace to assess submitted evidence.</p>
+                </div>
+              </div>
+            </div>
+            <div class="ad-grading-toolbar">
               <button
-                class="ad-filter-tab active"
-                role="tab"
-                data-filter="submitted"
-                data-i18n="adGradeTabPending"
+                class="ad-btn ad-btn--primary ad-toolbar-main-btn"
+                id="createAssignmentBtn"
+                data-i18n="adCreateAssignment"
               >
-                Needs Grading
-              </button>
-              <button
-                class="ad-filter-tab"
-                role="tab"
-                data-filter="graded"
-                data-i18n="adGradeTabGraded"
-              >
-                Graded
-              </button>
-              <button
-                class="ad-filter-tab"
-                role="tab"
-                data-filter="resubmit_required"
-                data-i18n="adGradeTabResubmit"
-              >
-                Resubmit
-              </button>
-              <button
-                class="ad-filter-tab"
-                role="tab"
-                data-filter="all"
-                data-i18n="adFilterAll"
-              >
-                All
+                + Buat Tugas
               </button>
             </div>
-            <button
-              class="ad-btn ad-btn--primary"
-              id="createAssignmentBtn"
-              data-i18n="adCreateAssignment"
-            >
-              + Buat Tugas
-            </button>
           </div>
 
           <div class="ad-card" id="assignmentFormCard" hidden>
@@ -1386,7 +1361,7 @@
               <h3 id="assignmentFormTitle" data-i18n="adAssignmentNewTitle">Buat Tugas Baru</h3>
               <button class="ad-icon-btn" id="closeAssignmentForm" aria-label="Tutup" data-i18n-aria-label="adClose">✕</button>
             </div>
-            <div class="ad-card__body" style="display:grid;gap:16px;">
+            <div class="ad-card__body" id="assignmentForm">
               <div class="ad-field">
                 <label class="ad-label" for="atTitle" data-i18n="adAssignmentTitle">Judul Tugas *</label>
                 <input class="ad-input" id="atTitle" type="text" data-i18n-placeholder="adAssignmentTitlePlaceholder" placeholder="Contoh: Studi Kasus Perawatan Lanjut Usia" required />
@@ -1395,7 +1370,7 @@
                 <label class="ad-label" for="atDesc" data-i18n="adAssignmentDesc">Deskripsi / Instruksi</label>
                 <textarea class="ad-input ad-textarea" id="atDesc" rows="4" data-i18n-placeholder="adAssignmentDescPlaceholder" placeholder="Jelaskan apa yang harus dikerjakan student..."></textarea>
               </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="ad-form-grid-2">
                 <div class="ad-field">
                   <label class="ad-label" for="atCourse" data-i18n="adAssignmentCourse">Kursus *</label>
                   <select class="ad-input ad-select" id="atCourse" required>
@@ -1410,7 +1385,7 @@
                   </select>
                 </div>
               </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+              <div class="ad-form-grid-3">
                 <div class="ad-field">
                   <label class="ad-label" for="atDueAt" data-i18n="adAssignmentDeadline">Deadline *</label>
                   <input class="ad-input" id="atDueAt" type="datetime-local" required />
@@ -1424,7 +1399,7 @@
                   <input class="ad-input" id="atMaxScore" type="number" min="1" value="100" />
                 </div>
               </div>
-              <div style="display:flex;gap:10px;align-items:center;">
+              <div class="ad-form-actions">
                 <p class="ad-grading-msg" id="assignmentFormMsg" aria-live="polite"></p>
                 <button class="ad-btn ad-btn--outline" id="cancelAssignmentBtn" type="button" data-i18n="adCancel">Batal</button>
                 <button class="ad-btn ad-btn--primary" id="saveAssignmentBtn" type="button" data-i18n="adSaveCourse">Simpan & Terbitkan</button>
@@ -1432,21 +1407,88 @@
             </div>
           </div>
 
-          <div class="ad-card" id="myAssignmentsCard" style="margin-bottom:16px;">
-            <div class="ad-card__header" style="display:flex;align-items:center;justify-content:space-between;">
-              <h3 data-i18n="adAssignmentsCreated">Tugas yang Sudah Dibuat</h3>
-              <button class="ad-btn ad-btn--outline ad-btn--sm" id="refreshAssignmentsBtn" data-i18n="adRefresh">Refresh</button>
+          <details class="ad-grading-accordion ad-grading-accordion--assignments">
+            <summary class="ad-grading-accordion__summary">
+              <div>
+                <h3>Created Assignments</h3>
+                <p>View and manage assignments created for your trainer/admin workspace.</p>
+              </div>
+            </summary>
+            <div class="ad-grading-accordion__body">
+              <div class="ad-card" id="myAssignmentsCard">
+                <div class="ad-card__header">
+                  <div>
+                    <h3 data-i18n="adAssignmentsCreated">Tugas yang Sudah Dibuat</h3>
+                    <span class="ad-assignments-card-subtitle">Active assignments for this trainer/admin workspace.</span>
+                  </div>
+                  <button class="ad-btn ad-btn--outline ad-btn--sm" id="refreshAssignmentsBtn" data-i18n="adRefresh">Refresh</button>
+                </div>
+                <div id="myAssignmentsList">
+                  <p id="myAssignmentsEmpty" data-i18n="adAssignmentsEmpty">
+                    Belum ada tugas yang dibuat.
+                  </p>
+                </div>
+              </div>
             </div>
-            <div id="myAssignmentsList" style="display:grid;gap:8px;padding:12px 16px;">
-              <p id="myAssignmentsEmpty" style="color:var(--sd-text-muted);font-size:.875rem;" data-i18n="adAssignmentsEmpty">
-                Belum ada tugas yang dibuat.
-              </p>
-            </div>
-          </div>
+          </details>
 
+          <details class="ad-grading-accordion ad-grading-accordion--review">
+            <summary class="ad-grading-accordion__summary">
+              <div>
+                <h3>Review Workspace</h3>
+                <p>Select a submission, review the evidence, then save grade and feedback.</p>
+              </div>
+              <div class="ad-review-status-strip" aria-hidden="true">
+                <span class="ad-tag ad-tag--orange">Submitted</span>
+                <span class="ad-tag ad-tag--blue">In Review</span>
+                <span class="ad-tag ad-tag--green">Satisfactory</span>
+              </div>
+              <span class="ad-grading-accordion__dot" id="reviewWorkspaceDot" hidden aria-hidden="true"></span>
+            </summary>
+            <div class="ad-grading-accordion__body">
+              <div class="ad-grading-review-controls">
+                <div class="ad-filter-tabs" role="tablist">
+                  <button
+                    class="ad-filter-tab active"
+                    role="tab"
+                    data-filter="submitted"
+                    data-i18n="adGradeTabPending"
+                  >
+                    Needs Grading
+                  </button>
+                  <button
+                    class="ad-filter-tab"
+                    role="tab"
+                    data-filter="graded"
+                    data-i18n="adGradeTabGraded"
+                  >
+                    Graded
+                  </button>
+                  <button
+                    class="ad-filter-tab"
+                    role="tab"
+                    data-filter="resubmit_required"
+                    data-i18n="adGradeTabResubmit"
+                  >
+                    Resubmit
+                  </button>
+                  <button
+                    class="ad-filter-tab"
+                    role="tab"
+                    data-filter="all"
+                    data-i18n="adFilterAll"
+                  >
+                    All
+                  </button>
+                </div>
+              </div>
           <div class="ad-grading-layout" id="gradingLayout">
             <!-- Submission Queue (left) -->
             <div class="ad-submission-queue" id="submissionQueue">
+              <div class="ad-submission-queue__header">
+                <p class="ad-submission-queue__title">Submission Queue</p>
+                <span class="ad-submission-queue__hint">20 latest</span>
+              </div>
               <div class="ad-empty-state" id="submissionEmpty">
                 <svg
                   width="40"
@@ -1502,8 +1544,9 @@
                   </div>
                   <span class="ad-tag" id="gradeCurrentStatus" data-i18n="lmsTabSubmitted">Submitted</span>
                 </div>
+                <div class="ad-grading-panel-body">
                 <!-- File preview -->
-                <div class="ad-file-preview" id="gradeFilePreview">
+                <div class="ad-review-section ad-file-preview" id="gradeFilePreview">
                   <p
                     class="ad-file-preview__label"
                     data-i18n="adSubmittedFiles"
@@ -1513,10 +1556,8 @@
                   <div class="ad-file-list" id="gradeFileList"></div>
                 </div>
                 <!-- Student notes -->
-                <div class="ad-field">
-                  <label class="ad-label" data-i18n="adStudentNotes"
-                    >Student Notes</label
-                  >
+                <div class="ad-review-section">
+                  <p class="ad-review-section__title" data-i18n="adStudentNotes">Student Notes</p>
                   <p
                     class="ad-grading-form__student-notes"
                     id="gradeStudentNotes"
@@ -1525,6 +1566,8 @@
                   </p>
                 </div>
                 <!-- Grade input -->
+                <div class="ad-review-section">
+                  <p class="ad-review-section__title">Assessment Result</p>
                 <div class="ad-field-row">
                   <div class="ad-field">
                     <label class="ad-label" for="gradeScore" data-i18n="adGrade"
@@ -1550,7 +1593,8 @@
                   <label class="ad-label" data-i18n="adCompetencyStatus">Competency Status</label>
                   <p class="ad-grade-result" id="gradeCompetencyResult">—</p>
                 </div>
-                <div class="ad-field">
+                </div>
+                <div class="ad-review-section">
                   <label
                     class="ad-label"
                     for="gradeFeedback"
@@ -1564,6 +1608,7 @@
                     data-i18n="adFeedbackPlaceholder"
                     placeholder="Write your feedback..."
                   ></textarea>
+                </div>
                 </div>
                 <div class="ad-grading-form__footer">
                   <p
@@ -1591,6 +1636,8 @@
               </div>
             </div>
           </div>
+          </div>
+          </details>
         </section>
 
         <!-- ══════════════════════════════

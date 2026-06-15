@@ -40,6 +40,13 @@
   ================================================================ */
   const $ = (id) => document.getElementById(id);
 
+  function updateReviewWorkspaceDot(count) {
+    const dot = $("reviewWorkspaceDot");
+    if (!dot) return;
+    const value = parseInt(count || 0, 10) || 0;
+    dot.hidden = value <= 0;
+  }
+
   async function runSupabaseSilently(query, label = "Supabase mutation") {
     try {
       const { error } = await query;
@@ -561,6 +568,7 @@
         const gb = $("gradingBadge");
         const count = data.pending_grading || 0;
         if (gb) { gb.textContent = count; gb.style.display = count > 0 ? "inline-block" : "none"; }
+        updateReviewWorkspaceDot(count);
 
         // Map KPI card ke section tujuan
         const kpiNavMap = [
@@ -2584,6 +2592,7 @@
       const nextCount = Math.max(count, existingCount);
       badge.textContent = nextCount;
       badge.style.display = nextCount > 0 ? "inline-block" : "none";
+      if (id === "gradingBadge") updateReviewWorkspaceDot(nextCount);
     });
     const msgBadge = $("adMsgBadge");
     if (msgBadge) {
