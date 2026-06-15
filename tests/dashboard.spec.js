@@ -989,11 +989,11 @@ test.describe("Student Dashboard", () => {
       "https://example.com/signed/course-materials/courses/thumbnails/aged-care-basics.png"
     );
     await expect(page.locator("#continueLearningContent .sd-continue-item__thumb")).toHaveCSS("overflow", "hidden");
-    await expect(page.locator("#continueLearningContent .sd-continue-item__thumb")).toHaveCSS("width", "96px");
-    await expect(page.locator("#continueLearningContent .sd-continue-item__thumb")).toHaveCSS("height", "68px");
+    await expect(page.locator("#continueLearningContent .sd-continue-item__thumb")).toHaveCSS("width", "104px");
+    await expect(page.locator("#continueLearningContent .sd-continue-item__thumb")).toHaveCSS("height", "86px");
     await expect(page.locator("#continueLearningContent .sd-continue-item__thumb img")).toHaveCSS("object-fit", "cover");
-    await expect(page.locator("#continueLearningContent .sd-continue-item__thumb img")).toHaveCSS("width", "94px");
-    await expect(page.locator("#continueLearningContent .sd-continue-item__thumb img")).toHaveCSS("height", "66px");
+    await expect(page.locator("#continueLearningContent .sd-continue-item__thumb img")).toHaveCSS("width", "104px");
+    await expect(page.locator("#continueLearningContent .sd-continue-item__thumb img")).toHaveCSS("height", "86px");
   });
 
   test("keeps half-complete enrolled courses active and hides certificate count until certificate logic ships", async ({ page }) => {

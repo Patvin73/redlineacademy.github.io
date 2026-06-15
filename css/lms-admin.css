@@ -1,1 +1,266 @@
 @import url('../styles/lms-admin.css');
+
+/* ==============================================================
+   Admin/trainer home dashboard visual refresh
+   Scope: section-home only. Keep welcome banner and JS contracts intact.
+   ============================================================== */
+
+.ad-body #section-home {
+  --lms-home-surface: #ffffff;
+  --lms-home-surface-soft: #fbfcff;
+  --lms-home-border: rgba(228, 233, 242, .95);
+  --lms-home-shadow: 0 14px 40px rgba(16, 24, 40, .07);
+  --lms-home-shadow-soft: 0 12px 30px rgba(16, 24, 40, .06);
+  --lms-home-card-radius: 18px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.ad-body #section-home .ad-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.ad-body #section-home .ad-kpi-card {
+  background: linear-gradient(180deg, var(--lms-home-surface) 0%, var(--lms-home-surface-soft) 100%);
+  border: 1px solid var(--lms-home-border);
+  border-radius: var(--lms-home-card-radius);
+  padding: 18px;
+  gap: 14px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset, var(--lms-home-shadow-soft);
+  overflow: hidden;
+  position: relative;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.ad-body #section-home .ad-kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(229, 0, 26, .18);
+  box-shadow: 0 16px 44px rgba(16, 24, 40, .10);
+}
+
+.ad-body #section-home .ad-kpi-card::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--sd-red);
+}
+
+.ad-body #section-home .ad-kpi-card:focus-visible,
+.ad-body #section-home .ad-btn:focus-visible,
+.ad-body #section-home .ad-activity-item:focus-visible,
+.ad-body #section-home .ad-pending-item:focus-visible {
+  outline: 3px solid rgba(229, 0, 26, .22);
+  outline-offset: 3px;
+}
+
+.ad-body #section-home .ad-kpi-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .7);
+}
+
+.ad-body #section-home .ad-kpi-card__icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.ad-body #section-home .ad-kpi-icon--blue { background: #eff6ff; color: #2563eb; }
+.ad-body #section-home .ad-kpi-icon--green { background: #ecfdf3; color: #16a34a; }
+.ad-body #section-home .ad-kpi-icon--orange { background: #fff7ed; color: #ea580c; }
+.ad-body #section-home .ad-kpi-icon--red { background: #fff1f2; color: #e11d48; }
+
+.ad-body #section-home .ad-kpi-card__value {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  color: #101828;
+}
+
+.ad-body #section-home .ad-kpi-card__label {
+  margin-top: 7px;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-transform: uppercase;
+  letter-spacing: .045em;
+}
+
+.ad-body #section-home .ad-mid-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr);
+  gap: 18px;
+  align-items: stretch;
+  margin-bottom: 18px;
+}
+
+.ad-body #section-home .ad-card {
+  background: rgba(255, 255, 255, .94);
+  border: 1px solid var(--lms-home-border);
+  border-radius: 20px;
+  box-shadow: var(--lms-home-shadow);
+  padding: 18px;
+  overflow: hidden;
+}
+
+.ad-body #section-home .ad-card + .ad-card {
+  margin-top: 18px;
+}
+
+.ad-body #section-home .ad-mid-row > .ad-card {
+  height: 100%;
+  margin-top: 0;
+}
+
+.ad-body #section-home .ad-card__header {
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.ad-body #section-home .ad-card__title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0;
+  color: #101828;
+}
+
+.ad-body #section-home .ad-btn--outline.ad-btn--sm {
+  border-radius: 999px;
+  font-weight: 900;
+}
+
+.ad-body #section-home .ad-live-dot {
+  width: 11px;
+  height: 11px;
+  box-shadow: 0 0 0 5px rgba(34, 197, 94, .14);
+}
+
+.ad-body #section-home .ad-pending-count {
+  border-radius: 999px;
+  background: #fff1f2;
+  color: var(--sd-red);
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 900;
+  min-width: 28px;
+}
+
+.ad-body #section-home .ad-activity-list,
+.ad-body #section-home .ad-pending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: none;
+  overflow: visible;
+}
+
+.ad-body #section-home .ad-activity-item,
+.ad-body #section-home .ad-pending-item {
+  border: 1px solid #eef2f7;
+  border-radius: 15px;
+  background: #fbfcff;
+  padding: 12px;
+  transition: border-color .18s ease, background .18s ease;
+}
+
+.ad-body #section-home .ad-activity-item:hover,
+.ad-body #section-home .ad-pending-item:hover {
+  border-color: rgba(229, 0, 26, .22);
+  background: #ffffff;
+}
+
+.ad-body #section-home .ad-activity-item__icon,
+.ad-body #section-home .ad-pending-item > span:first-child {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: #fff1f2;
+  color: var(--sd-red);
+  font-weight: 900;
+}
+
+.ad-body #section-home .ad-activity-item__text,
+.ad-body #section-home .ad-pending-item__text {
+  color: #101828;
+  font-weight: 900;
+}
+
+.ad-body #section-home .ad-activity-item__time,
+.ad-body #section-home .ad-pending-item__meta {
+  color: #667085;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ad-body #section-home .ad-pending-item__text {
+  white-space: normal;
+}
+
+.ad-body #section-home .ad-tag {
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.ad-body #section-home .ad-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #eef2f7;
+  border-radius: 16px;
+}
+
+.ad-body #section-home .ad-table th {
+  background: #f8fafc;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .055em;
+}
+
+.ad-body #section-home .ad-table td {
+  border-top: 1px solid #eef2f7;
+  font-weight: 700;
+}
+
+.ad-body #section-home .ad-table td:first-child {
+  color: #101828;
+  font-weight: 900;
+}
+
+.ad-body #section-home .ad-activity-empty,
+.ad-body #section-home .ad-pending-empty,
+.ad-body #section-home .ad-table-empty {
+  color: #667085;
+  font-weight: 700;
+}
+
+@media (max-width: 1050px) {
+  .ad-body #section-home .ad-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ad-body #section-home .ad-mid-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .ad-body #section-home .ad-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ad-body #section-home .ad-kpi-card {
+    padding: 16px;
+  }
+}
