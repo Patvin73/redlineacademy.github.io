@@ -1167,7 +1167,7 @@
 
   function renderAdminLessonModules(lessons) {
     if (!lessons?.length) {
-      return `<p class="ad-message-detail__body">Belum ada materi tersedia untuk kursus ini.</p>`;
+      return `<div class="ad-course-detail__empty">Belum ada materi tersedia untuk kursus ini.</div>`;
     }
     const modules = new Map();
     lessons.forEach((lesson) => {
@@ -1178,19 +1178,28 @@
       modules.get(key).lessons.push(lesson);
     });
     return Array.from(modules.values()).map((module) => `
-      <div class="ad-message-detail__recipients">
-        <p class="ad-message-detail__label">${escHtml(module.title)}</p>
-        ${module.lessons.map((lesson) => {
+      <section class="ad-course-detail__module">
+        <div class="ad-course-detail__module-head">
+          <h4>${escHtml(module.title)}</h4>
+          <span>${module.lessons.length} lesson${module.lessons.length === 1 ? "" : "s"}</span>
+        </div>
+        <div class="ad-course-detail__lesson-list">
+          ${module.lessons.map((lesson, index) => {
           const safeUrl = toSafeUiUrl(lesson.material_display_url);
           return `
-            <div class="ad-message-recipient">
-              <span>${escHtml(lesson.title || "Lesson")}</span>
+            <div class="ad-course-detail__lesson">
+              <div class="ad-course-detail__lesson-index">${index + 1}</div>
+              <div class="ad-course-detail__lesson-main">
+                <p>${escHtml(lesson.title || "Lesson")}</p>
+                <span>${escHtml(lesson.material_type || "Material")}</span>
+              </div>
               ${safeUrl
-                ? `<a class="ad-btn ad-btn--outline ad-btn--sm" href="${escHtml(safeUrl)}" target="_blank" rel="noopener">Open material</a>`
-                : `<span class="ad-inbox-item__time">${escHtml(lesson.material_type || "Material")}</span>`}
+                ? `<a class="ad-btn ad-btn--outline ad-btn--sm ad-course-detail__material-link" href="${escHtml(safeUrl)}" target="_blank" rel="noopener">Open material</a>`
+                : `<span class="ad-course-detail__lesson-status">No file</span>`}
             </div>`;
         }).join("")}
-      </div>`).join("");
+        </div>
+      </section>`).join("");
   }
 
   async function openAdminCourseDetail(course) {
@@ -1199,17 +1208,16 @@
 
     panel.hidden = false;
     panel.innerHTML = `
-      <div class="ad-message-view__detail">
-        <div class="ad-message-detail__actions">
-          <div>
-            <p class="ad-inbox-item__name">${escHtml(course.title || "Course")}</p>
-            <p class="ad-inbox-item__time">${escHtml(course.category || "Course")} - Creator ID: ${escHtml(course.creatorId || "-")}${course.createdAt ? ` - Created ${formatDT(course.createdAt)}` : ""}</p>
-          </div>
-          <button class="ad-btn ad-btn--outline ad-btn--sm" type="button" data-admin-course-close>Close</button>
+      <div class="ad-course-detail__header">
+        <div class="ad-course-detail__heading">
+          <span class="ad-course-detail__eyebrow">${escHtml(course.category || "Course")}</span>
+          <h3>${escHtml(course.title || "Course")}</h3>
+          <p>Creator ID: ${escHtml(course.creatorId || "-")}${course.createdAt ? ` - Created ${formatDT(course.createdAt)}` : ""}</p>
         </div>
-        <div class="ad-message-view__compose">
-          <p class="ad-message-detail__body">Loading course contents...</p>
-        </div>
+        <button class="ad-btn ad-btn--outline ad-btn--sm" type="button" data-admin-course-close>Close</button>
+      </div>
+      <div class="ad-course-detail__body">
+        <div class="ad-course-detail__empty">Loading course contents...</div>
       </div>`;
     panel.querySelector("[data-admin-course-close]")?.addEventListener("click", () => {
       panel.hidden = true;
@@ -1225,11 +1233,11 @@
         .order("lesson_order", { ascending: true });
       if (error) throw error;
       const lessonsWithUrls = await prepareCourseMaterialUrls(lessons || []);
-      const body = panel.querySelector(".ad-message-view__compose");
+      const body = panel.querySelector(".ad-course-detail__body");
       if (body) body.innerHTML = renderAdminLessonModules(lessonsWithUrls);
     } catch (err) {
-      const body = panel.querySelector(".ad-message-view__compose");
-      if (body) body.innerHTML = `<p class="ad-message-detail__body">${escHtml(err.message || "Course contents failed to load.")}</p>`;
+      const body = panel.querySelector(".ad-course-detail__body");
+      if (body) body.innerHTML = `<div class="ad-course-detail__empty">${escHtml(err.message || "Course contents failed to load.")}</div>`;
     }
   }
 

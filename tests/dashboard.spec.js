@@ -1010,7 +1010,7 @@ test.describe("Student Dashboard", () => {
 
     await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
 
-    await expect(page.locator("#statCoursesEnrolled")).toHaveText("1");
+    await expect(page.locator("#statCoursesEnrolled")).toHaveText("3");
     await expect(page.locator("#statCertificates")).toHaveText("0");
 
     await page.locator(".sd-nav__item[data-section='courses']").click();
@@ -1111,7 +1111,7 @@ test.describe("Student Dashboard", () => {
     await installSupabaseStub(page, fixture);
 
     await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
-    await expect(page.locator("#statCoursesEnrolled")).toHaveText("1");
+    await expect(page.locator("#statCoursesEnrolled")).toHaveText("3");
     await page.locator(".sd-nav__item[data-section='courses']").click();
     await expect(page.locator("#courseGrid .sd-course-card")).toHaveCount(3);
     await expect(page.locator("#courseGrid")).not.toContainText("Realtime Care");
@@ -1139,7 +1139,7 @@ test.describe("Student Dashboard", () => {
     });
 
     expect(triggered).toBe(1);
-    await expect(page.locator("#statCoursesEnrolled")).toHaveText("2");
+    await expect(page.locator("#statCoursesEnrolled")).toHaveText("4");
     await expect(page.locator("#courseGrid")).toContainText("Realtime Care");
   });
 
@@ -1155,6 +1155,8 @@ test.describe("Student Dashboard", () => {
 
     await expect(page.locator("#studentCourseDetail")).toBeVisible();
     await expect(page.locator("#studentCourseDetail")).toContainText("Aged Care Basics");
+    await expect(page.locator("#studentCourseDetail .sd-course-detail__module")).toHaveCount(1);
+    await expect(page.locator("#studentCourseDetail .sd-course-detail__lesson")).toHaveCount(2);
     await expect(page.locator("#studentCourseDetail")).toContainText("Safe Transfers Video");
     await expect(page.locator("#studentCourseDetail")).toContainText("Care Plan Notes");
     await expect(page.locator("#studentCourseDetail a", { hasText: "Open material" })).toHaveAttribute("href", "https://example.com/signed/course-materials/courses/course-1/module-1/safe-transfers.mp4");
@@ -1357,6 +1359,11 @@ test.describe("Student Dashboard", () => {
     await expect(page.locator(".sd-schedule-calendar__weekday.is-sunday")).toHaveText("Sun");
     await expect(page.locator(".sd-schedule-calendar__cell.is-sunday").first()).toBeVisible();
     await expect(page.locator(".sd-schedule-calendar")).toContainText("Sun, Jan 2099");
+    await expect(page.locator(".sd-schedule-calendar__event--live", { hasText: "Live Session" })).toBeVisible();
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    const calendarFitsMobile = await page.locator(".sd-schedule-calendar").evaluate((el) => el.scrollWidth <= el.clientWidth + 1);
+    expect(calendarFitsMobile).toBe(true);
 
     await page.locator("[data-schedule-month='next']").click();
     await expect(page.locator(".sd-schedule-calendar__title")).toHaveText("February 2099");

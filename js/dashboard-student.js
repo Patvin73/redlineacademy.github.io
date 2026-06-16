@@ -1468,7 +1468,7 @@
 
   function renderStudentLessonModules(lessons) {
     if (!lessons?.length) {
-      return `<p class="sd-message-detail__body">Belum ada materi tersedia untuk kursus ini.</p>`;
+      return `<div class="sd-course-detail__empty">Belum ada materi tersedia untuk kursus ini.</div>`;
     }
     const modules = new Map();
     lessons.forEach((lesson) => {
@@ -1482,19 +1482,28 @@
       modules.get(key).lessons.push(lesson);
     });
     return Array.from(modules.values()).map((module) => `
-      <div class="sd-message-detail__recipients">
-        <p class="sd-message-detail__label">${escHtml(module.title)}</p>
-        ${module.lessons.map((lesson) => {
+      <section class="sd-course-detail__module">
+        <div class="sd-course-detail__module-head">
+          <h4>${escHtml(module.title)}</h4>
+          <span>${module.lessons.length} lesson${module.lessons.length === 1 ? "" : "s"}</span>
+        </div>
+        <div class="sd-course-detail__lesson-list">
+          ${module.lessons.map((lesson, index) => {
           const safeUrl = toSafeUiUrl(lesson.material_display_url);
           return `
-            <div class="sd-message-recipient">
-              <span>${escHtml(lesson.title || "Lesson")}</span>
+            <div class="sd-course-detail__lesson">
+              <div class="sd-course-detail__lesson-index">${index + 1}</div>
+              <div class="sd-course-detail__lesson-main">
+                <p>${escHtml(lesson.title || "Lesson")}</p>
+                <span>${escHtml(lesson.material_type || "Material")}</span>
+              </div>
               ${safeUrl
-                ? `<a class="sd-btn sd-btn--outline sd-btn--sm" href="${escHtml(safeUrl)}" target="_blank" rel="noopener">Open material</a>`
-                : `<span class="sd-course-card__trainer">${escHtml(lesson.material_type || "Material")}</span>`}
+                ? `<a class="sd-btn sd-btn--outline sd-btn--sm sd-course-detail__material-link" href="${escHtml(safeUrl)}" target="_blank" rel="noopener">Open material</a>`
+                : `<span class="sd-course-detail__lesson-status">No file</span>`}
             </div>`;
         }).join("")}
-      </div>`).join("");
+        </div>
+      </section>`).join("");
   }
 
   async function openStudentCourseDetail(course) {
@@ -1503,15 +1512,16 @@
 
     panel.hidden = false;
     panel.innerHTML = `
-      <div class="sd-message-view__header">
-        <div>
-          <p class="sd-message-view__subject">${escHtml(course.title || "Course")}</p>
-          <p class="sd-inbox-item__time">${escHtml(course.categories?.name || course.category_id || "Course")}</p>
+      <div class="sd-course-detail__header">
+        <div class="sd-course-detail__heading">
+          <span class="sd-course-detail__eyebrow">${escHtml(course.categories?.name || course.category_id || "Course")}</span>
+          <h3>${escHtml(course.title || "Course")}</h3>
+          <p>Course contents and learning materials</p>
         </div>
         <button class="sd-btn sd-btn--outline sd-btn--sm" type="button" data-student-course-close>Close</button>
       </div>
-      <div class="sd-message-view__body">
-        <p class="sd-message-detail__body">Loading course contents...</p>
+      <div class="sd-course-detail__body">
+        <div class="sd-course-detail__empty">Loading course contents...</div>
       </div>`;
     panel.querySelector("[data-student-course-close]")?.addEventListener("click", () => {
       panel.hidden = true;
@@ -1527,11 +1537,11 @@
         .order("lesson_order", { ascending: true });
       if (error) throw error;
       const lessonsWithUrls = await prepareCourseMaterialUrls(lessons || []);
-      const body = panel.querySelector(".sd-message-view__body");
+      const body = panel.querySelector(".sd-course-detail__body");
       if (body) body.innerHTML = renderStudentLessonModules(lessonsWithUrls);
     } catch (err) {
-      const body = panel.querySelector(".sd-message-view__body");
-      if (body) body.innerHTML = `<p class="sd-message-detail__body">${escHtml(err.message || "Course contents failed to load.")}</p>`;
+      const body = panel.querySelector(".sd-course-detail__body");
+      if (body) body.innerHTML = `<div class="sd-course-detail__empty">${escHtml(err.message || "Course contents failed to load.")}</div>`;
     }
   }
 
@@ -2276,8 +2286,15 @@
           </div>`;
         dayEvents.forEach((event) => {
           const item = document.createElement("div");
-          item.className = "sd-schedule-calendar__event";
-          item.innerHTML = `<strong>${escHtml(event.title || "Event")}</strong><br>${escHtml(formatScheduleEventTimeRange(event))}`;
+          const eventClass = {
+            live_session: "sd-schedule-calendar__event--live",
+            exam: "sd-schedule-calendar__event--exam",
+            orientation: "sd-schedule-calendar__event--live",
+          }[event.event_type] || "sd-schedule-calendar__event--deadline";
+          item.className = `sd-schedule-calendar__event ${eventClass}`;
+          item.innerHTML = `
+            <strong>${escHtml(event.title || "Event")}</strong>
+            <span>${escHtml(formatScheduleEventTimeRange(event))}</span>`;
           cell.appendChild(item);
         });
 

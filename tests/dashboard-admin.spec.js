@@ -2137,6 +2137,8 @@ test("admin opens course contents from the course row", async ({ page }) => {
 
   await expect(page.locator("#adminCourseDetail")).toBeVisible();
   await expect(page.locator("#adminCourseDetail")).toContainText("Leadership Basics");
+  await expect(page.locator("#adminCourseDetail .ad-course-detail__module")).toHaveCount(1);
+  await expect(page.locator("#adminCourseDetail .ad-course-detail__lesson")).toHaveCount(2);
   await expect(page.locator("#adminCourseDetail")).toContainText("Orientation");
   await expect(page.locator("#adminCourseDetail")).toContainText("Leadership Intro");
   await expect(page.locator("#adminCourseDetail")).toContainText("Leadership Checklist");
@@ -2152,6 +2154,10 @@ test("admin sees all upcoming events and trainer sees only owned events", async 
   await expect(page.locator("#section-schedule")).toHaveClass(/active/);
   await expect(page.locator("#adminEventsList")).toContainText("Trainer Live Session");
   await expect(page.locator("#adminEventsList")).toContainText("Admin Exam");
+  await page.setViewportSize({ width: 390, height: 844 });
+  const eventListFitsMobile = await page.locator("#adminEventsList").evaluate((el) => el.scrollWidth <= el.clientWidth + 1);
+  expect(eventListFitsMobile).toBe(true);
+  await page.setViewportSize({ width: 1280, height: 720 });
 
   await installSupabaseStub(page, "trainer");
   await page.reload({ waitUntil: "domcontentloaded" });
