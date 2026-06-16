@@ -823,7 +823,7 @@ test.describe("Student Dashboard", () => {
     await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
 
     await expect.poll(() => consoleMessages.join("\n")).toContain("[LMS] View missing: v_student_dashboard.");
-    await expect(page.locator("#statCoursesEnrolled")).toHaveText("1");
+    await expect(page.locator("#statCoursesEnrolled")).toHaveText("3");
   });
 
   test("falls back to direct student stats when dashboard view has no row", async ({ page }) => {
@@ -838,7 +838,7 @@ test.describe("Student Dashboard", () => {
     await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
 
     await expect.poll(() => consoleMessages.join("\n")).toContain("[STATS] No row in v_student_dashboard for this student. Using direct count.");
-    await expect(page.locator("#statCoursesEnrolled")).toHaveText("1");
+    await expect(page.locator("#statCoursesEnrolled")).toHaveText("3");
     await expect(page.locator("#statPendingAssignments")).toHaveText("2");
   });
 
@@ -971,7 +971,7 @@ test.describe("Student Dashboard", () => {
     ).toHaveCSS("height", "140px");
   });
 
-  test("course stat falls back to active enrollments when dashboard view is stale", async ({ page }) => {
+  test("course stat falls back to all visible courses when dashboard view is stale", async ({ page }) => {
     const fixture = makeStudentFixture();
     fixture.tableData.v_student_dashboard[0].courses_enrolled = 0;
     fixture.tableData.v_student_dashboard[0].pending_submissions = 0;
@@ -981,7 +981,7 @@ test.describe("Student Dashboard", () => {
 
     await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
 
-    await expect(page.locator("#statCoursesEnrolled")).toHaveText("1");
+    await expect(page.locator("#statCoursesEnrolled")).toHaveText("3");
     await expect(page.locator("#statPendingAssignments")).toHaveText("2");
     await expect(page.locator("#continueLearningContent")).toContainText("Aged Care Basics");
     await expect(page.locator("#continueLearningContent .sd-continue-item__thumb img")).toHaveAttribute(

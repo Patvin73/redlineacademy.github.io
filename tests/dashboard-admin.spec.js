@@ -1162,7 +1162,7 @@ test("trainer sees KPI values and role badge", async ({ page }) => {
   await expect(page.locator("#welcomeRoleSub")).toContainText("Trainer");
 
   await expect(page.locator("#kpiTotalStudents")).toHaveText("12");
-  await expect(page.locator("#kpiActiveCourses")).toHaveText("3");
+  await expect(page.locator("#kpiActiveCourses")).toHaveText("1");
   await expect(page.locator("#kpiPendingGrading")).toHaveText("1");
   await expect(page.locator("#kpiCompletionRate")).toHaveText("76%");
 });
@@ -2070,7 +2070,7 @@ test("trainer can upload lesson material and save it with course lessons", async
   });
 });
 
-test("trainer sees only owned courses with creator IDs", async ({ page }) => {
+test("trainer sees all courses with creator IDs but can edit only owned courses", async ({ page }) => {
   await installSupabaseStub(page, "trainer");
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
 
@@ -2078,11 +2078,11 @@ test("trainer sees only owned courses with creator IDs", async ({ page }) => {
   await expect(page.locator("#section-courses")).toHaveClass(/active/);
 
   const rows = page.locator("#adminCourseList .ad-course-row:not(.ad-skeleton-row)");
-  await expect(rows).toHaveCount(1);
+  await expect(rows).toHaveCount(2);
   await expect(page.locator("#adminCourseList")).toContainText("Leadership Basics");
-  await expect(page.locator("#adminCourseList")).not.toContainText("Emergency Response");
+  await expect(page.locator("#adminCourseList")).toContainText("Emergency Response");
   await expect(page.locator("#adminCourseList")).toContainText("Creator ID: TR-002");
-  await expect(page.locator("#adminCourseList")).not.toContainText("Creator ID: ADM-001");
+  await expect(page.locator("#adminCourseList")).toContainText("Creator ID: ADM-001");
 
   await expect(page.locator(".ad-course-row", { hasText: "Leadership Basics" }).locator("[data-action='edit']")).toBeVisible();
   await expect(page.locator(".ad-course-row", { hasText: "Emergency Response" }).locator("[data-action='edit']")).toHaveCount(0);

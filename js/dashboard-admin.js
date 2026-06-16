@@ -549,11 +549,22 @@
           .single();
         data = trainerData;
         if (data) {
+          let sharedActiveCourseCount = null;
+          try {
+            const { data: visibleCourses, count, error } = await window.lmsSupabase
+              .from("courses")
+              .select("id", { count: "exact", head: true })
+              .eq("status", "published");
+            if (!error) {
+              sharedActiveCourseCount = count ?? visibleCourses?.length ?? 0;
+            }
+          } catch {}
           const [visibleStudentCount, pendingGradingCount] = await Promise.all([
             countVisibleStudentsForCurrentRole().catch(() => null),
             countPendingGradingForCurrentRole().catch(() => null)
           ]);
           if ((data.total_students || 0) === 0 && visibleStudentCount !== null) data.total_students = visibleStudentCount;
+          if (sharedActiveCourseCount !== null) data.courses_created = sharedActiveCourseCount;
           if (pendingGradingCount !== null) data.pending_grading = pendingGradingCount;
         }
       }
@@ -1235,9 +1246,6 @@
           profiles!courses_trainer_id_fkey(admin_id, student_id)
         `)
         .order("created_at", { ascending: false });
-      if (currentRole !== "admin") {
-        query = query.eq("trainer_id", currentProfile.id);
-      }
       const { data: courses } = await query;
 
       // Remove skeletons dan existing rows sebelum re-render

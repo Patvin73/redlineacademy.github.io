@@ -200,7 +200,17 @@
       if (error) throw error;
       const enrollments = data || [];
       const progressMap = await getCourseProgressMap(userId, enrollments.map((row) => row.course_id));
-      return enrollments.filter((row) => isEnrollmentCourseActive(row, progressMap)).length;
+      const activeEnrollmentCourseIds = enrollments
+        .filter((row) => isEnrollmentCourseActive(row, progressMap))
+        .map((row) => row.course_id);
+      const batchMaterialCourseIds = await getStudentBatchMaterialCourseIds();
+      const { data: publishedCourses, error: courseErr } = await window.lmsSupabase
+        .from("courses")
+        .select("id")
+        .eq("status", "published");
+      if (courseErr) throw courseErr;
+      const publishedCourseIds = (publishedCourses || []).map((course) => course.id);
+      return uniqueIds([...activeEnrollmentCourseIds, ...batchMaterialCourseIds, ...publishedCourseIds]).length;
     } catch {
       return null;
     }
