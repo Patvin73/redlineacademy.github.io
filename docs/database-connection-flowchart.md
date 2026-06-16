@@ -10,7 +10,7 @@ flowchart LR
         Home["Homepage<br/>index.html"]
         PublicPages["Public content pages<br/>about, programs, blog, contact,<br/>articles, legal"]
         PublicRuntime["Public frontend runtime<br/>script.js, main.js, blog-hub.js,<br/>i18n, navigation, public forms"]
-        Enrollment["Enrollment / inquiry flows<br/>programs.html, whatsapp-enquiry.html"]
+        Enrollment["Enrollment / manual payment flows<br/>programs.html, whatsapp-enquiry.html"]
         LoginEntry["LMS / portal entry point<br/>pages/login.html"]
 
         Home --> PublicPages
@@ -44,6 +44,7 @@ flowchart LR
         MessageRepo["Message repository<br/>threads, messages, notifications"]
         ProgressRepo["Progress repository<br/>lesson completion, course progress,<br/>certificates, dashboard views"]
         StorageRepo["Storage repository<br/>signed URLs and private files"]
+        PaymentRepo["Manual payment repository<br/>pending payments, proof review,<br/>admin confirmation"]
 
         Repository --> ProfileRepo
         Repository --> CourseRepo
@@ -51,6 +52,7 @@ flowchart LR
         Repository --> MessageRepo
         Repository --> ProgressRepo
         Repository --> StorageRepo
+        Repository --> PaymentRepo
     end
 
     subgraph Client["Database Client Layer"]
@@ -73,20 +75,20 @@ flowchart LR
         Functions["SQL functions<br/>progress recalculation and helpers"]
     end
 
-    subgraph PaymentBackend["Server-side Payment and Upload Flow"]
-        PHP["Plain PHP endpoints<br/>submit_registration.php, doku_notify.php,<br/>get_csrf_token.php"]
-        DOKU["DOKU Checkout API<br/>payment request and webhook"]
-        ServerFiles["Server filesystem<br/>private KTP uploads and logs"]
-        PaymentSQL["Payment-related SQL setup<br/>SUPABASE_PAYMENTS_SETUP.sql"]
+    subgraph ManualPayment["Manual Payment Confirmation Flow"]
+        PaymentPending["Manual payment request<br/>status: pending"]
+        AdminReview["Admin reviews payment proof<br/>and validates amount"]
+        PaymentConfirmed["Admin updates payment status<br/>completed / rejected / follow up"]
     end
 
     Visitor --> Home
     LoginEntry --> LoginUI
-    Enrollment --> PHP
+    Enrollment --> PaymentPending
 
     StudentDashboard --> Repository
     AdminDashboard --> Repository
     MarketerDashboard --> Repository
+    AdminDashboard --> AdminReview
 
     AuthBoundary --> SupabaseClient
     ProfileRepo --> SupabaseClient
@@ -95,6 +97,7 @@ flowchart LR
     MessageRepo --> SupabaseClient
     ProgressRepo --> SupabaseClient
     StorageRepo --> SupabaseClient
+    PaymentRepo --> SupabaseClient
 
     SupabaseClient --> QueryMethods
     SupabaseClient --> SupabaseAuth
@@ -112,11 +115,9 @@ flowchart LR
     Views --> Policies
     Functions --> Policies
 
-    PHP --> DOKU
-    DOKU --> PHP
-    PHP --> ServerFiles
-    PHP -.optional persistence / setup.-> PaymentSQL
-    PaymentSQL -.defines payment tables.-> Tables
+    PaymentPending --> AdminReview
+    AdminReview --> PaymentConfirmed
+    PaymentConfirmed --> PaymentRepo
 
     classDef website fill:#e9f5ff,stroke:#2c6e9b,color:#17384d
     classDef frontend fill:#e9f5ff,stroke:#2c6e9b,color:#17384d
@@ -124,15 +125,15 @@ flowchart LR
     classDef client fill:#f3edff,stroke:#7c3aed,color:#32135f
     classDef service fill:#eafaf1,stroke:#2f855a,color:#123524
     classDef database fill:#fdecec,stroke:#b84a4a,color:#4a1818
-    classDef backend fill:#f5f1e8,stroke:#7a5c2e,color:#2e2416
+    classDef manual fill:#f5f1e8,stroke:#7a5c2e,color:#2e2416
 
     class Visitor,Home,PublicPages,PublicRuntime,Enrollment,LoginEntry website
     class LoginUI,AuthBoundary,ProfileLookup,RoleRouter,StudentDashboard,AdminDashboard,MarketerDashboard frontend
-    class Repository,ProfileRepo,CourseRepo,AssignmentRepo,MessageRepo,ProgressRepo,StorageRepo boundary
+    class Repository,ProfileRepo,CourseRepo,AssignmentRepo,MessageRepo,ProgressRepo,StorageRepo,PaymentRepo boundary
     class SupabaseClient,QueryMethods client
     class SupabaseAuth,PostgREST,RPC,Storage,Realtime service
     class Tables,Views,Policies,Functions database
-    class PHP,DOKU,ServerFiles,PaymentSQL backend
+    class PaymentPending,AdminReview,PaymentConfirmed manual
 ```
 
 ## Technologies Used
@@ -163,12 +164,13 @@ flowchart LR
 - Realtime: Supabase Realtime for notification/dashboard refresh flows.
 - Storage: Supabase Storage for LMS files and private course materials.
 
-### Server-side Payment Flow
+### Manual Payment Confirmation Flow
 
-- Server endpoints: plain PHP files such as `submit_registration.php`, `doku_notify.php`, and `get_csrf_token.php`.
-- Payment provider: DOKU Checkout API.
-- Upload/log storage: server filesystem for selected private uploads and webhook logs.
-- SQL setup: `SUPABASE_PAYMENTS_SETUP.sql` and other `SUPABASE_*.sql` files for schema, policies, and functions.
+- Payment model: manual payment or transfer confirmation.
+- Confirmation owner: Admin role through `dashboard-admin.html` / `dashboard-admin.js`.
+- Payment status: pending until Admin validates the proof and amount.
+- Data access: manual payment records are handled through the repository boundary and persisted through Supabase/PostgreSQL.
+- SQL setup: `SUPABASE_PAYMENTS_SETUP.sql` and other `SUPABASE_*.sql` files for payment tables, policies, and related database objects.
 
 ### Testing and Tooling
 

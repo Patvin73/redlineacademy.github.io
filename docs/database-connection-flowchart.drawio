@@ -1,0 +1,304 @@
+<mxfile host="app.diagrams.net" modified="2026-06-16T00:00:00.000Z" agent="Codex" version="26.0.0" type="device">
+  <diagram id="database-connection-flowchart" name="Website to Dashboard Database Connection">
+    <mxGraphModel dx="2600" dy="1600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2600" pageHeight="1700" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="Redline Academy: Website to Dashboard Database Connection" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=28;fontStyle=1;fontColor=#252B34;" vertex="1" parent="1">
+          <mxGeometry x="260" y="30" width="2080" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="Flow from public website to role dashboards, repository interface, Supabase services, and PostgreSQL data layer" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=15;fontColor=#596275;" vertex="1" parent="1">
+          <mxGeometry x="260" y="78" width="2080" height="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="group_website" value="Public Website Layer" style="swimlane;html=1;startSize=32;horizontal=1;rounded=1;fillColor=#F7FBFF;strokeColor=#9CC9E8;fontColor=#17384D;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="150" width="420" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="group_auth" value="Authentication and Dashboard Routing" style="swimlane;html=1;startSize=32;horizontal=1;rounded=1;fillColor=#F7FBFF;strokeColor=#9CC9E8;fontColor=#17384D;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="150" width="520" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="group_repo" value="Data Repository Interface Layer" style="swimlane;html=1;startSize=32;horizontal=1;rounded=1;fillColor=#FFF9EA;strokeColor=#D9A441;fontColor=#4A2D05;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="150" width="500" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="group_client" value="Database Client Layer" style="swimlane;html=1;startSize=32;horizontal=1;rounded=1;fillColor=#FBF8FF;strokeColor=#C4B5FD;fontColor=#32135F;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1740" y="150" width="340" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="group_services" value="Supabase Service Layer" style="swimlane;html=1;startSize=32;horizontal=1;rounded=1;fillColor=#F6FFFA;strokeColor=#98D9B7;fontColor=#123524;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="2160" y="150" width="380" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="group_database" value="PostgreSQL Database Layer" style="swimlane;html=1;startSize=32;horizontal=1;rounded=1;fillColor=#FFF7F7;strokeColor=#E1A4A4;fontColor=#4A1818;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="2160" y="730" width="380" height="440" as="geometry" />
+        </mxCell>
+        <mxCell id="group_payment" value="Manual Payment Confirmation Flow" style="swimlane;html=1;startSize=32;horizontal=1;rounded=1;fillColor=#FBF8EF;strokeColor=#CAB27C;fontColor=#2E2416;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="730" width="1100" height="270" as="geometry" />
+        </mxCell>
+
+        <mxCell id="visitor" value="Visitor / User" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E9F5FF;strokeColor=#2C6E9B;fontColor=#17384D;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="80" width="150" height="52" as="geometry" />
+        </mxCell>
+
+        <mxCell id="home" value="Homepage&lt;br&gt;&lt;b&gt;index.html&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9F5FF;strokeColor=#2C6E9B;fontColor=#17384D;" vertex="1" parent="1">
+          <mxGeometry x="100" y="210" width="330" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="public_pages" value="Public content pages&lt;br&gt;about, programs, blog, contact,&lt;br&gt;articles, legal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9F5FF;strokeColor=#2C6E9B;fontColor=#17384D;" vertex="1" parent="1">
+          <mxGeometry x="100" y="320" width="330" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="public_runtime" value="Public frontend runtime&lt;br&gt;script.js, main.js, blog-hub.js&lt;br&gt;i18n, navigation, public forms" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9F5FF;strokeColor=#2C6E9B;fontColor=#17384D;" vertex="1" parent="1">
+          <mxGeometry x="100" y="450" width="330" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="enrollment" value="Enrollment / manual payment flows&lt;br&gt;programs.html&lt;br&gt;whatsapp-enquiry.html" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9F5FF;strokeColor=#2C6E9B;fontColor=#17384D;" vertex="1" parent="1">
+          <mxGeometry x="100" y="570" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="login_entry" value="LMS / portal entry point&lt;br&gt;pages/login.html" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9F5FF;strokeColor=#2C6E9B;fontColor=#17384D;" vertex="1" parent="1">
+          <mxGeometry x="270" y="570" width="160" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="login_ui" value="Login UI&lt;br&gt;pages/login.html" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9F5FF;strokeColor=#2C6E9B;fontColor=#17384D;" vertex="1" parent="1">
+          <mxGeometry x="600" y="210" width="190" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="auth_boundary" value="Auth / session boundary&lt;br&gt;auth.js, guard.js" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9F5FF;strokeColor=#2C6E9B;fontColor=#17384D;" vertex="1" parent="1">
+          <mxGeometry x="830" y="210" width="210" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="profile_lookup" value="Profile and role lookup&lt;br&gt;profiles.role, is_active" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9F5FF;strokeColor=#2C6E9B;fontColor=#17384D;" vertex="1" parent="1">
+          <mxGeometry x="690" y="330" width="250" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="role_router" value="Dashboard role route" style="rhombus;whiteSpace=wrap;html=1;fillColor=#E9F5FF;strokeColor=#2C6E9B;fontColor=#17384D;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="720" y="440" width="190" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="student_dashboard" value="Student Dashboard&lt;br&gt;dashboard-student.html&lt;br&gt;dashboard-student.js" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9F5FF;strokeColor=#2C6E9B;fontColor=#17384D;" vertex="1" parent="1">
+          <mxGeometry x="590" y="570" width="150" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="admin_dashboard" value="Admin / Trainer Dashboard&lt;br&gt;dashboard-admin.html&lt;br&gt;dashboard-admin.js" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9F5FF;strokeColor=#2C6E9B;fontColor=#17384D;" vertex="1" parent="1">
+          <mxGeometry x="750" y="570" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="marketer_dashboard" value="Marketer Dashboard&lt;br&gt;dashboard-marketer.html&lt;br&gt;dashboard-marketer.js" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9F5FF;strokeColor=#2C6E9B;fontColor=#17384D;" vertex="1" parent="1">
+          <mxGeometry x="920" y="570" width="150" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="repository" value="Data Repository Interface&lt;br&gt;logical dashboard data boundary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4DB;strokeColor=#B7791F;fontColor=#4A2D05;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1280" y="210" width="250" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="profile_repo" value="Profile repository&lt;br&gt;user profile, role, activation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4DB;strokeColor=#B7791F;fontColor=#4A2D05;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="335" width="210" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="course_repo" value="Course repository&lt;br&gt;courses, modules, lessons, materials" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4DB;strokeColor=#B7791F;fontColor=#4A2D05;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="335" width="210" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="assignment_repo" value="Assignment repository&lt;br&gt;assignments, submissions, grading" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4DB;strokeColor=#B7791F;fontColor=#4A2D05;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="430" width="210" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="message_repo" value="Message repository&lt;br&gt;threads, messages, notifications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4DB;strokeColor=#B7791F;fontColor=#4A2D05;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="430" width="210" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="progress_repo" value="Progress repository&lt;br&gt;lesson completion, course progress,&lt;br&gt;certificates, dashboard views" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4DB;strokeColor=#B7791F;fontColor=#4A2D05;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="525" width="210" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="storage_repo" value="Storage repository&lt;br&gt;signed URLs and private files" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4DB;strokeColor=#B7791F;fontColor=#4A2D05;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="525" width="210" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="payment_repo" value="Manual payment repository&lt;br&gt;pending payments, proof review,&lt;br&gt;admin confirmation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4DB;strokeColor=#B7791F;fontColor=#4A2D05;" vertex="1" parent="1">
+          <mxGeometry x="1305" y="615" width="210" height="65" as="geometry" />
+        </mxCell>
+
+        <mxCell id="supabase_client" value="@supabase/supabase-js v2&lt;br&gt;js/supabase-client.js" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3EDFF;strokeColor=#7C3AED;fontColor=#32135F;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1800" y="250" width="220" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="query_methods" value="Client API methods&lt;br&gt;.from(...), .select(), .insert(),&lt;br&gt;.update(), .delete(), .rpc(),&lt;br&gt;storage.from(...)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3EDFF;strokeColor=#7C3AED;fontColor=#32135F;" vertex="1" parent="1">
+          <mxGeometry x="1800" y="430" width="220" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="supabase_auth" value="Supabase Auth&lt;br&gt;sessions and user identity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAFAF1;strokeColor=#2F855A;fontColor=#123524;" vertex="1" parent="1">
+          <mxGeometry x="2220" y="205" width="250" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="postgrest" value="PostgREST Data API&lt;br&gt;table and view access" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAFAF1;strokeColor=#2F855A;fontColor=#123524;" vertex="1" parent="1">
+          <mxGeometry x="2220" y="305" width="250" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="rpc" value="PostgreSQL RPC&lt;br&gt;business functions via .rpc(...)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAFAF1;strokeColor=#2F855A;fontColor=#123524;" vertex="1" parent="1">
+          <mxGeometry x="2220" y="405" width="250" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="storage" value="Supabase Storage&lt;br&gt;private course materials and files" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAFAF1;strokeColor=#2F855A;fontColor=#123524;" vertex="1" parent="1">
+          <mxGeometry x="2220" y="505" width="250" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="realtime" value="Supabase Realtime&lt;br&gt;notifications and dashboard refresh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAFAF1;strokeColor=#2F855A;fontColor=#123524;" vertex="1" parent="1">
+          <mxGeometry x="2220" y="595" width="250" height="65" as="geometry" />
+        </mxCell>
+
+        <mxCell id="tables" value="Core LMS tables&lt;br&gt;profiles, courses, lessons,&lt;br&gt;assignments, submissions, messages,&lt;br&gt;notifications, progress" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDECEC;strokeColor=#B84A4A;fontColor=#4A1818;" vertex="1" parent="1">
+          <mxGeometry x="2220" y="785" width="250" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="views" value="Read models / views&lt;br&gt;dashboard and progress views" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDECEC;strokeColor=#B84A4A;fontColor=#4A1818;" vertex="1" parent="1">
+          <mxGeometry x="2220" y="905" width="250" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="functions" value="SQL functions&lt;br&gt;progress recalculation and helpers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDECEC;strokeColor=#B84A4A;fontColor=#4A1818;" vertex="1" parent="1">
+          <mxGeometry x="2220" y="1000" width="250" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="policies" value="RLS policies&lt;br&gt;role-based access control" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDECEC;strokeColor=#B84A4A;fontColor=#4A1818;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="2220" y="1095" width="250" height="65" as="geometry" />
+        </mxCell>
+
+        <mxCell id="payment_pending" value="Manual payment request&lt;br&gt;status: pending" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F1E8;strokeColor=#7A5C2E;fontColor=#2E2416;" vertex="1" parent="1">
+          <mxGeometry x="120" y="805" width="230" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="admin_review" value="Admin reviews payment proof&lt;br&gt;and validates amount" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F1E8;strokeColor=#7A5C2E;fontColor=#2E2416;" vertex="1" parent="1">
+          <mxGeometry x="450" y="805" width="220" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="payment_confirmed" value="Admin updates payment status&lt;br&gt;completed / rejected / follow up" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F1E8;strokeColor=#7A5C2E;fontColor=#2E2416;" vertex="1" parent="1">
+          <mxGeometry x="770" y="805" width="230" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="tech_note" value="Technologies Used&lt;br&gt;&lt;br&gt;Website/dashboard: HTML, CSS, vanilla JavaScript&lt;br&gt;Database client: @supabase/supabase-js v2&lt;br&gt;Auth: Supabase Auth&lt;br&gt;Data API: Supabase PostgREST&lt;br&gt;Database: PostgreSQL&lt;br&gt;Authorization: Row Level Security policies&lt;br&gt;Realtime: Supabase Realtime&lt;br&gt;Storage: Supabase Storage&lt;br&gt;Payment: manual payment confirmation by Admin role&lt;br&gt;Testing/tooling: Node.js, Playwright, Jest, ESLint, Prettier, Supabase CLI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#596275;fontColor=#252B34;align=left;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1080" width="820" height="260" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_visitor_home" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="visitor" target="home">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_home_public" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="home" target="public_pages">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_public_runtime" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="public_pages" target="public_runtime">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_public_enrollment" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="public_pages" target="enrollment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_public_login_entry" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="public_pages" target="login_entry">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_login_entry_ui" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="login_entry" target="login_ui">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_login_auth" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="login_ui" target="auth_boundary">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_auth_profile" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="auth_boundary" target="profile_lookup">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_profile_role" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="profile_lookup" target="role_router">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_role_student" value="student" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="role_router" target="student_dashboard">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_role_admin" value="admin / trainer" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="role_router" target="admin_dashboard">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_role_marketer" value="marketer" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="role_router" target="marketer_dashboard">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_student_repo" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="student_dashboard" target="repository">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_admin_repo" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="admin_dashboard" target="repository">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_marketer_repo" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="marketer_dashboard" target="repository">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_repo_profile" style="endArrow=block;html=1;rounded=0;strokeColor=#B7791F;" edge="1" parent="1" source="repository" target="profile_repo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_repo_course" style="endArrow=block;html=1;rounded=0;strokeColor=#B7791F;" edge="1" parent="1" source="repository" target="course_repo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_repo_assignment" style="endArrow=block;html=1;rounded=0;strokeColor=#B7791F;" edge="1" parent="1" source="repository" target="assignment_repo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_repo_message" style="endArrow=block;html=1;rounded=0;strokeColor=#B7791F;" edge="1" parent="1" source="repository" target="message_repo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_repo_progress" style="endArrow=block;html=1;rounded=0;strokeColor=#B7791F;" edge="1" parent="1" source="repository" target="progress_repo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_repo_storage" style="endArrow=block;html=1;rounded=0;strokeColor=#B7791F;" edge="1" parent="1" source="repository" target="storage_repo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_repo_payment" style="endArrow=block;html=1;rounded=0;strokeColor=#B7791F;" edge="1" parent="1" source="repository" target="payment_repo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_profile_client" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="profile_repo" target="supabase_client">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_course_client" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="course_repo" target="supabase_client">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_assignment_client" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="assignment_repo" target="supabase_client">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_message_client" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="message_repo" target="supabase_client">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_progress_client" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="progress_repo" target="supabase_client">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_storage_client" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="storage_repo" target="supabase_client">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_payment_client" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="payment_repo" target="supabase_client">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_auth_client" value="session" style="endArrow=block;html=1;rounded=0;strokeColor=#596275;" edge="1" parent="1" source="auth_boundary" target="supabase_client">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_client_methods" style="endArrow=block;html=1;rounded=0;strokeColor=#7C3AED;" edge="1" parent="1" source="supabase_client" target="query_methods">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_client_auth" style="endArrow=block;html=1;rounded=0;strokeColor=#2F855A;" edge="1" parent="1" source="supabase_client" target="supabase_auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_methods_postgrest" style="endArrow=block;html=1;rounded=0;strokeColor=#2F855A;" edge="1" parent="1" source="query_methods" target="postgrest">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_methods_rpc" style="endArrow=block;html=1;rounded=0;strokeColor=#2F855A;" edge="1" parent="1" source="query_methods" target="rpc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_methods_storage" style="endArrow=block;html=1;rounded=0;strokeColor=#2F855A;" edge="1" parent="1" source="query_methods" target="storage">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_methods_realtime" style="endArrow=block;html=1;rounded=0;strokeColor=#2F855A;" edge="1" parent="1" source="query_methods" target="realtime">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_postgrest_tables" style="endArrow=block;html=1;rounded=0;strokeColor=#B84A4A;" edge="1" parent="1" source="postgrest" target="tables">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_postgrest_views" style="endArrow=block;html=1;rounded=0;strokeColor=#B84A4A;" edge="1" parent="1" source="postgrest" target="views">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_rpc_functions" style="endArrow=block;html=1;rounded=0;strokeColor=#B84A4A;" edge="1" parent="1" source="rpc" target="functions">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_realtime_tables" style="endArrow=block;html=1;rounded=0;strokeColor=#B84A4A;" edge="1" parent="1" source="realtime" target="tables">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_storage_policies" style="endArrow=block;html=1;rounded=0;strokeColor=#B84A4A;" edge="1" parent="1" source="storage" target="policies">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_tables_policies" style="endArrow=block;html=1;rounded=0;strokeColor=#B84A4A;" edge="1" parent="1" source="tables" target="policies">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_views_policies" style="endArrow=block;html=1;rounded=0;strokeColor=#B84A4A;" edge="1" parent="1" source="views" target="policies">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_functions_policies" style="endArrow=block;html=1;rounded=0;strokeColor=#B84A4A;" edge="1" parent="1" source="functions" target="policies">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_enrollment_payment_pending" style="endArrow=block;html=1;rounded=0;strokeColor=#7A5C2E;" edge="1" parent="1" source="enrollment" target="payment_pending">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_admin_dashboard_review" style="endArrow=block;html=1;rounded=0;strokeColor=#7A5C2E;" edge="1" parent="1" source="admin_dashboard" target="admin_review">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_payment_pending_review" style="endArrow=block;html=1;rounded=0;strokeColor=#7A5C2E;" edge="1" parent="1" source="payment_pending" target="admin_review">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_admin_review_confirmed" style="endArrow=block;html=1;rounded=0;strokeColor=#7A5C2E;" edge="1" parent="1" source="admin_review" target="payment_confirmed">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_confirmed_payment_repo" style="endArrow=block;html=1;rounded=0;strokeColor=#7A5C2E;" edge="1" parent="1" source="payment_confirmed" target="payment_repo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
