@@ -24,6 +24,9 @@
   let adminMessageChannel = null;
   let adminMessageChannelUserId = null;
   let adminUnreadSections = { courses: 0, grading: 0, schedule: 0 };
+  let adminScheduleCache = [];
+  let adminScheduleCalendarCursor = null;
+  let adminScheduleSortOrder = "asc";
   const USER_ROLE_TAGS = { admin: "red", trainer: "purple", student: "blue" };
   const COURSE_MATERIAL_BUCKET = "course-materials";
   const Competency = window.RedlineCompetency || {};
@@ -216,15 +219,6 @@
     });
   }
 
-  function formatDateShort(iso) {
-    if (!iso) return { day: "-", month: "" };
-    const d = new Date(iso);
-    return {
-      day:   d.getDate(),
-      month: d.toLocaleString("en-AU", { month: "short" }).toUpperCase(),
-    };
-  }
-
   /* ================================================================
      INIT
   ================================================================ */
@@ -260,14 +254,53 @@
     const overlay   = $("adOverlay");
     const hamburger = $("adHamburger");
     const closeBtn  = $("adSidebarClose");
+    const desktopQuery = window.matchMedia("(min-width: 769px)");
+    const collapsedKey = "redline-admin-sidebar-collapsed";
+
+    document.querySelectorAll(".ad-nav__item[data-section], .ad-logout-btn").forEach((item) => {
+      const labelSource = item.querySelector("span[data-i18n]") || item;
+      const label = (labelSource.textContent || "").replace(/\s+/g, " ").trim();
+      if (!label) return;
+      item.dataset.sidebarTooltip = label;
+      item.setAttribute("title", label);
+      if (!item.getAttribute("aria-label")) item.setAttribute("aria-label", label);
+    });
 
     const open  = () => { sidebar.classList.add("open"); overlay.classList.add("active"); hamburger.setAttribute("aria-expanded", "true"); };
     const close = () => { sidebar.classList.remove("open"); overlay.classList.remove("active"); hamburger.setAttribute("aria-expanded", "false"); };
+    const setCollapsed = (collapsed) => {
+      document.body.classList.toggle("ad-sidebar-collapsed", collapsed);
+      closeBtn?.setAttribute("aria-label", collapsed ? "Open sidebar" : "Close sidebar");
+      closeBtn?.setAttribute("aria-expanded", collapsed ? "false" : "true");
+      hamburger?.setAttribute("aria-label", collapsed ? "Open sidebar" : "Close sidebar");
+      try { localStorage.setItem(collapsedKey, collapsed ? "1" : "0"); } catch {}
+    };
+    const toggleDesktopSidebar = () => setCollapsed(!document.body.classList.contains("ad-sidebar-collapsed"));
 
-    hamburger && hamburger.addEventListener("click", open);
-    closeBtn  && closeBtn.addEventListener("click", close);
+    try {
+      setCollapsed(desktopQuery.matches && localStorage.getItem(collapsedKey) === "1");
+    } catch {
+      setCollapsed(false);
+    }
+
+    hamburger && hamburger.addEventListener("click", () => {
+      if (desktopQuery.matches) toggleDesktopSidebar();
+      else open();
+    });
+    closeBtn  && closeBtn.addEventListener("click", () => {
+      if (desktopQuery.matches) toggleDesktopSidebar();
+      else close();
+    });
     overlay   && overlay.addEventListener("click", close);
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+    desktopQuery.addEventListener?.("change", (event) => {
+      if (!event.matches) {
+        document.body.classList.remove("ad-sidebar-collapsed");
+        close();
+      } else {
+        try { setCollapsed(localStorage.getItem(collapsedKey) === "1"); } catch {}
+      }
+    });
   }
 
   /* ================================================================
@@ -2480,6 +2513,22 @@
       e.preventDefault();
       saveBtn && saveBtn.click();
     });
+
+    document.querySelectorAll("[data-admin-schedule-view]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("[data-admin-schedule-view]").forEach((item) => item.classList.remove("active"));
+        btn.classList.add("active");
+        const container = $("adminScheduleContent");
+        if (container) container.dataset.view = btn.dataset.adminScheduleView || "list";
+        renderAdminSchedule();
+      });
+    });
+
+    const sortSelect = $("adminScheduleSort");
+    sortSelect?.addEventListener("change", () => {
+      adminScheduleSortOrder = sortSelect.value === "desc" ? "desc" : "asc";
+      renderAdminSchedule();
+    });
   }
 
   async function saveEvent() {
@@ -2532,60 +2581,218 @@
 
   async function loadEventsList() {
     const list  = $("adminEventsList");
-    const empty = $("eventsEmpty");
     if (!list) return;
 
     try {
       let evQuery = window.lmsSupabase
         .from("schedules")
-        .select("id, title, event_type, start_datetime, end_datetime, meeting_url, courses(title)")
-        .gte("start_datetime", new Date().toISOString())
+        .select("id, title, event_type, start_datetime, end_datetime, meeting_url, course_id, trainer_id, courses(title)")
         .order("start_datetime", { ascending: true })
-        .limit(10);
+        .limit(50);
       if (currentRole !== "admin") {
         evQuery = evQuery.eq("trainer_id", currentProfile.id);
       }
       const { data } = await evQuery;
+      adminScheduleCache = data || [];
+      renderAdminSchedule();
+      return;
+    } catch (err) { console.warn("Events load error:", err.message); }
+  }
 
-      if (!data || data.length === 0) { if (empty) empty.style.display = "flex"; return; }
-      if (empty) empty.style.display = "none";
+  function scheduleDateKey(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
 
-      list.querySelectorAll(".ad-event-row").forEach((el) => el.remove());
+  function formatScheduleMonthTitle(date) {
+    return date.toLocaleDateString("en-AU", { month: "long", year: "numeric" });
+  }
 
-      data.forEach((ev) => {
-        const { day, month } = formatDateShort(ev.start_datetime);
-        const typeColors = { live_session: "blue", exam: "red", webinar: "purple" };
-        const row = document.createElement("div");
-        row.className = "ad-event-row";
-        row.innerHTML = `
-          <div class="ad-event-row__date">
-            <p class="ad-event-row__day">${day}</p>
-            <p class="ad-event-row__month">${month}</p>
-          </div>
-          <div class="ad-event-row__body">
-            <p class="ad-event-row__title">${escHtml(ev.title)}</p>
-            <p class="ad-event-row__meta">${escHtml(ev.courses?.title || "All students")} · ${new Date(ev.start_datetime).toLocaleTimeString("en-AU",{hour:"2-digit",minute:"2-digit"})}</p>
-          </div>
-          <span class="ad-tag ad-tag--${typeColors[ev.event_type] || "gray"}">${ev.event_type.replace("_", " ")}</span>
-          ${toSafeUiUrl(ev.meeting_url) ? `<a href="${escHtml(toSafeUiUrl(ev.meeting_url))}" target="_blank" rel="noopener" class="ad-btn ad-btn--outline ad-btn--sm">Join</a>` : ""}
-          <button class="ad-icon-btn ad-icon-btn--danger" data-event-id="${ev.id}" aria-label="Delete event">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
-          </button>`;
+  function formatScheduleEventDateParts(iso) {
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return { day: "", monthYear: "", fullDate: "", time: "" };
+    return {
+      day: date.toLocaleDateString("en-AU", { day: "2-digit" }),
+      monthYear: date.toLocaleDateString("en-AU", { month: "short", year: "numeric" }),
+      fullDate: date.toLocaleDateString("en-AU", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      }),
+      time: date.toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit" })
+    };
+  }
 
-        row.querySelector(".ad-icon-btn--danger").addEventListener("click", () => {
-          showConfirmModal("Delete this event?", async () => {
-            await runSupabaseSilently(
-              window.lmsSupabase.from("schedules").delete().eq("id", ev.id),
-              "Delete schedule failed"
-            );
-            row.remove();
-          });
-          return;
+  function formatScheduleEventTimeRange(event) {
+    const start = formatScheduleEventDateParts(event.start_datetime);
+    if (!event.end_datetime) return `${start.fullDate}, ${start.time}`;
+    const end = new Date(event.end_datetime);
+    const startDate = new Date(event.start_datetime);
+    const endTime = end.toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit" });
+    if (scheduleDateKey(startDate) === scheduleDateKey(end)) {
+      return `${start.fullDate}, ${start.time} - ${endTime}`;
+    }
+    return `${start.fullDate}, ${start.time} - ${formatDT(event.end_datetime)}`;
+  }
+
+  function scheduleTypeLabel(type) {
+    return {
+      live_session: "Live session",
+      webinar: "Webinar",
+      exam: "Exam",
+      orientation: "Orientation",
+      other: "Other"
+    }[type] || "Deadline";
+  }
+
+  function scheduleTypeClass(type, base) {
+    return {
+      live_session: `${base}--live`,
+      webinar: `${base}--live`,
+      exam: `${base}--exam`,
+      orientation: `${base}--live`
+    }[type] || `${base}--deadline`;
+  }
+
+  function sortedAdminScheduleEvents() {
+    const direction = adminScheduleSortOrder === "desc" ? -1 : 1;
+    return [...adminScheduleCache].sort((a, b) =>
+      direction * (new Date(a.start_datetime || 0) - new Date(b.start_datetime || 0))
+    );
+  }
+
+  function renderAdminSchedule() {
+    const container = $("adminScheduleContent");
+    const list = $("adminEventsList");
+    const empty = $("eventsEmpty");
+    if (!list) return;
+
+    list.querySelectorAll("[data-admin-schedule-render='true']").forEach((el) => el.remove());
+
+    if (!adminScheduleCache.length) {
+      if (empty) empty.style.display = "flex";
+      return;
+    }
+
+    if (empty) empty.style.display = "none";
+
+    if ((container?.dataset.view || "list") === "calendar") {
+      const baseDate = adminScheduleCalendarCursor || new Date();
+      adminScheduleCalendarCursor = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+      const monthStart = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+      const monthEnd = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0);
+      const startWeekday = monthStart.getDay();
+      const totalCells = Math.ceil((startWeekday + monthEnd.getDate()) / 7) * 7;
+      const eventMap = new Map();
+
+      adminScheduleCache.forEach((event) => {
+        const key = scheduleDateKey(new Date(event.start_datetime));
+        if (!eventMap.has(key)) eventMap.set(key, []);
+        eventMap.get(key).push(event);
+      });
+
+      const toolbar = document.createElement("div");
+      toolbar.dataset.adminScheduleRender = "true";
+      toolbar.className = "ad-schedule-calendar__toolbar";
+      toolbar.innerHTML = `
+        <button class="ad-btn ad-btn--outline ad-btn--sm" type="button" data-admin-schedule-month="prev" aria-label="Previous month">&lt;</button>
+        <p class="ad-schedule-calendar__title">${escHtml(formatScheduleMonthTitle(monthStart))}</p>
+        <button class="ad-btn ad-btn--outline ad-btn--sm" type="button" data-admin-schedule-month="next" aria-label="Next month">&gt;</button>
+      `;
+      toolbar.querySelectorAll("[data-admin-schedule-month]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const direction = btn.dataset.adminScheduleMonth === "next" ? 1 : -1;
+          adminScheduleCalendarCursor = new Date(monthStart.getFullYear(), monthStart.getMonth() + direction, 1);
+          renderAdminSchedule();
+        });
+      });
+      list.insertBefore(toolbar, empty);
+
+      const calendar = document.createElement("div");
+      calendar.dataset.adminScheduleRender = "true";
+      calendar.className = "ad-schedule-calendar";
+
+      ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach((weekday, index) => {
+        const header = document.createElement("div");
+        header.className = `ad-schedule-calendar__weekday${index === 0 ? " is-sunday" : ""}`;
+        header.textContent = weekday;
+        calendar.appendChild(header);
+      });
+
+      for (let cellIndex = 0; cellIndex < totalCells; cellIndex++) {
+        const dayNumber = cellIndex - startWeekday + 1;
+        const cell = document.createElement("div");
+        cell.className = "ad-schedule-calendar__cell";
+
+        if (dayNumber < 1 || dayNumber > monthEnd.getDate()) {
+          cell.classList.add("is-muted");
+          calendar.appendChild(cell);
+          continue;
+        }
+
+        const date = new Date(baseDate.getFullYear(), baseDate.getMonth(), dayNumber);
+        const key = scheduleDateKey(date);
+        const dayEvents = eventMap.get(key) || [];
+        if (date.getDay() === 0) cell.classList.add("is-sunday");
+        const dateCaption = `${date.toLocaleDateString("en-AU", { weekday: "short" })}, ${date.toLocaleDateString("en-AU", { month: "short", year: "numeric" })}`;
+
+        cell.innerHTML = `
+          <div class="ad-schedule-calendar__date" aria-label="${escHtml(date.toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}">
+            <span>${dayNumber}</span>
+            <small>${escHtml(dateCaption)}</small>
+          </div>`;
+        dayEvents.forEach((event) => {
+          const item = document.createElement("div");
+          item.className = `ad-schedule-calendar__event ${scheduleTypeClass(event.event_type, "ad-schedule-calendar__event")}`;
+          item.innerHTML = `
+            <strong>${escHtml(event.title || "Event")}</strong>
+            <span>${escHtml(formatScheduleEventTimeRange(event))}</span>`;
+          cell.appendChild(item);
         });
 
-        list.insertBefore(row, empty);
+        calendar.appendChild(cell);
+      }
+
+      list.insertBefore(calendar, empty);
+      return;
+    }
+
+    sortedAdminScheduleEvents().forEach((ev) => {
+      const dateParts = formatScheduleEventDateParts(ev.start_datetime);
+      const row = document.createElement("div");
+      row.dataset.adminScheduleRender = "true";
+      row.className = `ad-event-row ad-schedule-event-card ${scheduleTypeClass(ev.event_type, "ad-schedule-event-card")}`;
+      row.innerHTML = `
+        <div class="ad-event-row__date ad-schedule-event-card__date">
+          <p class="ad-event-row__day ad-schedule-event-card__day">${escHtml(dateParts.day)}</p>
+          <p class="ad-event-row__month ad-schedule-event-card__month">${escHtml(dateParts.monthYear)}</p>
+        </div>
+        <div class="ad-event-row__body ad-schedule-event-card__info">
+          <p class="ad-event-row__title ad-schedule-event-card__title">${escHtml(ev.title || "Event")}</p>
+          <p class="ad-event-row__meta ad-schedule-event-card__meta">${escHtml(ev.courses?.title || "All students")} - ${escHtml(scheduleTypeLabel(ev.event_type))} - ${escHtml(formatScheduleEventTimeRange(ev))}</p>
+        </div>
+        ${toSafeUiUrl(ev.meeting_url) ? `<a href="${escHtml(toSafeUiUrl(ev.meeting_url))}" target="_blank" rel="noopener" class="ad-btn ad-btn--outline ad-btn--sm">Join</a>` : ""}
+        <button class="ad-icon-btn ad-icon-btn--danger" data-event-id="${escHtml(ev.id)}" aria-label="Delete event">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+        </button>`;
+
+      row.querySelector(".ad-icon-btn--danger").addEventListener("click", () => {
+        showConfirmModal("Delete this event?", async () => {
+          await runSupabaseSilently(
+            window.lmsSupabase.from("schedules").delete().eq("id", ev.id),
+            "Delete schedule failed"
+          );
+          adminScheduleCache = adminScheduleCache.filter((event) => event.id !== ev.id);
+          renderAdminSchedule();
+        });
       });
-    } catch (err) { console.warn("Events load error:", err.message); }
+
+      list.insertBefore(row, empty);
+    });
   }
 
   /* ================================================================

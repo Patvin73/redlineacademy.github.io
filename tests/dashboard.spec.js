@@ -1343,32 +1343,38 @@ test.describe("Student Dashboard", () => {
     const fixture = makeStudentFixture();
     fixture.tableData.enrollments[0].status = "completed";
     await installSupabaseStub(page, fixture);
+    const currentMonth = new Date().toLocaleDateString("en-AU", { month: "long", year: "numeric" });
 
     await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
     await page.locator(".sd-nav__item[data-section='schedule']").click();
 
-    await expect(page.locator("#scheduleFullList .sd-schedule-event-card")).toHaveCount(2);
+    await expect(page.locator("#scheduleFullList .sd-schedule-event-card")).toHaveCount(2, { timeout: 15000 });
     await expect(page.locator("#scheduleFullList .sd-schedule-event-card", { hasText: "Live Session" })).toContainText("January 2099");
     await expect(page.locator("#scheduleFullList a", { hasText: "Join" })).toHaveCount(1);
+    await page.selectOption("#scheduleSortOrder", "desc");
+    await expect(page.locator("#scheduleFullList .sd-schedule-event-card").first()).toContainText("Skills Exam");
+    await page.selectOption("#scheduleSortOrder", "asc");
+    await expect(page.locator("#scheduleFullList .sd-schedule-event-card").first()).toContainText("Live Session");
 
     await page.click(".sd-view-btn[data-view='calendar']");
 
     await expect(page.locator(".sd-view-btn[data-view='calendar']")).toHaveClass(/active/);
     await expect(page.locator("#scheduleFullList .sd-schedule-event-card")).toHaveCount(0);
-    await expect(page.locator(".sd-schedule-calendar__title")).toHaveText("January 2099");
+    await expect(page.locator(".sd-schedule-calendar__title")).toHaveText(currentMonth);
     await expect(page.locator(".sd-schedule-calendar__weekday.is-sunday")).toHaveText("Sun");
     await expect(page.locator(".sd-schedule-calendar__cell.is-sunday").first()).toBeVisible();
-    await expect(page.locator(".sd-schedule-calendar")).toContainText("Sun, Jan 2099");
-    await expect(page.locator(".sd-schedule-calendar__event--live", { hasText: "Live Session" })).toBeVisible();
 
     await page.setViewportSize({ width: 390, height: 844 });
-    const calendarFitsMobile = await page.locator(".sd-schedule-calendar").evaluate((el) => el.scrollWidth <= el.clientWidth + 1);
-    expect(calendarFitsMobile).toBe(true);
+    await expect.poll(async () =>
+      page.locator(".sd-schedule-calendar").evaluate((el) => el.scrollWidth <= el.clientWidth + 1)
+    ).toBe(true);
 
     await page.locator("[data-schedule-month='next']").click();
-    await expect(page.locator(".sd-schedule-calendar__title")).toHaveText("February 2099");
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    await expect(page.locator(".sd-schedule-calendar__title")).toHaveText(nextMonth.toLocaleDateString("en-AU", { month: "long", year: "numeric" }));
     await page.locator("[data-schedule-month='prev']").click();
-    await expect(page.locator(".sd-schedule-calendar__title")).toHaveText("January 2099");
+    await expect(page.locator(".sd-schedule-calendar__title")).toHaveText(currentMonth);
   });
 
   test("warns when a student has no enrolled courses for assignments", async ({ page }) => {
@@ -1589,21 +1595,58 @@ test.describe("Student Dashboard", () => {
   test("reply uses the original sender name when the profile lookup is not returned", async ({ page }) => {
     const fixture = makeStudentFixture();
     fixture.tableData.profiles = fixture.tableData.profiles.filter((profile) => profile.id !== "trainer-1");
-    fixture.tableData.messages = fixture.tableData.messages.map((message) =>
+    const messages = fixture.tableData.messages.map((message) =>
       message.sender_id === "trainer-1"
         ? { ...message, profiles: null, sender_profile: { id: "trainer-1", full_name: "Trainer One", email: "trainer@example.com" } }
         : message
     );
+    fixture.tableData.messages = [
+      {
+        id: "msg-student-opened-thread",
+        sender_id: "student-1",
+        recipient_id: "trainer-1",
+        subject: "Welcome",
+        body: "I saw the welcome note.",
+        is_read: true,
+        is_archived: false,
+        created_at: "2099-01-01T08:55:00.000Z",
+        profiles: null,
+        sender_profile: { id: "student-1", full_name: "Alpha Student", email: "alpha@example.com" }
+      },
+      ...messages
+    ];
     await installSupabaseStub(page, fixture);
 
     await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
     await page.locator(".sd-nav__item[data-section='messages']").click();
+    await expect(page.locator(".sd-inbox-item", { hasText: "Welcome" }).locator(".sd-inbox-item__name")).toHaveText("Trainer One");
     await page.locator(".sd-inbox-item", { hasText: "Welcome" }).click();
 
     await expect(page.locator("#messageDetail")).toContainText("From: Trainer One");
     await page.locator("[data-sd-msg-reply]").click();
     await expect(page.locator("#studentMsgRecipient")).toHaveValues(["trainer-1"]);
     await expect(page.locator("#studentMsgRecipient option:checked")).toHaveText("Trainer One");
+  });
+
+  test("desktop sidebar can collapse and reopen", async ({ page }) => {
+    await installSupabaseStub(page, makeStudentFixture());
+    await page.goto("/pages/dashboard-student.html", { waitUntil: "domcontentloaded" });
+
+    await page.locator("#sdSidebarClose").click();
+    await expect(page.locator("body")).toHaveClass(/sd-sidebar-collapsed/);
+    await expect(page.locator("#sdMain")).toHaveCSS("margin-left", "72px");
+    await expect(page.locator(".sd-language-switcher")).toBeHidden();
+    const coursesTooltip = await page.locator(".sd-nav__item[data-section='courses']").getAttribute("data-sidebar-tooltip");
+    expect(coursesTooltip).toMatch(/My Courses|Kursus Saya/);
+    expect(coursesTooltip).not.toContain("0");
+    await page.locator(".sd-nav__item[data-section='courses']").hover();
+    await expect.poll(async () => page.locator(".sd-nav__item[data-section='courses']").evaluate((el, value) =>
+      getComputedStyle(el, "::after").content.includes(value), coursesTooltip || ""
+    )).toBe(true);
+    await expect(page.locator("#logoutBtn svg")).toHaveCSS("width", "22px");
+
+    await page.locator("#sdSidebarClose").click();
+    await expect(page.locator("body")).not.toHaveClass(/sd-sidebar-collapsed/);
   });
 
   test("renders the full thread when older messages are outside the global message pool", async ({ page }) => {

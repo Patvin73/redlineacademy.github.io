@@ -49,3 +49,36 @@
 [0612/000957.632:WARNING:net\spdy\spdy_session.cc:3071] Received HEADERS for invalid stream 7
 [0612/001018.768:WARNING:net\spdy\spdy_session.cc:3071] Received HEADERS for invalid stream 5
 [0612/001019.393:WARNING:net\spdy\spdy_session.cc:3071] Received HEADERS for invalid stream 7
+[0617/154815.431:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/154815.431:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/155141.525:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/155229.861:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/155248.937:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/155524.369:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/155852.897:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/161146.068:WARNING:net\spdy\spdy_session.cc:3071] Received HEADERS for invalid stream 5
+[0617/161507.102:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/161609.496:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/162037.010:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/162208.431:WARNING:net\spdy\spdy_session.cc:3071] Received HEADERS for invalid stream 1
+[0617/162208.486:WARNING:net\spdy\spdy_session.cc:3071] Received HEADERS for invalid stream 1
+[0617/162208.577:WARNING:net\spdy\spdy_session.cc:3071] Received HEADERS for invalid stream 3
+[0617/162218.730:WARNING:net\spdy\spdy_session.cc:3071] Received HEADERS for invalid stream 1
+[0617/162518.975:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/162632.377:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/163120.253:WARNING:net\spdy\spdy_session.cc:3071] Received HEADERS for invalid stream 3
+[0617/163120.379:WARNING:net\spdy\spdy_session.cc:3071] Received HEADERS for invalid stream 5
+[0617/163120.577:WARNING:net\spdy\spdy_session.cc:3071] Received HEADERS for invalid stream 7
+[0617/163120.577:WARNING:net\spdy\spdy_session.cc:3071] Received HEADERS for invalid stream 9
+[0617/163133.078:WARNING:net\spdy\spdy_session.cc:3071] Received HEADERS for invalid stream 1
+[0617/163133.162:WARNING:net\spdy\spdy_session.cc:3071] Received HEADERS for invalid stream 3
+[0617/163137.636:WARNING:net\spdy\spdy_session.cc:3071] Received HEADERS for invalid stream 7
+[0617/164724.419:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/165014.900:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/165119.053:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/165311.945:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/165700.300:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/170348.406:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/170348.898:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/170447.056:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[0617/170533.698:ERROR:gpu\ipc\client\command_buffer_proxy_impl.cc:287] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.

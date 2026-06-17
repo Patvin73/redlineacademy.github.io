@@ -66,8 +66,9 @@
             stroke="currentColor"
             stroke-width="2.2"
           >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
+            <rect x="4" y="4" width="16" height="16" rx="2.5" />
+            <path d="M9 4v16" />
+            <path d="M15 9l-3 3 3 3" />
           </svg>
         </button>
       </div>
@@ -1336,24 +1337,18 @@
              SECTION: GRADING
         ══════════════════════════════ -->
         <section class="ad-section" id="section-grading">
-          <div class="ad-grading-hero">
+          <div class="ad-section__header">
             <div>
-              <div class="ad-section__header">
-                <div>
-                  <h2>Assessment Workspace</h2>
-                  <p>Manage created assignments, review learner submissions, and provide grading feedback. Use Created Assignments to manage tasks; use Review Workspace to assess submitted evidence.</p>
-                </div>
-              </div>
+              <h2>Assessment Workspace</h2>
+              <p>Manage created assignments, review learner submissions, and provide grading feedback. Use Created Assignments to manage tasks; use Review Workspace to assess submitted evidence.</p>
             </div>
-            <div class="ad-grading-toolbar">
-              <button
-                class="ad-btn ad-btn--primary ad-toolbar-main-btn"
-                id="createAssignmentBtn"
-                data-i18n="adCreateAssignment"
-              >
-                + Buat Tugas
-              </button>
-            </div>
+            <button
+              class="ad-btn ad-btn--primary ad-toolbar-main-btn"
+              id="createAssignmentBtn"
+              data-i18n="adCreateAssignment"
+            >
+              + Buat Tugas
+            </button>
           </div>
 
           <div class="ad-card" id="assignmentFormCard" hidden>
@@ -1758,12 +1753,23 @@
             </div>
           </div>
 
-          <!-- Upcoming Events List -->
-          <div class="ad-card ad-card--no-pad">
-            <div class="ad-card__header ad-card__header--padded">
-              <h2 class="ad-card__title" data-i18n="adUpcomingEvents">
-                Upcoming Events
-              </h2>
+          <div class="ad-schedule-full" id="adminScheduleContent">
+            <div class="ad-schedule-controls">
+              <div class="ad-view-toggle" role="group" aria-label="Calendar view">
+                <button class="ad-view-btn active" type="button" data-admin-schedule-view="list" data-i18n="lmsViewList">
+                  List
+                </button>
+                <button class="ad-view-btn" type="button" data-admin-schedule-view="calendar" data-i18n="lmsViewCalendar">
+                  Calendar
+                </button>
+              </div>
+              <label class="ad-schedule-sort" for="adminScheduleSort">
+                <span>Urutkan</span>
+                <select class="ad-input ad-select" id="adminScheduleSort">
+                  <option value="asc">Terlama ke Terbaru</option>
+                  <option value="desc">Terbaru ke Terlama</option>
+                </select>
+              </label>
             </div>
             <div class="ad-events-list" id="adminEventsList">
               <div class="ad-empty-state" id="eventsEmpty">

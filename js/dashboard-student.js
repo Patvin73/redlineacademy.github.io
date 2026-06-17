@@ -26,6 +26,7 @@
   let studentMessageChannelUserId = null;
   let studentUnreadSections = { courses: 0, assignments: 0, schedule: 0 };
   let scheduleCalendarCursor = null;
+  let scheduleSortOrder = "asc";
   const COURSE_MATERIAL_BUCKET = "course-materials";
   const ASSIGNMENT_SUBMISSIONS_BUCKET = "assignment-submissions";
   const Competency = window.RedlineCompetency || {};
@@ -364,6 +365,17 @@
     const overlay  = $("sdOverlay");
     const hamburger = $("sdHamburger");
     const closeBtn  = $("sdSidebarClose");
+    const desktopQuery = window.matchMedia("(min-width: 769px)");
+    const collapsedKey = "redline-student-sidebar-collapsed";
+
+    document.querySelectorAll(".sd-nav__item[data-section], .sd-logout-btn").forEach((item) => {
+      const labelSource = item.querySelector("span[data-i18n]") || item;
+      const label = (labelSource.textContent || "").replace(/\s+/g, " ").trim();
+      if (!label) return;
+      item.dataset.sidebarTooltip = label;
+      item.setAttribute("title", label);
+      if (!item.getAttribute("aria-label")) item.setAttribute("aria-label", label);
+    });
 
     function openSidebar() {
       sidebar.classList.add("open");
@@ -377,14 +389,47 @@
       hamburger.setAttribute("aria-expanded", "false");
     }
 
-    hamburger && hamburger.addEventListener("click", openSidebar);
-    closeBtn  && closeBtn.addEventListener("click", closeSidebar);
+    function setCollapsed(collapsed) {
+      document.body.classList.toggle("sd-sidebar-collapsed", collapsed);
+      closeBtn?.setAttribute("aria-label", collapsed ? "Open sidebar" : "Close sidebar");
+      closeBtn?.setAttribute("aria-expanded", collapsed ? "false" : "true");
+      hamburger?.setAttribute("aria-label", collapsed ? "Open sidebar" : "Close sidebar");
+      try { localStorage.setItem(collapsedKey, collapsed ? "1" : "0"); } catch {}
+    }
+
+    function toggleDesktopSidebar() {
+      setCollapsed(!document.body.classList.contains("sd-sidebar-collapsed"));
+    }
+
+    try {
+      setCollapsed(desktopQuery.matches && localStorage.getItem(collapsedKey) === "1");
+    } catch {
+      setCollapsed(false);
+    }
+
+    hamburger && hamburger.addEventListener("click", () => {
+      if (desktopQuery.matches) toggleDesktopSidebar();
+      else openSidebar();
+    });
+    closeBtn  && closeBtn.addEventListener("click", () => {
+      if (desktopQuery.matches) toggleDesktopSidebar();
+      else closeSidebar();
+    });
     overlay   && overlay.addEventListener("click", closeSidebar);
 
     // Close on ESC
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && sidebar.classList.contains("open")) {
         closeSidebar();
+      }
+    });
+
+    desktopQuery.addEventListener?.("change", (event) => {
+      if (!event.matches) {
+        document.body.classList.remove("sd-sidebar-collapsed");
+        closeSidebar();
+      } else {
+        try { setCollapsed(localStorage.getItem(collapsedKey) === "1"); } catch {}
       }
     });
   }
@@ -542,6 +587,12 @@
           renderFullSchedule();
         });
       });
+    });
+
+    const sortSelect = $("scheduleSortOrder");
+    sortSelect?.addEventListener("change", () => {
+      scheduleSortOrder = sortSelect.value === "desc" ? "desc" : "asc";
+      renderFullSchedule();
     });
   }
 
@@ -2200,6 +2251,13 @@
     }[type] || "Deadline";
   }
 
+  function sortedFullScheduleEvents() {
+    const direction = scheduleSortOrder === "desc" ? -1 : 1;
+    return [...fullScheduleCache].sort((a, b) =>
+      direction * (new Date(a.start_datetime || 0) - new Date(b.start_datetime || 0))
+    );
+  }
+
   function renderFullSchedule() {
     const container = $("scheduleFullContent");
     const list = $("scheduleFullList");
@@ -2216,8 +2274,7 @@
     if (empty) empty.style.display = "none";
 
     if ((container?.dataset.view || "list") === "calendar") {
-      const fallbackDate = new Date(fullScheduleCache[0]?.start_datetime || Date.now());
-      const baseDate = scheduleCalendarCursor || fallbackDate;
+      const baseDate = scheduleCalendarCursor || new Date();
       scheduleCalendarCursor = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
       const monthStart = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
       const monthEnd = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0);
@@ -2305,7 +2362,7 @@
       return;
     }
 
-    fullScheduleCache.forEach((event) => {
+    sortedFullScheduleEvents().forEach((event) => {
       const typeClass = {
         live_session: "sd-schedule-event-card--live",
         exam: "sd-schedule-event-card--exam",
@@ -2582,7 +2639,8 @@
       group.messages.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
       group.key = `${group.type}:${group.messages.map((msg) => msg.id).sort().join(",")}`;
       group.isUnread = group.messages.some((msg) => !msg.is_read && msg.recipient_id === currentStudentProfile.id);
-      group.sender = profileMap.get(group.sender_id) || group.messages[0]?.sender_profile || group.messages[0]?.profiles || {};
+      const senderMessage = group.messages.find((msg) => msg.sender_id === group.sender_id);
+      group.sender = profileMap.get(group.sender_id) || senderMessage?.sender_profile || senderMessage?.profiles || {};
       return group;
     });
   }
@@ -3047,7 +3105,8 @@
             }
           }
           const msg = group.messages[group.messages.length - 1];
-          const sender = profileMap.get(group.sender_id) || msg.sender_profile || msg.profiles || {};
+          const senderMessage = group.messages.find((item) => item.sender_id === group.sender_id);
+          const sender = profileMap.get(group.sender_id) || group.sender || senderMessage?.sender_profile || senderMessage?.profiles || {};
           const senderLabel = profileLabel(sender);
           const threadHTML = await renderThreadFor(msg, senderLabel);
           detail.innerHTML = `

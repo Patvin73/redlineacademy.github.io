@@ -2147,6 +2147,7 @@ test("admin opens course contents from the course row", async ({ page }) => {
 
 test("admin sees all upcoming events and trainer sees only owned events", async ({ page }) => {
   await installSupabaseStub(page, "admin");
+  const currentMonth = new Date().toLocaleDateString("en-AU", { month: "long", year: "numeric" });
   await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#sidebarName")).toHaveText("E2E Admin");
 
@@ -2154,10 +2155,21 @@ test("admin sees all upcoming events and trainer sees only owned events", async 
   await expect(page.locator("#section-schedule")).toHaveClass(/active/);
   await expect(page.locator("#adminEventsList")).toContainText("Trainer Live Session");
   await expect(page.locator("#adminEventsList")).toContainText("Admin Exam");
+  await page.selectOption("#adminScheduleSort", "desc");
+  await expect(page.locator("#adminEventsList .ad-schedule-event-card").first()).toContainText("Admin Exam");
+  await page.selectOption("#adminScheduleSort", "asc");
+  await expect(page.locator("#adminEventsList .ad-schedule-event-card").first()).toContainText("Trainer Live Session");
+  await page.locator("[data-admin-schedule-view='calendar']").click();
+  await expect(page.locator("[data-admin-schedule-view='calendar']")).toHaveClass(/active/);
+  await expect(page.locator(".ad-schedule-calendar__title")).toHaveText(currentMonth);
+  await expect(page.locator(".ad-schedule-calendar")).toContainText("Trainer Live Session");
+  await expect(page.locator(".ad-schedule-calendar")).toContainText("Admin Exam");
   await page.setViewportSize({ width: 390, height: 844 });
-  const eventListFitsMobile = await page.locator("#adminEventsList").evaluate((el) => el.scrollWidth <= el.clientWidth + 1);
-  expect(eventListFitsMobile).toBe(true);
+  await expect.poll(async () =>
+    page.locator(".ad-schedule-calendar").evaluate((el) => el.scrollWidth <= el.clientWidth + 1)
+  ).toBe(true);
   await page.setViewportSize({ width: 1280, height: 720 });
+  await page.locator("[data-admin-schedule-view='list']").click();
 
   await installSupabaseStub(page, "trainer");
   await page.reload({ waitUntil: "domcontentloaded" });
@@ -2166,6 +2178,27 @@ test("admin sees all upcoming events and trainer sees only owned events", async 
   await expect(page.locator("#section-schedule")).toHaveClass(/active/);
   await expect(page.locator("#adminEventsList")).toContainText("Trainer Live Session");
   await expect(page.locator("#adminEventsList")).not.toContainText("Admin Exam");
+});
+
+test("admin desktop sidebar can collapse and reopen", async ({ page }) => {
+  await installSupabaseStub(page, "admin");
+  await page.goto("/pages/dashboard-admin.html", { waitUntil: "domcontentloaded" });
+
+  await page.locator("#adSidebarClose").click();
+  await expect(page.locator("body")).toHaveClass(/ad-sidebar-collapsed/);
+  await expect(page.locator("#adMain")).toHaveCSS("margin-left", "72px");
+  await expect(page.locator(".ad-language-switcher")).toBeHidden();
+  const scheduleTooltip = await page.locator(".ad-nav__item[data-section='schedule']").getAttribute("data-sidebar-tooltip");
+  expect(scheduleTooltip).toMatch(/Schedule|Jadwal/);
+  expect(scheduleTooltip).not.toContain("0");
+  await page.locator(".ad-nav__item[data-section='schedule']").hover();
+  await expect.poll(async () => page.locator(".ad-nav__item[data-section='schedule']").evaluate((el) =>
+    getComputedStyle(el, "::after").content.includes(el.getAttribute("data-sidebar-tooltip") || "")
+  )).toBe(true);
+  await expect(page.locator("#logoutBtn svg")).toHaveCSS("width", "22px");
+
+  await page.locator("#adSidebarClose").click();
+  await expect(page.locator("body")).not.toHaveClass(/ad-sidebar-collapsed/);
 });
 
 test("admin sees all announcements regardless of author", async ({ page }) => {
