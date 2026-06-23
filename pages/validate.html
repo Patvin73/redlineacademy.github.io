@@ -11,7 +11,10 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --red:#E5001A;--red-dark:#b5001a;--red-pale:#fff0f2;--red-light:#ffd6da;
+  --red:#d7001e;--red-dark:#a50017;--red-pale:#fff0f2;--red-light:#ffd6da;
+  --red-gradient:linear-gradient(135deg,#d7001e 0%,#a50017 100%);
+  --red-gradient-hover:linear-gradient(135deg,#f0001f 0%,#c2001a 100%);
+  --dark-900:#050505;
   --bg:#f0f2f5;--white:#ffffff;--border:#e4e7ec;--border-md:#d0d5dd;
   --t1:#101828;--t2:#344054;--t3:#667085;--t4:#98a2b3;
   --shadow-sm:0 1px 3px rgba(16,24,40,.08);
@@ -24,35 +27,35 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
 
 /* ── HEADER ── */
 .site-header{
-  background:var(--white);border-bottom:1px solid var(--border);
+  background:var(--dark-900);border-bottom:3px solid var(--red);
   height:60px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 32px;box-shadow:var(--shadow-sm);position:sticky;top:0;z-index:100;
+  padding:0 32px;box-shadow:0 2px 20px rgba(0,0,0,.35);position:sticky;top:0;z-index:100;
 }
 .logo{display:flex;align-items:center;gap:10px}
-.logo-mark{width:34px;height:34px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:15px;color:#fff;flex-shrink:0}
-.logo-name{font-family:var(--fh);font-weight:700;font-size:15px;color:var(--t1)}
-.logo-tagline{font-size:11px;color:var(--t3)}
-.btn-logout{padding:6px 14px;background:transparent;border:1.5px solid var(--border-md);border-radius:7px;font-family:var(--fb);font-size:13px;font-weight:600;color:var(--t2);cursor:pointer;transition:.2s;display:flex;align-items:center;gap:5px}
-.btn-logout:hover{border-color:var(--red);color:var(--red);background:var(--red-pale)}
+.logo-mark{height:40px;width:auto;display:block;flex-shrink:0}
+.logo-name{font-family:var(--fh);font-weight:700;font-size:15px;color:#fff}
+.logo-tagline{font-size:11px;color:rgba(255,255,255,.58)}
+.btn-logout{padding:6px 14px;background:transparent;border:1.5px solid rgba(255,255,255,.24);border-radius:7px;font-family:var(--fb);font-size:13px;font-weight:600;color:rgba(255,255,255,.78);cursor:pointer;transition:.2s;display:flex;align-items:center;gap:5px}
+.btn-logout:hover{border-color:var(--red);color:#fff;background:rgba(215,0,30,.16)}
 
 /* ── LOGIN ── */
 #loginPage{min-height:100vh;display:none;flex-direction:column}
 #loginPage.active{display:flex}
-.login-body{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 20px;background:linear-gradient(135deg,#f0f2f5 0%,#fef2f3 60%,#f0f2f5 100%)}
-.login-card{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:42px 38px;width:100%;max-width:420px;box-shadow:var(--shadow-lg)}
+.login-body{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 20px;background:linear-gradient(rgba(5,5,5,.58),rgba(5,5,5,.58)),url('../assets/images/Caregiver-Certificate.jpg') center/cover no-repeat}
+.login-card{background:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.68);border-radius:18px;padding:42px 38px;width:100%;max-width:420px;box-shadow:var(--shadow-lg);backdrop-filter:blur(10px)}
 .login-eyebrow{display:inline-flex;align-items:center;gap:6px;background:var(--red-pale);color:var(--red);font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;border:1px solid var(--red-light);letter-spacing:.5px;text-transform:uppercase;margin-bottom:14px}
 .login-title{font-family:var(--fh);font-size:26px;font-weight:800;color:var(--t1);line-height:1.2;margin-bottom:6px}
 .login-title span{color:var(--red)}
 .login-desc{font-size:13.5px;color:var(--t3);line-height:1.6;margin-bottom:28px}
 .form-label{display:block;font-size:12.5px;font-weight:700;color:var(--t2);margin-bottom:5px}
 .form-input{width:100%;padding:11px 13px;border:1.5px solid var(--border-md);border-radius:9px;font-family:var(--fb);font-size:14px;color:var(--t1);background:var(--white);outline:none;transition:.2s;letter-spacing:.4px}
-.form-input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(229,0,26,.08)}
+.form-input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(215,0,30,.08)}
 .form-input::placeholder{color:var(--t4)}
 .form-hint{font-size:11.5px;color:var(--t4);margin-top:5px}
-.btn-login{width:100%;margin-top:22px;padding:13px;background:var(--red);color:#fff;font-family:var(--fh);font-size:15px;font-weight:700;border:none;border-radius:9px;cursor:pointer;transition:.2s;box-shadow:0 3px 10px rgba(229,0,26,.28);display:flex;align-items:center;justify-content:center;gap:7px}
-.btn-login:hover{background:var(--red-dark);box-shadow:0 5px 14px rgba(229,0,26,.38)}
+.btn-login{width:100%;margin-top:22px;padding:13px;background:var(--red-gradient);color:#fff;font-family:var(--fh);font-size:15px;font-weight:700;border:none;border-radius:9px;cursor:pointer;transition:.2s;box-shadow:0 3px 10px rgba(215,0,30,.28);display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-login:hover{background:var(--red-gradient-hover);transform:translateY(-1px);box-shadow:0 5px 14px rgba(215,0,30,.38)}
 .error-msg{display:none;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;font-size:13px;padding:10px 13px;border-radius:8px;margin-top:11px}
-.login-footer{text-align:center;padding:20px;font-size:11.5px;color:var(--t4);background:var(--white);border-top:1px solid var(--border)}
+.login-footer{text-align:center;padding:20px;font-size:11.5px;color:rgba(255,255,255,.45);background:var(--dark-900);border-top:1px solid rgba(255,255,255,.07)}
 
 /* ── DIVIDER ── */
 .or-divider{display:flex;align-items:center;gap:10px;margin:18px 0;color:var(--t4);font-size:12px;font-weight:600}
@@ -122,10 +125,10 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
 /* laser sweep */
 .scan-laser{
   position:absolute;left:12px;right:12px;height:2px;
-  background:linear-gradient(90deg,transparent 0%,var(--red) 30%,#ff3350 50%,var(--red) 70%,transparent 100%);
+  background:linear-gradient(90deg,transparent 0%,var(--red) 30%,#f0001f 50%,var(--red) 70%,transparent 100%);
   border-radius:2px;top:50%;
   animation:laserSweep 2s ease-in-out infinite;
-  box-shadow:0 0 8px rgba(229,0,26,.7);
+  box-shadow:0 0 8px rgba(215,0,30,.7);
   z-index:11;
 }
 @keyframes laserSweep{
@@ -170,7 +173,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
 
 /* participant header in left panel */
 .participant-header{padding:22px 20px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border)}
-.avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--red),#ff4d63);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:19px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 3px 10px rgba(229,0,26,.22)}
+.avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--red),#f0001f);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:19px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 3px 10px rgba(215,0,30,.22)}
 .participant-name{font-family:var(--fh);font-size:15px;font-weight:800;color:var(--t1);line-height:1.25}
 .participant-pos{font-size:11.5px;color:var(--t3);margin-top:2px;line-height:1.4}
 
@@ -191,8 +194,8 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
 .panel-heading{font-family:var(--fh);font-size:16px;font-weight:800;color:var(--t1)}
 .panel-sub{font-size:12px;color:var(--t3);margin-top:2px}
 
-.btn-download{display:flex;align-items:center;gap:7px;padding:10px 18px;background:var(--red);color:#fff;font-family:var(--fh);font-size:13px;font-weight:700;border:none;border-radius:9px;cursor:pointer;transition:.2s;box-shadow:0 2px 8px rgba(229,0,26,.25)}
-.btn-download:hover{background:var(--red-dark);box-shadow:0 4px 14px rgba(229,0,26,.36)}
+.btn-download{display:flex;align-items:center;gap:7px;padding:10px 18px;background:var(--red-gradient);color:#fff;font-family:var(--fh);font-size:13px;font-weight:700;border:none;border-radius:9px;cursor:pointer;transition:.2s;box-shadow:0 2px 8px rgba(215,0,30,.25)}
+.btn-download:hover{background:var(--red-gradient-hover);transform:translateY(-1px);box-shadow:0 4px 14px rgba(215,0,30,.36)}
 .btn-download:active{transform:scale(.98)}
 
 /* ── CERTIFICATE ── */
@@ -213,14 +216,14 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
 /* outer border frame */
 .cert-frame{
   position:absolute;inset:12px;
-  border:2.5px solid #E5001A;
+  border:2.5px solid var(--red);
   border-radius:6px;
   pointer-events:none;
   z-index:2;
 }
 .cert-frame-inner{
   position:absolute;inset:16px;
-  border:1px solid rgba(229,0,26,.25);
+  border:1px solid rgba(215,0,30,.25);
   border-radius:4px;
   pointer-events:none;
   z-index:2;
@@ -238,14 +241,14 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
 .cert-watermark{
   position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   font-family:var(--fh);font-size:130px;font-weight:800;
-  color:rgba(229,0,26,.04);letter-spacing:-4px;
+  color:rgba(215,0,30,.04);letter-spacing:-4px;
   user-select:none;pointer-events:none;z-index:1;white-space:nowrap;
 }
 
 /* top red bar */
 .cert-topbar{
   height:8px;
-  background:linear-gradient(90deg,#E5001A 0%,#ff3350 50%,#E5001A 100%);
+  background:linear-gradient(90deg,var(--red) 0%,#f0001f 50%,var(--red) 100%);
   flex-shrink:0;
 }
 
@@ -259,7 +262,8 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
 
 /* institution */
 .cert-inst{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.cert-logo-box{width:44px;height:44px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:18px;color:#fff;flex-shrink:0;box-shadow:0 3px 10px rgba(229,0,26,.3)}
+.cert-logo-box{width:44px;height:44px;background:var(--dark-900);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 10px rgba(5,5,5,.2);overflow:hidden;padding:5px}
+.cert-logo-box img{display:block;width:100%;height:100%;object-fit:contain}
 .cert-inst-name{font-family:var(--fh);font-size:17px;font-weight:800;color:var(--red);text-align:left;line-height:1.1}
 .cert-inst-sub{font-size:10px;color:var(--t3);text-align:left;font-weight:600}
 
@@ -293,7 +297,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
 .cert-info-row{
   display:flex;align-items:flex-end;justify-content:space-between;
   width:100%;padding-top:14px;
-  border-top:1px solid rgba(229,0,26,.18);
+  border-top:1px solid rgba(215,0,30,.18);
   margin-top:auto;
 }
 
@@ -309,7 +313,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
   font-family:var(--fh);font-weight:800;flex-shrink:0;
   background:var(--red-pale);
 }
-.cert-seal-rl{font-size:16px;color:var(--red);font-weight:800}
+.cert-seal-logo{display:block;width:24px;height:auto;margin:0 auto}
 .cert-seal-sub{font-size:6.5px;color:var(--red);letter-spacing:.5px;text-transform:uppercase;text-align:center;line-height:1.2;margin-top:1px}
 
 .cert-sign{text-align:right}
@@ -318,7 +322,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
 .cert-sign-role{font-size:8.5px;color:var(--t3)}
 
 /* bottom red bar */
-.cert-bottombar{height:5px;background:linear-gradient(90deg,#E5001A 0%,#ff3350 50%,#E5001A 100%);flex-shrink:0}
+.cert-bottombar{height:5px;background:linear-gradient(90deg,var(--red) 0%,#f0001f 50%,var(--red) 100%);flex-shrink:0}
 
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
@@ -332,7 +336,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
 <!-- HEADER (shared) -->
 <header class="site-header">
   <div class="logo">
-    <div class="logo-mark">RL</div>
+    <img class="logo-mark" src="../assets/images/redlinewlogo.png" alt="Redline Academy Logo">
     <div>
       <div class="logo-name">Redline Academy</div>
       <div class="logo-tagline">Alumni Access Portal</div>
@@ -347,13 +351,12 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
     <div class="login-card">
       <div class="login-eyebrow">🎓 Alumni Access</div>
       <h1 class="login-title">Portal <span>Peserta</span><br>Redline Academy</h1>
-      <p class="login-desc">Masukkan Candidate ID Anda yang tertera pada kartu akses atau QR Code yang diberikan oleh trainer.</p>
+      <p class="login-desc">Masukkan Candidate ID Anda yang tertera pada kartu akses atau QR Code.</p>
 
       <label class="form-label" for="candidateInput">Candidate ID</label>
       <input class="form-input" id="candidateInput" type="text"
         placeholder="RA-MLG-B1-2026-XXXXXXXX"
         autocomplete="off" autocapitalize="characters" spellcheck="false">
-      <p class="form-hint">Contoh: RA-MLG-B1-2026-X7K9M2QP</p>
 
       <div class="error-msg" id="errorMsg">⚠️ Candidate ID tidak ditemukan. Periksa kembali kartu akses Anda.</div>
 
@@ -372,7 +375,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
       </button>
     </div>
   </div>
-  <div class="login-footer">© 2026 Redline Academy · Pelatihan Penguji Kompetensi SDM Aparatur Bidang Pariwisata</div>
+  <div class="login-footer">© 2026 Redline Academy · Mahir Lastana Gantari</div>
 </div>
 
 <!-- ══════════ SCANNER MODAL ══════════ -->
@@ -380,7 +383,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
   <div class="scan-modal">
     <div class="scan-modal-head">
       <div class="scan-modal-title">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E5001A" stroke-width="2.2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
         Scan QR Code / Barcode
       </div>
       <button class="btn-close-scan" onclick="closeScanner()">✕</button>
@@ -420,6 +423,11 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
           </div>
         </div>
         <div class="info-card-body">
+          <div class="qr-card">
+            <div class="qr-wrap" id="qrCode"></div>
+            <div class="qr-label">QR Code Identitas Peserta</div>
+            <div class="qr-id" id="qrIdLabel">—</div>
+          </div>
           <div class="field">
             <label>NIP</label>
             <div class="val mono" id="pNIP">—</div>
@@ -466,11 +474,11 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
         <div class="info-card-body">
           <div class="field">
             <label>Lembaga Penerbit</label>
-            <div class="val">Redline Academy</div>
+            <div class="val">Redline Academy · Mahir Lastana Gantari</div>
           </div>
           <div class="field">
-            <label>Kerangka Kerja</label>
-            <div class="val small">National Microcredentials Framework (NMF) · Australia</div>
+            <label>Akreditasi</label>
+            <div class="val small">Australia Microcredentials Framework</div>
           </div>
           <div class="field">
             <label>Kualifikasi</label>
@@ -482,14 +490,6 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
           </div>
         </div>
       </div>
-
-      <!-- QR -->
-      <div class="qr-card">
-        <div class="qr-wrap" id="qrCode"></div>
-        <div class="qr-label">QR Code Identitas Peserta</div>
-        <div class="qr-id" id="qrIdLabel">—</div>
-      </div>
-
     </div><!-- /left-panel -->
 
     <!-- RIGHT PANEL -->
@@ -515,15 +515,15 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
           <div class="cert-frame-inner"></div>
 
           <!-- corner ornaments -->
-          <div class="corner tl"><svg viewBox="0 0 40 40" fill="none"><path d="M2 38 L2 8 Q2 2 8 2 L38 2" stroke="#E5001A" stroke-width="2.5"/><path d="M6 38 L6 10 Q6 6 10 6 L38 6" stroke="#E5001A" stroke-width="1" opacity=".4"/><circle cx="2" cy="2" r="3" fill="#E5001A"/></svg></div>
-          <div class="corner tr"><svg viewBox="0 0 40 40" fill="none"><path d="M2 38 L2 8 Q2 2 8 2 L38 2" stroke="#E5001A" stroke-width="2.5"/><path d="M6 38 L6 10 Q6 6 10 6 L38 6" stroke="#E5001A" stroke-width="1" opacity=".4"/><circle cx="2" cy="2" r="3" fill="#E5001A"/></svg></div>
-          <div class="corner bl"><svg viewBox="0 0 40 40" fill="none"><path d="M2 38 L2 8 Q2 2 8 2 L38 2" stroke="#E5001A" stroke-width="2.5"/><path d="M6 38 L6 10 Q6 6 10 6 L38 6" stroke="#E5001A" stroke-width="1" opacity=".4"/><circle cx="2" cy="2" r="3" fill="#E5001A"/></svg></div>
-          <div class="corner br"><svg viewBox="0 0 40 40" fill="none"><path d="M2 38 L2 8 Q2 2 8 2 L38 2" stroke="#E5001A" stroke-width="2.5"/><path d="M6 38 L6 10 Q6 6 10 6 L38 6" stroke="#E5001A" stroke-width="1" opacity=".4"/><circle cx="2" cy="2" r="3" fill="#E5001A"/></svg></div>
+          <div class="corner tl"><svg viewBox="0 0 40 40" fill="none"><path d="M2 38 L2 8 Q2 2 8 2 L38 2" stroke="currentColor" stroke-width="2.5"/><path d="M6 38 L6 10 Q6 6 10 6 L38 6" stroke="currentColor" stroke-width="1" opacity=".4"/><circle cx="2" cy="2" r="3" fill="currentColor"/></svg></div>
+          <div class="corner tr"><svg viewBox="0 0 40 40" fill="none"><path d="M2 38 L2 8 Q2 2 8 2 L38 2" stroke="currentColor" stroke-width="2.5"/><path d="M6 38 L6 10 Q6 6 10 6 L38 6" stroke="currentColor" stroke-width="1" opacity=".4"/><circle cx="2" cy="2" r="3" fill="currentColor"/></svg></div>
+          <div class="corner bl"><svg viewBox="0 0 40 40" fill="none"><path d="M2 38 L2 8 Q2 2 8 2 L38 2" stroke="currentColor" stroke-width="2.5"/><path d="M6 38 L6 10 Q6 6 10 6 L38 6" stroke="currentColor" stroke-width="1" opacity=".4"/><circle cx="2" cy="2" r="3" fill="currentColor"/></svg></div>
+          <div class="corner br"><svg viewBox="0 0 40 40" fill="none"><path d="M2 38 L2 8 Q2 2 8 2 L38 2" stroke="currentColor" stroke-width="2.5"/><path d="M6 38 L6 10 Q6 6 10 6 L38 6" stroke="currentColor" stroke-width="1" opacity=".4"/><circle cx="2" cy="2" r="3" fill="currentColor"/></svg></div>
 
           <!-- cert body -->
           <div class="cert-body">
             <div class="cert-inst">
-              <div class="cert-logo-box">RL</div>
+              <div class="cert-logo-box"><img src="../assets/images/redlinewlogo.png" alt="Redline Academy Logo"></div>
               <div>
                 <div class="cert-inst-name">REDLINE ACADEMY</div>
                 <div class="cert-inst-sub">Training & Assessment Management · National Microcredentials Framework</div>
@@ -552,7 +552,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh
                 <div class="v mono" id="certNum">—</div>
               </div>
               <div class="cert-seal">
-                <div class="cert-seal-rl">RL</div>
+                <img class="cert-seal-logo" src="../assets/images/redlinewlogo.png" alt="Redline Academy Logo">
                 <div class="cert-seal-sub">Redline<br>Academy</div>
               </div>
               <div class="cert-sign">
@@ -621,7 +621,7 @@ function loadDashboard(id, p){
   document.getElementById('pNIP').textContent      = p.nip;
   document.getElementById('pUnit').textContent     = p.unit;
 
-  const certNum = `CERT/RL/MLG/B1/${String(p.no).padStart(2,'0')}/2026`;
+  const certNum = `CERT/RA/MLG/B1/${String(p.no).padStart(2,'0')}/2026`;
   document.getElementById('cNumber').textContent   = certNum;
   document.getElementById('certNum').textContent   = certNum;
   document.getElementById('certName').textContent  = p.name;

@@ -92,12 +92,14 @@
   }
   .nav-links a,
   .nav-actions .nav-login-btn,
+  .nav-actions .nav-validate-btn,
   .nav-actions .language-switcher {
     width: min(100%, 18rem) !important;
     margin: 0 !important;
   }
   .nav-links a,
-  .nav-actions .nav-login-btn {
+  .nav-actions .nav-login-btn,
+  .nav-actions .nav-validate-btn {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -322,6 +324,18 @@ a:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(215, 0, 30, 0.35);
   color: #ffffff;
+}
+
+.nav-validate-btn {
+  background: transparent;
+  border-color: rgba(255,255,255,0.38);
+  box-shadow: none;
+}
+
+.nav-validate-btn:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.6);
+  box-shadow: none;
 }
 
 /* ----------------------
@@ -1319,7 +1333,8 @@ footer {
     border-left: none;
     justify-content: center;
   }
-  .nav-actions .nav-login-btn {
+  .nav-actions .nav-login-btn,
+  .nav-actions .nav-validate-btn {
     align-self: center;
   }
   nav a {
