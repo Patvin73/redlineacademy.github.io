@@ -7,6 +7,12 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+:root {
+  --primary-color: #d7001e;
+  --primary-dark: #a50017;
+  --primary-light: #fff0f2;
+}
+
 body {
   font-family: 'Arial', sans-serif;
   background: #f0f2f5;
@@ -37,7 +43,7 @@ body {
 .btn-print {
   margin-top: 12px;
   padding: 9px 22px;
-  background: #E5001A;
+  background: var(--primary-color);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -45,7 +51,7 @@ body {
   font-weight: 700;
   cursor: pointer;
 }
-.btn-print:hover { background: #b5001a; }
+.btn-print:hover { background: var(--primary-dark); }
 
 /* GRID */
 .cards-grid {
@@ -71,34 +77,28 @@ body {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  position: relative;
   padding-bottom: 8px;
   border-bottom: 1px solid #f0f2f5;
 }
 
 .card-logo {
-  width: 22px;
-  height: 22px;
-  background: #E5001A;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 9px;
-  color: #fff;
-  flex-shrink: 0;
+  width: 82px;
+  height: auto;
+  display: block;
 }
 
 .card-brand {
   font-size: 9px;
   font-weight: 700;
-  color: #E5001A;
+  color: var(--primary-color);
   line-height: 1.2;
 }
 
 .card-no {
-  margin-left: auto;
+  position: absolute;
+  right: 0;
   font-size: 9px;
   color: #98a2b3;
   font-weight: 700;
@@ -137,11 +137,11 @@ body {
 .card-id {
   font-family: monospace;
   font-size: 8.5px;
-  color: #E5001A;
-  background: #fff0f2;
+  color: var(--primary-color);
+  background: var(--primary-light);
   padding: 3px 7px;
   border-radius: 4px;
-  border: 1px solid #ffd6da;
+  border: 1px solid rgba(215, 0, 30, 0.18);
   letter-spacing: 0.3px;
   text-align: center;
 }
@@ -214,8 +214,7 @@ PARTICIPANTS.forEach(p => {
   card.className = 'card';
   card.innerHTML = `
     <div class="card-top">
-      <div class="card-logo">RL</div>
-      <div class="card-brand">REDLINE<br>ACADEMY</div>
+      <img class="card-logo" src="../assets/images/redlinelogo.png" alt="Redline Academy Logo" loading="lazy" decoding="async">
       <div class="card-no">#${String(p.no).padStart(2,'0')}</div>
     </div>
     <div class="qr-box" id="qr-${p.no}"></div>
