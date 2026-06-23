@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alumni Access Portal — Redline Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Nunito:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#E5001A;--red-dark:#b5001a;--red-pale:#fff0f2;--red-light:#ffd6da;
+  --bg:#f0f2f5;--white:#ffffff;--border:#e4e7ec;--border-md:#d0d5dd;
+  --t1:#101828;--t2:#344054;--t3:#667085;--t4:#98a2b3;
+  --shadow-sm:0 1px 3px rgba(16,24,40,.08);
+  --shadow-md:0 4px 12px rgba(16,24,40,.10);
+  --shadow-lg:0 12px 32px rgba(16,24,40,.13);
+  --fh:'Bricolage Grotesque',sans-serif;
+  --fb:'Nunito',sans-serif;
+}
+body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh}
+
+/* ── HEADER ── */
+.site-header{
+  background:var(--white);border-bottom:1px solid var(--border);
+  height:60px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;box-shadow:var(--shadow-sm);position:sticky;top:0;z-index:100;
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:34px;height:34px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:15px;color:#fff;flex-shrink:0}
+.logo-name{font-family:var(--fh);font-weight:700;font-size:15px;color:var(--t1)}
+.logo-tagline{font-size:11px;color:var(--t3)}
+.btn-logout{padding:6px 14px;background:transparent;border:1.5px solid var(--border-md);border-radius:7px;font-family:var(--fb);font-size:13px;font-weight:600;color:var(--t2);cursor:pointer;transition:.2s;display:flex;align-items:center;gap:5px}
+.btn-logout:hover{border-color:var(--red);color:var(--red);background:var(--red-pale)}
+
+/* ── LOGIN ── */
+#loginPage{min-height:100vh;display:none;flex-direction:column}
+#loginPage.active{display:flex}
+.login-body{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 20px;background:linear-gradient(135deg,#f0f2f5 0%,#fef2f3 60%,#f0f2f5 100%)}
+.login-card{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:42px 38px;width:100%;max-width:420px;box-shadow:var(--shadow-lg)}
+.login-eyebrow{display:inline-flex;align-items:center;gap:6px;background:var(--red-pale);color:var(--red);font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;border:1px solid var(--red-light);letter-spacing:.5px;text-transform:uppercase;margin-bottom:14px}
+.login-title{font-family:var(--fh);font-size:26px;font-weight:800;color:var(--t1);line-height:1.2;margin-bottom:6px}
+.login-title span{color:var(--red)}
+.login-desc{font-size:13.5px;color:var(--t3);line-height:1.6;margin-bottom:28px}
+.form-label{display:block;font-size:12.5px;font-weight:700;color:var(--t2);margin-bottom:5px}
+.form-input{width:100%;padding:11px 13px;border:1.5px solid var(--border-md);border-radius:9px;font-family:var(--fb);font-size:14px;color:var(--t1);background:var(--white);outline:none;transition:.2s;letter-spacing:.4px}
+.form-input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(229,0,26,.08)}
+.form-input::placeholder{color:var(--t4)}
+.form-hint{font-size:11.5px;color:var(--t4);margin-top:5px}
+.btn-login{width:100%;margin-top:22px;padding:13px;background:var(--red);color:#fff;font-family:var(--fh);font-size:15px;font-weight:700;border:none;border-radius:9px;cursor:pointer;transition:.2s;box-shadow:0 3px 10px rgba(229,0,26,.28);display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-login:hover{background:var(--red-dark);box-shadow:0 5px 14px rgba(229,0,26,.38)}
+.error-msg{display:none;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;font-size:13px;padding:10px 13px;border-radius:8px;margin-top:11px}
+.login-footer{text-align:center;padding:20px;font-size:11.5px;color:var(--t4);background:var(--white);border-top:1px solid var(--border)}
+
+/* ── DIVIDER ── */
+.or-divider{display:flex;align-items:center;gap:10px;margin:18px 0;color:var(--t4);font-size:12px;font-weight:600}
+.or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── SCAN BUTTON ── */
+.btn-scan{width:100%;padding:11px 13px;background:var(--white);border:1.5px solid var(--border-md);border-radius:9px;font-family:var(--fb);font-size:14px;font-weight:600;color:var(--t2);cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-scan:hover{border-color:var(--red);color:var(--red);background:var(--red-pale)}
+.btn-scan svg{flex-shrink:0}
+
+/* ── SCANNER MODAL ── */
+.scan-modal-overlay{
+  display:none;position:fixed;inset:0;z-index:999;
+  background:rgba(10,14,23,.72);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;padding:20px;
+}
+.scan-modal-overlay.open{display:flex}
+.scan-modal{
+  background:var(--white);border-radius:20px;
+  width:100%;max-width:420px;
+  box-shadow:0 24px 60px rgba(0,0,0,.28);
+  overflow:hidden;
+  animation:modalIn .22s ease;
+}
+@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:none}}
+
+.scan-modal-head{
+  padding:18px 22px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.scan-modal-title{font-family:var(--fh);font-size:15px;font-weight:800;color:var(--t1);display:flex;align-items:center;gap:8px}
+.btn-close-scan{width:30px;height:30px;border-radius:7px;background:var(--bg);border:1px solid var(--border);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t3);transition:.2s;flex-shrink:0}
+.btn-close-scan:hover{background:var(--red-pale);color:var(--red);border-color:var(--red-light)}
+
+.scan-modal-body{padding:20px 22px 24px}
+
+/* viewfinder */
+.scan-viewfinder-wrap{
+  position:relative;border-radius:12px;overflow:hidden;
+  background:#0a0e17;margin-bottom:16px;
+  aspect-ratio:1/1;
+}
+#reader{width:100%!important}
+#reader video{border-radius:12px!important}
+
+/* override html5-qrcode default UI */
+#reader__scan_region{border:none!important}
+#reader__dashboard{display:none!important}
+
+/* corner brackets overlay */
+.scan-corners{
+  position:absolute;inset:0;pointer-events:none;z-index:10;
+}
+.scan-corners::before,.scan-corners::after{
+  content:'';position:absolute;width:36px;height:36px;
+  border-color:var(--red);border-style:solid;
+}
+.scan-corners::before{top:12px;left:12px;border-width:3px 0 0 3px;border-radius:4px 0 0 0}
+.scan-corners::after{top:12px;right:12px;border-width:3px 3px 0 0;border-radius:0 4px 0 0}
+.scan-corners-b::before,.scan-corners-b::after{
+  content:'';position:absolute;width:36px;height:36px;
+  border-color:var(--red);border-style:solid;
+}
+.scan-corners-b::before{bottom:12px;left:12px;border-width:0 0 3px 3px;border-radius:0 0 0 4px}
+.scan-corners-b::after{bottom:12px;right:12px;border-width:0 3px 3px 0;border-radius:0 0 4px 0}
+
+/* laser sweep */
+.scan-laser{
+  position:absolute;left:12px;right:12px;height:2px;
+  background:linear-gradient(90deg,transparent 0%,var(--red) 30%,#ff3350 50%,var(--red) 70%,transparent 100%);
+  border-radius:2px;top:50%;
+  animation:laserSweep 2s ease-in-out infinite;
+  box-shadow:0 0 8px rgba(229,0,26,.7);
+  z-index:11;
+}
+@keyframes laserSweep{
+  0%{top:16%;opacity:.8}50%{top:84%;opacity:1}100%{top:16%;opacity:.8}
+}
+
+.scan-hint{
+  display:flex;align-items:center;gap:8px;
+  background:#f8f9fb;border:1px solid var(--border);border-radius:9px;
+  padding:10px 13px;font-size:12.5px;color:var(--t3);font-weight:500;
+  margin-bottom:12px;line-height:1.45;
+}
+.scan-hint-icon{font-size:18px;flex-shrink:0}
+
+.scan-status{
+  text-align:center;font-size:12px;font-weight:600;
+  color:var(--t3);display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.scan-dot{width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block;animation:blink 1.2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.scan-status.success-status{color:#027a48}
+.scan-status.success-status .scan-dot{background:#12b76a;animation:none}
+
+/* ── DASHBOARD ── */
+#dashPage{display:none}
+#dashPage.active{display:block}
+.dash-main{max-width:1200px;margin:0 auto;padding:28px 32px;display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start}
+
+/* ── LEFT PANEL ── */
+.left-panel{display:flex;flex-direction:column;gap:16px}
+
+.info-card{background:var(--white);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-sm);overflow:hidden}
+.info-card-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.info-card-icon{width:30px;height:30px;background:var(--red-pale);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.info-card-title{font-family:var(--fh);font-size:13.5px;font-weight:700;color:var(--t1)}
+.info-card-body{padding:18px 20px;display:flex;flex-direction:column;gap:13px}
+
+.field label{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--t4);margin-bottom:3px}
+.field .val{font-size:13.5px;color:var(--t1);font-weight:600;line-height:1.35}
+.field .val.mono{font-family:monospace;font-size:12px;color:var(--red);background:var(--red-pale);padding:3px 8px;border-radius:5px;border:1px solid var(--red-light);display:inline-block}
+.field .val.small{font-size:12px}
+
+/* participant header in left panel */
+.participant-header{padding:22px 20px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border)}
+.avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--red),#ff4d63);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:19px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 3px 10px rgba(229,0,26,.22)}
+.participant-name{font-family:var(--fh);font-size:15px;font-weight:800;color:var(--t1);line-height:1.25}
+.participant-pos{font-size:11.5px;color:var(--t3);margin-top:2px;line-height:1.4}
+
+/* QR */
+.qr-card{background:var(--white);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-sm);padding:18px 20px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.qr-wrap{width:110px;height:110px;background:#fff;border-radius:8px;padding:6px;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.qr-wrap canvas,.qr-wrap img{width:100%!important;height:100%!important}
+.qr-label{font-size:11px;color:var(--t3);font-weight:600;text-align:center;line-height:1.4}
+.qr-id{font-family:monospace;font-size:10.5px;color:var(--red);background:var(--red-pale);padding:3px 8px;border-radius:5px;border:1px solid var(--red-light)}
+
+/* status chip */
+.status-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;background:#fffaeb;color:#92400e;border:1px solid #fde68a}
+.status-chip::before{content:'';width:6px;height:6px;border-radius:50%;background:#f79009;display:inline-block}
+
+/* ── RIGHT PANEL ── */
+.right-panel{}
+.panel-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px}
+.panel-heading{font-family:var(--fh);font-size:16px;font-weight:800;color:var(--t1)}
+.panel-sub{font-size:12px;color:var(--t3);margin-top:2px}
+
+.btn-download{display:flex;align-items:center;gap:7px;padding:10px 18px;background:var(--red);color:#fff;font-family:var(--fh);font-size:13px;font-weight:700;border:none;border-radius:9px;cursor:pointer;transition:.2s;box-shadow:0 2px 8px rgba(229,0,26,.25)}
+.btn-download:hover{background:var(--red-dark);box-shadow:0 4px 14px rgba(229,0,26,.36)}
+.btn-download:active{transform:scale(.98)}
+
+/* ── CERTIFICATE ── */
+.cert-outer{background:var(--white);border-radius:18px;padding:24px;box-shadow:var(--shadow-md);border:1px solid var(--border)}
+
+#certificateEl{
+  width:100%;
+  aspect-ratio:1.414/1; /* A4 landscape */
+  background:#fff;
+  border-radius:10px;
+  position:relative;
+  overflow:hidden;
+  font-family:var(--fb);
+  display:flex;
+  flex-direction:column;
+}
+
+/* outer border frame */
+.cert-frame{
+  position:absolute;inset:12px;
+  border:2.5px solid #E5001A;
+  border-radius:6px;
+  pointer-events:none;
+  z-index:2;
+}
+.cert-frame-inner{
+  position:absolute;inset:16px;
+  border:1px solid rgba(229,0,26,.25);
+  border-radius:4px;
+  pointer-events:none;
+  z-index:2;
+}
+
+/* corner ornaments */
+.corner{position:absolute;width:40px;height:40px;z-index:3}
+.corner svg{width:100%;height:100%}
+.corner.tl{top:10px;left:10px}
+.corner.tr{top:10px;right:10px;transform:scaleX(-1)}
+.corner.bl{bottom:10px;left:10px;transform:scaleY(-1)}
+.corner.br{bottom:10px;right:10px;transform:scale(-1,-1)}
+
+/* watermark */
+.cert-watermark{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:var(--fh);font-size:130px;font-weight:800;
+  color:rgba(229,0,26,.04);letter-spacing:-4px;
+  user-select:none;pointer-events:none;z-index:1;white-space:nowrap;
+}
+
+/* top red bar */
+.cert-topbar{
+  height:8px;
+  background:linear-gradient(90deg,#E5001A 0%,#ff3350 50%,#E5001A 100%);
+  flex-shrink:0;
+}
+
+/* cert body */
+.cert-body{
+  flex:1;padding:28px 48px 24px;
+  display:flex;flex-direction:column;
+  align-items:center;text-align:center;
+  position:relative;z-index:4;
+}
+
+/* institution */
+.cert-inst{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.cert-logo-box{width:44px;height:44px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:18px;color:#fff;flex-shrink:0;box-shadow:0 3px 10px rgba(229,0,26,.3)}
+.cert-inst-name{font-family:var(--fh);font-size:17px;font-weight:800;color:var(--red);text-align:left;line-height:1.1}
+.cert-inst-sub{font-size:10px;color:var(--t3);text-align:left;font-weight:600}
+
+.cert-divider{width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--red),transparent);margin:0 auto 14px}
+
+.cert-eyebrow{font-size:9.5px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+
+.cert-title-text{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(14px,2vw,22px);
+  font-weight:700;font-style:italic;
+  color:var(--t1);line-height:1.2;margin-bottom:6px;
+}
+
+.cert-subtitle{font-size:10px;font-weight:600;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+
+.cert-recipient-label{font-size:10px;color:var(--t3);font-weight:600;margin-bottom:4px}
+.cert-recipient{
+  font-family:var(--fh);font-size:clamp(18px,3vw,28px);
+  font-weight:800;color:var(--red);
+  margin-bottom:4px;line-height:1.1;
+}
+.cert-pos{font-size:10.5px;color:var(--t3);font-weight:600;margin-bottom:14px}
+
+.cert-desc{
+  font-size:9.5px;color:var(--t2);line-height:1.6;
+  max-width:560px;margin:0 auto 18px;
+}
+
+/* bottom info row */
+.cert-info-row{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  width:100%;padding-top:14px;
+  border-top:1px solid rgba(229,0,26,.18);
+  margin-top:auto;
+}
+
+.cert-field-block{text-align:left}
+.cert-field-block label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--t4);display:block;margin-bottom:2px}
+.cert-field-block .v{font-size:10.5px;font-weight:700;color:var(--t1);line-height:1.3}
+.cert-field-block .v.mono{font-family:monospace;font-size:10px;color:var(--red)}
+
+.cert-seal{
+  width:64px;height:64px;border-radius:50%;
+  border:2px solid var(--red);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--fh);font-weight:800;flex-shrink:0;
+  background:var(--red-pale);
+}
+.cert-seal-rl{font-size:16px;color:var(--red);font-weight:800}
+.cert-seal-sub{font-size:6.5px;color:var(--red);letter-spacing:.5px;text-transform:uppercase;text-align:center;line-height:1.2;margin-top:1px}
+
+.cert-sign{text-align:right}
+.cert-sign-line{width:120px;height:1px;background:var(--t4);margin:0 0 4px auto}
+.cert-sign-name{font-family:var(--fh);font-size:10px;font-weight:700;color:var(--t1)}
+.cert-sign-role{font-size:8.5px;color:var(--t3)}
+
+/* bottom red bar */
+.cert-bottombar{height:5px;background:linear-gradient(90deg,#E5001A 0%,#ff3350 50%,#E5001A 100%);flex-shrink:0}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .dash-main{grid-template-columns:1fr;padding:20px 16px}
+  .site-header{padding:0 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER (shared) -->
+<header class="site-header">
+  <div class="logo">
+    <div class="logo-mark">RL</div>
+    <div>
+      <div class="logo-name">Redline Academy</div>
+      <div class="logo-tagline">Alumni Access Portal</div>
+    </div>
+  </div>
+  <button class="btn-logout" id="logoutBtn" style="display:none" onclick="doLogout()">↩ Keluar</button>
+</header>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="loginPage" class="active">
+  <div class="login-body">
+    <div class="login-card">
+      <div class="login-eyebrow">🎓 Alumni Access</div>
+      <h1 class="login-title">Portal <span>Peserta</span><br>Redline Academy</h1>
+      <p class="login-desc">Masukkan Candidate ID Anda yang tertera pada kartu akses atau QR Code yang diberikan oleh trainer.</p>
+
+      <label class="form-label" for="candidateInput">Candidate ID</label>
+      <input class="form-input" id="candidateInput" type="text"
+        placeholder="RA-MLG-B1-2026-XXXXXXXX"
+        autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <p class="form-hint">Contoh: RA-MLG-B1-2026-X7K9M2QP</p>
+
+      <div class="error-msg" id="errorMsg">⚠️ Candidate ID tidak ditemukan. Periksa kembali kartu akses Anda.</div>
+
+      <button class="btn-login" onclick="doLogin()">🔐 Masuk ke Portal</button>
+
+      <div class="or-divider">atau</div>
+
+      <button class="btn-scan" onclick="openScanner()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+          <path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+          <rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/>
+          <rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/>
+        </svg>
+        Scan QR Code / Barcode
+      </button>
+    </div>
+  </div>
+  <div class="login-footer">© 2026 Redline Academy · Pelatihan Penguji Kompetensi SDM Aparatur Bidang Pariwisata</div>
+</div>
+
+<!-- ══════════ SCANNER MODAL ══════════ -->
+<div class="scan-modal-overlay" id="scanModal">
+  <div class="scan-modal">
+    <div class="scan-modal-head">
+      <div class="scan-modal-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E5001A" stroke-width="2.2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+        Scan QR Code / Barcode
+      </div>
+      <button class="btn-close-scan" onclick="closeScanner()">✕</button>
+    </div>
+    <div class="scan-modal-body">
+      <div class="scan-viewfinder-wrap">
+        <div id="reader"></div>
+        <div class="scan-corners"></div>
+        <div class="scan-corners-b" style="position:absolute;inset:0;pointer-events:none;z-index:10"></div>
+        <div class="scan-laser" id="scanLaser"></div>
+      </div>
+      <div class="scan-hint">
+        <span class="scan-hint-icon">💡</span>
+        Arahkan kamera ke QR Code atau Barcode pada kartu akses Anda. Pastikan pencahayaan cukup.
+      </div>
+      <div class="scan-status" id="scanStatus">
+        <span class="scan-dot"></span> Menunggu scan…
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ DASHBOARD ══════════ -->
+<div id="dashPage">
+  <div class="dash-main">
+
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+
+      <!-- Participant -->
+      <div class="info-card">
+        <div class="participant-header">
+          <div class="avatar" id="avatarInitial">—</div>
+          <div>
+            <div class="participant-name" id="pName">—</div>
+            <div class="participant-pos" id="pPosition">—</div>
+          </div>
+        </div>
+        <div class="info-card-body">
+          <div class="field">
+            <label>NIP</label>
+            <div class="val mono" id="pNIP">—</div>
+          </div>
+          <div class="field">
+            <label>Instansi / Unit Kerja</label>
+            <div class="val small" id="pUnit">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Certificate Info -->
+      <div class="info-card">
+        <div class="info-card-head">
+          <div class="info-card-icon">🎓</div>
+          <div class="info-card-title">Informasi Sertifikat</div>
+        </div>
+        <div class="info-card-body">
+          <div class="field">
+            <label>Nomor Sertifikat</label>
+            <div class="val mono" id="cNumber">—</div>
+          </div>
+          <div class="field">
+            <label>Nama Sertifikat</label>
+            <div class="val small">Sertifikat Kompetensi Penguji SDM Aparatur Bidang Pariwisata</div>
+          </div>
+          <div class="field">
+            <label>Program</label>
+            <div class="val small">Assessor Skill Set — TAE Training & Assessment</div>
+          </div>
+          <div class="field">
+            <label>Status</label>
+            <div class="status-chip">In Progress</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Institution -->
+      <div class="info-card">
+        <div class="info-card-head">
+          <div class="info-card-icon">🏛️</div>
+          <div class="info-card-title">Informasi Institusi</div>
+        </div>
+        <div class="info-card-body">
+          <div class="field">
+            <label>Lembaga Penerbit</label>
+            <div class="val">Redline Academy</div>
+          </div>
+          <div class="field">
+            <label>Kerangka Kerja</label>
+            <div class="val small">National Microcredentials Framework (NMF) · Australia</div>
+          </div>
+          <div class="field">
+            <label>Kualifikasi</label>
+            <div class="val small">TAE — Training & Education · Assessor Skill Set</div>
+          </div>
+          <div class="field">
+            <label>Batch / Lokasi</label>
+            <div class="val">Batch 1 · 2026 · Malang</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QR -->
+      <div class="qr-card">
+        <div class="qr-wrap" id="qrCode"></div>
+        <div class="qr-label">QR Code Identitas Peserta</div>
+        <div class="qr-id" id="qrIdLabel">—</div>
+      </div>
+
+    </div><!-- /left-panel -->
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+      <div class="panel-top">
+        <div>
+          <div class="panel-heading">Pratinjau Sertifikat</div>
+          <div class="panel-sub">Sertifikat dapat diunduh setelah semua unit kompetensi diselesaikan</div>
+        </div>
+        <button class="btn-download" onclick="downloadCert()">⬇ Unduh Sertifikat</button>
+      </div>
+
+      <div class="cert-outer">
+        <div id="certificateEl">
+          <!-- top bar -->
+          <div class="cert-topbar"></div>
+
+          <!-- watermark -->
+          <div class="cert-watermark">REDLINE</div>
+
+          <!-- frames -->
+          <div class="cert-frame"></div>
+          <div class="cert-frame-inner"></div>
+
+          <!-- corner ornaments -->
+          <div class="corner tl"><svg viewBox="0 0 40 40" fill="none"><path d="M2 38 L2 8 Q2 2 8 2 L38 2" stroke="#E5001A" stroke-width="2.5"/><path d="M6 38 L6 10 Q6 6 10 6 L38 6" stroke="#E5001A" stroke-width="1" opacity=".4"/><circle cx="2" cy="2" r="3" fill="#E5001A"/></svg></div>
+          <div class="corner tr"><svg viewBox="0 0 40 40" fill="none"><path d="M2 38 L2 8 Q2 2 8 2 L38 2" stroke="#E5001A" stroke-width="2.5"/><path d="M6 38 L6 10 Q6 6 10 6 L38 6" stroke="#E5001A" stroke-width="1" opacity=".4"/><circle cx="2" cy="2" r="3" fill="#E5001A"/></svg></div>
+          <div class="corner bl"><svg viewBox="0 0 40 40" fill="none"><path d="M2 38 L2 8 Q2 2 8 2 L38 2" stroke="#E5001A" stroke-width="2.5"/><path d="M6 38 L6 10 Q6 6 10 6 L38 6" stroke="#E5001A" stroke-width="1" opacity=".4"/><circle cx="2" cy="2" r="3" fill="#E5001A"/></svg></div>
+          <div class="corner br"><svg viewBox="0 0 40 40" fill="none"><path d="M2 38 L2 8 Q2 2 8 2 L38 2" stroke="#E5001A" stroke-width="2.5"/><path d="M6 38 L6 10 Q6 6 10 6 L38 6" stroke="#E5001A" stroke-width="1" opacity=".4"/><circle cx="2" cy="2" r="3" fill="#E5001A"/></svg></div>
+
+          <!-- cert body -->
+          <div class="cert-body">
+            <div class="cert-inst">
+              <div class="cert-logo-box">RL</div>
+              <div>
+                <div class="cert-inst-name">REDLINE ACADEMY</div>
+                <div class="cert-inst-sub">Training & Assessment Management · National Microcredentials Framework</div>
+              </div>
+            </div>
+
+            <div class="cert-divider"></div>
+
+            <div class="cert-eyebrow">Certificate of Competency</div>
+            <div class="cert-title-text">Sertifikat Kompetensi Penguji SDM Aparatur<br>Bidang Pariwisata</div>
+            <div class="cert-subtitle">Assessor Skill Set · TAE Training & Education · Batch 1 · Malang · 2026</div>
+
+            <div class="cert-recipient-label">Diberikan kepada</div>
+            <div class="cert-recipient" id="certName">—</div>
+            <div class="cert-pos" id="certPos">—</div>
+
+            <div class="cert-desc">
+              Telah menyelesaikan dan dinyatakan kompeten dalam program pelatihan Penguji Kompetensi SDM Aparatur Bidang Pariwisata
+              yang diselenggarakan oleh Redline Academy bekerja sama dengan Kementerian Pariwisata dan Ekonomi Kreatif Republik Indonesia,
+              mencakup unit kompetensi TAEASS512, TAEASS412, TAEASS413, dan TAEASS404.
+            </div>
+
+            <div class="cert-info-row">
+              <div class="cert-field-block">
+                <label>Nomor Sertifikat</label>
+                <div class="v mono" id="certNum">—</div>
+              </div>
+              <div class="cert-seal">
+                <div class="cert-seal-rl">RL</div>
+                <div class="cert-seal-sub">Redline<br>Academy</div>
+              </div>
+              <div class="cert-sign">
+                <div class="cert-sign-line"></div>
+                <div class="cert-sign-name">Program Director</div>
+                <div class="cert-sign-role">Redline Academy · 2026</div>
+              </div>
+            </div>
+          </div><!-- /cert-body -->
+
+          <!-- bottom bar -->
+          <div class="cert-bottombar"></div>
+        </div><!-- /#certificateEl -->
+      </div><!-- /cert-outer -->
+    </div><!-- /right-panel -->
+
+  </div><!-- /dash-main -->
+</div><!-- /dashPage -->
+
+<script>
+const PARTICIPANTS = {
+  "RA-MLG-B1-2026-X7K9M2QP":{ name:"Suwanto", nip:"196907011995121001", position:"Widyaiswara Ahli Madya", unit:"Asdep Peningkatan Kapasitas SDM Aparatur dan Pendidikan Vokasi", no:1 },
+  "RA-MLG-B1-2026-B4N8R5ZT":{ name:"Joko Abu Bakir", nip:"196907011995121001", position:"Adyatama Kepariwisataan dan Ekonomi Kreatif Ahli Muda", unit:"Asdep Peningkatan Kapasitas SDM Aparatur dan Pendidikan Vokasi", no:2 },
+  "RA-MLG-B1-2026-Q2W7L9XF":{ name:"Herman Peudada", nip:"198106282024211003", position:"Widyaiswara Ahli Pertama", unit:"Asdep Peningkatan Kapasitas SDM Aparatur dan Pendidikan Vokasi", no:3 },
+  "RA-MLG-B1-2026-M8C3V6JK":{ name:"Agus Indra Setiawan", nip:"198208312009121005", position:"Analis Kebijakan Ahli Muda", unit:"Asdep Peningkatan Kapasitas Masyarakat", no:4 },
+  "RA-MLG-B1-2026-T5P9H2RD":{ name:"Frianty Kartika Widhi", nip:"198402172009022002", position:"Adyatama Kepariwisataan dan Ekonomi Kreatif Ahli Muda", unit:"Asdep Peningkatan Kapasitas SDM Industri", no:5 },
+  "RA-MLG-B1-2026-K7Y4N8BW":{ name:"Fatma Indah Murdiyati", nip:"197908042003122010", position:"Adyatama Kepariwisataan dan Ekonomi Kreatif Ahli Madya", unit:"Asdep Perancangan Destinasi Pariwisata", no:6 },
+  "RA-MLG-B1-2026-R3X6Q1ZM":{ name:"Putra Anindita", nip:"198810282014031001", position:"Adyatama Kepariwisataan dan Ekonomi Kreatif Ahli Muda", unit:"Deputi Bidang Pengembangan Destinasi dan Infrastruktur", no:7 },
+  "RA-MLG-B1-2026-N9J5T7KC":{ name:"Mega Indah Sri Purwanti", nip:"198601082009122003", position:"Analis Kebijakan Ahli Muda", unit:"Asdep Manajemen Usaha Pariwisata Berkelanjutan", no:8 },
+  "RA-MLG-B1-2026-F2L8W4YP":{ name:"Rahmat Suganda", nip:"198805192023211017", position:"Analis Kebijakan Ahli Pertama", unit:"Asdep Standardisasi dan Sertifikasi Usaha", no:9 },
+  "RA-MLG-B1-2026-H6M3R9XN":{ name:"Dewitri Anggraini", nip:"198506072009122003", position:"Kepala Bidang Perencanaan dan Pengembangan Manajemen Investasi", unit:"Asdep Manajemen Investasi", no:10 },
+  "RA-MLG-B1-2026-D7Q2K5VT":{ name:"Luthfie Setiya Priambodo", nip:"198909112018021001", position:"Analis Kerjasama dan Permodalan", unit:"Asdep Pengembangan Usaha dan Akses Permodalan", no:11 },
+  "RA-MLG-B1-2026-P4Z8C1YL":{ name:"Dea Novia Praditha", nip:"199011272015032008", position:"Adyatama Kepariwisataan dan Ekonomi Kreatif Ahli Muda", unit:"Asdep Pemasaran Pariwisata Mancanegara 1", no:12 },
+  "RA-MLG-B1-2026-W9N6H3RF":{ name:"Annissa Noviarny", nip:"198511092009022006", position:"Penerjemah Ahli Muda", unit:"Asdep Pemasaran Pariwisata Mancanegara II", no:13 },
+  "RA-MLG-B1-2026-J2T7M4XK":{ name:"R. Soufie Rosalind Saudiah", nip:"197710232009122002", position:"Analis Kebijakan Ahli Muda", unit:"Asdep Pemasaran Pariwisata Nusantara", no:14 },
+  "RA-MLG-B1-2026-C8P5Y9QD":{ name:"Tringsasi Agus Rini", nip:"197508182005022001", position:"Kepala Bidang Pemasaran Pariwisata Mancanegara II", unit:"Asdep Pemasaran Pariwisata Mancanegara II", no:15 },
+  "RA-MLG-B1-2026-L3R6W2ZN":{ name:"Nicko Himawan Sutanto", nip:"198803072014031001", position:"Adyatama Kepariwisataan dan Ekonomi Kreatif Ahli Muda", unit:"Asdep Strategi dan Komunikasi Pemasaran", no:16 },
+  "RA-MLG-B1-2026-Y7F4K8MH":{ name:"Laura Hudayati", nip:"198102222006052001", position:"Analis Kebijakan Ahli Madya", unit:"Asdep Pemasaran Pariwisata Mancanegara III", no:17 },
+  "RA-MLG-B1-2026-V2N9T5XC":{ name:"Nia Agmon", nip:"198108132006052001", position:"Analis Kebijakan Ahli Muda", unit:"Asdep Pertemuan, Perjalanan Insentif, Konvensi, dan Pameran", no:18 },
+  "RA-MLG-B1-2026-G6Q3P7WL":{ name:"Citra Budi Lestari", nip:"198702082014032001", position:"Analis Kebijakan Ahli Madya", unit:"Asdep Strategi Event", no:19 },
+  "RA-MLG-B1-2026-Z8K1R4YJ":{ name:"Mona Yuli Artha Silaban", nip:"198107222014032001", position:"Adyatama Kepariwisataan dan Ekonomi Kreatif Ahli Muda", unit:"Asdep Event Daerah", no:20 },
+  "RA-MLG-B1-2026-M5X9C2TN":{ name:"Rosalin Petrina Kristianti", nip:"198209232009022006", position:"Adyatama Kepariwisataan dan Ekonomi Kreatif Ahli Muda", unit:"Asdep Event Daerah", no:21 },
+  "RA-MLG-B1-2026-R7W4L8PF":{ name:"Zakkeus Alberto Hutabarat", nip:"197801022005021003", position:"Analis Sarana dan Prasarana Pendidikan", unit:"Badan Pelaksana Otorita Danau Toba", no:22 },
+  "RA-MLG-B1-2026-T3Y6N1QK":{ name:"Yulwan A", nip:"197707242011011003", position:"Kepala Divisi Amenitas dan DTW", unit:"Badan Pelaksana Otorita Borobudur", no:23 },
+  "RA-MLG-B1-2026-K9V2M7ZD":{ name:"Novita Dwihapsari", nip:"198611162009122004", position:"Kepala Divisi Keuangan", unit:"Badan Pelaksana Otorita Borobudur", no:24 }
+};
+
+let currentId = null;
+
+function doLogin(){
+  const raw = document.getElementById('candidateInput').value.trim().toUpperCase();
+  const err = document.getElementById('errorMsg');
+  err.style.display='none';
+  if(!PARTICIPANTS[raw]){ err.style.display='block'; return; }
+  currentId = raw;
+  loadDashboard(raw, PARTICIPANTS[raw]);
+}
+
+document.getElementById('candidateInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+function loadDashboard(id, p){
+  const initials = p.name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  document.getElementById('avatarInitial').textContent = initials;
+  document.getElementById('pName').textContent     = p.name;
+  document.getElementById('pPosition').textContent = p.position;
+  document.getElementById('pNIP').textContent      = p.nip;
+  document.getElementById('pUnit').textContent     = p.unit;
+
+  const certNum = `CERT/RL/MLG/B1/${String(p.no).padStart(2,'0')}/2026`;
+  document.getElementById('cNumber').textContent   = certNum;
+  document.getElementById('certNum').textContent   = certNum;
+  document.getElementById('certName').textContent  = p.name;
+  document.getElementById('certPos').textContent   = p.position + ' · ' + p.unit;
+  document.getElementById('qrIdLabel').textContent = id;
+
+  // QR Code
+  const qrDiv = document.getElementById('qrCode');
+  qrDiv.innerHTML = '';
+  new QRCode(qrDiv, {
+    text: `ID:${id}\nNAMA:${p.name}\nNIP:${p.nip}\nSERT:${certNum}`,
+    width: 98, height: 98,
+    colorDark:'#101828', colorLight:'#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
+  document.getElementById('loginPage').classList.remove('active');
+  document.getElementById('dashPage').style.display='block';
+  document.getElementById('logoutBtn').style.display='flex';
+  window.scrollTo(0,0);
+}
+
+function doLogout(){
+  document.getElementById('dashPage').style.display='none';
+  document.getElementById('loginPage').classList.add('active');
+  document.getElementById('logoutBtn').style.display='none';
+  document.getElementById('candidateInput').value='';
+  document.getElementById('errorMsg').style.display='none';
+  document.getElementById('qrCode').innerHTML='';
+  currentId=null;
+}
+
+// ── SCANNER ──
+let html5QrScanner = null;
+
+function openScanner(){
+  document.getElementById('scanModal').classList.add('open');
+  document.getElementById('scanStatus').className = 'scan-status';
+  document.getElementById('scanStatus').innerHTML = '<span class="scan-dot"></span> Menunggu scan…';
+  document.getElementById('scanLaser').style.display = 'block';
+
+  // small delay so modal renders before camera init
+  setTimeout(() => {
+    html5QrScanner = new Html5Qrcode("reader");
+    html5QrScanner.start(
+      { facingMode: "environment" },
+      {
+        fps: 12,
+        qrbox: { width: 220, height: 220 },
+        formatsToSupport: [
+          Html5QrcodeSupportedFormats.QR_CODE,
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.DATA_MATRIX,
+          Html5QrcodeSupportedFormats.PDF_417,
+          Html5QrcodeSupportedFormats.EAN_13,
+        ]
+      },
+      onScanSuccess,
+      () => {} // ignore per-frame errors
+    ).catch(err => {
+      document.getElementById('scanStatus').innerHTML = '⚠️ Kamera tidak dapat diakses. Izinkan akses kamera di browser.';
+      document.getElementById('scanLaser').style.display = 'none';
+    });
+  }, 200);
+}
+
+function onScanSuccess(decodedText){
+  // Extract candidate ID — look for RA-MLG-... pattern anywhere in the text
+  const match = decodedText.toUpperCase().match(/RA-MLG-B1-2026-[A-Z0-9]{8}/);
+  const candidateId = match ? match[0] : decodedText.trim().toUpperCase();
+
+  if(PARTICIPANTS[candidateId]){
+    // Success
+    document.getElementById('scanStatus').className = 'scan-status success-status';
+    document.getElementById('scanStatus').innerHTML = '✅ Berhasil dikenali — membuka dashboard…';
+    document.getElementById('scanLaser').style.display = 'none';
+
+    stopScanner().then(() => {
+      document.getElementById('candidateInput').value = candidateId;
+      closeScanner();
+      setTimeout(() => {
+        currentId = candidateId;
+        loadDashboard(candidateId, PARTICIPANTS[candidateId]);
+      }, 600);
+    });
+  } else {
+    document.getElementById('scanStatus').innerHTML = '⚠️ Kode tidak dikenali. Coba lagi…';
+    setTimeout(() => {
+      document.getElementById('scanStatus').innerHTML = '<span class="scan-dot"></span> Menunggu scan…';
+    }, 2000);
+  }
+}
+
+function stopScanner(){
+  if(html5QrScanner){
+    return html5QrScanner.stop().catch(()=>{}).finally(()=>{
+      html5QrScanner.clear();
+      html5QrScanner = null;
+    });
+  }
+  return Promise.resolve();
+}
+
+function closeScanner(){
+  stopScanner().then(() => {
+    document.getElementById('scanModal').classList.remove('open');
+    document.getElementById('reader').innerHTML = '';
+  });
+}
+
+// close modal on overlay click
+document.getElementById('scanModal').addEventListener('click', function(e){
+  if(e.target === this) closeScanner();
+});
+
+function downloadCert(){
+  const el = document.getElementById('certificateEl');
+  const btn = document.querySelector('.btn-download');
+  btn.textContent = '⏳ Menyiapkan...';
+  btn.disabled = true;
+
+  html2canvas(el, {
+    scale: 3,
+    useCORS: true,
+    backgroundColor: '#ffffff',
+    logging: false
+  }).then(canvas => {
+    const link = document.createElement('a');
+    const p = PARTICIPANTS[currentId];
+    const name = p.name.replace(/\s+/g,'_');
+    link.download = `Sertifikat_${name}_RL_2026.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    btn.innerHTML = '⬇ Unduh Sertifikat';
+    btn.disabled = false;
+  }).catch(()=>{
+    btn.innerHTML = '⬇ Unduh Sertifikat';
+    btn.disabled = false;
+    alert('Gagal mengunduh. Silakan coba lagi.');
+  });
+}
+</script>
+</body>
+</html>
