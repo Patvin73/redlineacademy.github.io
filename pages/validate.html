@@ -672,6 +672,7 @@ const PARTICIPANTS = {
   "RA-MLG-B1-2026-K9V2M7ZD":{ name:"Novita Dwihapsari", nip:"198611162009122004", position:"Kepala Divisi Keuangan", unit:"Badan Pelaksana Otorita Borobudur", no:24 }
 };
 
+const VALIDATION_BASE_URL = 'https://redlineacademy.com.au/pages/validate.html';
 let currentId = null;
 
 function doLogin(){
@@ -686,6 +687,7 @@ function doLogin(){
 document.getElementById('candidateInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
 
 function loadDashboard(id, p){
+  currentId = id;
   const initials = p.name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
   document.getElementById('avatarInitial').textContent = initials;
   document.getElementById('pName').textContent     = p.name;
@@ -704,7 +706,7 @@ function loadDashboard(id, p){
   const qrDiv = document.getElementById('qrCode');
   qrDiv.innerHTML = '';
   new QRCode(qrDiv, {
-    text: `ID:${id}\nNAMA:${p.name}\nNIP:${p.nip}\nSERT:${certNum}`,
+    text: `${VALIDATION_BASE_URL}?id=${encodeURIComponent(id)}`,
     width: 98, height: 98,
     colorDark:'#101828', colorLight:'#ffffff',
     correctLevel: QRCode.CorrectLevel.M
@@ -715,6 +717,28 @@ function loadDashboard(id, p){
   document.getElementById('logoutBtn').style.display='flex';
   window.scrollTo(0,0);
 }
+
+function getParticipantIdFromUrl(){
+  const params = new URLSearchParams(window.location.search);
+  const rawId = params.get('id') || params.get('candidate') || params.get('candidateId');
+  return rawId ? rawId.trim().toUpperCase() : '';
+}
+
+function openParticipantFromUrl(){
+  const candidateId = getParticipantIdFromUrl();
+  if(!candidateId) return;
+
+  if(PARTICIPANTS[candidateId]){
+    document.getElementById('candidateInput').value = candidateId;
+    loadDashboard(candidateId, PARTICIPANTS[candidateId]);
+    return;
+  }
+
+  document.getElementById('candidateInput').value = candidateId;
+  document.getElementById('errorMsg').style.display = 'block';
+}
+
+openParticipantFromUrl();
 
 function doLogout(){
   document.getElementById('dashPage').style.display='none';
