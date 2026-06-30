@@ -10,6 +10,16 @@ function makeLocalDateTime(daysFromNow, hour = 9) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+function makeCurrentMonthFutureIso(hoursFromNow) {
+  const d = new Date(Date.now() + hoursFromNow * 60 * 60 * 1000);
+  const now = new Date();
+  if (d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear()) {
+    d.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
+    d.setHours(23, 50, 0, 0);
+  }
+  return d.toISOString();
+}
+
 async function expectThreadMessageFullyVisible(page, threadSelector, messageSelector, edge) {
   await expect.poll(async () => page.locator(threadSelector).evaluate((thread, selector) => {
     const edgeMessage = thread.querySelector(selector);
@@ -148,8 +158,8 @@ async function installSupabaseStub(page, role, options = {}) {
       id: "event-1",
       title: "Trainer Live Session",
       event_type: "live_session",
-      start_datetime: new Date(Date.now() + 86400000).toISOString(),
-      end_datetime: new Date(Date.now() + 90000000).toISOString(),
+      start_datetime: makeCurrentMonthFutureIso(1),
+      end_datetime: makeCurrentMonthFutureIso(2),
       meeting_url: "https://example.com/trainer-live",
       trainer_id: "e2e-trainer",
       courses: { title: "Leadership Basics" }
@@ -158,8 +168,8 @@ async function installSupabaseStub(page, role, options = {}) {
       id: "event-2",
       title: "Admin Exam",
       event_type: "exam",
-      start_datetime: new Date(Date.now() + 172800000).toISOString(),
-      end_datetime: new Date(Date.now() + 176400000).toISOString(),
+      start_datetime: makeCurrentMonthFutureIso(3),
+      end_datetime: makeCurrentMonthFutureIso(4),
       meeting_url: "https://example.com/admin-exam",
       trainer_id: "e2e-admin",
       courses: { title: "Emergency Response" }

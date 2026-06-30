@@ -1440,6 +1440,10 @@
   flex-shrink: 0;
 }
 
+.sd-assignment-item__actions .sd-grade-result {
+  min-width: 0;
+}
+
 .sd-assignment-item__file {
   max-width: 180px;
   font-size: .78rem;
@@ -1592,6 +1596,23 @@
   border-radius: var(--sd-radius-sm);
   background: var(--sd-card-bg);
   overflow: hidden;
+}
+
+.sd-schedule-calendar__cell.has-events {
+  border-color: rgba(229, 0, 26, .45);
+  background: linear-gradient(180deg, #fff, var(--sd-red-light));
+  box-shadow: inset 0 0 0 1px rgba(229, 0, 26, .08);
+}
+
+.sd-schedule-calendar__cell.has-events .sd-schedule-calendar__date span {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  padding: 0 .35rem;
+  border-radius: 999px;
+  background: var(--sd-red);
+  color: #fff;
 }
 
 .sd-schedule-calendar__cell.is-muted {
@@ -1756,11 +1777,31 @@
 .sd-msg-search__input:focus { border-color: var(--sd-red); }
 
 .sd-messages-layout {
+  position: relative;
   display: grid;
   grid-template-columns: 300px 1fr;
   gap: 1rem;
   height: calc(100vh - 240px);
   min-height: 500px;
+}
+
+.sd-messages-layout.is-detail-open {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.sd-messages-layout.is-detail-open .sd-inbox {
+  position: absolute;
+  inset: auto auto 0 0;
+  width: min(300px, 45vw);
+  height: min(220px, 45%);
+  opacity: .01;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+.sd-messages-layout.is-detail-open .sd-message-view {
+  min-width: 0;
+  z-index: 1;
 }
 
 .sd-inbox {
@@ -1997,7 +2038,8 @@
 
 .sd-btn--msg-reply,
 .sd-btn--msg-archive,
-.sd-btn--msg-delete {
+.sd-btn--msg-delete,
+.sd-btn--msg-back {
   font-size: .78rem;
   padding: .4rem .875rem;
   display: inline-flex;
@@ -2005,6 +2047,17 @@
   gap: .35rem;
   border-radius: var(--sd-radius-sm);
   cursor: pointer;
+}
+
+.sd-btn--msg-back {
+  background: var(--sd-bg);
+  color: var(--sd-text-secondary);
+  border: 1px solid var(--sd-border);
+}
+
+.sd-btn--msg-back:hover {
+  border-color: var(--sd-red);
+  color: var(--sd-red);
 }
 
 .sd-btn--msg-reply {
@@ -2076,6 +2129,10 @@
 }
 
 .sd-thread-bubble-wrap { max-width: 72%; }
+
+.sd-messages-layout.is-detail-open .sd-thread-bubble-wrap {
+  max-width: min(760px, 78%);
+}
 
 .sd-thread-name {
   font-size: .72rem;
@@ -2308,15 +2365,28 @@
   width: 42px;
   height: 42px;
   border-radius: var(--sd-radius-sm);
+  background: var(--sd-red);
+  color: #fff;
   display: grid;
   place-items: center;
   flex-shrink: 0;
+  font-size: .82rem;
+  font-weight: 800;
+  letter-spacing: 0;
 }
 
-.sd-resource-card__icon--pdf    { background: rgba(239,68,68,.1);  color: #ef4444; }
-.sd-resource-card__icon--video  { background: rgba(59,130,246,.1); color: var(--sd-blue); }
-.sd-resource-card__icon--link   { background: rgba(139,92,246,.1); color: #8b5cf6; }
-.sd-resource-card__icon--doc    { background: rgba(34,197,94,.1);  color: var(--sd-green); }
+.sd-resource-card__icon--pdf,
+.sd-resource-card__icon--video,
+.sd-resource-card__icon--link,
+.sd-resource-card__icon--doc {
+  background: var(--sd-red);
+  color: #fff;
+}
+
+.sd-resource-card__icon--pdf {
+  font-size: .72rem;
+  font-family: Arial, sans-serif;
+}
 
 .sd-resource-card__body { flex: 1; min-width: 0; }
 
@@ -2787,6 +2857,50 @@
   .sd-course-grid   { grid-template-columns: 1fr; }
   .sd-resource-grid { grid-template-columns: 1fr; }
 
+  .sd-assignment-item {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: .75rem;
+    padding: .875rem;
+  }
+
+  .sd-assignment-item__icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .sd-assignment-item__body {
+    flex: 1 1 auto;
+  }
+
+  .sd-assignment-item__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem;
+    line-height: 1.45;
+  }
+
+  .sd-assignment-item__actions {
+    width: 100%;
+    margin-left: calc(36px + .75rem);
+    flex: 1 0 calc(100% - 36px - .75rem);
+    flex-direction: column;
+    align-items: stretch;
+    gap: .45rem;
+  }
+
+  .sd-assignment-item__actions .sd-btn,
+  .sd-assignment-item__file {
+    width: 100%;
+    max-width: none;
+  }
+
+  .sd-grade-result,
+  .sd-assignment-item__actions .sd-grade-result {
+    text-align: left;
+    align-items: flex-start;
+  }
+
   .sd-course-detail__header {
     flex-direction: column;
     align-items: stretch;
@@ -2843,9 +2957,20 @@
     border-radius: 6px;
   }
 
+  .sd-schedule-calendar__cell.has-events {
+    background: var(--sd-red-light);
+    border-color: var(--sd-red);
+  }
+
   .sd-schedule-calendar__date {
     margin-bottom: .25rem;
     font-size: .78rem;
+  }
+
+  .sd-schedule-calendar__cell.has-events .sd-schedule-calendar__date span {
+    min-width: 1.45rem;
+    height: 1.45rem;
+    padding: 0;
   }
 
   .sd-schedule-calendar__date small {
@@ -2893,7 +3018,60 @@
 
   /* Messages stacked */
   .sd-messages-layout { grid-template-columns: 1fr; }
+  .sd-messages-layout.is-detail-open .sd-inbox {
+    position: absolute;
+    inset: auto auto 0 0;
+    width: min(300px, 45vw);
+    height: min(220px, 45%);
+    opacity: .01;
+    z-index: 20;
+    pointer-events: auto;
+  }
+
+  .sd-btn--msg-back { position: relative; z-index: 3; }
   .sd-inbox { max-height: 280px; }
+  .sd-message-view { min-height: 520px; }
+  .sd-msg-detail-header {
+    flex-wrap: wrap;
+    gap: .75rem;
+    padding: .875rem 1rem;
+  }
+  .sd-btn--msg-back {
+    flex: 0 0 auto;
+    padding-inline: .75rem;
+  }
+  .sd-msg-detail-meta { flex: 1 1 100%; }
+  .sd-msg-detail-avatar { display: none; }
+  .sd-msg-detail-subject { font-size: .95rem; }
+  .sd-msg-detail-from,
+  .sd-msg-detail-date { display: none; }
+  .sd-msg-detail-actions {
+    width: 100%;
+    padding-top: .5rem;
+  }
+  .sd-msg-detail-actions .sd-btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-inline: .65rem;
+  }
+  .sd-msg-thread {
+    padding: 1rem .75rem 1.5rem;
+    gap: .7rem;
+    background: #f7f7f7;
+  }
+  .sd-thread-av,
+  .sd-thread-name { display: none; }
+  .sd-thread-msg { gap: 0; }
+  .sd-thread-bubble-wrap { max-width: 86%; }
+  .sd-messages-layout.is-detail-open .sd-thread-bubble-wrap { max-width: 88%; }
+  .sd-thread-bubble {
+    border-radius: 4px 14px 14px 14px;
+    padding: .65rem .8rem;
+    line-height: 1.5;
+  }
+  .sd-thread-msg--out .sd-thread-bubble {
+    border-radius: 14px 4px 14px 14px;
+  }
 
   /* Profile */
   .sd-profile-layout  { grid-template-columns: 1fr; }

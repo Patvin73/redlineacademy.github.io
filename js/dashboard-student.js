@@ -2334,6 +2334,10 @@
         const dayEvents = eventMap.get(key) || [];
         const isSunday = date.getDay() === 0;
         if (isSunday) cell.classList.add("is-sunday");
+        if (dayEvents.length > 0) {
+          cell.classList.add("has-events");
+          cell.setAttribute("aria-label", `${dayEvents.length} schedule event${dayEvents.length === 1 ? "" : "s"} on ${date.toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}`);
+        }
         const dateCaption = `${date.toLocaleDateString("en-AU", { weekday: "short" })}, ${date.toLocaleDateString("en-AU", { month: "short", year: "numeric" })}`;
 
         cell.innerHTML = `
@@ -2447,6 +2451,12 @@
     if (visible) {
       el.style.visibility = "visible";
     }
+  }
+
+  function setStudentMessageDetailMode(open) {
+    const layout = document.querySelector("#section-messages .sd-messages-layout");
+    if (!layout) return;
+    layout.classList.toggle("is-detail-open", Boolean(open));
   }
 
   const MAX_MESSAGE_RECIPIENTS = 50;
@@ -2570,6 +2580,7 @@
       setMessagePanelVisible(detail, true);
       return;
     }
+    setStudentMessageDetailMode(false);
     setMessagePanelVisible(viewEmpty, true);
   }
 
@@ -2939,6 +2950,7 @@
       if (loadSeq !== studentMessagesLoadSeq) return;
 
       inbox.querySelectorAll(".sd-inbox-item").forEach((el) => el.remove());
+      setStudentMessageDetailMode(false);
       if (composeForm?.hidden) {
         setMessagePanelVisible(detail, false);
         setMessagePanelVisible(viewEmpty, true);
@@ -3083,6 +3095,7 @@
         setMessagePanelVisible(viewEmpty, false);
         setMessagePanelVisible(composeForm, false);
         setMessagePanelVisible(detail, true);
+        setStudentMessageDetailMode(true);
         setStudentMessageStatus("");
         let detailStatus = "";
 
@@ -3111,6 +3124,7 @@
           const threadHTML = await renderThreadFor(msg, senderLabel);
           detail.innerHTML = `
             <div class="sd-msg-detail-header">
+              <button class="sd-btn sd-btn--msg-back" type="button" data-sd-msg-back aria-label="Kembali ke daftar pesan">Kembali</button>
               <div class="sd-msg-detail-avatar">${escHtml(initialsFor(senderLabel))}</div>
               <div class="sd-msg-detail-meta">
                 <p class="sd-msg-detail-subject">${escHtml(group.subject)}</p>
@@ -3145,6 +3159,7 @@
               });
           detail.innerHTML = `
             <div class="sd-msg-detail-header">
+              <button class="sd-btn sd-btn--msg-back" type="button" data-sd-msg-back aria-label="Kembali ke daftar pesan">Kembali</button>
               <div class="sd-msg-detail-avatar">${escHtml(initialsFor(senderLabel))}</div>
               <div class="sd-msg-detail-meta">
                 <p class="sd-msg-detail-subject">${escHtml(group.subject)}</p>
@@ -3181,6 +3196,16 @@
           if (scrollThreadToLatest) scrollStudentMessageThreadToLatest(thread);
           else scrollStudentMessageThreadToStart(thread);
         }, 50);
+
+        detail.querySelector("[data-sd-msg-back]")?.addEventListener("click", () => {
+          setStudentMessageDetailMode(false);
+          setMessagePanelVisible(detail, false);
+          setMessagePanelVisible(viewEmpty, true);
+          inbox.querySelectorAll(".sd-inbox-item").forEach((el) => {
+            el.classList.remove("active");
+            el.setAttribute("aria-selected", "false");
+          });
+        });
 
         detail.querySelector("[data-sd-msg-reply]")?.addEventListener("click", async () => {
           await openStudentMessageComposer(group.sender_id, {
@@ -3352,6 +3377,7 @@
         text: "sd-resource-card__icon--doc",
         quiz: "sd-resource-card__icon--link"
       };
+      materialIcons.pdf = "PDF";
 
       lessonsWithUrls.forEach((lesson) => {
         const materialType = (lesson.material_type || "text").toLowerCase();

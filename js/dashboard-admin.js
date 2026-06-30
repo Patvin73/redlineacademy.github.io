@@ -2887,6 +2887,13 @@
     }
   }
 
+  function setAdminMessageDetailMode(open) {
+    const layout = document.querySelector("#section-messages .ad-messages-layout");
+    if (!layout) return;
+    layout.classList.toggle("is-detail-open", Boolean(open));
+    if (!open) layout.classList.remove("is-editing-message");
+  }
+
   function getSelectedMessageRecipients(recipient = $("adMsgRecipient")) {
     return Array.from(recipient?.selectedOptions || [])
       .map((option) => option.value)
@@ -2950,6 +2957,7 @@
       setMessagePanelVisible(viewDetail, true);
       return;
     }
+    setAdminMessageDetailMode(false);
     setMessagePanelVisible(viewEmpty, true);
   }
 
@@ -3299,6 +3307,7 @@
       if (loadSeq !== messagesLoadSeq) return;
 
       inbox.querySelectorAll(".ad-inbox-item").forEach((el) => el.remove());
+      setAdminMessageDetailMode(false);
       setMessagePanelVisible(viewDetail, false);
       setMessagePanelVisible(viewEmpty, true);
 
@@ -3442,6 +3451,8 @@
           setMessagePanelVisible(viewEmpty, false);
           setMessagePanelVisible(composeForm, false);
           setMessagePanelVisible(viewDetail, true);
+          setAdminMessageDetailMode(true);
+          document.querySelector("#section-messages .ad-messages-layout")?.classList.remove("is-editing-message");
 
           if (group.type === "received") {
             const unreadIds = group.messages
@@ -3467,6 +3478,7 @@
             const threadHTML = await renderThreadFor(msg, senderName);
             viewDetail.innerHTML = `
               <div class="ad-msg-detail-header">
+                <button class="ad-btn ad-btn--msg-back" type="button" data-ad-msg-back aria-label="Kembali ke daftar pesan">Kembali</button>
                 <div class="ad-msg-detail-avatar">${escHtml(initialsFor(senderName))}</div>
                 <div class="ad-msg-detail-meta">
                   <p class="ad-msg-detail-subject">${escHtml(group.subject)}</p>
@@ -3501,6 +3513,7 @@
                 });
             viewDetail.innerHTML = `
               <div class="ad-msg-detail-header">
+                <button class="ad-btn ad-btn--msg-back" type="button" data-ad-msg-back aria-label="Kembali ke daftar pesan">Kembali</button>
                 <div class="ad-msg-detail-avatar">${escHtml(initialsFor(senderName))}</div>
                 <div class="ad-msg-detail-meta">
                   <p class="ad-msg-detail-subject">${escHtml(group.subject)}</p>
@@ -3534,6 +3547,16 @@
             if (scrollThreadToLatest) scrollAdminMessageThreadToLatest(thread);
             else scrollAdminMessageThreadToStart(thread);
           }, 50);
+
+          viewDetail.querySelector("[data-ad-msg-back]")?.addEventListener("click", () => {
+            setAdminMessageDetailMode(false);
+            setMessagePanelVisible(viewDetail, false);
+            setMessagePanelVisible(viewEmpty, true);
+            inbox.querySelectorAll(".ad-inbox-item").forEach((el) => {
+              el.classList.remove("active");
+              el.setAttribute("aria-selected", "false");
+            });
+          });
           const activeMessageIds = (group.type === "received"
             ? await fetchFullThread(group.messages[group.messages.length - 1] || group.messages[0])
             : group.messages
@@ -3575,6 +3598,7 @@
             });
           });
           viewDetail.querySelector("[data-ad-msg-edit]")?.addEventListener("click", () => {
+            document.querySelector("#section-messages .ad-messages-layout")?.classList.add("is-editing-message");
             viewDetail.innerHTML = `
               <form class="ad-message-edit-form">
                 <div class="ad-field">
